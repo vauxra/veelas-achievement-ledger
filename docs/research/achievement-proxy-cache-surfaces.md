@@ -1,34 +1,10 @@
-# Achievement Proxy/Cache Notes
+# Progress cache behavior
 
-Checked local Dalamud, ClientStructs, and Lumina docs for achievement cache/proxy data.
+Current behavior:
 
-## Found
+- The native Achievement UI can return numeric progress for an opened entry.
+- The plugin passively caches that `(current, max)` value.
+- Cached progress is session-local and resets on login/logout.
+- Completion state still comes from `IUnlockState` when available.
 
-- `IUnlockState.IsAchievementListLoaded`
-- `IUnlockState.IsAchievementComplete(...)`
-- `Achievement.CompletedAchievements`
-- `Achievement.CompletedAchievementsBitArray`
-- `Achievement.History`
-- one current progress slot:
-  - `ProgressAchievementId`
-  - `ProgressCurrent`
-  - `ProgressMax`
-- native Achievement UI methods:
-  - `AgentAchievement.OpenById(...)`
-  - generic event/callback methods
-
-## Not found
-
-- No public `InfoProxyAchievement` wrapper.
-- No public achievement-progress observable.
-- No clean category/subcategory selection API.
-
-## Takeaway
-
-Flow:
-
-1. User clicks **↻** or **Update Next**.
-2. The game opens the achievement entry.
-3. The plugin records the progress value the game receives.
-
-Avoid synthetic menu clicks or packet automation unless maintainers explicitly approve that direction.
+Avoid synthetic UI clicks, packet automation, and plugin-originated progress requests unless maintainers approve a separate design.

@@ -25,11 +25,8 @@ class Finding:
 
 
 CODE_SUFFIXES = {".cs", ".csproj", ".json", ".py", ".sln", ".sh"}
-EXCLUDED_PREFIXES = ("docs/", ".hermes/", "bin/", "obj/")
-ALLOWED_ACHIEVEMENT_REQUEST_FILES = {
-    "AchievementTracker/Services/ClientAchievementProgressSource.cs",
-    "AchievementTracker/Services/AchievementProgressDebugHooks.cs",
-}
+EXCLUDED_PREFIXES = ("docs/", ".hermes/", "bin/", "obj/", "released/")
+ALLOWED_ACHIEVEMENT_REQUEST_FILES: set[str] = set()
 SCANNER_IMPLEMENTATION_FILES = {
     "scripts/audit-ai-policy.py",
     "scripts/adversarial-code-review.py",
@@ -57,7 +54,7 @@ POLICY_FAIL_TOKENS: list[tuple[str, str]] = [
     ("analytics", "Analytics are out of scope for V1 unless separately designed and approved."),
     ("leaderboard", "Leaderboards imply backend/user data and are out of scope for V1."),
     ("ContentId", "ContentId use needs explicit privacy review."),
-    ("RequestAchievementProgress", "Achievement progress request references must stay passive/observational; plugin-originated calls are out of scope."),
+    ("RequestAchievementProgress", "Plugin-originated achievement progress requests are out of scope."),
 ]
 
 AUTO_TRIGGER_TOKENS = [
@@ -82,6 +79,7 @@ REQUEST_WRAPPER_TOKENS = [
     "AchievementProgressSource.RequestProgress",
     "ProcessQueuedProgressRequests(",
     "ProgressRefreshQueue.Enqueue",
+    "ProgressRequestThrottler",
 ]
 
 SCANNER_SECURITY_PATTERNS: list[tuple[re.Pattern[str], str, str]] = [

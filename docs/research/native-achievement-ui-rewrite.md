@@ -1,24 +1,15 @@
-# Native Achievement UI Notes
+# Native Achievement UI flow
 
-Date: 2026-06-09
-
-## Current approach
+Current beta flow:
 
 1. User tracks achievements in `/val`.
-2. User clicks **↻** or **Update Next**.
-3. The game Achievement window opens that entry.
-4. The tracker records progress when the game returns it.
+2. User clicks `↻` or **Update Next**.
+3. The native Achievement window opens that entry.
+4. The plugin passively records progress returned to the native UI.
 
-## Boundaries
+Boundaries:
 
-- No polling.
-- No backend or telemetry.
-- No gameplay automation.
-- No plugin-originated progress refresh loop.
-- No advanced diagnostics UI is exposed in the beta flow.
-
-## Research notes
-
-Local docs show `AgentAchievement.OpenById(...)`, completion state, and one current progress slot. They do not show a clean achievement proxy or category/subcategory API.
-
-Use `/xldata network` for manual research only; do not automate it without maintainer approval.
+- no plugin-originated progress requests,
+- no automatic refresh loop,
+- no advanced diagnostics UI,
+- no synthetic menu clicks or packet/network automation.

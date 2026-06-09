@@ -82,8 +82,8 @@ Fail the review if the diff introduces any of these without a clear, documented,
 6. **Cache correctness bugs**
    - numeric achievement progress cache shared across characters/sessions
    - stale numeric cache overriding known local completion state
-   - per-frame or repeated requests for the same achievement without throttling/deduplication
-   - queue items dequeued/marked throttled before the request is actually sent
+   - reintroducing plugin-originated achievement progress requests, queues, or throttlers
+   - stale observed progress overriding known local completion state
 
 ## C# security review checklist
 
@@ -112,8 +112,10 @@ The safe default is:
 - passive local reads are okay
 - `IUnlockState` completion state is authoritative when loaded
 - Lumina target counts are local and okay
-- ClientStructs progress requests must remain manual/user-triggered and throttled
-- cache/queue/throttle state must reset on login/logout
+- `↻` and **Update Next** only open the native Achievement entry
+- numeric progress is passively cached from native Achievement UI responses
+- observed progress cache resets on login/logout
+- plugin-originated progress requests, queues, throttlers, and polling are out of scope
 - no backend, telemetry, analytics, or self-updaters
 
 If the diff moves away from that stance, request changes.

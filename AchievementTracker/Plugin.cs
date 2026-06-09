@@ -27,7 +27,6 @@ public sealed class Plugin : IDalamudPlugin
     // Passive hooks observe native achievement UI progress flow; they do not issue requests.
     // https://dalamud.dev/plugin-development/interaction/
     [PluginService] internal static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
-    [PluginService] internal static IPluginLog Log { get; private set; } = null!;
 
     public Configuration Configuration { get; }
     public TrackedAchievementStore TrackedAchievements { get; }
@@ -36,7 +35,6 @@ public sealed class Plugin : IDalamudPlugin
     public IAchievementProgressSource AchievementProgressSource { get; }
     public ClientAchievementProgressSource ClientAchievementProgressSource { get; }
     public NativeAchievementNavigator NativeAchievementNavigator { get; }
-    public DebugLog DebugLog { get; }
     public WindowSystem WindowSystem { get; } = new("VeelasAchievementLedger");
 
     private TrackerWindow TrackerWindow { get; }
@@ -46,13 +44,12 @@ public sealed class Plugin : IDalamudPlugin
     public Plugin()
     {
         this.Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-        this.DebugLog = new DebugLog(Log, false);
         this.TrackedAchievements = new TrackedAchievementStore();
         this.TrackedAchievements.LoadFrom(this.Configuration.TrackedAchievementIds);
         this.AchievementCatalog = new AchievementCatalog(DataManager);
-        this.ClientAchievementProgressSource = new ClientAchievementProgressSource(this.DebugLog);
+        this.ClientAchievementProgressSource = new ClientAchievementProgressSource();
         this.AchievementProgressSource = this.ClientAchievementProgressSource;
-        this.NativeAchievementNavigator = new NativeAchievementNavigator(this.DebugLog);
+        this.NativeAchievementNavigator = new NativeAchievementNavigator();
         this.AchievementProgressService = new AchievementProgressService(UnlockState, this.AchievementProgressSource);
         this.TrackerWindow = new TrackerWindow(this);
         this.ConfigWindow = new ConfigWindow(this);
@@ -70,8 +67,6 @@ public sealed class Plugin : IDalamudPlugin
         PluginInterface.UiBuilder.OpenConfigUi += this.ToggleConfigUi;
         ClientState.Login += this.ResetProgressState;
         ClientState.Logout += this.ResetProgressStateOnLogout;
-
-        Log.Information("Veela's Achievement Ledger loaded.");
     }
 
     public void Dispose()

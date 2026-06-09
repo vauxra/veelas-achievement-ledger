@@ -1,41 +1,49 @@
-# Development Due Diligence
+# Development due diligence
 
-Changes are built, tested, scanned, and reviewed before release.
+Veela's Achievement Ledger is developed with human review, AI assistance, and repeatable local checks.
 
-## Guardrails
+## Methodology
 
-- Use Dalamud services first; use ClientStructs only where needed.
-- No telemetry, backend sync, cloud service, or gameplay automation.
-- No automatic achievement progress polling.
-- Keep unsafe code isolated.
-- Keep debug logging opt-in.
-- Dispose hooks, windows, and event handlers cleanly.
+- Use official Dalamud docs before adding or changing APIs.
+- Prefer Dalamud services and Lumina data before ClientStructs.
+- Keep unsafe/native interaction isolated.
+- Avoid plugin-originated achievement progress requests, polling, telemetry, or backend sync.
+- Keep UI and docs short and user-facing.
 
-## Verification
+## Manual checks
 
-`./scripts/verify-local.sh HEAD` runs:
+Before a beta build, verify in game:
+
+- `/val` opens the ledger.
+- Configure can search, add, remove, and reorder tracked achievements.
+- Tracked achievements persist after logout/login.
+- `↻` opens the chosen native Achievement entry.
+- **Update Next** opens the next unobserved or oldest-observed tracked entry.
+- Progress updates when the native Achievement UI returns data.
+- No advanced diagnostics UI is present.
+
+## Automated checks
+
+Run:
+
+```bash
+./scripts/verify-local.sh HEAD
+```
+
+Coverage:
 
 - unit tests,
 - Debug build,
 - Release build,
-- CodeQL C# scan,
-- Dalamud/AI policy tripwire,
-- adversarial review tripwire,
-- whitespace check.
+- CodeQL C# security/quality scan,
+- AI/Dalamud policy tripwire,
+- adversarial code-review tripwire,
+- whitespace diff check.
 
-## Manual testing
+## Review
 
-Covered during beta work:
+For merge/submission, run a fresh-context review using:
 
-- `/val` open/close,
-- configure/search/add/remove/reorder,
-- opening native Achievement entries,
-- progress updates from native Achievement UI,
-- completion state,
-- diagnostics toggle/logging.
+- `docs/ai-policy-audits/adversarial-code-review-agent.md`
 
-## Known limits
-
-- Numeric progress is not live at all times.
-- Open an achievement in the game UI to refresh its value.
-- Some achievements only show completion or target count until the game loads that entry.
+Provide the diff plus verification output.

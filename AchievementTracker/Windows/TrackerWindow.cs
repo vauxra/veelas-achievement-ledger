@@ -2,7 +2,6 @@ using AchievementTracker.Services;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Windowing;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -11,8 +10,6 @@ namespace AchievementTracker.Windows;
 public sealed class TrackerWindow : Window
 {
     private readonly Plugin plugin;
-    private readonly Dictionary<uint, string> lastLiveProgressText = new();
-
     public TrackerWindow(Plugin plugin)
         : base("Veela's Achievement Ledger##AchievementLedgerLive")
     {
@@ -30,7 +27,6 @@ public sealed class TrackerWindow : Window
 
         if (ImGui.Button("Configure"))
         {
-            this.plugin.DebugLog.Trace("Tracker.Button", "Configure pressed");
             this.plugin.ToggleConfigUi();
         }
 
@@ -40,7 +36,7 @@ public sealed class TrackerWindow : Window
             var nextId = this.GetNextTrackedAchievementId();
             if (nextId.HasValue)
             {
-                this.OpenNativeAchievement(nextId.Value, "update-next");
+                this.OpenNativeAchievement(nextId.Value);
             }
         }
 
@@ -70,16 +66,10 @@ public sealed class TrackerWindow : Window
             progressText = this.plugin.AchievementProgressService.GetProgress(row).ToDisplayText();
         }
 
-        if (!this.lastLiveProgressText.TryGetValue(achievementId, out var previousText) || previousText != progressText)
-        {
-            this.lastLiveProgressText[achievementId] = progressText;
-            this.plugin.DebugLog.Trace("Tracker.ProgressValue", $"achievementId={achievementId} name='{info.Name}' progress='{progressText}'");
-        }
-
         ImGui.PushID((int)achievementId);
         if (ImGui.Button("↻"))
         {
-            this.OpenNativeAchievement(achievementId, "row-refresh");
+            this.OpenNativeAchievement(achievementId);
         }
 
         ImGui.SameLine();
@@ -121,9 +111,8 @@ public sealed class TrackerWindow : Window
             .First().Id;
     }
 
-    private void OpenNativeAchievement(uint achievementId, string source)
+    private void OpenNativeAchievement(uint achievementId)
     {
-        this.plugin.DebugLog.Trace("Tracker.OpenNativeAchievement", $"source={source} achievementId={achievementId}");
         if (!this.plugin.NativeAchievementNavigator.OpenAchievement(achievementId))
         {
             ImGui.TextDisabled("Could not open Achievements right now.");

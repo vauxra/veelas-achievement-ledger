@@ -1,7 +1,6 @@
 using AchievementTracker.Services;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Windowing;
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -10,7 +9,6 @@ namespace AchievementTracker.Windows;
 public sealed class ConfigWindow : Window
 {
     private readonly Plugin plugin;
-    private readonly Dictionary<uint, string> lastManagedProgressText = new();
     private string searchQuery = string.Empty;
 
     public ConfigWindow(Plugin plugin)
@@ -88,12 +86,6 @@ public sealed class ConfigWindow : Window
         if (this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row))
         {
             progressText = this.plugin.AchievementProgressService.GetProgress(row).ToDisplayText();
-        }
-
-        if (!this.lastManagedProgressText.TryGetValue(achievementId, out var previousText) || previousText != progressText)
-        {
-            this.lastManagedProgressText[achievementId] = progressText;
-            this.plugin.DebugLog.Trace("Config.ManagedProgressValue", $"achievementId={achievementId} name='{info.Name}' progress='{progressText}'");
         }
 
         ImGui.TextWrapped($"{info.Name} — {progressText}");
