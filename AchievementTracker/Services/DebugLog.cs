@@ -8,6 +8,11 @@ public sealed class DebugLog
     private readonly IPluginLog log;
     private readonly Func<bool> isEnabled;
 
+    public DebugLog(IPluginLog log, bool enabled)
+        : this(log, () => enabled)
+    {
+    }
+
     public DebugLog(IPluginLog log, Func<bool> isEnabled)
     {
         this.log = log;

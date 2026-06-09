@@ -68,12 +68,28 @@ public sealed class AchievementCatalog
         var categoryName = achievement.AchievementCategory.IsValid
             ? achievement.AchievementCategory.Value.Name.ToString()
             : string.Empty;
+        var categoryPath = categoryName;
+
+        if (achievement.AchievementCategory.IsValid)
+        {
+            var kind = achievement.AchievementCategory.Value.AchievementKind;
+            if (kind.IsValid)
+            {
+                var kindName = kind.Value.Name.ToString();
+                if (!string.IsNullOrWhiteSpace(kindName) && !string.Equals(kindName, categoryName, StringComparison.Ordinal))
+                {
+                    categoryPath = string.IsNullOrWhiteSpace(categoryName)
+                        ? kindName
+                        : $"{kindName} > {categoryName}";
+                }
+            }
+        }
 
         return new AchievementInfo(
             achievement.RowId,
             achievement.Name.ToString(),
             achievement.Description.ToString(),
             achievement.Points,
-            categoryName);
+            categoryPath);
     }
 }

@@ -3,7 +3,7 @@
   "InternalName": "VeelasAchievementLedger",
   "Name": "Veela's Achievement Ledger",
   "Punchline": "Lightweight achievement organizer and tracker.",
-  "Description": "A lightweight assistive achievement organizer and tracker. Use /val, then Open to update progress.",
+  "Description": "A lightweight assistive achievement organizer and tracker. Use /val, then ↻ or Update Next to open tracked achievements in the game UI and update current progress.",
   "ApplicableVersion": "any",
   "Tags": [
     "achievement",

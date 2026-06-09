@@ -6,12 +6,12 @@ A lightweight assistive achievement organizer and tracker for FFXIV.
 
 Beta build. Current features:
 
-- `/val` opens the tracker.
+- `/val` opens the ledger.
 - Track up to 5 achievements.
 - Search by name or category.
+- Hide completed achievements from search by default.
 - Show completion status and known target counts.
-- Open tracked achievements in the game's Achievement window.
-- Update progress from the game Achievement window.
+- Use **↻** or **Update Next** to open tracked achievements in the game Achievement window and update current progress.
 
 The plugin has no backend, telemetry, cloud sync, or gameplay automation.
 
@@ -19,10 +19,10 @@ The plugin has no backend, telemetry, cloud sync, or gameplay automation.
 
 1. Run `/val`.
 2. Click **Configure** and add achievements.
-3. Click **Open** beside an achievement, or **Open next**.
-4. Wait for the entry to load.
+3. Click **↻** beside an achievement, or **Update Next**.
+4. Wait for the game entry to load.
 
-If progress looks stale, open the entry again.
+Tracked achievements are saved between logouts.
 
 ## Issue reports
 
@@ -31,8 +31,7 @@ Include:
 - achievement name or ID,
 - expected progress,
 - shown progress,
-- whether **Open** was used,
-- `DebugTrace` logs if diagnostics were enabled.
+- whether **↻** or **Update Next** was used.
 
 ## Development notes
 

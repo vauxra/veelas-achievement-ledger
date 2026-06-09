@@ -27,19 +27,8 @@ public sealed class ConfigWindow : Window
     public override void Draw()
     {
         ImGui.TextUnformatted("Tracked achievements");
-        ImGui.TextDisabled("Use Open to refresh progress.");
-        var debugLogging = this.plugin.Configuration.EnableDebugLogging;
-        if (ImGui.Checkbox("Enable advanced diagnostics", ref debugLogging))
-        {
-            this.plugin.Configuration.EnableDebugLogging = debugLogging;
-            this.plugin.SaveConfiguration();
-            if (debugLogging)
-            {
-                this.plugin.DebugLog.Trace("Config.Diagnostics", "advanced diagnostics enabled from config UI");
-            }
-        }
-
-        ImGui.TextDisabled("Adds DebugTrace lines to the Dalamud log.");
+        ImGui.TextDisabled("Tracked items are saved between logouts.");
+        ImGui.TextDisabled("Use ↻ to open an achievement in the game UI and update progress.");
         ImGui.Separator();
 
         this.DrawTrackedManagement();
@@ -63,30 +52,26 @@ public sealed class ConfigWindow : Window
             ImGui.PushID((int)achievementId);
             if (ImGui.Button("Up") && this.plugin.TrackedAchievements.MoveUp(achievementId))
             {
-                this.plugin.DebugLog.Trace("Config.Button", $"Up pressed achievementId={achievementId}");
                 this.plugin.SaveTrackedAchievements();
             }
 
             ImGui.SameLine();
             if (ImGui.Button("Down") && this.plugin.TrackedAchievements.MoveDown(achievementId))
             {
-                this.plugin.DebugLog.Trace("Config.Button", $"Down pressed achievementId={achievementId}");
                 this.plugin.SaveTrackedAchievements();
             }
 
             ImGui.SameLine();
             if (ImGui.Button("Remove") && this.plugin.TrackedAchievements.Remove(achievementId))
             {
-                this.plugin.DebugLog.Trace("Config.Button", $"Remove pressed achievementId={achievementId}");
                 this.plugin.SaveTrackedAchievements();
                 ImGui.PopID();
                 continue;
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Open") )
+            if (ImGui.Button("↻"))
             {
-                this.plugin.DebugLog.Trace("Config.Button", $"Open pressed achievementId={achievementId}");
                 this.plugin.NativeAchievementNavigator.OpenAchievement(achievementId);
             }
 
@@ -121,6 +106,13 @@ public sealed class ConfigWindow : Window
     private void DrawSearchAndAdd()
     {
         ImGui.TextUnformatted("Search achievements to track");
+        var hideCompleted = this.plugin.Configuration.HideCompletedInSearch;
+        if (ImGui.Checkbox("Hide completed", ref hideCompleted))
+        {
+            this.plugin.Configuration.HideCompletedInSearch = hideCompleted;
+            this.plugin.SaveConfiguration();
+        }
+
         ImGui.SetNextItemWidth(-1);
         ImGui.InputText("##AchievementSearch", ref this.searchQuery, 128);
 
@@ -132,7 +124,10 @@ public sealed class ConfigWindow : Window
 
         var trackedIds = this.plugin.TrackedAchievements.AchievementIds;
         var isFull = trackedIds.Count >= TrackedAchievementStore.MaxTrackedAchievements;
-        var results = this.plugin.AchievementCatalog.Search(this.searchQuery, 25).ToList();
+        var results = this.plugin.AchievementCatalog.Search(this.searchQuery, 200)
+            .Where(result => !this.plugin.Configuration.HideCompletedInSearch || !this.IsComplete(result.Id))
+            .Take(25)
+            .ToList();
 
         if (results.Count == 0)
         {
@@ -146,18 +141,14 @@ public sealed class ConfigWindow : Window
             var alreadyTracked = trackedIds.Contains(result.Id);
             var canAdd = !isFull && !alreadyTracked;
 
-            if (canAdd)
+            if (canAdd && ImGui.Button("Add"))
             {
-                if (ImGui.Button("Add"))
+                if (this.plugin.TrackedAchievements.TryAdd(result.Id))
                 {
-                    this.plugin.DebugLog.Trace("Config.Button", $"Add pressed achievementId={result.Id} name='{result.Name}' trackedCountBefore={trackedIds.Count}");
-                    if (this.plugin.TrackedAchievements.TryAdd(result.Id))
-                    {
-                        this.plugin.SaveTrackedAchievements();
-                    }
+                    this.plugin.SaveTrackedAchievements();
                 }
             }
-            else
+            else if (!canAdd)
             {
                 ImGui.TextDisabled(alreadyTracked ? "Added" : "Full");
             }
@@ -172,4 +163,8 @@ public sealed class ConfigWindow : Window
             ImGui.PopID();
         }
     }
+
+    private bool IsComplete(uint achievementId)
+        => this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row)
+            && this.plugin.AchievementProgressService.IsComplete(row);
 }

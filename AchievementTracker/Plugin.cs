@@ -27,10 +27,6 @@ public sealed class Plugin : IDalamudPlugin
     // Passive hooks observe native achievement UI progress flow; they do not issue requests.
     // https://dalamud.dev/plugin-development/interaction/
     [PluginService] internal static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
-    [PluginService] internal static IAddonLifecycle AddonLifecycle { get; private set; } = null!;
-    [PluginService] internal static IFramework Framework { get; private set; } = null!;
-    [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
-    [PluginService] internal static ICondition Condition { get; private set; } = null!;
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
 
     public Configuration Configuration { get; }
@@ -45,13 +41,12 @@ public sealed class Plugin : IDalamudPlugin
 
     private TrackerWindow TrackerWindow { get; }
     private ConfigWindow ConfigWindow { get; }
-    private AchievementProgressDebugHooks? achievementProgressObserver;
-    private ActivityDebugSurfaces? activityDebugSurfaces;
+    private PassiveAchievementProgressObserver? passiveAchievementProgressObserver;
 
     public Plugin()
     {
         this.Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-        this.DebugLog = new DebugLog(Log, () => this.Configuration.EnableDebugLogging);
+        this.DebugLog = new DebugLog(Log, false);
         this.TrackedAchievements = new TrackedAchievementStore();
         this.TrackedAchievements.LoadFrom(this.Configuration.TrackedAchievementIds);
         this.AchievementCatalog = new AchievementCatalog(DataManager);
@@ -62,7 +57,6 @@ public sealed class Plugin : IDalamudPlugin
         this.TrackerWindow = new TrackerWindow(this);
         this.ConfigWindow = new ConfigWindow(this);
         this.InstallPassiveAchievementObserver();
-        this.UpdateDebugSurfaceState();
         this.WindowSystem.AddWindow(this.TrackerWindow);
         this.WindowSystem.AddWindow(this.ConfigWindow);
 
@@ -78,22 +72,18 @@ public sealed class Plugin : IDalamudPlugin
         ClientState.Logout += this.ResetProgressStateOnLogout;
 
         Log.Information("Veela's Achievement Ledger loaded.");
-        this.DebugLog.Trace("Plugin.Load", $"tracked=[{string.Join(", ", this.TrackedAchievements.AchievementIds)}] debugLogging={this.Configuration.EnableDebugLogging}");
     }
 
     public void Dispose()
     {
-        this.DebugLog.Trace("Plugin.Dispose", "disposing plugin and removing event handlers/windows");
         PluginInterface.UiBuilder.Draw -= this.WindowSystem.Draw;
         PluginInterface.UiBuilder.OpenMainUi -= this.ToggleMainUi;
         PluginInterface.UiBuilder.OpenConfigUi -= this.ToggleConfigUi;
         ClientState.Login -= this.ResetProgressState;
         ClientState.Logout -= this.ResetProgressStateOnLogout;
         CommandManager.RemoveHandler(CommandName);
-        this.achievementProgressObserver?.Dispose();
-        this.achievementProgressObserver = null;
-        this.activityDebugSurfaces?.Dispose();
-        this.activityDebugSurfaces = null;
+        this.passiveAchievementProgressObserver?.Dispose();
+        this.passiveAchievementProgressObserver = null;
         this.WindowSystem.RemoveAllWindows();
     }
 
@@ -101,70 +91,31 @@ public sealed class Plugin : IDalamudPlugin
     {
         this.Configuration.TrackedAchievementIds = this.TrackedAchievements.ToConfigList();
         this.Configuration.Save();
-        this.DebugLog.Trace("Plugin.SaveTrackedAchievements", $"tracked=[{string.Join(", ", this.Configuration.TrackedAchievementIds)}]");
     }
 
     public void SaveConfiguration()
     {
-        this.UpdateDebugSurfaceState();
         this.Configuration.Save();
-        this.DebugLog.Trace("Plugin.SaveConfiguration", $"debugLogging={this.Configuration.EnableDebugLogging} tracked=[{string.Join(", ", this.Configuration.TrackedAchievementIds)}]");
     }
 
-    public void ToggleMainUi()
-    {
-        this.DebugLog.Trace("Plugin.ToggleMainUi", $"beforeVisible={this.TrackerWindow.IsOpen}");
-        this.TrackerWindow.Toggle();
-        this.DebugLog.Trace("Plugin.ToggleMainUi", $"afterVisible={this.TrackerWindow.IsOpen}");
-    }
+    public void ToggleMainUi() => this.TrackerWindow.Toggle();
 
-    public void ToggleConfigUi()
-    {
-        this.DebugLog.Trace("Plugin.ToggleConfigUi", $"beforeVisible={this.ConfigWindow.IsOpen}");
-        this.ConfigWindow.Toggle();
-        this.DebugLog.Trace("Plugin.ToggleConfigUi", $"afterVisible={this.ConfigWindow.IsOpen}");
-    }
+    public void ToggleConfigUi() => this.ConfigWindow.Toggle();
 
     private void InstallPassiveAchievementObserver()
     {
-        this.achievementProgressObserver ??= new AchievementProgressDebugHooks(
+        this.passiveAchievementProgressObserver ??= new PassiveAchievementProgressObserver(
             GameInteropProvider,
-            AddonLifecycle,
-            Framework,
-            this.DebugLog,
             this.ClientAchievementProgressSource);
-    }
-
-    private void UpdateDebugSurfaceState()
-    {
-        if (this.Configuration.EnableDebugLogging)
-        {
-            this.activityDebugSurfaces ??= new ActivityDebugSurfaces(ChatGui, ClientState, Condition, this.DebugLog);
-            return;
-        }
-
-        this.activityDebugSurfaces?.Dispose();
-        this.activityDebugSurfaces = null;
     }
 
     private void ResetProgressState()
     {
-        this.DebugLog.Trace("Plugin.ResetProgressState", "clearing observed progress cache");
-        // Login/logout only clear local observed cache state. Do not extend these lifecycle handlers
-        // to send achievement progress requests without separate Dalamud policy review:
-        // https://dalamud.dev/plugin-publishing/restrictions.
+        // Login/logout only clear local progress cache. Tracked achievement IDs stay saved in config.
         this.AchievementProgressSource.ClearCache();
     }
 
-    private void ResetProgressStateOnLogout(int type, int code)
-    {
-        this.DebugLog.Trace("Plugin.Logout", $"logout event type={type} code={code}");
-        this.ResetProgressState();
-    }
+    private void ResetProgressStateOnLogout(int type, int code) => this.ResetProgressState();
 
-    private void OnCommand(string command, string args)
-    {
-        this.DebugLog.Trace("Plugin.Command", $"command={command} args='{args}' toggling main UI");
-        this.ToggleMainUi();
-    }
+    private void OnCommand(string command, string args) => this.ToggleMainUi();
 }

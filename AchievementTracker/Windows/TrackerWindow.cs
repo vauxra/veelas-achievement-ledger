@@ -35,12 +35,12 @@ public sealed class TrackerWindow : Window
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Open next"))
+        if (ImGui.Button("Update Next"))
         {
             var nextId = this.GetNextTrackedAchievementId();
             if (nextId.HasValue)
             {
-                this.OpenNativeAchievement(nextId.Value, "open-next");
+                this.OpenNativeAchievement(nextId.Value, "update-next");
             }
         }
 
@@ -77,9 +77,9 @@ public sealed class TrackerWindow : Window
         }
 
         ImGui.PushID((int)achievementId);
-        if (ImGui.Button("Open"))
+        if (ImGui.Button("↻"))
         {
-            this.OpenNativeAchievement(achievementId, "row-button");
+            this.OpenNativeAchievement(achievementId, "row-refresh");
         }
 
         ImGui.SameLine();

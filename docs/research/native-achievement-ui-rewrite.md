@@ -5,7 +5,7 @@ Date: 2026-06-09
 ## Current approach
 
 1. User tracks achievements in `/val`.
-2. User clicks **Open** or **Open next**.
+2. User clicks **↻** or **Update Next**.
 3. The game Achievement window opens that entry.
 4. The tracker records progress when the game returns it.
 
@@ -15,7 +15,7 @@ Date: 2026-06-09
 - No backend or telemetry.
 - No gameplay automation.
 - No plugin-originated progress refresh loop.
-- Extra logs stay behind **Advanced diagnostics**.
+- No advanced diagnostics UI is exposed in the beta flow.
 
 ## Research notes
 

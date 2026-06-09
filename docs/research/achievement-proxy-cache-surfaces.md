@@ -27,7 +27,7 @@ Checked local Dalamud, ClientStructs, and Lumina docs for achievement cache/prox
 
 Flow:
 
-1. User clicks **Open**.
+1. User clicks **↻** or **Update Next**.
 2. The game opens the achievement entry.
 3. The plugin records the progress value the game receives.
 

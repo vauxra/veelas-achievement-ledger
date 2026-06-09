@@ -11,7 +11,7 @@ public sealed class Configuration : IPluginConfiguration
 
     public List<uint> TrackedAchievementIds { get; set; } = [];
 
-    public bool EnableDebugLogging { get; set; } = false;
+    public bool HideCompletedInSearch { get; set; } = true;
 
     public void Save()
     {
