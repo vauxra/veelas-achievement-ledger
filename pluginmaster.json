@@ -8,7 +8,7 @@
     "ApplicableVersion": "any",
     "DalamudApiLevel": 15,
     "Punchline": "Track achievements from /val.",
-    "RepoUrl": "https://github.com/vauxra/achievement-tracker-mod",
+    "RepoUrl": "https://github.com/vauxra/veelas-achievement-ledger",
     "Tags": [
       "achievement",
       "tracker",
@@ -16,9 +16,9 @@
     ],
     "IsHide": false,
     "IsTestingExclusive": true,
-    "DownloadLinkInstall": "https://github.com/vauxra/achievement-tracker-mod/releases/latest/download/latest.zip",
-    "DownloadLinkUpdate": "https://github.com/vauxra/achievement-tracker-mod/releases/latest/download/latest.zip",
-    "DownloadLinkTesting": "https://github.com/vauxra/achievement-tracker-mod/releases/latest/download/latest.zip",
-    "LastUpdate": "1781034524"
+    "DownloadLinkInstall": "https://github.com/vauxra/veelas-achievement-ledger/releases/latest/download/latest.zip",
+    "DownloadLinkUpdate": "https://github.com/vauxra/veelas-achievement-ledger/releases/latest/download/latest.zip",
+    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/latest/download/latest.zip",
+    "LastUpdate": "1781034716"
   }
 ]

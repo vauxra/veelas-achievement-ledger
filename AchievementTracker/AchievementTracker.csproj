@@ -5,7 +5,7 @@
     <AssemblyName>VeelasAchievementLedger</AssemblyName>
     <RootNamespace>AchievementTracker</RootNamespace>
     <Authors>Saagi</Authors>
-    <PackageProjectUrl>https://github.com/vauxra/achievement-tracker-mod</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/vauxra/veelas-achievement-ledger</PackageProjectUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <IsPackable>false</IsPackable>
     <!-- AllowUnsafeBlocks is required for isolated ClientStructs adapters; see https://dalamud.dev/plugin-development/interaction/. -->
