@@ -15,10 +15,9 @@
       "utility"
     ],
     "IsHide": false,
-    "IsTestingExclusive": true,
-    "DownloadLinkInstall": "https://github.com/vauxra/veelas-achievement-ledger/releases/latest/download/latest.zip",
-    "DownloadLinkUpdate": "https://github.com/vauxra/veelas-achievement-ledger/releases/latest/download/latest.zip",
-    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/latest/download/latest.zip",
-    "LastUpdate": "1781034716"
+    "IsTestingExclusive": false,
+    "DownloadLinkInstall": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.8/VeelasAchievementLedger_0_2_0_8.zip",
+    "DownloadLinkUpdate": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.8/VeelasAchievementLedger_0_2_0_8.zip",
+    "LastUpdate": "1781035575"
   }
 ]
