@@ -24,15 +24,6 @@ The plugin has no backend, telemetry, cloud sync, or gameplay automation.
 
 Tracked achievements are saved between logouts.
 
-## Issue reports
-
-Include:
-
-- achievement name or ID,
-- expected progress,
-- shown progress,
-- whether the reload icon or **Update Next** was used.
-
 ## Development notes
 
 This project used AI-assisted development, with human review and testing. See:
