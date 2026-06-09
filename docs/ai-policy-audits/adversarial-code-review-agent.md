@@ -112,7 +112,7 @@ The safe default is:
 - passive local reads are okay
 - `IUnlockState` completion state is authoritative when loaded
 - Lumina target counts are local and okay
-- `↻` and **Update Next** only open the native Achievement entry
+- the row reload icon and **Update Next** only open the native Achievement entry
 - numeric progress is passively cached from native Achievement UI responses
 - observed progress cache resets on login/logout
 - plugin-originated progress requests, queues, throttlers, and polling are out of scope

@@ -1,5 +1,7 @@
 using AchievementTracker.Services;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
+using Dalamud.Interface.Components;
 using Dalamud.Interface.Windowing;
 using System;
 using System.Linq;
@@ -67,7 +69,7 @@ public sealed class TrackerWindow : Window
         }
 
         ImGui.PushID((int)achievementId);
-        if (ImGui.Button("↻"))
+        if (ImGuiComponents.IconButton(FontAwesomeIcon.SyncAlt))
         {
             this.OpenNativeAchievement(achievementId);
         }

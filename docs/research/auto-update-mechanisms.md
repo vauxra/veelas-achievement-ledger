@@ -4,7 +4,7 @@ Current decision: no automatic achievement progress refresh.
 
 The beta uses a user-guided flow:
 
-1. User clicks `↻` or **Update Next**.
+1. User clicks the row reload icon or **Update Next**.
 2. The native Achievement window opens the selected entry.
 3. The plugin passively caches progress returned to the native UI.
 

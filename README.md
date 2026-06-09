@@ -11,7 +11,7 @@ Beta build. Current features:
 - Search by name or category.
 - Hide completed achievements from search by default.
 - Show completion status and known target counts.
-- Use **↻** or **Update Next** to open tracked achievements in the game Achievement window.
+- Use the reload icon or **Update Next** to open tracked achievements in the game Achievement window.
 
 The plugin has no backend, telemetry, cloud sync, or gameplay automation.
 
@@ -19,7 +19,7 @@ The plugin has no backend, telemetry, cloud sync, or gameplay automation.
 
 1. Run `/val`.
 2. Click **Configure** and add achievements.
-3. Click **↻** beside an achievement, or **Update Next**.
+3. Click the reload icon beside an achievement, or **Update Next**.
 4. Wait for the game entry to load; progress updates when the game returns data.
 
 Tracked achievements are saved between logouts.
@@ -31,7 +31,7 @@ Include:
 - achievement name or ID,
 - expected progress,
 - shown progress,
-- whether **↻** or **Update Next** was used.
+- whether the reload icon or **Update Next** was used.
 
 ## Development notes
 

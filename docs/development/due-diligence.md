@@ -17,7 +17,7 @@ Before a beta build, verify in game:
 - `/val` opens the ledger.
 - Configure can search, add, remove, and reorder tracked achievements.
 - Tracked achievements persist after logout/login.
-- `↻` opens the chosen native Achievement entry.
+- the row reload icon opens the chosen native Achievement entry.
 - **Update Next** opens the next unobserved or oldest-observed tracked entry.
 - Progress updates when the native Achievement UI returns data.
 - No advanced diagnostics UI is present.

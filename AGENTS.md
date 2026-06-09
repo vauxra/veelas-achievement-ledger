@@ -16,7 +16,7 @@ Veela's Achievement Ledger is intentionally small:
 
 - `/val` opens the ledger.
 - Users track up to five achievements.
-- `↻` and **Update Next** open the native Achievement entry.
+- the row reload icon and **Update Next** open the native Achievement entry.
 - Numeric progress is cached only when the native Achievement UI returns progress data.
 - Tracked achievement IDs persist between logouts; observed progress cache resets on login/logout.
 

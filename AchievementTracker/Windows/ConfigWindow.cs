@@ -1,5 +1,7 @@
 using AchievementTracker.Services;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
+using Dalamud.Interface.Components;
 using Dalamud.Interface.Windowing;
 using System.Linq;
 using System.Numerics;
@@ -26,7 +28,7 @@ public sealed class ConfigWindow : Window
     {
         ImGui.TextUnformatted("Tracked achievements");
         ImGui.TextDisabled("Tracked items are saved between logouts.");
-        ImGui.TextDisabled("Use ↻ to open an achievement in the game UI and update progress.");
+        ImGui.TextDisabled("Use the reload button to open an achievement in the game UI and update progress.");
         ImGui.Separator();
 
         this.DrawTrackedManagement();
@@ -68,7 +70,7 @@ public sealed class ConfigWindow : Window
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("↻"))
+            if (ImGuiComponents.IconButton(FontAwesomeIcon.SyncAlt))
             {
                 this.plugin.NativeAchievementNavigator.OpenAchievement(achievementId);
             }
