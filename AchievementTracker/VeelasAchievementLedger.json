@@ -1,9 +1,9 @@
 {
   "Author": "Saagi",
-  "InternalName": "VeelasAchievementLedger",
   "Name": "Veela's Achievement Ledger",
   "Punchline": "Lightweight achievement organizer and tracker.",
   "Description": "Use /val to track achievements and open entries in the game Achievement window.",
+  "RepoUrl": "https://github.com/vauxra/achievement-tracker-mod",
   "ApplicableVersion": "any",
   "Tags": [
     "achievement",

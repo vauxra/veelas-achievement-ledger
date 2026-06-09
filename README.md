@@ -50,8 +50,8 @@ export DOTNET_ROOT="$HOME/.dotnet"
 
 Outputs:
 
-- `AchievementTracker/bin/Debug/AchievementTracker.dll`
-- `AchievementTracker/bin/Release/AchievementTracker.dll`
+- `AchievementTracker/bin/Debug/VeelasAchievementLedger.dll`
+- `AchievementTracker/bin/Release/VeelasAchievementLedger.dll`
 
 ## References
 
