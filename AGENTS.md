@@ -1,4 +1,4 @@
-# Achievement Tracker Agent Guide
+# Veela's Achievement Ledger Agent Guide
 
 This repo is a Final Fantasy XIV Dalamud plugin. Treat Dalamud's official docs at <https://dalamud.dev> as the source of truth.
 

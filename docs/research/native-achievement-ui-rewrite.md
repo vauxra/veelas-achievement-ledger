@@ -4,7 +4,7 @@ Date: 2026-06-09
 
 ## Current approach
 
-1. User tracks achievements in `/achtrack`.
+1. User tracks achievements in `/val`.
 2. User clicks **Open** or **Open next**.
 3. The game Achievement window opens that entry.
 4. The tracker records progress when the game returns it.

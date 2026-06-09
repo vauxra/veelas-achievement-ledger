@@ -1,12 +1,12 @@
-# Achievement Tracker Mod
+# Veela's Achievement Ledger
 
-A small Dalamud/XIVLauncher plugin for tracking a few FFXIV achievements.
+A lightweight assistive achievement organizer and tracker for FFXIV.
 
 ## Status
 
 Beta build. Current features:
 
-- `/achtrack` opens the tracker.
+- `/val` opens the tracker.
 - Track up to 5 achievements.
 - Search by name or category.
 - Show completion status and known target counts.
@@ -17,7 +17,7 @@ The plugin has no backend, telemetry, cloud sync, or gameplay automation.
 
 ## Basic use
 
-1. Run `/achtrack`.
+1. Run `/val`.
 2. Click **Configure** and add achievements.
 3. Click **Open** beside an achievement, or **Open next**.
 4. Wait for the entry to load.

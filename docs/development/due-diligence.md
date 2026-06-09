@@ -27,7 +27,7 @@ Changes are built, tested, scanned, and reviewed before release.
 
 Covered during beta work:
 
-- `/achtrack` open/close,
+- `/val` open/close,
 - configure/search/add/remove/reorder,
 - opening native Achievement entries,
 - progress updates from native Achievement UI,

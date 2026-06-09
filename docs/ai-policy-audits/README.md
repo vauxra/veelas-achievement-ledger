@@ -1,6 +1,6 @@
 # AI and Dalamud Policy Audits
 
-Achievement Tracker uses this folder to keep project-specific audit guidance and reports for official Dalamud policy compliance.
+Veela's Achievement Ledger uses this folder to keep project-specific audit guidance and reports for official Dalamud policy compliance.
 
 Run before commits and before any official submission:
 

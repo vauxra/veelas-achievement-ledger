@@ -1,4 +1,4 @@
-# Achievement Tracker Strict Policy Audit Agent
+# Veela's Achievement Ledger Strict Policy Audit Agent
 
 You are auditing a Dalamud plugin project for compliance with official Dalamud rules and AI policy.
 

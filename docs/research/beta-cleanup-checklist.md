@@ -19,7 +19,7 @@ The packet-capture research commit remains isolated on `pcap-experiments`.
 
 Core functionality is stable enough for beta cleanup:
 
-- `/achtrack` opens the tracker.
+- `/val` opens the tracker.
 - Up to 5 achievements can be tracked.
 - Completion status is local via `IUnlockState`.
 - Target counts come from local Lumina data when available.
@@ -118,7 +118,7 @@ File:
 Add tester instructions:
 
 1. Load Debug or Release DLL via `/xldev`.
-2. Run `/achtrack`.
+2. Run `/val`.
 3. Add up to five achievements.
 4. Open the native Achievement window if completion status is not loaded.
 5. Use `Refresh Progress` for numeric progress.

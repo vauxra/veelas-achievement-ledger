@@ -14,7 +14,7 @@ public sealed class TrackerWindow : Window
     private readonly Dictionary<uint, string> lastLiveProgressText = new();
 
     public TrackerWindow(Plugin plugin)
-        : base("Achievement Tracker##AchievementTrackerLive")
+        : base("Veela's Achievement Ledger##AchievementLedgerLive")
     {
         this.plugin = plugin;
         this.SizeConstraints = new WindowSizeConstraints
@@ -45,7 +45,7 @@ public sealed class TrackerWindow : Window
         }
 
         ImGui.SameLine();
-        ImGui.TextDisabled("/achtrack");
+        ImGui.TextDisabled("/val");
         ImGui.Separator();
 
         var trackedIds = this.plugin.TrackedAchievements.AchievementIds.ToList();

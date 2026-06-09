@@ -1,6 +1,6 @@
 # Adversarial Dalamud/C# Code Review Agent
 
-Use this prompt for a fresh-context reviewer before committing or shipping changes to the Achievement Tracker plugin. The reviewer should be intentionally skeptical and should fail closed.
+Use this prompt for a fresh-context reviewer before committing or shipping changes to the Veela's Achievement Ledger plugin. The reviewer should be intentionally skeptical and should fail closed.
 
 ## Reviewer role
 
@@ -105,7 +105,7 @@ Warn/suggest on:
 - nullable reference hazards
 - broad catch blocks that should log context
 
-## Expected stance for Achievement Tracker V1
+## Expected stance for Veela's Achievement Ledger V1
 
 The safe default is:
 

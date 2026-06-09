@@ -27,7 +27,7 @@ Relevant guidance:
 5. `IClientState` exposes lifecycle events we can use to scope caches: `Login`, `Logout`, `TerritoryChanged`, `ClassJobChanged`, `LevelChanged`, etc.
 6. `IUnlockState` safely exposes loaded/completed status, but not numeric current counters.
 
-Implication for Achievement Tracker:
+Implication for Veela's Achievement Ledger:
 
 - Passive local reads and local cache invalidation are fine.
 - User-clicked progress refresh is fine.

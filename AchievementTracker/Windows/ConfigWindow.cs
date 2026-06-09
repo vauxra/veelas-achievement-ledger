@@ -14,7 +14,7 @@ public sealed class ConfigWindow : Window
     private string searchQuery = string.Empty;
 
     public ConfigWindow(Plugin plugin)
-        : base("Achievement Tracker Config##AchievementTrackerConfig")
+        : base("Veela's Ledger Config##AchievementLedgerConfig")
     {
         this.plugin = plugin;
         this.SizeConstraints = new WindowSizeConstraints

@@ -11,7 +11,7 @@ namespace AchievementTracker;
 
 public sealed class Plugin : IDalamudPlugin
 {
-    private const string CommandName = "/achtrack";
+    private const string CommandName = "/val";
 
     // Dalamud service injection pattern:
     // https://dalamud.dev/plugin-development/project-layout
@@ -41,7 +41,7 @@ public sealed class Plugin : IDalamudPlugin
     public ClientAchievementProgressSource ClientAchievementProgressSource { get; }
     public NativeAchievementNavigator NativeAchievementNavigator { get; }
     public DebugLog DebugLog { get; }
-    public WindowSystem WindowSystem { get; } = new("AchievementTracker");
+    public WindowSystem WindowSystem { get; } = new("VeelasAchievementLedger");
 
     private TrackerWindow TrackerWindow { get; }
     private ConfigWindow ConfigWindow { get; }
@@ -68,7 +68,7 @@ public sealed class Plugin : IDalamudPlugin
 
         CommandManager.AddHandler(CommandName, new CommandInfo(this.OnCommand)
         {
-            HelpMessage = "Open the Achievement Tracker window.",
+            HelpMessage = "Open Veela's Achievement Ledger.",
         });
 
         PluginInterface.UiBuilder.Draw += this.WindowSystem.Draw;
@@ -77,7 +77,7 @@ public sealed class Plugin : IDalamudPlugin
         ClientState.Login += this.ResetProgressState;
         ClientState.Logout += this.ResetProgressStateOnLogout;
 
-        Log.Information("Achievement Tracker loaded.");
+        Log.Information("Veela's Achievement Ledger loaded.");
         this.DebugLog.Trace("Plugin.Load", $"tracked=[{string.Join(", ", this.TrackedAchievements.AchievementIds)}] debugLogging={this.Configuration.EnableDebugLogging}");
     }
 

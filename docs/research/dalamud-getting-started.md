@@ -1,4 +1,4 @@
-# Dalamud Research Notes — Achievement Tracker Mod
+# Dalamud Research Notes — Veela's Achievement Ledger
 
 Date: 2026-06-08
 Project path: `/mnt/mintData/git/achievement-tracker-mod`
@@ -53,7 +53,7 @@ AchievementTracker/
 
 A safe first version should be an in-game UI helper:
 
-- slash command: `/achtrack` opens the tracker window
+- slash command: `/val` opens the tracker window
 - window: Dalamud `WindowSystem` + ImGui table/list
 - data source: Lumina achievement sheets through `IDataManager.GetExcelSheet<Achievement>()`
 - completion state: `IUnlockState.IsAchievementComplete(Achievement row)` when `IUnlockState.IsAchievementListLoaded` is true
@@ -102,7 +102,7 @@ Register chat command handlers:
 - `AddHandler(string command, CommandInfo info)`
 - `RemoveHandler(string command)`
 
-Use for `/achtrack` or similar.
+Use for `/val` or similar.
 
 ### `WindowSystem` / `Window`
 
@@ -284,7 +284,7 @@ Do not scaffold plugin code yet. Keep the project in research/design mode until 
 3. Rename project/assembly/manifest to `AchievementTracker` before doing any real work so `InternalName` is stable.
 4. Add basic plugin shell:
    - `Plugin.cs`
-   - `/achtrack` command
+   - `/val` command
    - `WindowSystem`
    - main tracker window
 5. Add data layer:
