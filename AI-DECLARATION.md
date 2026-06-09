@@ -15,6 +15,7 @@ The human developer chose the features, tested behavior in game, reviewed change
 - Diagnostics
 - Tests and verification scripts
 - Documentation drafts
+- CodeQL processing 
 
 ## Assets
 
