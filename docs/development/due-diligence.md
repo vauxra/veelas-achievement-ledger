@@ -7,7 +7,7 @@ Achievement Tracker was developed with conservative Dalamud-plugin guardrails an
 - Prefer documented Dalamud services and local Lumina data before ClientStructs.
 - Keep server-affecting achievement progress requests manual and user-triggered.
 - Do not add automatic polling, gameplay automation, telemetry, backend sync, or cloud services.
-- Keep ClientStructs and unmanaged-access code isolated in small services; see `docs/docs-cache/dalamud/plugin-development-interaction.md` for the documented safe API → ClientStructs → raw-memory escalation model.
+- Keep ClientStructs and unmanaged-access code isolated in small services; see `https://dalamud.dev/plugin-development/interaction/` for the documented safe API → ClientStructs → raw-memory escalation model.
 - Gate diagnostic hooks behind an opt-in setting.
 - Dispose event handlers, hooks, windows, queues, and diagnostic surfaces on shutdown/toggle-off.
 
@@ -21,7 +21,6 @@ Local verification is run with:
 
 The verification script covers:
 
-- cached Dalamud docs freshness check,
 - unit tests,
 - Debug build,
 - Release build,

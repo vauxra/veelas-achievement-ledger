@@ -33,7 +33,7 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
     public void UpdateCache()
     {
         // ClientStructs stage-2 interaction is documented as a Dalamud-supported fallback:
-        // docs/docs-cache/dalamud/plugin-development-interaction.md
+        // https://dalamud.dev/plugin-development/interaction/
         var achievement = Achievement.Instance();
         if (achievement == null)
         {
@@ -142,7 +142,7 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
         this.UpdateCache();
 
         // This calls the same client path used for achievement progress and must remain user-triggered.
-        // Server interaction restriction docs: docs/docs-cache/dalamud/plugin-publishing-restrictions.md
+        // Server interaction restriction docs: https://dalamud.dev/plugin-publishing/restrictions
         var achievement = Achievement.Instance();
         if (achievement == null)
         {

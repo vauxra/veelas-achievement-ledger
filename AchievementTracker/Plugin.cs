@@ -14,18 +14,18 @@ public sealed class Plugin : IDalamudPlugin
     private const string CommandName = "/achtrack";
 
     // Dalamud service injection pattern:
-    // docs/docs-cache/dalamud/plugin-development-project-layout.md
+    // https://dalamud.dev/plugin-development/project-layout
     [PluginService] internal static IDalamudPluginInterface PluginInterface { get; private set; } = null!;
     [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
-    // IDataManager docs: docs/docs-cache/dalamud/api-IDataManager.md
+    // IDataManager docs: https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IDataManager
     [PluginService] internal static IDataManager DataManager { get; private set; } = null!;
-    // IUnlockState docs: docs/docs-cache/dalamud/api-IUnlockState.md
+    // IUnlockState docs: https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IUnlockState
     [PluginService] internal static IUnlockState UnlockState { get; private set; } = null!;
     // IClientState login/logout events are used to scope cached progress to the current character.
-    // docs/docs-cache/dalamud/api-IClientState.md
+    // https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IClientState
     [PluginService] internal static IClientState ClientState { get; private set; } = null!;
     // Debug-only passive hooks for achievement request/receive/completion flow.
-    // docs/docs-cache/dalamud/plugin-development-interaction.md
+    // https://dalamud.dev/plugin-development/interaction/
     [PluginService] internal static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
     [PluginService] internal static IAddonLifecycle AddonLifecycle { get; private set; } = null!;
     [PluginService] internal static IFramework Framework { get; private set; } = null!;
@@ -122,7 +122,7 @@ public sealed class Plugin : IDalamudPlugin
         // Login/logout only clear local cache/queue/throttle state. Do not extend these
         // lifecycle handlers to send achievement progress requests without separate
         // Dalamud policy review; automatic request loops are prohibited by
-        // docs/docs-cache/dalamud/plugin-publishing-restrictions.md.
+        // https://dalamud.dev/plugin-publishing/restrictions.
         this.AchievementProgressSource.ClearCache();
         this.ProgressRefreshQueue.Clear();
         this.ProgressRequestThrottler.Clear();

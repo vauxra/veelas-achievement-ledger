@@ -61,7 +61,7 @@ public unsafe sealed class AchievementProgressDebugHooks : IDisposable
             // Debug-only observability for achievement progress flow. These hooks do not send requests;
             // they log the client methods that send a progress request, receive a requested progress
             // response, or mark an achievement complete. ClientStructs interaction docs:
-            // docs/docs-cache/dalamud/plugin-development-interaction.md
+            // https://dalamud.dev/plugin-development/interaction/
             this.requestHook = interopProvider.HookFromAddress<Achievement.Delegates.RequestAchievementProgress>(
                 Achievement.MemberFunctionPointers.RequestAchievementProgress,
                 this.OnRequestAchievementProgress);

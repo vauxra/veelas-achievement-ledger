@@ -69,7 +69,6 @@ Build outputs:
 
 ## Docs and policy notes
 
-- Docs cache: [`docs/docs-cache/`](docs/docs-cache/)
 - Research notes: [`docs/research/`](docs/research/)
 - AI/policy audit materials: [`docs/ai-policy-audits/`](docs/ai-policy-audits/)
 - Official Dalamud docs: <https://dalamud.dev>

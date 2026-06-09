@@ -21,7 +21,7 @@ public sealed class AchievementProgressService
         var requiredTarget = GetRequiredTarget(achievement);
 
         // IUnlockState achievement docs:
-        // docs/docs-cache/dalamud/api-IUnlockState.md
+        // https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IUnlockState
         if (this.unlockState.IsAchievementListLoaded && this.unlockState.IsAchievementComplete(achievement))
         {
             return requiredTarget.HasValue

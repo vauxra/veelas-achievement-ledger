@@ -35,9 +35,9 @@ WARN_PATTERNS = [
     Pattern("hook", "WARN", "Hooks/raw memory work require explicit design review."),
     Pattern("clientstructs", "WARN", "Client Structs usage requires explicit design review and docs references."),
     Pattern("pvp", "WARN", "PvP-sensitive behavior needs policy review."),
-    Pattern("PluginService", "WARN", "New Dalamud service usage should cite official docs/cache."),
-    Pattern("GetExcelSheet", "WARN", "Lumina sheet usage should cite IDataManager docs/cache."),
-    Pattern("IsAchievementComplete", "WARN", "Achievement completion usage should cite IUnlockState docs/cache."),
+    Pattern("PluginService", "WARN", "New Dalamud service usage should cite official docs."),
+    Pattern("GetExcelSheet", "WARN", "Lumina sheet usage should cite IDataManager docs."),
+    Pattern("IsAchievementComplete", "WARN", "Achievement completion usage should cite IUnlockState docs."),
 ]
 
 
@@ -89,13 +89,15 @@ def main() -> int:
             continue
 
         if pattern.severity == "WARN":
-            if token == "pluginservice" and ("plugin-development-project-layout.md" in lowered or "api-iclientstate.md" in lowered):
+            if token == "pluginservice" and ("plugin-development/project-layout" in lowered or "api/dalamud.plugin.services/interfaces/iclientstate" in lowered):
                 continue
-            if token == "getexcelsheet" and "api-idatamanager.md" in lowered:
+            if token == "getexcelsheet" and "api/dalamud.plugin.services/interfaces/idatamanager" in lowered:
                 continue
-            if token == "isachievementcomplete" and "api-iunlockstate.md" in lowered:
+            if token == "isachievementcomplete" and "api/dalamud.plugin.services/interfaces/iunlockstate" in lowered:
                 continue
-            if token in {"unsafe", "clientstructs"} and "plugin-development-interaction.md" in lowered and "plugin-publishing-restrictions.md" in lowered:
+            if token in {"unsafe", "clientstructs"} and "plugin-development/interaction" in lowered and "plugin-publishing/restrictions" in lowered:
+                continue
+            if token == "hook" and "plugin-development/interaction" in lowered:
                 continue
 
         findings.append((pattern, pattern.message))

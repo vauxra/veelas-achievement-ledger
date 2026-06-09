@@ -6,7 +6,7 @@ Inputs:
 
 - Current git diff.
 - `docs/research/dalamud-getting-started.md`.
-- Cached official docs under `docs/docs-cache/dalamud/`.
+- Cached official docs under `https://dalamud.dev/`.
 
 Hard fail if the diff introduces:
 

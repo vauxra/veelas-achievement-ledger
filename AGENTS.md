@@ -1,14 +1,14 @@
 # Achievement Tracker Agent Guide
 
-This repo is a Final Fantasy XIV Dalamud plugin. Treat Dalamud's official docs at <https://dalamud.dev> as the source of truth. The local cache under `docs/docs-cache/dalamud/` exists so agents can cite and review against the same guidance offline.
+This repo is a Final Fantasy XIV Dalamud plugin. Treat Dalamud's official docs at <https://dalamud.dev> as the source of truth.
 
 ## Required pre-work before code changes
 
-1. Read the relevant cached Dalamud docs before touching code:
-   - `plugin-development-interaction.md` for safe API → ClientStructs → raw-memory escalation.
-   - `plugin-publishing-restrictions.md` for automation, server interaction, combat/PvP, privacy, and backend restrictions.
-   - `plugin-development-technical-considerations.md` for Windowing API, Lumina/local data, backend/privacy/performance guidance.
-   - API pages for any service being added or changed, e.g. `api-IClientState.md`, `api-IUnlockState.md`, `api-IDataManager.md`.
+1. Read the relevant official Dalamud docs before touching code:
+   - <https://dalamud.dev/plugin-development/interaction/> for safe API → ClientStructs → raw-memory escalation.
+   - <https://dalamud.dev/plugin-publishing/restrictions> for automation, server interaction, combat/PvP, privacy, and backend restrictions.
+   - <https://dalamud.dev/plugin-development/technical-considerations> for Windowing API, Lumina/local data, backend/privacy/performance guidance.
+   - API pages for any service being added or changed, e.g. `IClientState`, `IUnlockState`, `IDataManager`.
 2. For non-obvious API behavior, inspect local Dalamud XML/DLL metadata under `/home/developer/.xlcore/dalamud/Hooks/dev/` before guessing.
 3. Record reusable findings in `docs/research/`.
 
@@ -62,15 +62,13 @@ Run before committing:
 
 This runs:
 
-- Dalamud docs freshness check
 - unit tests
 - Debug build
+- Release build
 - CodeQL C# security/quality scan
 - AI/Dalamud policy tripwire
 - adversarial code-review tripwire
 - `git diff --check`
-
-The docs freshness step may update timestamps in `docs/docs-cache`; do not commit cache timestamp churn unless the doc content actually changed and that change is intentional.
 
 For merge/submission, also run an independent fresh-context reviewer using:
 
@@ -81,5 +79,5 @@ Provide that reviewer the diff plus outputs from both audit scripts.
 ## Commit hygiene
 
 - Keep feature/policy changes in small commits.
-- Do not commit `bin/`, `obj/`, `.hermes/`, or transient docs-cache timestamp churn.
+- Do not commit `bin/`, `obj/`, `.hermes/`, or generated/transient analysis output.
 - If a review finds issues, fix only the reported issues and re-run the full verification pipeline plus the independent reviewer.

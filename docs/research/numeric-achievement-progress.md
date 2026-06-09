@@ -8,8 +8,8 @@ Find safe, documented or local-data-backed ways to show progress for tracked ach
 
 ## Sources checked
 
-- Cached `IDataManager` docs: `docs/docs-cache/dalamud/api-IDataManager.md`
-- Cached `IUnlockState` docs: `docs/docs-cache/dalamud/api-IUnlockState.md`
+- Cached `IDataManager` docs: `https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IDataManager`
+- Cached `IUnlockState` docs: `https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IUnlockState`
 - Local Lumina assemblies under `/home/developer/.xlcore/dalamud/Hooks/dev/`
 - Local game data under `/mintData/games/.xlcore/ffxiv/game/sqpack`
 

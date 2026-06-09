@@ -20,7 +20,7 @@ public sealed class AchievementCatalog
     {
         var normalizedQuery = query.Trim();
         // IDataManager.GetExcelSheet<T>() docs:
-        // docs/docs-cache/dalamud/api-IDataManager.md
+        // https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IDataManager
         var sheet = this.dataManager.GetExcelSheet<Achievement>();
 
         var results = sheet
@@ -41,7 +41,7 @@ public sealed class AchievementCatalog
     public bool TryGet(uint achievementId, out AchievementInfo achievementInfo)
     {
         // IDataManager.GetExcelSheet<T>() docs:
-        // docs/docs-cache/dalamud/api-IDataManager.md
+        // https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IDataManager
         var sheet = this.dataManager.GetExcelSheet<Achievement>();
         if (sheet.TryGetRow(achievementId, out var achievement))
         {
@@ -56,7 +56,7 @@ public sealed class AchievementCatalog
     public bool TryGetRow(uint achievementId, out Achievement achievement)
     {
         // IDataManager.GetExcelSheet<T>() docs:
-        // docs/docs-cache/dalamud/api-IDataManager.md
+        // https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IDataManager
         var sheet = this.dataManager.GetExcelSheet<Achievement>();
         return sheet.TryGetRow(achievementId, out achievement);
     }

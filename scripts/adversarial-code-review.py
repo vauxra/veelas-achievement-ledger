@@ -100,14 +100,14 @@ SHELL_SECURITY_PATTERNS: list[tuple[re.Pattern[str], str, str]] = [
 
 DOC_REQUIREMENTS = {
     "RequestAchievementProgress": [
-        "plugin-development-interaction.md",
-        "plugin-publishing-restrictions.md",
+        "plugin-development/interaction",
+        "plugin-publishing/restrictions",
     ],
-    "unsafe": ["plugin-development-interaction.md"],
-    "ClientStructs": ["plugin-development-interaction.md"],
-    "IClientState": ["api-IClientState.md"],
-    "IUnlockState": ["api-IUnlockState.md"],
-    "IDataManager": ["api-IDataManager.md"],
+    "unsafe": ["plugin-development/interaction"],
+    "ClientStructs": ["plugin-development/interaction"],
+    "IClientState": ["api/Dalamud.Plugin.Services/Interfaces/IClientState"],
+    "IUnlockState": ["api/Dalamud.Plugin.Services/Interfaces/IUnlockState"],
+    "IDataManager": ["api/Dalamud.Plugin.Services/Interfaces/IDataManager"],
 }
 
 

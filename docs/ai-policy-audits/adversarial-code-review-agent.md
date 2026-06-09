@@ -34,12 +34,12 @@ Suggestions and test gaps are non-blocking unless they reveal an actual bug or u
 
 Check changed code against these project-cached Dalamud docs and research notes when relevant:
 
-- `docs/docs-cache/dalamud/plugin-publishing-restrictions.md`
-- `docs/docs-cache/dalamud/plugin-development-interaction.md`
-- `docs/docs-cache/dalamud/plugin-development-technical-considerations.md`
-- `docs/docs-cache/dalamud/api-IClientState.md`
-- `docs/docs-cache/dalamud/api-IUnlockState.md`
-- `docs/docs-cache/dalamud/api-IDataManager.md`
+- `https://dalamud.dev/plugin-publishing/restrictions`
+- `https://dalamud.dev/plugin-development/interaction/`
+- `https://dalamud.dev/plugin-development/technical-considerations`
+- `https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IClientState`
+- `https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IUnlockState`
+- `https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IDataManager`
 - `docs/research/auto-update-mechanisms.md`
 - `docs/research/numeric-achievement-progress.md`
 

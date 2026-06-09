@@ -9,14 +9,14 @@ This note is about **runtime cache update criteria inside the plugin**, not rele
 
 ## Dalamud guidance that constrains the design
 
-Sources checked from the local official docs cache:
+Sources checked from the local official docs:
 
-- `docs/docs-cache/dalamud/plugin-development-interaction.md`
-- `docs/docs-cache/dalamud/plugin-publishing-restrictions.md`
-- `docs/docs-cache/dalamud/plugin-development-technical-considerations.md`
-- `docs/docs-cache/dalamud/api-IClientState.md`
-- `docs/docs-cache/dalamud/api-IUnlockState.md`
-- `docs/docs-cache/dalamud/api-IDataManager.md`
+- `https://dalamud.dev/plugin-development/interaction/`
+- `https://dalamud.dev/plugin-publishing/restrictions`
+- `https://dalamud.dev/plugin-development/technical-considerations`
+- `https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IClientState`
+- `https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IUnlockState`
+- `https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IDataManager`
 
 Relevant guidance:
 
