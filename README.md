@@ -1,4 +1,5 @@
-# Veela's Achievement Ledger
+# Veela's Achievement Ledger 
+[![AI-DECLARATION: copilot](https://img.shields.io/badge/䷼%20AI--DECLARATION-copilot-fee2e2?labelColor=fee2e2)](https://ai-declaration.md)
 
 A lightweight assistive achievement organizer and tracker for FFXIV.
 
