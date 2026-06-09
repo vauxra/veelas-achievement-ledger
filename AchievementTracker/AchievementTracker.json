@@ -2,8 +2,8 @@
   "Author": "Saagi",
   "InternalName": "AchievementTracker",
   "Name": "Achievement Tracker",
-  "Punchline": "Track selected achievements with native-UI guided updates.",
-  "Description": "Track selected achievement status in a movable and resizable window. Numeric current progress is learned from user-driven native Achievement window interactions; the plugin does not issue its own progress refresh requests. Use /achtrack to open the tracker.",
+  "Punchline": "Track selected achievements.",
+  "Description": "Track achievements in a movable window. Use /achtrack, then Open to update progress.",
   "ApplicableVersion": "any",
   "Tags": [
     "achievement",

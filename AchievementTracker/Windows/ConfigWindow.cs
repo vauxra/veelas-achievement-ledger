@@ -27,7 +27,7 @@ public sealed class ConfigWindow : Window
     public override void Draw()
     {
         ImGui.TextUnformatted("Tracked achievements");
-        ImGui.TextDisabled("Use this panel to manage the guided tracker. Progress is learned from native Achievement UI interactions.");
+        ImGui.TextDisabled("Use Open to refresh progress.");
         var debugLogging = this.plugin.Configuration.EnableDebugLogging;
         if (ImGui.Checkbox("Enable advanced diagnostics", ref debugLogging))
         {
@@ -39,7 +39,7 @@ public sealed class ConfigWindow : Window
             }
         }
 
-        ImGui.TextWrapped("Advanced diagnostics are off by default. Passive progress observation remains enabled so the tracker can learn from progress responses caused by the native Achievement window. Diagnostics only add local DebugTrace detail for tracker actions, native Achievement UI activity, chat/log messages, condition changes, and client-state events.");
+        ImGui.TextDisabled("Adds DebugTrace lines to the Dalamud log.");
         ImGui.Separator();
 
         this.DrawTrackedManagement();
@@ -126,7 +126,7 @@ public sealed class ConfigWindow : Window
 
         if (this.searchQuery.Trim().Length < 2)
         {
-            ImGui.TextDisabled("Type at least 2 characters from the achievement name or category.");
+            ImGui.TextDisabled("Type 2+ characters from a name or category.");
             return;
         }
 
