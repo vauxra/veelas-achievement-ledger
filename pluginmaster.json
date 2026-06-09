@@ -4,10 +4,10 @@
     "Name": "Veela's Achievement Ledger",
     "InternalName": "VeelasAchievementLedger",
     "AssemblyVersion": "0.2.0.8",
-    "Description": "Achievement tracker for FFXIV.",
+    "Description": "Experimental custom-repo build. Achievement tracker for FFXIV.",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 15,
-    "Punchline": "Track achievements from /val.",
+    "Punchline": "Experimental / testing build for /val.",
     "RepoUrl": "https://github.com/vauxra/veelas-achievement-ledger",
     "Tags": [
       "achievement",
@@ -15,9 +15,13 @@
       "utility"
     ],
     "IsHide": false,
-    "IsTestingExclusive": false,
+    "IsTestingExclusive": true,
     "DownloadLinkInstall": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.8/VeelasAchievementLedger_0_2_0_8.zip",
     "DownloadLinkUpdate": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.8/VeelasAchievementLedger_0_2_0_8.zip",
-    "LastUpdate": "1781035575"
+    "LastUpdate": "1781035798",
+    "TestingAssemblyVersion": "0.2.0.8",
+    "TestingDalamudApiLevel": 15,
+    "TestingChangelog": "Experimental custom-repo build.",
+    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.8/VeelasAchievementLedger_0_2_0_8.zip"
   }
 ]
