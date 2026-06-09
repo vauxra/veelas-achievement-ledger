@@ -1,0 +1,12 @@
+{
+  "Author": "Saagi",
+  "Name": "Achievement Tracker",
+  "Punchline": "Track selected achievements with manual progress refresh.",
+  "Description": "Track selected achievement status in a movable and resizable window. Numeric current progress is refreshed only when the user presses Refresh tracked progress. Use /achtrack to open the tracker.",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "achievement",
+    "tracker",
+    "utility"
+  ]
+}

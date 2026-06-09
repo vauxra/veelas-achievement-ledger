@@ -1,0 +1,17 @@
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.nupkg
+Dalamud/
+packages/
+.DS_Store
+
+# Hermes local planning/session files
+.hermes/
+
+# Local CodeQL analysis artifacts
+.codeql-db/
+.codeql-results/

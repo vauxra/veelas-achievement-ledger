@@ -1,0 +1,150 @@
+{
+  "checked_at": "2026-06-09T02:42:42.570435+00:00",
+  "sources": [
+    {
+      "slug": "plugin-development-getting-started",
+      "url": "https://dalamud.dev/plugin-development/getting-started",
+      "status": 200,
+      "sha256": "947cae5bb436e97336a16d16176158c0b4434b54b533411aa499c1bd6b0cb1f7",
+      "changed": false,
+      "fetched_at": "2026-06-09T02:42:42.570435+00:00",
+      "output": "docs/docs-cache/dalamud/plugin-development-getting-started.md"
+    },
+    {
+      "slug": "plugin-development-project-layout",
+      "url": "https://dalamud.dev/plugin-development/project-layout",
+      "status": 200,
+      "sha256": "b2a9322dcb561a790a03deeb9cddce3b837f944151715dedf94f63fa832798a0",
+      "changed": false,
+      "fetched_at": "2026-06-09T02:42:42.570435+00:00",
+      "output": "docs/docs-cache/dalamud/plugin-development-project-layout.md"
+    },
+    {
+      "slug": "plugin-development-plugin-metadata",
+      "url": "https://dalamud.dev/plugin-development/plugin-metadata",
+      "status": 200,
+      "sha256": "ffd32fd6e0e4923626b7504572268f846e35969832c1b93418f1e8c562e67a90",
+      "changed": false,
+      "fetched_at": "2026-06-09T02:42:42.570435+00:00",
+      "output": "docs/docs-cache/dalamud/plugin-development-plugin-metadata.md"
+    },
+    {
+      "slug": "plugin-development-technical-considerations",
+      "url": "https://dalamud.dev/plugin-development/technical-considerations",
+      "status": 200,
+      "sha256": "a77c16fc03bb01def01d55b45a74f95520bba45ecbd6b132e792b5f16af3a268",
+      "changed": false,
+      "fetched_at": "2026-06-09T02:42:42.570435+00:00",
+      "output": "docs/docs-cache/dalamud/plugin-development-technical-considerations.md"
+    },
+    {
+      "slug": "plugin-development-interaction",
+      "url": "https://dalamud.dev/plugin-development/interaction/",
+      "status": 200,
+      "sha256": "41ed6dc663edca096028d8925eaa265e7150b629dfc5c5340214aeb0d61dcf3c",
+      "changed": false,
+      "fetched_at": "2026-06-09T02:42:42.570435+00:00",
+      "output": "docs/docs-cache/dalamud/plugin-development-interaction.md"
+    },
+    {
+      "slug": "plugin-publishing-restrictions",
+      "url": "https://dalamud.dev/plugin-publishing/restrictions",
+      "status": 200,
+      "sha256": "13eaa4cd67e8718166f4a4ba9a33942fb34f8b94a0bf439fd6a81dab3e007654",
+      "changed": false,
+      "fetched_at": "2026-06-09T02:42:42.570435+00:00",
+      "output": "docs/docs-cache/dalamud/plugin-publishing-restrictions.md"
+    },
+    {
+      "slug": "plugin-publishing-submission",
+      "url": "https://dalamud.dev/plugin-publishing/submission",
+      "status": 200,
+      "sha256": "3c5951399f0f20ff3be812370fe57b4bb319dab5da908777a97361c84a73d17a",
+      "changed": false,
+      "fetched_at": "2026-06-09T02:42:42.570435+00:00",
+      "output": "docs/docs-cache/dalamud/plugin-publishing-submission.md"
+    },
+    {
+      "slug": "plugin-publishing-approval-process",
+      "url": "https://dalamud.dev/plugin-publishing/approval-process",
+      "status": 200,
+      "sha256": "da27c8e3d830eea961d00beea49c806f330c01fa69d21a6c41b4d63c9ee45cfb",
+      "changed": false,
+      "fetched_at": "2026-06-09T02:42:42.570435+00:00",
+      "output": "docs/docs-cache/dalamud/plugin-publishing-approval-process.md"
+    },
+    {
+      "slug": "plugin-publishing-ai-policy",
+      "url": "https://dalamud.dev/plugin-publishing/ai-policy",
+      "status": 200,
+      "sha256": "2c97c9203b9f491fe7eb1580701067f452f5b86e2081bb2b958e7ded30800255",
+      "changed": false,
+      "fetched_at": "2026-06-09T02:42:42.570435+00:00",
+      "output": "docs/docs-cache/dalamud/plugin-publishing-ai-policy.md"
+    },
+    {
+      "slug": "api-IDataManager",
+      "url": "https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IDataManager",
+      "status": 200,
+      "sha256": "4e6e3b06efc564e8c026f50d970fd1cf9e232bcd2785c77e8a7103d9e2e9aad3",
+      "changed": false,
+      "fetched_at": "2026-06-09T02:42:42.570435+00:00",
+      "output": "docs/docs-cache/dalamud/api-IDataManager.md"
+    },
+    {
+      "slug": "api-IUnlockState",
+      "url": "https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IUnlockState",
+      "status": 200,
+      "sha256": "fa5115e5f5984e5e225af7270089af24ae7e13c079f1a672af9acad382d3efeb",
+      "changed": false,
+      "fetched_at": "2026-06-09T02:42:42.570435+00:00",
+      "output": "docs/docs-cache/dalamud/api-IUnlockState.md"
+    },
+    {
+      "slug": "api-WindowSystem",
+      "url": "https://dalamud.dev/api/Dalamud.Interface.Windowing/Classes/WindowSystem",
+      "status": 200,
+      "sha256": "f97fb8d4af485132f3c14f128c56e4d5f9813c303545e72f5c3de2e8800d53d7",
+      "changed": false,
+      "fetched_at": "2026-06-09T02:42:42.570435+00:00",
+      "output": "docs/docs-cache/dalamud/api-WindowSystem.md"
+    },
+    {
+      "slug": "api-Window",
+      "url": "https://dalamud.dev/api/Dalamud.Interface.Windowing/Classes/Window",
+      "status": 200,
+      "sha256": "98aef90b0e7161d60d3a06b10d2af4a9bb4a7e4faf5d59eb47e9a1f7db8f2b54",
+      "changed": false,
+      "fetched_at": "2026-06-09T02:42:42.570435+00:00",
+      "output": "docs/docs-cache/dalamud/api-Window.md"
+    },
+    {
+      "slug": "api-ICommandManager",
+      "url": "https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/ICommandManager",
+      "status": 200,
+      "sha256": "d7a2c8fb246c9f8616184d8635b7cc62f62761744dc9eb31423a93cd626e7638",
+      "changed": false,
+      "fetched_at": "2026-06-09T02:42:42.570435+00:00",
+      "output": "docs/docs-cache/dalamud/api-ICommandManager.md"
+    },
+    {
+      "slug": "api-IClientState",
+      "url": "https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IClientState",
+      "status": 200,
+      "sha256": "6b1ea7cc8bee3c6e2f8169e4145f6554de9e4e238d854203d5c5e7adfece320d",
+      "changed": false,
+      "fetched_at": "2026-06-09T02:42:42.570435+00:00",
+      "output": "docs/docs-cache/dalamud/api-IClientState.md"
+    },
+    {
+      "slug": "api-IPluginConfiguration",
+      "url": "https://dalamud.dev/api/Dalamud.Configuration/Interfaces/IPluginConfiguration",
+      "status": 200,
+      "sha256": "5c2bfa2a5898332358b4c21d8d8ae24f920dad9aa45aee2178662e976e9dce9e",
+      "changed": false,
+      "fetched_at": "2026-06-09T02:42:42.570435+00:00",
+      "output": "docs/docs-cache/dalamud/api-IPluginConfiguration.md"
+    }
+  ],
+  "failures": []
+}

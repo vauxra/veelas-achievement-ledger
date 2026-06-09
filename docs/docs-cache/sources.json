@@ -1,0 +1,68 @@
+{
+  "sources": [
+    {
+      "slug": "plugin-development-getting-started",
+      "url": "https://dalamud.dev/plugin-development/getting-started"
+    },
+    {
+      "slug": "plugin-development-project-layout",
+      "url": "https://dalamud.dev/plugin-development/project-layout"
+    },
+    {
+      "slug": "plugin-development-plugin-metadata",
+      "url": "https://dalamud.dev/plugin-development/plugin-metadata"
+    },
+    {
+      "slug": "plugin-development-technical-considerations",
+      "url": "https://dalamud.dev/plugin-development/technical-considerations"
+    },
+    {
+      "slug": "plugin-development-interaction",
+      "url": "https://dalamud.dev/plugin-development/interaction/"
+    },
+    {
+      "slug": "plugin-publishing-restrictions",
+      "url": "https://dalamud.dev/plugin-publishing/restrictions"
+    },
+    {
+      "slug": "plugin-publishing-submission",
+      "url": "https://dalamud.dev/plugin-publishing/submission"
+    },
+    {
+      "slug": "plugin-publishing-approval-process",
+      "url": "https://dalamud.dev/plugin-publishing/approval-process"
+    },
+    {
+      "slug": "plugin-publishing-ai-policy",
+      "url": "https://dalamud.dev/plugin-publishing/ai-policy"
+    },
+    {
+      "slug": "api-IDataManager",
+      "url": "https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IDataManager"
+    },
+    {
+      "slug": "api-IUnlockState",
+      "url": "https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IUnlockState"
+    },
+    {
+      "slug": "api-WindowSystem",
+      "url": "https://dalamud.dev/api/Dalamud.Interface.Windowing/Classes/WindowSystem"
+    },
+    {
+      "slug": "api-Window",
+      "url": "https://dalamud.dev/api/Dalamud.Interface.Windowing/Classes/Window"
+    },
+    {
+      "slug": "api-ICommandManager",
+      "url": "https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/ICommandManager"
+    },
+    {
+      "slug": "api-IClientState",
+      "url": "https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IClientState"
+    },
+    {
+      "slug": "api-IPluginConfiguration",
+      "url": "https://dalamud.dev/api/Dalamud.Configuration/Interfaces/IPluginConfiguration"
+    }
+  ]
+}
