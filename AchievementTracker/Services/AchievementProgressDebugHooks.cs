@@ -248,6 +248,11 @@ public unsafe sealed class AchievementProgressDebugHooks : IDisposable
 
     private void OnFrameworkUpdate(IFramework updateFramework)
     {
+        if (!this.debugLog.Enabled)
+        {
+            return;
+        }
+
         this.TryInstallAgentVirtualHooks();
         if (updateFramework.LastUpdateUTC < this.nextStateSampleUtc)
         {

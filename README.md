@@ -12,29 +12,30 @@ Achievement Tracker is intended for distributed beta releases. The current build
 - Searches Lumina achievement data via Dalamud `IDataManager`.
 - Shows completion status through `IUnlockState` once the achievement list is loaded.
 - Shows known target counts for many count-based achievements from Lumina data.
-- Provides a manual **Refresh tracked progress** button for numeric current/max progress.
+- Provides guided buttons that open tracked entries in the native game Achievement window.
+- Passively records numeric current/max progress when the native client receives progress data.
 
-Numeric progress is intentionally manual-refresh only. The plugin does not poll, automate gameplay, or make automatic/unprompted achievement-progress requests.
+Numeric progress is intentionally native-UI driven. The plugin does not poll, automate gameplay, or make plugin-originated achievement-progress requests; users choose when to open the game's Achievement window for a tracked entry.
 
 ## Testing and issue reports
 
 1. Install or load the plugin, then run `/achtrack` in game.
 2. Open **Configure** and add up to 5 achievements.
 3. If completion status is unavailable, open the native game Achievement window once so Dalamud's achievement list is loaded.
-4. Press **Refresh tracked progress** when you want current numeric progress for tracked achievements.
+4. Click **Open in Achievements** or **Open next in Achievements** when you want the native game UI to load a tracked entry.
 
 When reporting issues, include:
 
 - achievement ID/name,
 - expected progress,
 - displayed progress,
-- whether **Refresh tracked progress** was pressed,
+- whether the native Achievement window was opened for that entry,
 - any `DebugTrace` logs if Advanced diagnostics were enabled.
 
 ## Privacy and policy posture
 
 - No backend, telemetry, cloud sync, leaderboard, or user directory.
-- No automatic progress polling or gameplay automation.
+- No automatic progress polling, gameplay automation, or plugin-originated progress refresh requests.
 - No AI-generated user-facing assets are included.
 - Advanced diagnostics are opt-in and write Dalamud log lines; they may include gameplay/chat/log context useful for debugging.
 

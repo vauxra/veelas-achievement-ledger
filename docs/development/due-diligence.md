@@ -5,11 +5,11 @@ Achievement Tracker was developed with conservative Dalamud-plugin guardrails an
 ## Guardrails
 
 - Prefer documented Dalamud services and local Lumina data before ClientStructs.
-- Keep server-affecting achievement progress requests manual and user-triggered.
+- Avoid plugin-originated achievement progress requests. Prefer user-driven native Achievement UI interactions and passive observation of client state/responses already caused by that UI.
 - Do not add automatic polling, gameplay automation, telemetry, backend sync, or cloud services.
 - Keep ClientStructs and unmanaged-access code isolated in small services; see `https://dalamud.dev/plugin-development/interaction/` for the documented safe API → ClientStructs → raw-memory escalation model.
-- Gate diagnostic hooks behind an opt-in setting.
-- Dispose event handlers, hooks, windows, queues, and diagnostic surfaces on shutdown/toggle-off.
+- Keep passive observation hooks small, local, and non-requesting; gate verbose diagnostic surfaces behind an opt-in setting.
+- Dispose event handlers, hooks, windows, and diagnostic surfaces on shutdown/toggle-off.
 
 ## Testing performed
 
@@ -33,8 +33,8 @@ Manual in-game testing covered:
 
 - `/achtrack` command and UI toggles,
 - achievement search/add/remove/reorder,
-- manual progress refresh queueing/throttling,
-- native Achievement window progress requests,
+- guided native Achievement window opening,
+- passive capture of native Achievement window progress responses,
 - completion events,
 - gathering/mining chat/log/condition surfaces.
 
@@ -42,7 +42,7 @@ Manual in-game testing covered:
 
 Policy-sensitive changes were reviewed with deterministic scripts and independent fresh-context adversarial review focused on:
 
-- automatic game-server requests,
+- plugin-originated game-server requests,
 - hook lifecycle and disposal safety,
 - stale cache correctness,
 - chat/log privacy risk,
@@ -58,10 +58,10 @@ Relevant findings are kept under `docs/research/`, including:
 - native Achievement UI/agent exploration,
 - gameplay activity surfaces,
 - beta cleanup checklist,
-- packet-capture experiment plan on the experimental branch.
+- packet-capture and `/xldata network` experiment notes on experimental branches.
 
 ## Known limitations
 
-- Numeric current progress is not continuously live; users press **Refresh tracked progress** when they want current values.
-- Some achievements expose only target counts or completion state until refreshed.
+- Numeric current progress is not continuously live; users open tracked entries in the native Achievement window when they want current values.
+- Some achievements expose only target counts or completion state until the native UI has loaded that entry.
 - Advanced diagnostics are for troubleshooting and can produce verbose Dalamud logs.

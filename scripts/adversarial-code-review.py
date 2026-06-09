@@ -57,7 +57,7 @@ POLICY_FAIL_TOKENS: list[tuple[str, str]] = [
     ("analytics", "Analytics are out of scope for V1 unless separately designed and approved."),
     ("leaderboard", "Leaderboards imply backend/user data and are out of scope for V1."),
     ("ContentId", "ContentId use needs explicit privacy review."),
-    ("RequestAchievementProgress", "Achievement progress requests must stay isolated, user-triggered, queued, and throttled."),
+    ("RequestAchievementProgress", "Achievement progress request references must stay passive/observational; plugin-originated calls are out of scope."),
 ]
 
 AUTO_TRIGGER_TOKENS = [

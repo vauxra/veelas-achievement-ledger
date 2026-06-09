@@ -29,7 +29,9 @@ public sealed class AchievementCatalog
 
         if (!string.IsNullOrWhiteSpace(normalizedQuery))
         {
-            results = results.Where(info => info.Name.Contains(normalizedQuery, StringComparison.CurrentCultureIgnoreCase));
+            results = results.Where(info =>
+                info.Name.Contains(normalizedQuery, StringComparison.CurrentCultureIgnoreCase)
+                || info.CategoryName.Contains(normalizedQuery, StringComparison.CurrentCultureIgnoreCase));
         }
 
         return results

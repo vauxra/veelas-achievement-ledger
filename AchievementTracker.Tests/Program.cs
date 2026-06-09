@@ -10,11 +10,6 @@ var tests = new List<(string Name, Action Body)>
     ("MoveDown reorders an item toward the end", MoveDownReordersItemTowardEnd),
     ("LoadFrom sanitizes duplicates and trims to five", LoadFromSanitizesDuplicatesAndTrimsToFive),
     ("Progress display formats all safe states", ProgressDisplayFormatsAllSafeStates),
-    ("Progress request throttler blocks repeated requests inside cooldown", ProgressRequestThrottlerBlocksRepeatedRequestsInsideCooldown),
-    ("Progress request throttler clear resets cooldown state", ProgressRequestThrottlerClearResetsCooldownState),
-    ("Progress refresh queue de-duplicates and drains sequentially", ProgressRefreshQueueDeduplicatesAndDrainsSequentially),
-    ("Progress refresh queue applies cumulative jitter before readiness", ProgressRefreshQueueAppliesCumulativeJitterBeforeReadiness),
-    ("Progress refresh queue clear drops pending work", ProgressRefreshQueueClearDropsPendingWork),
 };
 
 foreach (var test in tests)
@@ -97,83 +92,6 @@ static void ProgressDisplayFormatsAllSafeStates()
     AssertEqual("437 / 1,000", AchievementProgress.Numeric(437, 1000).ToDisplayText());
     AssertEqual("Current unavailable / 1,500", AchievementProgress.TargetKnown(1500).ToDisplayText());
     AssertEqual("Progress unavailable", AchievementProgress.Unavailable().ToDisplayText());
-}
-
-static void ProgressRequestThrottlerBlocksRepeatedRequestsInsideCooldown()
-{
-    var throttler = new ProgressRequestThrottler(TimeSpan.FromSeconds(30));
-    var now = new DateTimeOffset(2026, 6, 8, 22, 0, 0, TimeSpan.Zero);
-
-    AssertTrue(throttler.TryMarkRequest(137, now), "first request should be allowed");
-    AssertTrue(!throttler.TryMarkRequest(137, now.AddSeconds(10)), "same achievement should be throttled inside cooldown");
-    AssertTrue(throttler.TryMarkRequest(138, now.AddSeconds(10)), "different achievement should be allowed");
-    AssertTrue(throttler.TryMarkRequest(137, now.AddSeconds(31)), "same achievement should be allowed after cooldown");
-}
-
-static void ProgressRequestThrottlerClearResetsCooldownState()
-{
-    var throttler = new ProgressRequestThrottler(TimeSpan.FromSeconds(30));
-    var now = new DateTimeOffset(2026, 6, 8, 22, 0, 0, TimeSpan.Zero);
-
-    AssertTrue(throttler.TryMarkRequest(137, now), "first request should be allowed");
-    throttler.Clear();
-    AssertTrue(throttler.TryMarkRequest(137, now.AddSeconds(1)), "clear should remove old per-achievement cooldown state");
-}
-
-static void ProgressRefreshQueueDeduplicatesAndDrainsSequentially()
-{
-    var queue = new ProgressRefreshQueue();
-
-    queue.Enqueue([137, 138, 137, 139]);
-
-    AssertTrue(queue.TryPeek(out var first), "first queued item should exist");
-    AssertEqualUInt(137u, first);
-    queue.Dequeue();
-    AssertTrue(queue.TryPeek(out var second), "second queued item should exist");
-    AssertEqualUInt(138u, second);
-    queue.Dequeue();
-    AssertTrue(queue.TryPeek(out var third), "third queued item should exist");
-    AssertEqualUInt(139u, third);
-    queue.Dequeue();
-    AssertTrue(!queue.TryPeek(out _), "queue should be empty after three unique ids");
-}
-
-static void ProgressRefreshQueueClearDropsPendingWork()
-{
-    var queue = new ProgressRefreshQueue();
-
-    queue.Enqueue([137, 138, 139]);
-    queue.Clear();
-
-    AssertTrue(!queue.TryPeek(out _), "clear should drop queued achievement refresh work");
-    queue.Enqueue([137]);
-    AssertTrue(queue.TryPeek(out var firstAfterClear), "queue should accept an id again after clear");
-    AssertEqualUInt(137u, firstAfterClear);
-}
-
-static void ProgressRefreshQueueAppliesCumulativeJitterBeforeReadiness()
-{
-    var queue = new ProgressRefreshQueue(() => TimeSpan.FromMilliseconds(500));
-    var now = new DateTimeOffset(2026, 6, 9, 12, 0, 0, TimeSpan.Zero);
-
-    queue.Enqueue([137, 138], now);
-
-    AssertFalse(queue.TryPeekReady(now.AddMilliseconds(499), out _), "first request should wait for jitter delay");
-    AssertTrue(queue.TryPeekReady(now.AddMilliseconds(500), out var first), "first request should become ready after first jitter delay");
-    AssertEqualUInt(137u, first);
-    queue.Dequeue();
-
-    AssertFalse(queue.TryPeekReady(now.AddMilliseconds(999), out _), "second request should wait for cumulative jitter delay");
-    AssertTrue(queue.TryPeekReady(now.AddMilliseconds(1000), out var second), "second request should become ready after second jitter delay");
-    AssertEqualUInt(138u, second);
-}
-
-static void AssertEqualUInt(uint expected, uint actual)
-{
-    if (expected != actual)
-    {
-        throw new InvalidOperationException($"Expected '{expected}', got '{actual}'");
-    }
 }
 
 static void AssertEqual(string expected, string actual)

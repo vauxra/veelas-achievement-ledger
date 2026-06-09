@@ -1,12 +1,15 @@
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace AchievementTracker.Services;
 
+public readonly record struct ObservedAchievementProgress(uint Current, uint Max, DateTimeOffset ObservedAt, string Source);
+
 public unsafe sealed class ClientAchievementProgressSource : IAchievementProgressSource
 {
-    private readonly Dictionary<uint, (uint Current, uint Max)> cachedProgress = new();
+    private readonly Dictionary<uint, ObservedAchievementProgress> cachedProgress = new();
     private readonly DebugLog debugLog;
     private Achievement.AchievementState? lastSeenAchievementState;
     private Achievement.AchievementState? lastSeenState;
@@ -19,15 +22,6 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
     public ClientAchievementProgressSource(DebugLog debugLog)
     {
         this.debugLog = debugLog;
-    }
-
-    public bool IsRequestInFlight
-    {
-        get
-        {
-            var achievement = Achievement.Instance();
-            return achievement != null && achievement->ProgressRequestState == Achievement.AchievementState.Requested;
-        }
     }
 
     public void UpdateCache()
@@ -83,7 +77,7 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
             this.lastLoadedMax = max;
         }
 
-        this.cachedProgress[achievementId] = (current, max);
+        this.cachedProgress[achievementId] = new ObservedAchievementProgress(current, max, DateTimeOffset.UtcNow, "Achievement state slot");
     }
 
     public void RecordObservedProgress(uint achievementId, uint current, uint max, string source)
@@ -94,7 +88,7 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
             return;
         }
 
-        this.cachedProgress[achievementId] = (current, max);
+        this.cachedProgress[achievementId] = new ObservedAchievementProgress(current, max, DateTimeOffset.UtcNow, source);
         this.lastLoadedAchievementId = achievementId;
         this.lastLoadedCurrent = current;
         this.lastLoadedMax = max;
@@ -137,28 +131,9 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
         return false;
     }
 
-    public bool RequestProgress(uint achievementId)
+    public bool TryGetObservation(uint achievementId, out ObservedAchievementProgress progress)
     {
         this.UpdateCache();
-
-        // This calls the same client path used for achievement progress and must remain user-triggered.
-        // Server interaction restriction docs: https://dalamud.dev/plugin-publishing/restrictions
-        var achievement = Achievement.Instance();
-        if (achievement == null)
-        {
-            this.debugLog.Trace("ProgressSource.RequestProgress", $"achievementId={achievementId} rejected=Achievement.Instance null");
-            return false;
-        }
-
-        if (achievement->ProgressRequestState == Achievement.AchievementState.Requested)
-        {
-            this.debugLog.Trace("ProgressSource.RequestProgress", $"achievementId={achievementId} rejected=request already in flight currentSlotId={achievement->ProgressAchievementId} current={achievement->ProgressCurrent} max={achievement->ProgressMax}");
-            return false;
-        }
-
-        this.debugLog.Trace("ProgressSource.RequestProgress", $"achievementId={achievementId} beforeState={achievement->ProgressRequestState} slotId={achievement->ProgressAchievementId} current={achievement->ProgressCurrent} max={achievement->ProgressMax}");
-        achievement->RequestAchievementProgress(achievementId);
-        this.debugLog.Trace("ProgressSource.RequestProgress", $"achievementId={achievementId} submitted afterState={achievement->ProgressRequestState} slotId={achievement->ProgressAchievementId} current={achievement->ProgressCurrent} max={achievement->ProgressMax}");
-        return true;
+        return this.cachedProgress.TryGetValue(achievementId, out progress);
     }
 }

@@ -27,7 +27,7 @@ public sealed class ConfigWindow : Window
     public override void Draw()
     {
         ImGui.TextUnformatted("Tracked achievements");
-        ImGui.TextDisabled("Use this panel to manage the live tracker. The live panel stays clean while you play.");
+        ImGui.TextDisabled("Use this panel to manage the guided tracker. Progress is learned from native Achievement UI interactions.");
         var debugLogging = this.plugin.Configuration.EnableDebugLogging;
         if (ImGui.Checkbox("Enable advanced diagnostics", ref debugLogging))
         {
@@ -39,7 +39,7 @@ public sealed class ConfigWindow : Window
             }
         }
 
-        ImGui.TextWrapped("Advanced diagnostics are off by default. When enabled, they write local DebugTrace lines for tracker actions, progress requests/responses, Achievement UI activity, chat/log messages, condition changes, and client-state events.");
+        ImGui.TextWrapped("Advanced diagnostics are off by default. Passive progress observation remains enabled so the tracker can learn from progress responses caused by the native Achievement window. Diagnostics only add local DebugTrace detail for tracker actions, native Achievement UI activity, chat/log messages, condition changes, and client-state events.");
         ImGui.Separator();
 
         this.DrawTrackedManagement();
@@ -84,6 +84,13 @@ public sealed class ConfigWindow : Window
             }
 
             ImGui.SameLine();
+            if (ImGui.Button("Open") )
+            {
+                this.plugin.DebugLog.Trace("Config.Button", $"Open pressed achievementId={achievementId}");
+                this.plugin.NativeAchievementNavigator.OpenAchievement(achievementId);
+            }
+
+            ImGui.SameLine();
             this.DrawManagedAchievement(achievementId);
             ImGui.PopID();
         }
@@ -113,13 +120,13 @@ public sealed class ConfigWindow : Window
 
     private void DrawSearchAndAdd()
     {
-        ImGui.TextUnformatted("Add achievement");
+        ImGui.TextUnformatted("Search achievements to track");
         ImGui.SetNextItemWidth(-1);
         ImGui.InputText("##AchievementSearch", ref this.searchQuery, 128);
 
         if (this.searchQuery.Trim().Length < 2)
         {
-            ImGui.TextDisabled("Type at least 2 characters to search.");
+            ImGui.TextDisabled("Type at least 2 characters from the achievement name or category.");
             return;
         }
 

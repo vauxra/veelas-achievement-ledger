@@ -1,3 +1,4 @@
+using AchievementTracker.Services;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Windowing;
 using System;
@@ -11,9 +12,6 @@ public sealed class TrackerWindow : Window
 {
     private readonly Plugin plugin;
     private readonly Dictionary<uint, string> lastLiveProgressText = new();
-    private bool lastInFlightLogged;
-    private uint? lastWaitingAchievementId;
-    private DateTimeOffset? lastWaitingNotBefore;
 
     public TrackerWindow(Plugin plugin)
         : base("Achievement Tracker##AchievementTrackerLive")
@@ -21,14 +19,14 @@ public sealed class TrackerWindow : Window
         this.plugin = plugin;
         this.SizeConstraints = new WindowSizeConstraints
         {
-            MinimumSize = new Vector2(320, 120),
+            MinimumSize = new Vector2(420, 180),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue),
         };
     }
 
     public override void Draw()
     {
-        this.ProcessQueuedProgressRequests();
+        this.plugin.AchievementProgressSource.UpdateCache();
 
         if (ImGui.Button("Configure"))
         {
@@ -37,14 +35,21 @@ public sealed class TrackerWindow : Window
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Refresh tracked progress"))
+        if (ImGui.Button("Open next in Achievements"))
         {
-            this.plugin.DebugLog.Trace("Tracker.Button", "Refresh tracked progress pressed");
-            this.RequestTrackedProgress();
+            var nextId = this.GetNextTrackedAchievementId();
+            if (nextId.HasValue)
+            {
+                this.OpenNativeAchievement(nextId.Value, "open-next");
+            }
         }
 
         ImGui.SameLine();
         ImGui.TextDisabled("/achtrack");
+        ImGui.Separator();
+
+        ImGui.TextWrapped("Progress updates when you open achievements in the native game window. This avoids plugin-originated progress requests and lets the client/UI drive approved interactions.");
+        ImGui.TextDisabled("Tip: click Open in Achievements, then let the game window load that entry. The passive observer records any progress response the client receives.");
         ImGui.Separator();
 
         var trackedIds = this.plugin.TrackedAchievements.AchievementIds.ToList();
@@ -64,7 +69,6 @@ public sealed class TrackerWindow : Window
     {
         _ = this.plugin.AchievementCatalog.TryGet(achievementId, out var info);
         var progressText = "Progress unavailable";
-
         if (this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row))
         {
             progressText = this.plugin.AchievementProgressService.GetProgress(row).ToDisplayText();
@@ -76,71 +80,78 @@ public sealed class TrackerWindow : Window
             this.plugin.DebugLog.Trace("Tracker.ProgressValue", $"achievementId={achievementId} name='{info.Name}' progress='{progressText}'");
         }
 
-        ImGui.BulletText(info.Name);
+        ImGui.PushID((int)achievementId);
+        if (ImGui.Button("Open in Achievements"))
+        {
+            this.OpenNativeAchievement(achievementId, "row-button");
+        }
+
         ImGui.SameLine();
+        ImGui.TextWrapped(info.Name);
         ImGui.TextDisabled(progressText);
-    }
 
-    private void RequestTrackedProgress()
-    {
-        var trackedIds = this.plugin.TrackedAchievements.AchievementIds.ToList();
-        var queue = this.plugin.ProgressRefreshQueue;
-        this.plugin.DebugLog.Trace("Tracker.RequestTrackedProgress", $"tracked=[{string.Join(", ", trackedIds)}] queueBefore={queue.Count}");
-        queue.Enqueue(trackedIds);
-        this.plugin.DebugLog.Trace("Tracker.RequestTrackedProgress", $"queueAfter={queue.Count}");
-    }
-
-    private void ProcessQueuedProgressRequests()
-    {
-        this.plugin.AchievementProgressSource.UpdateCache();
-        if (this.plugin.AchievementProgressSource.IsRequestInFlight)
+        if (this.plugin.ClientAchievementProgressSource.TryGetObservation(achievementId, out var observation))
         {
-            if (!this.lastInFlightLogged)
-            {
-                this.plugin.DebugLog.Trace("Tracker.ProcessQueue", $"requestInFlight queueCount={this.plugin.ProgressRefreshQueue.Count}");
-                this.lastInFlightLogged = true;
-            }
-
-            return;
-        }
-
-        this.lastInFlightLogged = false;
-
-        var now = DateTimeOffset.UtcNow;
-        if (!this.plugin.ProgressRefreshQueue.TryPeekReady(now, out var achievementId))
-        {
-            if (this.plugin.ProgressRefreshQueue.TryPeekNotBefore(out var waitingId, out var notBefore)
-                && (this.lastWaitingAchievementId != waitingId || this.lastWaitingNotBefore != notBefore))
-            {
-                this.lastWaitingAchievementId = waitingId;
-                this.lastWaitingNotBefore = notBefore;
-                this.plugin.DebugLog.Trace("Tracker.ProcessQueue", $"waiting achievementId={waitingId} notBefore={notBefore:O} now={now:O} queueCount={this.plugin.ProgressRefreshQueue.Count}");
-            }
-
-            return;
-        }
-
-        this.lastWaitingAchievementId = null;
-        this.lastWaitingNotBefore = null;
-
-        this.plugin.DebugLog.Trace("Tracker.ProcessQueue", $"ready achievementId={achievementId} now={now:O} queueCount={this.plugin.ProgressRefreshQueue.Count}");
-
-        if (!this.plugin.ProgressRequestThrottler.CanRequest(achievementId, now))
-        {
-            this.plugin.DebugLog.Trace("Tracker.ProcessQueue", $"throttled achievementId={achievementId} now={now:O} dequeuing without request");
-            this.plugin.ProgressRefreshQueue.Dequeue();
-            return;
-        }
-
-        if (this.plugin.AchievementProgressSource.RequestProgress(achievementId))
-        {
-            this.plugin.ProgressRequestThrottler.MarkRequest(achievementId, now);
-            this.plugin.ProgressRefreshQueue.Dequeue();
-            this.plugin.DebugLog.Trace("Tracker.ProcessQueue", $"requested achievementId={achievementId} queueAfter={this.plugin.ProgressRefreshQueue.Count}");
+            ImGui.SameLine();
+            ImGui.TextDisabled($"observed {FormatAge(observation.ObservedAt)} via {observation.Source}");
         }
         else
         {
-            this.plugin.DebugLog.Trace("Tracker.ProcessQueue", $"requestFailed achievementId={achievementId} queueCount={this.plugin.ProgressRefreshQueue.Count}");
+            ImGui.SameLine();
+            ImGui.TextDisabled("not observed this session");
         }
+
+        ImGui.PopID();
+    }
+
+    private uint? GetNextTrackedAchievementId()
+    {
+        var trackedIds = this.plugin.TrackedAchievements.AchievementIds.ToList();
+        if (trackedIds.Count == 0)
+        {
+            return null;
+        }
+
+        var unobserved = trackedIds.FirstOrDefault(id => !this.plugin.ClientAchievementProgressSource.TryGetObservation(id, out _));
+        if (unobserved != 0)
+        {
+            return unobserved;
+        }
+
+        return trackedIds
+            .Select(id => new
+            {
+                Id = id,
+                ObservedAt = this.plugin.ClientAchievementProgressSource.TryGetObservation(id, out var observation)
+                    ? observation.ObservedAt
+                    : DateTimeOffset.MinValue,
+            })
+            .OrderBy(item => item.ObservedAt)
+            .First().Id;
+    }
+
+    private void OpenNativeAchievement(uint achievementId, string source)
+    {
+        this.plugin.DebugLog.Trace("Tracker.OpenNativeAchievement", $"source={source} achievementId={achievementId}");
+        if (!this.plugin.NativeAchievementNavigator.OpenAchievement(achievementId))
+        {
+            ImGui.TextDisabled("Native Achievement window could not be opened right now.");
+        }
+    }
+
+    private static string FormatAge(DateTimeOffset observedAt)
+    {
+        var age = DateTimeOffset.UtcNow - observedAt;
+        if (age.TotalSeconds < 60)
+        {
+            return "just now";
+        }
+
+        if (age.TotalMinutes < 60)
+        {
+            return $"{(int)age.TotalMinutes}m ago";
+        }
+
+        return $"{(int)age.TotalHours}h ago";
     }
 }

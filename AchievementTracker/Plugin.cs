@@ -24,7 +24,7 @@ public sealed class Plugin : IDalamudPlugin
     // IClientState login/logout events are used to scope cached progress to the current character.
     // https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IClientState
     [PluginService] internal static IClientState ClientState { get; private set; } = null!;
-    // Debug-only passive hooks for achievement request/receive/completion flow.
+    // Passive hooks observe native achievement UI progress flow; they do not issue requests.
     // https://dalamud.dev/plugin-development/interaction/
     [PluginService] internal static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
     [PluginService] internal static IAddonLifecycle AddonLifecycle { get; private set; } = null!;
@@ -39,14 +39,13 @@ public sealed class Plugin : IDalamudPlugin
     public AchievementProgressService AchievementProgressService { get; }
     public IAchievementProgressSource AchievementProgressSource { get; }
     public ClientAchievementProgressSource ClientAchievementProgressSource { get; }
+    public NativeAchievementNavigator NativeAchievementNavigator { get; }
     public DebugLog DebugLog { get; }
-    public ProgressRequestThrottler ProgressRequestThrottler { get; } = new(TimeSpan.FromSeconds(30));
-    public ProgressRefreshQueue ProgressRefreshQueue { get; } = new();
     public WindowSystem WindowSystem { get; } = new("AchievementTracker");
 
     private TrackerWindow TrackerWindow { get; }
     private ConfigWindow ConfigWindow { get; }
-    private AchievementProgressDebugHooks? achievementProgressDebugHooks;
+    private AchievementProgressDebugHooks? achievementProgressObserver;
     private ActivityDebugSurfaces? activityDebugSurfaces;
 
     public Plugin()
@@ -58,10 +57,12 @@ public sealed class Plugin : IDalamudPlugin
         this.AchievementCatalog = new AchievementCatalog(DataManager);
         this.ClientAchievementProgressSource = new ClientAchievementProgressSource(this.DebugLog);
         this.AchievementProgressSource = this.ClientAchievementProgressSource;
+        this.NativeAchievementNavigator = new NativeAchievementNavigator(this.DebugLog);
         this.AchievementProgressService = new AchievementProgressService(UnlockState, this.AchievementProgressSource);
         this.TrackerWindow = new TrackerWindow(this);
         this.ConfigWindow = new ConfigWindow(this);
-        this.UpdateDebugHookState();
+        this.InstallPassiveAchievementObserver();
+        this.UpdateDebugSurfaceState();
         this.WindowSystem.AddWindow(this.TrackerWindow);
         this.WindowSystem.AddWindow(this.ConfigWindow);
 
@@ -89,55 +90,11 @@ public sealed class Plugin : IDalamudPlugin
         ClientState.Login -= this.ResetProgressState;
         ClientState.Logout -= this.ResetProgressStateOnLogout;
         CommandManager.RemoveHandler(CommandName);
-        this.achievementProgressDebugHooks?.Dispose();
-        this.achievementProgressDebugHooks = null;
+        this.achievementProgressObserver?.Dispose();
+        this.achievementProgressObserver = null;
         this.activityDebugSurfaces?.Dispose();
         this.activityDebugSurfaces = null;
         this.WindowSystem.RemoveAllWindows();
-    }
-
-    public void UpdateDebugHookState()
-    {
-        if (this.Configuration.EnableDebugLogging)
-        {
-            this.achievementProgressDebugHooks ??= new AchievementProgressDebugHooks(
-                GameInteropProvider,
-                AddonLifecycle,
-                Framework,
-                this.DebugLog,
-                this.ClientAchievementProgressSource);
-            this.activityDebugSurfaces ??= new ActivityDebugSurfaces(ChatGui, ClientState, Condition, this.DebugLog);
-            return;
-        }
-
-        this.achievementProgressDebugHooks?.Dispose();
-        this.achievementProgressDebugHooks = null;
-        this.activityDebugSurfaces?.Dispose();
-        this.activityDebugSurfaces = null;
-    }
-
-    private void ResetProgressState()
-    {
-        this.DebugLog.Trace("Plugin.ResetProgressState", "clearing progress cache, refresh queue, and throttler state");
-        // Login/logout only clear local cache/queue/throttle state. Do not extend these
-        // lifecycle handlers to send achievement progress requests without separate
-        // Dalamud policy review; automatic request loops are prohibited by
-        // https://dalamud.dev/plugin-publishing/restrictions.
-        this.AchievementProgressSource.ClearCache();
-        this.ProgressRefreshQueue.Clear();
-        this.ProgressRequestThrottler.Clear();
-    }
-
-    private void ResetProgressStateOnLogout(int type, int code)
-    {
-        this.DebugLog.Trace("Plugin.Logout", $"logout event type={type} code={code}");
-        this.ResetProgressState();
-    }
-
-    private void OnCommand(string command, string args)
-    {
-        this.DebugLog.Trace("Plugin.Command", $"command={command} args='{args}' toggling main UI");
-        this.ToggleMainUi();
     }
 
     public void SaveTrackedAchievements()
@@ -149,7 +106,7 @@ public sealed class Plugin : IDalamudPlugin
 
     public void SaveConfiguration()
     {
-        this.UpdateDebugHookState();
+        this.UpdateDebugSurfaceState();
         this.Configuration.Save();
         this.DebugLog.Trace("Plugin.SaveConfiguration", $"debugLogging={this.Configuration.EnableDebugLogging} tracked=[{string.Join(", ", this.Configuration.TrackedAchievementIds)}]");
     }
@@ -166,5 +123,48 @@ public sealed class Plugin : IDalamudPlugin
         this.DebugLog.Trace("Plugin.ToggleConfigUi", $"beforeVisible={this.ConfigWindow.IsOpen}");
         this.ConfigWindow.Toggle();
         this.DebugLog.Trace("Plugin.ToggleConfigUi", $"afterVisible={this.ConfigWindow.IsOpen}");
+    }
+
+    private void InstallPassiveAchievementObserver()
+    {
+        this.achievementProgressObserver ??= new AchievementProgressDebugHooks(
+            GameInteropProvider,
+            AddonLifecycle,
+            Framework,
+            this.DebugLog,
+            this.ClientAchievementProgressSource);
+    }
+
+    private void UpdateDebugSurfaceState()
+    {
+        if (this.Configuration.EnableDebugLogging)
+        {
+            this.activityDebugSurfaces ??= new ActivityDebugSurfaces(ChatGui, ClientState, Condition, this.DebugLog);
+            return;
+        }
+
+        this.activityDebugSurfaces?.Dispose();
+        this.activityDebugSurfaces = null;
+    }
+
+    private void ResetProgressState()
+    {
+        this.DebugLog.Trace("Plugin.ResetProgressState", "clearing observed progress cache");
+        // Login/logout only clear local observed cache state. Do not extend these lifecycle handlers
+        // to send achievement progress requests without separate Dalamud policy review:
+        // https://dalamud.dev/plugin-publishing/restrictions.
+        this.AchievementProgressSource.ClearCache();
+    }
+
+    private void ResetProgressStateOnLogout(int type, int code)
+    {
+        this.DebugLog.Trace("Plugin.Logout", $"logout event type={type} code={code}");
+        this.ResetProgressState();
+    }
+
+    private void OnCommand(string command, string args)
+    {
+        this.DebugLog.Trace("Plugin.Command", $"command={command} args='{args}' toggling main UI");
+        this.ToggleMainUi();
     }
 }
