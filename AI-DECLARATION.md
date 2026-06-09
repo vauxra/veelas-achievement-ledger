@@ -4,7 +4,7 @@ This project used AI assistance beyond autocomplete.
 
 ## Disclosure level
 
-**Copilot** — AI wrote or edited portions of the code and docs under human direction.
+**Copilot** — AI wrote or edited the code and docs under human direction.
 
 The human developer chose the features, tested behavior in game, reviewed changes, and accepted or rejected work.
 
