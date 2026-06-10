@@ -33,7 +33,6 @@ public sealed class ConfigWindow : Window
     private enum ConfigSection
     {
         AutoUpdate,
-        EventTriggers,
         TrackedAchievements,
         Help,
     }
@@ -67,10 +66,7 @@ public sealed class ConfigWindow : Window
         switch (this.selectedSection)
         {
             case ConfigSection.AutoUpdate:
-                this.DrawExperimentalAutoUpdateSettings();
-                break;
-            case ConfigSection.EventTriggers:
-                this.DrawTriggerAutoUpdateSettings();
+                this.DrawAutoUpdatePage();
                 break;
             case ConfigSection.TrackedAchievements:
                 this.DrawTrackedAchievementsPage();
@@ -87,7 +83,6 @@ public sealed class ConfigWindow : Window
     {
         ImGui.BeginChild("##ConfigNavigation", new Vector2(180, 0), true);
         this.DrawNavItem("Auto update", ConfigSection.AutoUpdate);
-        this.DrawNavItem("Event triggers", ConfigSection.EventTriggers);
         this.DrawNavItem("Tracked Achievements", ConfigSection.TrackedAchievements);
         this.DrawNavItem("Help", ConfigSection.Help);
         ImGui.EndChild();
@@ -463,6 +458,23 @@ public sealed class ConfigWindow : Window
         => this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row)
             && this.plugin.AchievementProgressService.IsComplete(row);
 
+    private void DrawAutoUpdatePage()
+    {
+        var spacing = ImGui.GetStyle().ItemSpacing.X;
+        var availableWidth = ImGui.GetContentRegionAvail().X;
+        var leftWidth = Math.Max(360f, (availableWidth - spacing) * 0.50f);
+        var rightWidth = Math.Max(360f, availableWidth - leftWidth - spacing);
+
+        ImGui.BeginChild("##AutoUpdateSettingsColumn", new Vector2(leftWidth, 0), true);
+        this.DrawExperimentalAutoUpdateSettings();
+        ImGui.EndChild();
+
+        ImGui.SameLine();
+        ImGui.BeginChild("##EventTriggerSettingsColumn", new Vector2(rightWidth, 0), true);
+        this.DrawTriggerAutoUpdateSettings();
+        ImGui.EndChild();
+    }
+
     private void DrawExperimentalAutoUpdateSettings()
     {
         ImGui.TextUnformatted("Experimental auto update");
@@ -634,8 +646,7 @@ public sealed class ConfigWindow : Window
 
         ImGui.Separator();
         ImGui.TextUnformatted("Config sections");
-        this.DrawWrappedBullet("Auto update: controls timed update cycles, request spacing, debug logs, and which tracked rows are included.");
-        this.DrawWrappedBullet("Event triggers: chooses which gathering, fishing, crafting, or completion events can queue updates.");
+        this.DrawWrappedBullet("Auto update: controls timed update cycles, request spacing, debug logs, included tracked rows, and event-triggered updates.");
         this.DrawWrappedBullet("Tracked Achievements: manages tracked rows, presets, ordering, search, add/remove, Cosmic score planning, and native Achievement opens.");
         this.DrawWrappedBullet("Help: explains the windows, controls, and risk notes.");
 
