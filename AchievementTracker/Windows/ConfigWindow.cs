@@ -3,6 +3,7 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Windowing;
+using System;
 using System.Linq;
 using System.Numerics;
 
@@ -28,9 +29,11 @@ public sealed class ConfigWindow : Window
     {
         ImGui.TextUnformatted("Tracked achievements");
         ImGui.TextDisabled("Tracked items are saved between logouts.");
-        ImGui.TextDisabled("Use the reload button to open an achievement in the game UI and update progress.");
+        ImGui.TextDisabled("Experimental branch: reload buttons request progress directly without opening the Achievement window.");
         ImGui.Separator();
 
+        this.DrawExperimentalAutoUpdateSettings();
+        ImGui.Separator();
         this.DrawTrackedManagement();
         ImGui.Separator();
         this.DrawSearchAndAdd();
@@ -64,7 +67,9 @@ public sealed class ConfigWindow : Window
             ImGui.SameLine();
             if (ImGui.Button("Remove") && this.plugin.TrackedAchievements.Remove(achievementId))
             {
+                this.plugin.Configuration.AutoUpdateAchievementIds.RemoveAll(id => id == achievementId);
                 this.plugin.SaveTrackedAchievements();
+                this.plugin.SaveConfiguration();
                 ImGui.PopID();
                 continue;
             }
@@ -72,8 +77,11 @@ public sealed class ConfigWindow : Window
             ImGui.SameLine();
             if (ImGuiComponents.IconButton(FontAwesomeIcon.SyncAlt))
             {
-                this.plugin.NativeAchievementNavigator.OpenAchievement(achievementId);
+                this.plugin.EnqueueUpdateOne(achievementId, "config-row-update");
             }
+
+            ImGui.SameLine();
+            this.DrawAutoUpdateIncludeCheckbox(achievementId);
 
             ImGui.SameLine();
             this.DrawManagedAchievement(achievementId);
@@ -140,6 +148,11 @@ public sealed class ConfigWindow : Window
                 if (this.plugin.TrackedAchievements.TryAdd(result.Id))
                 {
                     this.plugin.SaveTrackedAchievements();
+                    if (!this.plugin.Configuration.AutoUpdateAchievementIds.Contains(result.Id))
+                    {
+                        this.plugin.Configuration.AutoUpdateAchievementIds.Add(result.Id);
+                        this.plugin.SaveConfiguration();
+                    }
                 }
             }
             else if (!canAdd)
@@ -161,4 +174,67 @@ public sealed class ConfigWindow : Window
     private bool IsComplete(uint achievementId)
         => this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row)
             && this.plugin.AchievementProgressService.IsComplete(row);
+
+    private void DrawExperimentalAutoUpdateSettings()
+    {
+        ImGui.TextUnformatted("Experimental auto update");
+        ImGui.TextDisabled("Direct progress requests. 5s same-achievement backoff; Update All spaces requests by 15s plus random jitter.");
+
+        var enabled = this.plugin.Configuration.ExperimentalAutoUpdateEnabled;
+        if (ImGui.Checkbox("Enable auto update", ref enabled))
+        {
+            this.plugin.Configuration.ExperimentalAutoUpdateEnabled = enabled;
+            this.plugin.SaveConfiguration();
+        }
+
+        var interval = Math.Clamp(this.plugin.Configuration.ExperimentalAutoUpdateIntervalMinutes, 1, 1440);
+        ImGui.SetNextItemWidth(120);
+        if (ImGui.InputInt("Minutes between auto update cycles", ref interval))
+        {
+            this.plugin.Configuration.ExperimentalAutoUpdateIntervalMinutes = Math.Clamp(interval, 1, 1440);
+            this.plugin.SaveConfiguration();
+        }
+
+        var debug = this.plugin.Configuration.ExperimentalDebugLoggingEnabled;
+        if (ImGui.Checkbox("Debug prints (VAL DebugTrace)", ref debug))
+        {
+            this.plugin.Configuration.ExperimentalDebugLoggingEnabled = debug;
+            this.plugin.SaveConfiguration();
+        }
+
+        var trackedIds = this.plugin.TrackedAchievements.AchievementIds.ToList();
+        if (ImGui.Button("Include all tracked in auto update"))
+        {
+            this.plugin.Configuration.AutoUpdateAchievementIds = trackedIds.ToList();
+            this.plugin.SaveConfiguration();
+        }
+
+        ImGui.SameLine();
+        if (ImGui.Button("Include none"))
+        {
+            this.plugin.Configuration.AutoUpdateAchievementIds.Clear();
+            this.plugin.SaveConfiguration();
+        }
+    }
+
+    private void DrawAutoUpdateIncludeCheckbox(uint achievementId)
+    {
+        var included = this.plugin.Configuration.AutoUpdateAchievementIds.Contains(achievementId);
+        if (ImGui.Checkbox("Auto", ref included))
+        {
+            if (included)
+            {
+                if (!this.plugin.Configuration.AutoUpdateAchievementIds.Contains(achievementId))
+                {
+                    this.plugin.Configuration.AutoUpdateAchievementIds.Add(achievementId);
+                }
+            }
+            else
+            {
+                this.plugin.Configuration.AutoUpdateAchievementIds.RemoveAll(id => id == achievementId);
+            }
+
+            this.plugin.SaveConfiguration();
+        }
+    }
 }

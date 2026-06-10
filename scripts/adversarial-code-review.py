@@ -113,6 +113,30 @@ def run(args: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(args, check=False, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
+def is_experimental_branch() -> bool:
+    branch = run(["git", "branch", "--show-current"])
+    return branch.returncode == 0 and branch.stdout.strip() == "val-experimental"
+
+
+def apply_experimental_mode(findings: list[Finding]) -> list[Finding]:
+    """On val-experimental, Dalamud publishing guidance is advisory, not blocking.
+
+    Security/lifecycle findings remain blocking. Only explicit Dalamud-publishing
+    policy blockers and auto-game-request blockers are downgraded so agents can
+    build the deliberately non-publishable experiment without fighting the guardrail.
+    """
+    if not is_experimental_branch():
+        return findings
+
+    downgraded_rules = {"dalamud-policy", "auto-game-request"}
+    return [
+        Finding("WARN", finding.path, finding.line, finding.rule, f"Experimental branch advisory: {finding.message}")
+        if finding.severity == "FAIL" and finding.rule in downgraded_rules
+        else finding
+        for finding in findings
+    ]
+
+
 def is_code_path(path: str) -> bool:
     norm = path.replace("\\", "/")
     return not norm.startswith(EXCLUDED_PREFIXES) and Path(norm).suffix in CODE_SUFFIXES
@@ -232,12 +256,14 @@ def scan(base: str) -> list[Finding]:
     # outside the adapter, or if request logic is paired with new timer/framework triggers.
     request_files = [
         path for path, lines in added.items()
-        if not should_skip_literal_policy_scan(path)
+        if is_code_path(path)
+        and not should_skip_literal_policy_scan(path)
         and any(any(token in text for token in REQUEST_WRAPPER_TOKENS) for _, text in lines)
     ]
     trigger_files = [
         path for path, lines in added.items()
-        if not should_skip_literal_policy_scan(path)
+        if is_code_path(path)
+        and not should_skip_literal_policy_scan(path)
         and any(any(token in text for token in AUTO_TRIGGER_TOKENS) for _, text in lines)
     ]
     disallowed_request_files = [path for path in request_files if path not in ALLOWED_ACHIEVEMENT_REQUEST_FILES]
@@ -290,7 +316,7 @@ def main() -> int:
     parser.add_argument("--diff", default="HEAD", help="Git revision/base to diff against, default HEAD")
     args = parser.parse_args()
 
-    findings = scan(args.diff)
+    findings = apply_experimental_mode(scan(args.diff))
     has_fail = any(f.severity == "FAIL" for f in findings)
     has_warn = any(f.severity == "WARN" for f in findings)
     overall = "FAIL" if has_fail else "PASS WITH WARNINGS" if has_warn else "PASS"

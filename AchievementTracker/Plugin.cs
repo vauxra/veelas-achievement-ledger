@@ -27,6 +27,10 @@ public sealed class Plugin : IDalamudPlugin
     // Passive hooks observe native achievement UI progress flow; they do not issue requests.
     // https://dalamud.dev/plugin-development/interaction/
     [PluginService] internal static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
+    // Dalamud service injection pattern: https://dalamud.dev/plugin-development/project-layout
+    [PluginService] internal static IFramework Framework { get; private set; } = null!;
+    // Dalamud service injection pattern: https://dalamud.dev/plugin-development/project-layout
+    [PluginService] internal static IPluginLog PluginLog { get; private set; } = null!;
 
     public Configuration Configuration { get; }
     public TrackedAchievementStore TrackedAchievements { get; }
@@ -34,6 +38,7 @@ public sealed class Plugin : IDalamudPlugin
     public AchievementProgressService AchievementProgressService { get; }
     public IAchievementProgressSource AchievementProgressSource { get; }
     public ClientAchievementProgressSource ClientAchievementProgressSource { get; }
+    public AchievementProgressUpdater AchievementProgressUpdater { get; }
     public NativeAchievementNavigator NativeAchievementNavigator { get; }
     public WindowSystem WindowSystem { get; } = new("VeelasAchievementLedger");
 
@@ -47,9 +52,15 @@ public sealed class Plugin : IDalamudPlugin
         this.TrackedAchievements = new TrackedAchievementStore();
         this.TrackedAchievements.LoadFrom(this.Configuration.TrackedAchievementIds);
         this.AchievementCatalog = new AchievementCatalog(DataManager);
-        this.ClientAchievementProgressSource = new ClientAchievementProgressSource();
+        this.ClientAchievementProgressSource = new ClientAchievementProgressSource(this.DebugLog);
         this.AchievementProgressSource = this.ClientAchievementProgressSource;
         this.NativeAchievementNavigator = new NativeAchievementNavigator();
+        this.AchievementProgressUpdater = new AchievementProgressUpdater(
+            this.ClientAchievementProgressSource,
+            () => this.Configuration.GetAutoUpdateTrackedAchievementIds(),
+            () => this.Configuration.ExperimentalAutoUpdateEnabled,
+            () => this.Configuration.ExperimentalAutoUpdateIntervalMinutes,
+            this.DebugLog);
         this.AchievementProgressService = new AchievementProgressService(UnlockState, this.AchievementProgressSource);
         this.TrackerWindow = new TrackerWindow(this);
         this.ConfigWindow = new ConfigWindow(this);
@@ -65,6 +76,7 @@ public sealed class Plugin : IDalamudPlugin
         PluginInterface.UiBuilder.Draw += this.WindowSystem.Draw;
         PluginInterface.UiBuilder.OpenMainUi += this.ToggleMainUi;
         PluginInterface.UiBuilder.OpenConfigUi += this.ToggleConfigUi;
+        Framework.Update += this.OnFrameworkUpdate;
         ClientState.Login += this.ResetProgressState;
         ClientState.Logout += this.ResetProgressStateOnLogout;
     }
@@ -74,6 +86,7 @@ public sealed class Plugin : IDalamudPlugin
         PluginInterface.UiBuilder.Draw -= this.WindowSystem.Draw;
         PluginInterface.UiBuilder.OpenMainUi -= this.ToggleMainUi;
         PluginInterface.UiBuilder.OpenConfigUi -= this.ToggleConfigUi;
+        Framework.Update -= this.OnFrameworkUpdate;
         ClientState.Login -= this.ResetProgressState;
         ClientState.Logout -= this.ResetProgressStateOnLogout;
         CommandManager.RemoveHandler(CommandName);
@@ -85,12 +98,28 @@ public sealed class Plugin : IDalamudPlugin
     public void SaveTrackedAchievements()
     {
         this.Configuration.TrackedAchievementIds = this.TrackedAchievements.ToConfigList();
+        this.Configuration.AutoUpdateAchievementIds = this.Configuration.GetAutoUpdateTrackedAchievementIds();
         this.Configuration.Save();
     }
 
     public void SaveConfiguration()
     {
+        this.Configuration.ExperimentalAutoUpdateIntervalMinutes = Math.Clamp(this.Configuration.ExperimentalAutoUpdateIntervalMinutes, 1, 1440);
         this.Configuration.Save();
+    }
+
+    public void EnqueueUpdateAllTracked(string reason)
+        => this.AchievementProgressUpdater.EnqueueUpdateAll(this.TrackedAchievements.AchievementIds, reason);
+
+    public void EnqueueUpdateOne(uint achievementId, string reason)
+        => this.AchievementProgressUpdater.EnqueueUpdateAll([achievementId], reason);
+
+    public void DebugLog(string message)
+    {
+        if (this.Configuration.ExperimentalDebugLoggingEnabled)
+        {
+            PluginLog.Information(message);
+        }
     }
 
     public void ToggleMainUi() => this.TrackerWindow.Toggle();
@@ -108,7 +137,10 @@ public sealed class Plugin : IDalamudPlugin
     {
         // Login/logout only clear local progress cache. Tracked achievement IDs stay saved in config.
         this.AchievementProgressSource.ClearCache();
+        this.AchievementProgressUpdater.Clear();
     }
+
+    private void OnFrameworkUpdate(IFramework framework) => this.AchievementProgressUpdater.Tick();
 
     private void ResetProgressStateOnLogout(int type, int code) => this.ResetProgressState();
 

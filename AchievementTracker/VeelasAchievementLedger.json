@@ -1,8 +1,8 @@
 {
   "Author": "Saagi",
   "Name": "Veela's Achievement Ledger",
-  "Punchline": "Lightweight achievement organizer and tracker.",
-  "Description": "Use /val to track achievements and open entries in the game Achievement window.",
+  "Punchline": "EXPERIMENTAL: direct achievement progress updater.",
+  "Description": "Experimental / not for Dalamud publishing. Use /val to track achievements, request progress directly, and test optional timed auto updates.",
   "RepoUrl": "https://github.com/vauxra/veelas-achievement-ledger",
   "ApplicableVersion": "any",
   "Tags": [

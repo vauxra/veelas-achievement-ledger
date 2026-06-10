@@ -33,17 +33,15 @@ public sealed class TrackerWindow : Window
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Update Next"))
+        if (ImGui.Button("Update All"))
         {
-            var nextId = this.GetNextTrackedAchievementId();
-            if (nextId.HasValue)
-            {
-                this.OpenNativeAchievement(nextId.Value);
-            }
+            this.plugin.EnqueueUpdateAllTracked("manual-update-all");
         }
 
         ImGui.SameLine();
         ImGui.TextDisabled("/val");
+        ImGui.TextDisabled("Experimental: direct progress requests; not intended for Dalamud publishing.");
+        this.DrawQueueStatus();
         ImGui.Separator();
 
         var trackedIds = this.plugin.TrackedAchievements.AchievementIds.ToList();
@@ -71,7 +69,7 @@ public sealed class TrackerWindow : Window
         ImGui.PushID((int)achievementId);
         if (ImGuiComponents.IconButton(FontAwesomeIcon.SyncAlt))
         {
-            this.OpenNativeAchievement(achievementId);
+            this.plugin.EnqueueUpdateOne(achievementId, "manual-row-update");
         }
 
         ImGui.SameLine();
@@ -87,37 +85,21 @@ public sealed class TrackerWindow : Window
         ImGui.PopID();
     }
 
-    private uint? GetNextTrackedAchievementId()
+    private void DrawQueueStatus()
     {
-        var trackedIds = this.plugin.TrackedAchievements.AchievementIds.ToList();
-        if (trackedIds.Count == 0)
+        var pending = this.plugin.AchievementProgressUpdater.PendingCount;
+        var nextDue = this.plugin.AchievementProgressUpdater.NextDueAt;
+        if (pending > 0 && nextDue.HasValue)
         {
-            return null;
+            var seconds = Math.Max(0, (nextDue.Value - DateTimeOffset.UtcNow).TotalSeconds);
+            ImGui.TextDisabled($"Progress queue: {pending} pending, next request in {seconds:0}s");
         }
 
-        var unobserved = trackedIds.FirstOrDefault(id => !this.plugin.ClientAchievementProgressSource.TryGetObservation(id, out _));
-        if (unobserved != 0)
+        var nextAuto = this.plugin.AchievementProgressUpdater.NextAutoUpdateAt;
+        if (nextAuto.HasValue)
         {
-            return unobserved;
-        }
-
-        return trackedIds
-            .Select(id => new
-            {
-                Id = id,
-                ObservedAt = this.plugin.ClientAchievementProgressSource.TryGetObservation(id, out var observation)
-                    ? observation.ObservedAt
-                    : DateTimeOffset.MinValue,
-            })
-            .OrderBy(item => item.ObservedAt)
-            .First().Id;
-    }
-
-    private void OpenNativeAchievement(uint achievementId)
-    {
-        if (!this.plugin.NativeAchievementNavigator.OpenAchievement(achievementId))
-        {
-            ImGui.TextDisabled("Could not open Achievements right now.");
+            var minutes = Math.Max(0, (nextAuto.Value - DateTimeOffset.UtcNow).TotalMinutes);
+            ImGui.TextDisabled($"Auto update next cycle in {minutes:0.0}m");
         }
     }
 

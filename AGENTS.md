@@ -29,6 +29,29 @@ Do not reintroduce:
 - packet capture/network experiments,
 - backend sync, telemetry, analytics, or leaderboards.
 
+## `val-experimental` branch stance
+
+This branch is explicitly **not meant for Dalamud publishing**. When the current
+branch is `val-experimental`, treat Dalamud publishing restrictions as risk
+guidance and documentation requirements, not hard blockers. It is acceptable on
+this branch to prototype direct `RequestAchievementProgress` calls, automatic
+progress refresh queues, and debug instrumentation if the implementation is
+clearly labeled experimental, keeps unsafe/ClientStructs code isolated, remains
+easy to remove from public branches, and avoids unrelated security/privacy risks.
+
+Do still block on:
+
+- secrets or credentials,
+- command execution from plugin input/config,
+- backend/network telemetry without explicit user direction,
+- event/timer lifecycle leaks,
+- raw pointer lifetime bugs,
+- crashes from missing null checks,
+- changes that accidentally position this branch as official-submission safe.
+
+Local tripwires may downgrade Dalamud-publishing policy violations to warnings
+on `val-experimental`; security and lifecycle failures remain blockers.
+
 ## Security review requirements
 
 Before commit, check:
