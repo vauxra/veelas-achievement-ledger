@@ -9,15 +9,22 @@ public sealed class AchievementProgressService
 {
     private readonly IUnlockState unlockState;
     private readonly IAchievementProgressSource? progressSource;
+    private readonly CosmicClassProgressProvider? cosmicClassProgressProvider;
 
-    public AchievementProgressService(IUnlockState unlockState, IAchievementProgressSource? progressSource = null)
+    public AchievementProgressService(IUnlockState unlockState, IAchievementProgressSource? progressSource = null, CosmicClassProgressProvider? cosmicClassProgressProvider = null)
     {
         this.unlockState = unlockState;
         this.progressSource = progressSource;
+        this.cosmicClassProgressProvider = cosmicClassProgressProvider;
     }
 
     public AchievementProgress GetProgress(Achievement achievement)
     {
+        if (this.cosmicClassProgressProvider?.Handles(achievement.RowId) == true)
+        {
+            return this.cosmicClassProgressProvider.GetProgress(achievement.RowId);
+        }
+
         var requiredTarget = GetRequiredTarget(achievement);
 
         // IUnlockState achievement docs:

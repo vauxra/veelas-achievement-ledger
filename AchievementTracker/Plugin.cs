@@ -44,6 +44,7 @@ public sealed class Plugin : IDalamudPlugin
     public AchievementProgressService AchievementProgressService { get; }
     public IAchievementProgressSource AchievementProgressSource { get; }
     public ClientAchievementProgressSource ClientAchievementProgressSource { get; }
+    public CosmicClassProgressProvider CosmicClassProgressProvider { get; }
     public AchievementProgressUpdater AchievementProgressUpdater { get; }
     public NativeAchievementNavigator NativeAchievementNavigator { get; }
     public WindowSystem WindowSystem { get; } = new("VeelasAchievementLedger");
@@ -52,6 +53,7 @@ public sealed class Plugin : IDalamudPlugin
     private ConfigWindow ConfigWindow { get; }
     private PassiveAchievementProgressObserver? passiveAchievementProgressObserver;
     private AchievementActivityUpdateObserver? activityUpdateObserver;
+    private DateTimeOffset nextCosmicCacheRefreshAt = DateTimeOffset.MinValue;
 
     public Plugin()
     {
@@ -62,6 +64,7 @@ public sealed class Plugin : IDalamudPlugin
         this.AchievementCatalog = new AchievementCatalog(DataManager);
         this.ClientAchievementProgressSource = new ClientAchievementProgressSource(this.DebugLog);
         this.AchievementProgressSource = this.ClientAchievementProgressSource;
+        this.CosmicClassProgressProvider = new CosmicClassProgressProvider(this.Configuration.CosmicClassScoreCache, this.SaveConfiguration);
         this.NativeAchievementNavigator = new NativeAchievementNavigator();
         this.AchievementProgressUpdater = new AchievementProgressUpdater(
             this.ClientAchievementProgressSource,
@@ -70,7 +73,7 @@ public sealed class Plugin : IDalamudPlugin
             () => this.Configuration.ExperimentalAutoUpdateIntervalSeconds,
             () => this.Configuration.ExperimentalUpdateSpacingSeconds,
             this.DebugLog);
-        this.AchievementProgressService = new AchievementProgressService(UnlockState, this.AchievementProgressSource);
+        this.AchievementProgressService = new AchievementProgressService(UnlockState, this.AchievementProgressSource, this.CosmicClassProgressProvider);
         this.TrackerWindow = new TrackerWindow(this);
         this.ConfigWindow = new ConfigWindow(this);
         this.InstallPassiveAchievementObserver();
@@ -230,7 +233,23 @@ public sealed class Plugin : IDalamudPlugin
         this.AchievementProgressUpdater.Clear();
     }
 
-    private void OnFrameworkUpdate(IFramework framework) => this.AchievementProgressUpdater.Tick();
+    private void OnFrameworkUpdate(IFramework framework)
+    {
+        this.AchievementProgressUpdater.Tick();
+        this.RefreshCosmicCacheFromLiveState();
+    }
+
+    private void RefreshCosmicCacheFromLiveState()
+    {
+        var now = DateTimeOffset.UtcNow;
+        if (now < this.nextCosmicCacheRefreshAt)
+        {
+            return;
+        }
+
+        this.nextCosmicCacheRefreshAt = now.AddSeconds(5);
+        this.CosmicClassProgressProvider.RefreshCacheFromLiveScores();
+    }
 
     private void ResetProgressStateOnLogout(int type, int code) => this.ResetProgressState();
 

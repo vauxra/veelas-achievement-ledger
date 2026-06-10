@@ -1,28 +1,88 @@
 # Veela's Achievement Ledger
 
-A lightweight assistive achievement organizer and tracker for FFXIV.
+> [!WARNING]
+> **Experimental branch — not intended for normal Dalamud repository submission.**
+>
+> This repo intentionally tests behavior that Dalamud generally discourages for plugin submissions. Use it only if you understand and accept the risk, including possible account consequences.
+>
+> This branch may break or stress the spirit of these guidelines:
+>
+> - plugin-originated achievement progress requests instead of only user-opened native UI flow,
+> - automatic/timed request queues and event-triggered refreshes without a fresh direct click for every request,
+> - framework-update timers used to schedule or refresh progress-related state,
+> - ClientStructs reads for game-system state that Dalamud services do not expose,
+> - experimental diagnostics and behavior intended for private testing rather than polished public distribution.
+>
+> It does **not** attempt movement, crafting/gathering automation, action execution, synthetic addon submissions, packet capture, backend telemetry, or gameplay botting.
+
+A lightweight experimental achievement organizer and tracker for FFXIV.
 
 ## Status
 
-Beta build. Current features:
+Experimental build on `val-experimental`. Current features:
 
 - `/val` opens the ledger.
-- Track up to 5 achievements.
+- `/val config`, `/val configure`, and `/val man` open configuration.
+- `/val help` and `/val ?` open configuration directly to Help.
+- Track up to 20 achievements.
 - Search by name or category.
-- Hide completed achievements from search by default.
-- Show completion status and known target counts.
-- Use the reload icon or **Update Next** to open tracked achievements in the game Achievement window.
+- Hide completed achievements from search.
+- Reorder tracked achievements with Top, Up, Down, and Bottom controls.
+- Save, read, rename, and delete reusable tracked-achievement presets.
+- Selecting a preset loads it immediately; the Read button reloads the selected preset on demand.
+- Choose which tracked rows are included in timed auto update.
+- Queue direct progress updates with row reload, **Update All**, timed auto update, or enabled event triggers.
+- Space queued update requests with a configurable base delay plus jitter.
+- Show completion status, known target counts, observed progress, and supported Cosmic Class score progress.
+- Cache Cosmic Class score values after they are observed in Cosmic content so they remain visible outside the zone.
+- Use the magnifying-glass button to open the native Achievement entry.
 
-The plugin has no backend, telemetry, cloud sync, or gameplay automation.
+The plugin has no backend, telemetry, cloud sync, packet capture, movement automation, action-use automation, or synthetic addon submission flow.
 
 ## Basic use
 
 1. Run `/val`.
-2. Click **Configure** and add achievements.
-3. Click the reload icon beside an achievement, or **Update Next**.
-4. Wait for the game entry to load; progress updates when the game returns data.
+2. Click **Configure** and add achievements from **Tracked Achievements**.
+3. Optional: save your current tracked list as a preset.
+4. Use the row reload icon or **Update All** to request progress updates for tracked achievements.
+5. Optional: enable timed auto update or event triggers on the experimental branch.
+6. Use the magnifying-glass button when you want to inspect the native Achievement entry.
 
-Tracked achievements are saved between logouts.
+Tracked achievements, presets, auto-update settings, and cached Cosmic Class scores are saved between logouts.
+
+## Cosmic Class score progress
+
+Cosmic Class achievements are handled as a special local-progress case. The game exposes Cosmic score values through the local WKS/Cosmic state rather than the ordinary achievement progress slot.
+
+When Cosmic state is loaded, VAL reads the local score array, caches the full 11-class set, and displays matching achievement progress as `current / target`. Outside the zone, VAL reuses the last cached scores so the config/search view can still help plan play time.
+
+The current class-index mapping is based on the observed 11-value WKS score array and the local achievement row order. It still needs in-game validation against non-zero scores:
+
+1. Carpenter
+2. Blacksmith
+3. Armorer
+4. Goldsmith
+5. Leatherworker
+6. Weaver
+7. Alchemist
+8. Culinarian
+9. Miner
+10. Botanist
+11. Fisher
+
+## Experimental behavior notes
+
+This branch deliberately differs from the safer public/beta design:
+
+- Direct progress requests are made from plugin controls.
+- **Update All** and timed auto update can queue multiple requests.
+- Event triggers can queue scoped updates after supported gathering, fishing, crafting, or completion events.
+- Auto-update timing uses seconds and waits for the first countdown before the first cycle.
+- Request spacing includes jitter, including when the base spacing is set to `0`.
+- `Stop Update Tasks` disables auto update and clears pending update tasks.
+- Help includes Cosmic diagnostics for test feedback.
+
+Do not present this branch as official-submission-safe without removing or redesigning the experimental request/timer behavior.
 
 ## Development notes
 
@@ -30,6 +90,8 @@ This project used AI-assisted development, with human review and testing. See:
 
 - [`AI-DECLARATION.md`](AI-DECLARATION.md)
 - [`docs/development/due-diligence.md`](docs/development/due-diligence.md)
+- [`docs/cosmic-class-achievement-progress-research.md`](docs/cosmic-class-achievement-progress-research.md)
+- [`docs/research/automation-risk-analysis.md`](docs/research/automation-risk-analysis.md)
 
 ## Build
 
@@ -48,4 +110,5 @@ Outputs:
 
 - Dalamud docs: <https://dalamud.dev>
 - Dalamud API: <https://dalamud.dev/api>
+- Dalamud plugin restrictions: <https://dalamud.dev/plugin-publishing/restrictions>
 - AI policy: <https://dalamud.dev/plugin-publishing/ai-policy>

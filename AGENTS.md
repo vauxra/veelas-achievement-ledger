@@ -10,17 +10,16 @@ This repo is a Final Fantasy XIV Dalamud plugin. Treat Dalamud's official docs a
 - Do not store raw pointers across frames.
 - Subscribe/unsubscribe events symmetrically and dispose hooks/resources.
 
-## Current product shape
+## Product shape
 
-Veela's Achievement Ledger is intentionally small:
+The public/beta-safe shape for Veela's Achievement Ledger is intentionally small:
 
 - `/val` opens the ledger.
-- Users track up to five achievements.
-- the row reload icon and **Update Next** open the native Achievement entry.
+- the row reload icon opens the native Achievement entry.
 - Numeric progress is cached only when the native Achievement UI returns progress data.
-- Tracked achievement IDs persist between logouts; observed progress cache resets on login/logout.
+- Tracked achievement IDs persist between logouts; observed ordinary achievement progress cache resets on login/logout.
 
-Do not reintroduce:
+For public/beta-safe branches, do not reintroduce:
 
 - plugin-originated achievement progress requests,
 - refresh queues/throttlers,
@@ -35,9 +34,11 @@ This branch is explicitly **not meant for Dalamud publishing**. When the current
 branch is `val-experimental`, treat Dalamud publishing restrictions as risk
 guidance and documentation requirements, not hard blockers. It is acceptable on
 this branch to prototype direct `RequestAchievementProgress` calls, automatic
-progress refresh queues, and debug instrumentation if the implementation is
-clearly labeled experimental, keeps unsafe/ClientStructs code isolated, remains
-easy to remove from public branches, and avoids unrelated security/privacy risks.
+progress refresh queues, event-triggered refreshes, seconds-based auto timers,
+local WKS/Cosmic ClientStructs reads, cached Cosmic score display, and debug
+instrumentation if the implementation is clearly labeled experimental, keeps
+unsafe/ClientStructs code isolated, remains easy to remove from public branches,
+and avoids unrelated security/privacy risks.
 
 Do still block on:
 

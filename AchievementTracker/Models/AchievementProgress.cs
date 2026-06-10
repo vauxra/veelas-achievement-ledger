@@ -8,6 +8,7 @@ public enum AchievementProgressKind
     Numeric,
     TargetKnown,
     Unavailable,
+    DataNotAvailable,
 }
 
 public sealed record AchievementProgress(AchievementProgressKind Kind, int? Current = null, int? Required = null)
@@ -24,6 +25,8 @@ public sealed record AchievementProgress(AchievementProgressKind Kind, int? Curr
 
     public static AchievementProgress Unavailable() => new(AchievementProgressKind.Unavailable);
 
+    public static AchievementProgress DataNotAvailable() => new(AchievementProgressKind.DataNotAvailable);
+
     public string ToDisplayText()
     {
         return this.Kind switch
@@ -33,6 +36,7 @@ public sealed record AchievementProgress(AchievementProgressKind Kind, int? Curr
             AchievementProgressKind.Incomplete => "Incomplete",
             AchievementProgressKind.Numeric when this.Current.HasValue && this.Required.HasValue => $"{this.Current.Value:N0} / {this.Required.Value:N0}",
             AchievementProgressKind.TargetKnown when this.Required.HasValue => $"Current unavailable / {this.Required.Value:N0}",
+            AchievementProgressKind.DataNotAvailable => "Data not available",
             _ => "Progress unavailable",
         };
     }

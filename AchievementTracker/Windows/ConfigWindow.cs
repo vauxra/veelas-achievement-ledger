@@ -52,8 +52,6 @@ public sealed class ConfigWindow : Window
 
     public override void Draw()
     {
-        ImGui.TextUnformatted("Tracked achievements");
-        ImGui.SameLine();
         if (ImGui.Button("Open VAL"))
         {
             this.plugin.OpenMainUi();
@@ -140,6 +138,7 @@ public sealed class ConfigWindow : Window
                 {
                     this.selectedPresetName = preset.Name;
                     this.presetNameInput = preset.Name;
+                    this.LoadSelectedPreset();
                 }
 
                 if (selected)
@@ -150,14 +149,14 @@ public sealed class ConfigWindow : Window
 
             ImGui.EndCombo();
         }
-        this.AddTooltip("Choose saved list.");
+        this.AddTooltip("Selecting a preset loads it immediately.");
 
         ImGui.SameLine();
-        if (ImGuiComponents.IconButton("preset-load", FontAwesomeIcon.FolderOpen))
+        if (ImGuiComponents.IconButton("preset-read", FontAwesomeIcon.FolderOpen))
         {
             this.LoadSelectedPreset();
         }
-        this.AddTooltip("Load selected list.");
+        this.AddTooltip("Read selected list.");
 
         ImGui.SameLine();
         if (ImGuiComponents.IconButton("preset-rename", FontAwesomeIcon.Edit))
@@ -311,6 +310,7 @@ public sealed class ConfigWindow : Window
     {
         _ = this.plugin.AchievementCatalog.TryGet(achievementId, out var info);
         ImGui.TextWrapped(info.Name);
+        this.DrawCosmicProgressIfAvailable(achievementId);
         this.DrawCategoryPath(info.CategoryName);
     }
 
@@ -320,6 +320,17 @@ public sealed class ConfigWindow : Window
         {
             ImGui.TextDisabled(categoryPath);
         }
+    }
+
+    private void DrawCosmicProgressIfAvailable(uint achievementId)
+    {
+        if (!this.plugin.CosmicClassProgressProvider.Handles(achievementId)
+            || !this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row))
+        {
+            return;
+        }
+
+        ImGui.TextDisabled(this.plugin.AchievementProgressService.GetProgress(row).ToDisplayText());
     }
 
     private void DrawSearchAndAdd()
@@ -422,6 +433,7 @@ public sealed class ConfigWindow : Window
             ImGui.SameLine();
             ImGui.BeginGroup();
             ImGui.TextWrapped(result.Name);
+            this.DrawCosmicProgressIfAvailable(result.Id);
             this.DrawCategoryPath(result.CategoryName);
             ImGui.EndGroup();
 
@@ -611,7 +623,7 @@ public sealed class ConfigWindow : Window
     private void DrawHelp()
     {
         ImGui.TextUnformatted("Help");
-        ImGui.TextWrapped("Disclaimer: This addon does not follow strict Dalamud best practices. Use may have consequences for your account, including a ban.");
+        ImGui.TextWrapped("Disclaimer: This experimental addon uses direct progress requests, timers, and local ClientStructs reads that are discouraged for normal Dalamud submissions. Use may have consequences for your account, including a ban.");
         ImGui.Separator();
 
         ImGui.TextUnformatted("Main VAL window");
@@ -624,14 +636,20 @@ public sealed class ConfigWindow : Window
         ImGui.TextUnformatted("Config sections");
         this.DrawWrappedBullet("Auto update: controls timed update cycles, request spacing, debug logs, and which tracked rows are included.");
         this.DrawWrappedBullet("Event triggers: chooses which gathering, fishing, crafting, or completion events can queue updates.");
-        this.DrawWrappedBullet("Tracked Achievements: manages tracked rows, presets, ordering, search, add/remove, and native Achievement opens.");
+        this.DrawWrappedBullet("Tracked Achievements: manages tracked rows, presets, ordering, search, add/remove, Cosmic score planning, and native Achievement opens.");
         this.DrawWrappedBullet("Help: explains the windows, controls, and risk notes.");
 
         ImGui.Separator();
         ImGui.TextUnformatted("Tracked Achievements notes");
         this.DrawWrappedBullet("The Auto checkbox on each tracked row controls whether timed auto update includes that achievement.");
-        this.DrawWrappedBullet("Presets save, load, rename, and delete reusable tracked-achievement lists.");
+        this.DrawWrappedBullet("Presets save, read, rename, and delete reusable tracked-achievement lists. Selecting a preset loads it immediately; Read reloads the selected preset on demand.");
         this.DrawWrappedBullet("Search adds achievements to the tracked list; Clear resets the search bar.");
+        this.DrawWrappedBullet("Cosmic Class achievements show cached score progress in tracked and search rows when scores have been observed in Cosmic content.");
+        this.DrawWrappedBullet("Cosmic score cache refreshes passively while WKS/Cosmic data is loaded and remains available outside the zone.");
+
+        ImGui.Separator();
+        ImGui.TextUnformatted("Cosmic score diagnostics");
+        ImGui.TextWrapped(this.plugin.CosmicClassProgressProvider.GetDiagnostics());
     }
 
     private void DrawWrappedBullet(string text)

@@ -153,6 +153,7 @@ static void ProgressDisplayFormatsAllSafeStates()
     AssertEqual("437 / 1,000", AchievementProgress.Numeric(437, 1000).ToDisplayText());
     AssertEqual("Current unavailable / 1,500", AchievementProgress.TargetKnown(1500).ToDisplayText());
     AssertEqual("Progress unavailable", AchievementProgress.Unavailable().ToDisplayText());
+    AssertEqual("Data not available", AchievementProgress.DataNotAvailable().ToDisplayText());
 }
 
 static void UpdateAllSpacesQueuedRequestsByBaseSecondsPlusJitter()

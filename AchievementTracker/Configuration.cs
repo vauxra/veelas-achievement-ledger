@@ -15,6 +15,8 @@ public sealed class Configuration : IPluginConfiguration
 
     public List<TrackedAchievementPreset> TrackedAchievementPresets { get; set; } = [];
 
+    public CosmicClassScoreCache CosmicClassScoreCache { get; set; } = new();
+
     public bool HideCompletedInSearch { get; set; } = true;
 
     public bool ExperimentalAutoUpdateEnabled { get; set; }
@@ -76,6 +78,7 @@ public sealed class Configuration : IPluginConfiguration
 
         this.ExperimentalAutoUpdateIntervalSeconds = Math.Clamp(this.ExperimentalAutoUpdateIntervalSeconds, 1, 86_400);
         this.ExperimentalUpdateSpacingSeconds = Math.Clamp(this.ExperimentalUpdateSpacingSeconds, 0, 3_600);
+        this.CosmicClassScoreCache ??= new CosmicClassScoreCache();
         TrackedAchievementPresetStore.Normalize(this.TrackedAchievementPresets);
     }
 
