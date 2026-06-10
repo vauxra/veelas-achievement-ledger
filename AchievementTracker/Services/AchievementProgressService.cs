@@ -22,7 +22,7 @@ public sealed class AchievementProgressService
 
         // IUnlockState achievement docs:
         // https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IUnlockState
-        if (this.IsComplete(achievement))
+        if (this.IsComplete(achievement) || this.progressSource?.IsObservedComplete(achievement.RowId) == true)
         {
             return requiredTarget.HasValue
                 ? AchievementProgress.Numeric(requiredTarget.Value, requiredTarget.Value)

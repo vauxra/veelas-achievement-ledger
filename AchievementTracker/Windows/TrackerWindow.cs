@@ -31,16 +31,32 @@ public sealed class TrackerWindow : Window
         {
             this.plugin.ToggleConfigUi();
         }
+        AddTooltip("Open configuration.");
 
         ImGui.SameLine();
         if (ImGui.Button("Update All"))
         {
             this.plugin.EnqueueUpdateAllTracked("manual-update-all");
         }
+        AddTooltip("Update tracked achievements.");
 
-        ImGui.SameLine();
-        ImGui.TextDisabled("/val");
-        ImGui.TextDisabled("Experimental: direct progress requests; not intended for Dalamud publishing.");
+        this.SameLineOrWrap(250f);
+        if (ImGui.Button("Stop Update Tasks"))
+        {
+            this.plugin.StopAutoUpdateAndClearQueue();
+        }
+        AddTooltip("Disable auto update and clear queue.");
+
+        this.SameLineOrWrap(110f);
+        var autoUpdateEnabled = this.plugin.Configuration.ExperimentalAutoUpdateEnabled;
+        if (ImGui.Checkbox("Auto update", ref autoUpdateEnabled))
+        {
+            this.plugin.Configuration.ExperimentalAutoUpdateEnabled = autoUpdateEnabled;
+            this.plugin.SaveConfiguration();
+            this.plugin.ResetAutoUpdateCountdownIfActive();
+        }
+        AddTooltip("Run timed updates.");
+
         this.DrawQueueStatus();
         ImGui.Separator();
 
@@ -71,6 +87,14 @@ public sealed class TrackerWindow : Window
         {
             this.plugin.EnqueueUpdateOne(achievementId, "manual-row-update");
         }
+        AddTooltip("Update this achievement.");
+
+        ImGui.SameLine();
+        if (ImGuiComponents.IconButton(FontAwesomeIcon.Search))
+        {
+            this.plugin.NativeAchievementNavigator.OpenAchievement(achievementId);
+        }
+        AddTooltip("Open in Achievements.");
 
         ImGui.SameLine();
         ImGui.TextWrapped(info.Name);
@@ -98,8 +122,24 @@ public sealed class TrackerWindow : Window
         var nextAuto = this.plugin.AchievementProgressUpdater.NextAutoUpdateAt;
         if (nextAuto.HasValue)
         {
-            var minutes = Math.Max(0, (nextAuto.Value - DateTimeOffset.UtcNow).TotalMinutes);
-            ImGui.TextDisabled($"Auto update next cycle in {minutes:0.0}m");
+            var seconds = Math.Max(0, (nextAuto.Value - DateTimeOffset.UtcNow).TotalSeconds);
+            ImGui.TextDisabled($"Auto update next cycle in {seconds:0}s");
+        }
+    }
+
+    private static void AddTooltip(string text)
+    {
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(text);
+        }
+    }
+
+    private void SameLineOrWrap(float estimatedNextItemWidth)
+    {
+        if (ImGui.GetContentRegionAvail().X >= estimatedNextItemWidth)
+        {
+            ImGui.SameLine();
         }
     }
 

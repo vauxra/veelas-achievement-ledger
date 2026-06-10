@@ -9,7 +9,7 @@ public readonly record struct ScheduledAchievementProgressRequest(uint Achieveme
 public sealed class AchievementProgressRequestScheduler
 {
     public static readonly TimeSpan PerAchievementBackoff = TimeSpan.FromSeconds(5);
-    public static readonly TimeSpan MinimumUpdateAllSpacing = TimeSpan.FromSeconds(15);
+    public static readonly TimeSpan DefaultUpdateAllSpacing = TimeSpan.FromSeconds(15);
 
     private readonly Func<DateTimeOffset> nowProvider;
     private readonly Func<TimeSpan> jitterProvider;
@@ -32,8 +32,12 @@ public sealed class AchievementProgressRequestScheduler
         : this.pendingRequests.Min(request => request.DueAt);
 
     public void EnqueueUpdateAll(IEnumerable<uint> achievementIds, string reason)
+        => this.EnqueueUpdateAll(achievementIds, reason, DefaultUpdateAllSpacing);
+
+    public void EnqueueUpdateAll(IEnumerable<uint> achievementIds, string reason, TimeSpan baseSpacing)
     {
         var now = this.nowProvider();
+        var normalizedBaseSpacing = NormalizeBaseSpacing(baseSpacing);
         var cursor = this.pendingRequests.Count > 0 && this.nextBatchCursor > now ? this.nextBatchCursor : now;
         var seen = new HashSet<uint>();
 
@@ -55,7 +59,7 @@ public sealed class AchievementProgressRequestScheduler
             }
 
             this.pendingRequests.Add(new ScheduledAchievementProgressRequest(achievementId, dueAt, reason));
-            cursor = dueAt + MinimumUpdateAllSpacing + NormalizeJitter(this.jitterProvider());
+            cursor = dueAt + normalizedBaseSpacing + NormalizeJitter(this.jitterProvider());
         }
 
         this.nextBatchCursor = cursor;
@@ -86,8 +90,18 @@ public sealed class AchievementProgressRequestScheduler
 
     private static TimeSpan CreateDefaultJitter()
     {
-        // Jitter request spacing by random milliseconds and up to a couple seconds.
-        return TimeSpan.FromMilliseconds(Random.Shared.Next(0, 2500));
+        // Always jitter request spacing by roughly 1-2 seconds, even when base spacing is 0.
+        return TimeSpan.FromMilliseconds(Random.Shared.Next(1000, 2001));
+    }
+
+    private static TimeSpan NormalizeBaseSpacing(TimeSpan baseSpacing)
+    {
+        if (baseSpacing < TimeSpan.Zero)
+        {
+            return TimeSpan.Zero;
+        }
+
+        return baseSpacing;
     }
 
     private static TimeSpan NormalizeJitter(TimeSpan jitter)

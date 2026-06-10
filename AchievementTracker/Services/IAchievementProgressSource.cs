@@ -7,4 +7,6 @@ public interface IAchievementProgressSource
     void ClearCache();
 
     bool TryGetProgress(uint achievementId, out uint current, out uint max);
+
+    bool IsObservedComplete(uint achievementId);
 }

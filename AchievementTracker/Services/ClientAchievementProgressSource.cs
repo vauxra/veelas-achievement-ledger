@@ -9,6 +9,7 @@ public readonly record struct ObservedAchievementProgress(uint Current, uint Max
 public unsafe sealed class ClientAchievementProgressSource : IAchievementProgressSource
 {
     private readonly Dictionary<uint, ObservedAchievementProgress> cachedProgress = new();
+    private readonly HashSet<uint> observedCompletions = [];
     private readonly Action<string> debugLog;
     private string lastSlotDebugLine = string.Empty;
 
@@ -44,6 +45,10 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
         }
 
         this.cachedProgress[achievementId] = new ObservedAchievementProgress(current, max, DateTimeOffset.UtcNow, "Achievement state slot");
+        if (current >= max)
+        {
+            this.observedCompletions.Add(achievementId);
+        }
     }
 
     public bool RequestProgress(uint achievementId, string reason)
@@ -73,16 +78,36 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
         }
 
         this.cachedProgress[achievementId] = new ObservedAchievementProgress(current, max, DateTimeOffset.UtcNow, source);
+        if (current >= max)
+        {
+            this.observedCompletions.Add(achievementId);
+        }
+
         this.debugLog($"VAL DebugTrace RecordObservedProgress id={achievementId} current={current} max={max} source={source}");
     }
 
     public void RecordObservedCompletion(uint achievementId, string source)
     {
         this.cachedProgress.Remove(achievementId);
+        this.observedCompletions.Add(achievementId);
         this.debugLog($"VAL DebugTrace RecordObservedCompletion id={achievementId} source={source}");
     }
 
-    public void ClearCache() => this.cachedProgress.Clear();
+    public static readonly TimeSpan RecentlyObservedUpdateAllSkipThreshold = TimeSpan.FromSeconds(30);
+
+    public void ClearCache()
+    {
+        this.cachedProgress.Clear();
+        this.observedCompletions.Clear();
+    }
+
+    public bool IsRecentlyObserved(uint achievementId, DateTimeOffset now, TimeSpan threshold)
+    {
+        this.UpdateCache();
+        return this.cachedProgress.TryGetValue(achievementId, out var progress)
+            && now - progress.ObservedAt >= TimeSpan.Zero
+            && now - progress.ObservedAt <= threshold;
+    }
 
     public bool TryGetProgress(uint achievementId, out uint current, out uint max)
     {
@@ -105,4 +130,6 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
         this.UpdateCache();
         return this.cachedProgress.TryGetValue(achievementId, out progress);
     }
+
+    public bool IsObservedComplete(uint achievementId) => this.observedCompletions.Contains(achievementId);
 }

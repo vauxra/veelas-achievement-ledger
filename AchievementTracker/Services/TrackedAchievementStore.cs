@@ -4,7 +4,7 @@ namespace AchievementTracker.Services;
 
 public sealed class TrackedAchievementStore
 {
-    public const int MaxTrackedAchievements = 5;
+    public const int MaxTrackedAchievements = 20;
 
     private readonly List<uint> achievementIds = [];
 
@@ -27,6 +27,19 @@ public sealed class TrackedAchievementStore
     }
 
     public bool Remove(uint achievementId) => this.achievementIds.Remove(achievementId);
+
+    public bool MoveToTop(uint achievementId)
+    {
+        var index = this.achievementIds.IndexOf(achievementId);
+        if (index <= 0)
+        {
+            return false;
+        }
+
+        this.achievementIds.RemoveAt(index);
+        this.achievementIds.Insert(0, achievementId);
+        return true;
+    }
 
     public bool MoveUp(uint achievementId)
     {
@@ -51,6 +64,19 @@ public sealed class TrackedAchievementStore
 
         (this.achievementIds[index + 1], this.achievementIds[index]) =
             (this.achievementIds[index], this.achievementIds[index + 1]);
+        return true;
+    }
+
+    public bool MoveToBottom(uint achievementId)
+    {
+        var index = this.achievementIds.IndexOf(achievementId);
+        if (index < 0 || index >= this.achievementIds.Count - 1)
+        {
+            return false;
+        }
+
+        this.achievementIds.RemoveAt(index);
+        this.achievementIds.Add(achievementId);
         return true;
     }
 
