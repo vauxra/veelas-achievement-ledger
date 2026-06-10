@@ -18,4 +18,18 @@ public unsafe sealed class NativeAchievementNavigator
         agent->OpenById(achievementId);
         return true;
     }
+
+    public bool CloseAchievements()
+    {
+        // Direct user action only: hide the native Achievement agent/addon if it is open.
+        // Agent/ClientStructs interaction docs: https://dalamud.dev/plugin-development/interaction/
+        var agent = AgentAchievement.Instance();
+        if (agent == null)
+        {
+            return false;
+        }
+
+        agent->Hide();
+        return true;
+    }
 }

@@ -12,6 +12,7 @@ namespace AchievementTracker.Windows;
 public sealed class TrackerWindow : Window
 {
     private readonly Plugin plugin;
+
     public TrackerWindow(Plugin plugin)
         : base("Veela's Achievement Ledger##AchievementLedgerLive")
     {
@@ -31,19 +32,43 @@ public sealed class TrackerWindow : Window
         {
             this.plugin.ToggleConfigUi();
         }
+        AddTooltip("Open configuration.");
 
         ImGui.SameLine();
+        var updateOpenLocked = !this.plugin.CanOpenAchievementForUpdate;
+        if (updateOpenLocked)
+        {
+            ImGui.BeginDisabled();
+        }
+
         if (ImGui.Button("Update Next"))
         {
             var nextId = this.GetNextTrackedAchievementId();
             if (nextId.HasValue)
             {
-                this.OpenNativeAchievement(nextId.Value);
+                this.OpenNativeAchievementForUpdate(nextId.Value);
             }
         }
 
+        if (updateOpenLocked)
+        {
+            ImGui.EndDisabled();
+        }
+
+        AddTooltip("Open the next tracked Achievement entry.");
+
         ImGui.SameLine();
-        ImGui.TextDisabled("/val");
+        if (ImGui.Button("Close Achievements"))
+        {
+            if (!this.plugin.NativeAchievementNavigator.CloseAchievements())
+            {
+                ImGui.TextDisabled("Could not close Achievements right now.");
+            }
+        }
+        AddTooltip("Close the native Achievements window.");
+
+        this.DrawUpdateOpenLockoutStatus();
+
         ImGui.Separator();
 
         var trackedIds = this.plugin.TrackedAchievements.AchievementIds.ToList();
@@ -69,10 +94,30 @@ public sealed class TrackerWindow : Window
         }
 
         ImGui.PushID((int)achievementId);
+        var updateOpenLocked = !this.plugin.CanOpenAchievementForUpdate;
+        if (updateOpenLocked)
+        {
+            ImGui.BeginDisabled();
+        }
+
         if (ImGuiComponents.IconButton(FontAwesomeIcon.SyncAlt))
+        {
+            this.OpenNativeAchievementForUpdate(achievementId);
+        }
+
+        if (updateOpenLocked)
+        {
+            ImGui.EndDisabled();
+        }
+
+        AddTooltip("Open native Achievement entry to update.");
+
+        ImGui.SameLine();
+        if (ImGuiComponents.IconButton(FontAwesomeIcon.Search))
         {
             this.OpenNativeAchievement(achievementId);
         }
+        AddTooltip("Open in Achievements.");
 
         ImGui.SameLine();
         ImGui.TextWrapped(info.Name);
@@ -113,11 +158,38 @@ public sealed class TrackerWindow : Window
             .First().Id;
     }
 
+    private void OpenNativeAchievementForUpdate(uint achievementId)
+    {
+        if (!this.plugin.OpenAchievementForUpdate(achievementId))
+        {
+            ImGui.TextDisabled(this.plugin.CanOpenAchievementForUpdate
+                ? "Could not open Achievements right now."
+                : "Achievement update opens are cooling down.");
+        }
+    }
+
     private void OpenNativeAchievement(uint achievementId)
     {
         if (!this.plugin.NativeAchievementNavigator.OpenAchievement(achievementId))
         {
             ImGui.TextDisabled("Could not open Achievements right now.");
+        }
+    }
+
+    private void DrawUpdateOpenLockoutStatus()
+    {
+        var remaining = this.plugin.AchievementUpdateOpenRemaining;
+        if (remaining > TimeSpan.Zero)
+        {
+            ImGui.TextDisabled($"Achievement update opens available in {Math.Ceiling(remaining.TotalSeconds):0}s");
+        }
+    }
+
+    private static void AddTooltip(string text)
+    {
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(text);
         }
     }
 

@@ -8,15 +8,18 @@ namespace AchievementTracker.Services;
 public unsafe sealed class PassiveAchievementProgressObserver : IDisposable
 {
     private readonly ClientAchievementProgressSource progressSource;
+    private readonly Func<bool> completionTriggerEnabledProvider;
     private readonly Hook<Achievement.Delegates.ReceiveAchievementProgress>? receiveHook;
     private readonly Hook<Achievement.Delegates.SetAchievementCompleted>? completedHook;
     private bool disposed;
 
     public PassiveAchievementProgressObserver(
         IGameInteropProvider interopProvider,
-        ClientAchievementProgressSource progressSource)
+        ClientAchievementProgressSource progressSource,
+        Func<bool> completionTriggerEnabledProvider)
     {
         this.progressSource = progressSource;
+        this.completionTriggerEnabledProvider = completionTriggerEnabledProvider;
 
         try
         {
@@ -61,6 +64,9 @@ public unsafe sealed class PassiveAchievementProgressObserver : IDisposable
     private void OnSetAchievementCompleted(Achievement* thisPtr, uint achievementId)
     {
         this.completedHook!.Original(thisPtr, achievementId);
-        this.progressSource.RecordObservedCompletion(achievementId, "Achievement completed");
+        if (this.completionTriggerEnabledProvider())
+        {
+            this.progressSource.RecordObservedCompletion(achievementId, "Achievement completed");
+        }
     }
 }

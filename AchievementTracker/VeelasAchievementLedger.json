@@ -1,8 +1,12 @@
 {
   "Author": "Saagi",
   "Name": "Veela's Achievement Ledger",
-  "Punchline": "Lightweight achievement organizer and tracker.",
-  "Description": "Use /val to track achievements and open entries in the game Achievement window.",
+  "Punchline": "Track achievements with native Achievement-window assisted refreshes.",
+  "Description": "Use /val to track achievements, open native Achievement entries, and passively cache observed progress.",
+  "IconUrl": "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/main/AchievementTracker/images/icon.png",
+  "ImageUrls": [
+    "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/main/AchievementTracker/images/icon.png"
+  ],
   "RepoUrl": "https://github.com/vauxra/veelas-achievement-ledger",
   "ApplicableVersion": "any",
   "Tags": [

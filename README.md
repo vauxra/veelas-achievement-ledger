@@ -8,22 +8,36 @@ A lightweight assistive achievement organizer and tracker for FFXIV.
 Beta build. Current features:
 
 - `/val` opens the ledger.
-- Track up to 5 achievements.
+- `/val config`, `/val configure`, and `/val man` open configuration.
+- `/val help` and `/val ?` open Help.
+- Track up to 20 achievements.
 - Search by name or category.
 - Hide completed achievements from search by default.
-- Show completion status and known target counts.
+- Save, read/load, rename, and delete reusable tracked-achievement presets.
+- Reorder tracked achievements with Top, Up, Down, and Bottom controls.
+- Show completion status, known target counts, and observed numeric progress.
 - Use the reload icon or **Update Next** to open tracked achievements in the game Achievement window.
+- Open rows/search results in the native Achievement window with the magnifying-glass button.
+- Show cached Cosmic Class score progress after the score data has been observed in Cosmic content.
 
-The plugin has no backend, telemetry, cloud sync, or gameplay automation.
+The plugin has no backend, telemetry, cloud sync, packet capture, gameplay automation, plugin-originated progress request queue, scheduled refresh loop, or game-event-driven refresh automation.
 
 ## Basic use
 
 1. Run `/val`.
 2. Click **Configure** and add achievements.
-3. Click the reload icon beside an achievement, or **Update Next**.
-4. Wait for the game entry to load; progress updates when the game returns data.
+3. Optional: save your current tracked list as a preset.
+4. Click the reload icon beside an achievement, or **Update Next**.
+5. Wait for the game entry to load; progress updates when the game returns data.
+6. Use the magnifying-glass button when you want to inspect the native Achievement entry.
 
-Tracked achievements are saved between logouts.
+Tracked achievements, presets, and cached Cosmic score data are saved between logouts.
+
+## Cosmic Class progress
+
+Some Cosmic Class achievements only expose normal achievement completion as complete/incomplete. When WKS/Cosmic score data is available locally, Veela's Achievement Ledger reads the local class score cache and maps those scores to the related Cosmic Class achievements for planning.
+
+This is read-only local ClientStructs state. It does not request achievement progress from the server.
 
 ## Development notes
 
@@ -31,6 +45,7 @@ This project used AI-assisted development, with human review and testing. See:
 
 - [`AI-DECLARATION.md`](AI-DECLARATION.md)
 - [`docs/development/due-diligence.md`](docs/development/due-diligence.md)
+- [`docs/cosmic-class-achievement-progress-research.md`](docs/cosmic-class-achievement-progress-research.md)
 
 ## Build
 

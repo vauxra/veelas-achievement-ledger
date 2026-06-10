@@ -9,6 +9,7 @@ public readonly record struct ObservedAchievementProgress(uint Current, uint Max
 public unsafe sealed class ClientAchievementProgressSource : IAchievementProgressSource
 {
     private readonly Dictionary<uint, ObservedAchievementProgress> cachedProgress = new();
+    private readonly HashSet<uint> observedCompletions = [];
 
     public void UpdateCache()
     {
@@ -31,6 +32,10 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
         }
 
         this.cachedProgress[achievementId] = new ObservedAchievementProgress(current, max, DateTimeOffset.UtcNow, "Achievement state slot");
+        if (current >= max)
+        {
+            this.observedCompletions.Add(achievementId);
+        }
     }
 
     public void RecordObservedProgress(uint achievementId, uint current, uint max, string source)
@@ -41,14 +46,23 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
         }
 
         this.cachedProgress[achievementId] = new ObservedAchievementProgress(current, max, DateTimeOffset.UtcNow, source);
+        if (current >= max)
+        {
+            this.observedCompletions.Add(achievementId);
+        }
     }
 
     public void RecordObservedCompletion(uint achievementId, string source)
     {
         this.cachedProgress.Remove(achievementId);
+        this.observedCompletions.Add(achievementId);
     }
 
-    public void ClearCache() => this.cachedProgress.Clear();
+    public void ClearCache()
+    {
+        this.cachedProgress.Clear();
+        this.observedCompletions.Clear();
+    }
 
     public bool TryGetProgress(uint achievementId, out uint current, out uint max)
     {
@@ -71,4 +85,6 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
         this.UpdateCache();
         return this.cachedProgress.TryGetValue(achievementId, out progress);
     }
+
+    public bool IsObservedComplete(uint achievementId) => this.observedCompletions.Contains(achievementId);
 }

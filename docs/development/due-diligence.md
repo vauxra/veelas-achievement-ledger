@@ -6,8 +6,10 @@ Veela's Achievement Ledger is developed with human review, AI assistance, and re
 
 - Use official Dalamud docs before adding or changing APIs.
 - Prefer Dalamud services and Lumina data before ClientStructs.
-- Keep unsafe/native interaction isolated.
-- Avoid plugin-originated achievement progress requests, polling, telemetry, or backend sync.
+- Keep unsafe/native interaction isolated in small service classes.
+- Avoid plugin-originated achievement progress requests, request queues, polling, telemetry, or backend sync.
+- Keep the assisted progress flow user-guided: a click opens the native Achievement entry, then the plugin passively caches progress returned by the client.
+- Keep Cosmic Class score support read-only and local-state based.
 - Keep UI and docs short and user-facing.
 
 ## Manual checks
@@ -15,11 +17,18 @@ Veela's Achievement Ledger is developed with human review, AI assistance, and re
 Before a beta build, verify in game:
 
 - `/val` opens the ledger.
+- `/val config`, `/val configure`, and `/val man` open configuration.
+- `/val help` and `/val ?` open the Help tab.
 - Configure can search, add, remove, and reorder tracked achievements.
-- Tracked achievements persist after logout/login.
-- the row reload icon opens the chosen native Achievement entry.
+- Top, Up, Down, and Bottom reorder controls behave correctly.
+- Presets save, load/read, rename, and delete reusable tracked lists.
+- Selecting a preset loads it immediately.
+- Tracked achievements and presets persist after logout/login.
+- The row reload icon opens the chosen native Achievement entry.
 - **Update Next** opens the next unobserved or oldest-observed tracked entry.
 - Progress updates when the native Achievement UI returns data.
+- Cosmic Class score progress appears after WKS/Cosmic score data has been observed.
+- No scheduled refresh UI, bulk request queue, game-event-driven refresh queue, or direct progress-request UI is present.
 - No advanced diagnostics UI is present.
 
 ## Automated checks
