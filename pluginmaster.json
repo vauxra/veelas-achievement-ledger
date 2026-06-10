@@ -3,8 +3,8 @@
     "Author": "Saagi",
     "Name": "Veela's Achievement Ledger",
     "InternalName": "VeelasAchievementLedger",
-    "AssemblyVersion": "0.0.0.0",
-    "Description": "Experimental custom-repo build. Achievement tracker for FFXIV.",
+    "AssemblyVersion": "0.2.0.9",
+    "Description": "Experimental custom-repo build. Achievement tracker with direct progress requests, timed/event-triggered updates, presets, and Cosmic score cache.",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 15,
     "Punchline": "Experimental / testing build for /val.",
@@ -16,12 +16,12 @@
     ],
     "IsHide": false,
     "IsTestingExclusive": true,
-    "DownloadLinkInstall": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.8/VeelasAchievementLedger_0_2_0_8.zip",
-    "DownloadLinkUpdate": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.8/VeelasAchievementLedger_0_2_0_8.zip",
-    "LastUpdate": "1781036080",
-    "TestingAssemblyVersion": "0.2.0.8",
+    "DownloadLinkInstall": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.9/VeelasAchievementLedger_0_2_0_9.zip",
+    "DownloadLinkUpdate": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.9/VeelasAchievementLedger_0_2_0_9.zip",
+    "LastUpdate": "1781121435",
+    "TestingAssemblyVersion": "0.2.0.9",
     "TestingDalamudApiLevel": 15,
-    "TestingChangelog": "Experimental custom-repo build.",
-    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.8/VeelasAchievementLedger_0_2_0_8.zip"
+    "TestingChangelog": "Experimental build: presets read/autoload, timed and event-triggered direct progress updates, cached Cosmic class score display, and expanded experimental warnings/docs.",
+    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.9/VeelasAchievementLedger_0_2_0_9.zip"
   }
 ]
