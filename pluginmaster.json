@@ -3,7 +3,7 @@
     "Author": "Saagi",
     "Name": "Veela's Achievement Ledger",
     "InternalName": "VeelasAchievementLedger",
-    "AssemblyVersion": "0.2.0.11",
+    "AssemblyVersion": "0.2.0.12",
     "Description": "Experimental custom-repo build. Achievement tracker with direct progress requests, timed/event-triggered updates, presets, and Cosmic score cache.",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 15,
@@ -16,12 +16,12 @@
     ],
     "IsHide": false,
     "IsTestingExclusive": true,
-    "DownloadLinkInstall": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.11/VeelasAchievementLedger_0_2_0_11.zip",
-    "DownloadLinkUpdate": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.11/VeelasAchievementLedger_0_2_0_11.zip",
-    "LastUpdate": "1781122353",
-    "TestingAssemblyVersion": "0.2.0.11",
+    "DownloadLinkInstall": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.12/VeelasAchievementLedger_0_2_0_12.zip",
+    "DownloadLinkUpdate": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.12/VeelasAchievementLedger_0_2_0_12.zip",
+    "LastUpdate": "1781122876",
+    "TestingAssemblyVersion": "0.2.0.12",
     "TestingDalamudApiLevel": 15,
-    "TestingChangelog": "Experimental build: combines event triggers into the Auto update page as a two-column layout.",
-    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.11/VeelasAchievementLedger_0_2_0_11.zip"
+    "TestingChangelog": "Experimental build: republishes the combined Auto update/Event triggers two-column layout with a fresh version.",
+    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.12/VeelasAchievementLedger_0_2_0_12.zip"
   }
 ]
