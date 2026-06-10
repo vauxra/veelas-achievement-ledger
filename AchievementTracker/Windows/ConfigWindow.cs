@@ -646,10 +646,6 @@ public sealed class ConfigWindow : Window
         this.DrawWrappedBullet("Search adds achievements to the tracked list; Clear resets the search bar.");
         this.DrawWrappedBullet("Cosmic Class achievements show cached score progress in tracked and search rows when scores have been observed in Cosmic content.");
         this.DrawWrappedBullet("Cosmic score cache refreshes passively while WKS/Cosmic data is loaded and remains available outside the zone.");
-
-        ImGui.Separator();
-        ImGui.TextUnformatted("Cosmic score diagnostics");
-        ImGui.TextWrapped(this.plugin.CosmicClassProgressProvider.GetDiagnostics());
     }
 
     private void DrawWrappedBullet(string text)
