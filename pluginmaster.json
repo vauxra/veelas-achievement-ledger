@@ -21,7 +21,7 @@
     "LastUpdate": "1781121715",
     "TestingAssemblyVersion": "0.2.0.10",
     "TestingDalamudApiLevel": 15,
-    "TestingChangelog": "Experimental build: removes Cosmic score diagnostics from Help while keeping cached Cosmic score display and planning support.",
+    "TestingChangelog": "Experimental build: removes the Cosmic debug section from Help while keeping cached Cosmic score display and planning support.",
     "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.10/VeelasAchievementLedger_0_2_0_10.zip"
   }
 ]
