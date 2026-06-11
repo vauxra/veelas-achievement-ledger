@@ -2,6 +2,15 @@
 
 Version: `v0.2.0.20`
 
+## Related function map entries
+
+- [`Plugin()` startup wiring](./02-function-call-map.md#plugin-constructor)
+- [`RegisterDalamudCallbacks()` lifecycle wiring](./02-function-call-map.md#register-dalamud-callbacks)
+- [`NativeAchievementNavigator`](./02-function-call-map.md#nativeachievementnavigator)
+- [`ClientAchievementProgressSource`](./02-function-call-map.md#clientachievementprogresssource)
+- [`CosmicClassProgressProvider`](./02-function-call-map.md#cosmicclassprogressprovider)
+- [`TrackerWindow`](./02-function-call-map.md#trackerwindow) and [`ConfigWindow`](./02-function-call-map.md#configwindow)
+
 This is the broad map of the entire plugin. Read it top-to-bottom like a Python package map.
 
 ## Repository layout

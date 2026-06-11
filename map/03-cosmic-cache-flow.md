@@ -2,6 +2,13 @@
 
 Version: `v0.2.0.20`
 
+## Related function map entries
+
+- [`Plugin.OnFrameworkUpdate(...)`](./02-function-call-map.md#plugin-onframeworkupdate)
+- [`Plugin.RefreshCosmicCacheFromLiveState()`](./02-function-call-map.md#plugin-refreshcosmiccachefromlivestate)
+- [`CosmicClassProgressProvider.RefreshCacheFromLiveScores()` / `GetProgress(...)`](./02-function-call-map.md#cosmicclassprogressprovider)
+- [`AchievementProgressService.GetProgress(...)`](./02-function-call-map.md#achievementprogressservice)
+
 ## Short answer to your question
 
 This function is **where the plugin decides whether to update the Cosmic cache**:

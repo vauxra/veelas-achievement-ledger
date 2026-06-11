@@ -12,6 +12,8 @@ This map follows the refactored code layout. The goal is to show what each impor
 
 ## `Plugin.cs` — app entry point / wiring
 
+<a id="plugin-constructor"></a>
+
 ### `Plugin()` 🟢/🟡
 
 Purpose: create the application object, services, and windows.
@@ -34,6 +36,8 @@ Plugin()
 
 See also: [Whole plugin hierarchy](./00-whole-plugin-hierarchy.md), [Data model map](./05-data-model-map.md).
 
+<a id="register-dalamud-callbacks"></a>
+
 ### `RegisterDalamudCallbacks()` / `UnregisterDalamudCallbacks()` 🟡
 
 Purpose: subscribe/unsubscribe from Dalamud events cleanly.
@@ -50,6 +54,8 @@ RegisterDalamudCallbacks()
 
 TLP: 🟡 because this uses Dalamud lifecycle services. Dispose unregisters the same callbacks.
 
+<a id="plugin-openachievementforupdate"></a>
+
 ### `OpenAchievementForUpdate(uint achievementId)` 🟢/🟠
 
 Purpose: shared lockout-protected path for update-intent native opens.
@@ -64,6 +70,8 @@ OpenAchievementForUpdate(id)
 
 Method links: [Big picture native open path](./01-big-picture.md#native-achievement-open-path), [Safety map](./06-safety-map.md#native-achievement-ui-actions).
 
+<a id="plugin-onframeworkupdate"></a>
+
 ### `OnFrameworkUpdate(IFramework framework)` 🟡/🟠
 
 ```text
@@ -73,6 +81,8 @@ OnFrameworkUpdate(framework)
 ```
 
 This is not a server polling loop. It reads local state only.
+
+<a id="plugin-refreshcosmiccachefromlivestate"></a>
 
 ### `RefreshCosmicCacheFromLiveState()` 🟢/🟡/🟠
 
@@ -84,6 +94,8 @@ RefreshCosmicCacheFromLiveState()
 ```
 
 See: [Cosmic Class cache flow](./03-cosmic-cache-flow.md).
+
+<a id="nativeachievementnavigator"></a>
 
 ## `NativeAchievementNavigator.cs` — native Achievement UI adapter 🟠
 
@@ -101,6 +113,8 @@ CloseAchievements()
 ├─ agent null-check
 └─ agent->Hide() 🟠
 ```
+
+<a id="clientachievementprogresssource"></a>
 
 ## `ClientAchievementProgressSource.cs` — bounded observation cache 🟠
 
@@ -127,6 +141,8 @@ TryRecordObservedSlot(...) 🟠
 
 No hook/event interception is used here.
 
+<a id="achievementprogressservice"></a>
+
 ## `AchievementProgressService.cs` — progress decision service 🟢/🟡/🟠
 
 ```text
@@ -141,6 +157,8 @@ GetProgress(Achievement row)
 │  └─ Complete 🟢
 └─ TargetKnown / Incomplete / Unavailable 🟢
 ```
+
+<a id="cosmicclassprogressprovider"></a>
 
 ## `CosmicClassProgressProvider.cs` — Cosmic score adapter 🟠
 
@@ -159,6 +177,8 @@ GetProgress(achievementId)
 
 See: [Cosmic Class cache flow](./03-cosmic-cache-flow.md).
 
+<a id="configuration-and-stores"></a>
+
 ## `Configuration.cs` and stores — saved/in-memory state 🟢/🟡
 
 ```text
@@ -173,6 +193,8 @@ TrackedAchievementPresetStore.SavePreset/Rename/Delete/Normalize 🟢
 ```
 
 See: [Data model map](./05-data-model-map.md).
+
+<a id="trackerwindow"></a>
 
 ## `TrackerWindow.cs` — main UI 🟢
 
@@ -192,6 +214,8 @@ GetProgressText(id)
 ├─ AchievementCatalog.TryGetRow(id) 🟢/🟡
 └─ AchievementProgressService.GetProgress(row) 🟢/🟡/🟠
 ```
+
+<a id="configwindow"></a>
 
 ## `ConfigWindow.cs` — config/search/preset UI 🟢
 

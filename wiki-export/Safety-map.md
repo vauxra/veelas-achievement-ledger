@@ -2,6 +2,14 @@
 
 Version: `v0.2.0.20`
 
+## Related function map entries
+
+- [`Plugin.OpenAchievementForUpdate(...)`](Function-call-map#plugin-openachievementforupdate)
+- [`NativeAchievementNavigator` native UI adapter](Function-call-map#nativeachievementnavigator)
+- [`ClientAchievementProgressSource` bounded cache](Function-call-map#clientachievementprogresssource)
+- [`CosmicClassProgressProvider` WKS score adapter](Function-call-map#cosmicclassprogressprovider)
+
+
 This file maps the potentially sensitive areas and what they do.
 
 ## No direct direct progress requests
@@ -53,7 +61,7 @@ Achievement.Instance() local progress slot
 
 Boundary:
 
-- starts only after `Plugin.OpenAchievementForUpdate(achievementId)` opens the native Achievement entry from a user click
+- starts only after [`Plugin.OpenAchievementForUpdate(achievementId)`](Function-call-map#plugin-openachievementforupdate) opens the native Achievement entry from a user click
 - records only if the loaded slot matches the active achievement ID
 - expires the observation window
 - uses no hooks, signatures, or direct progress requests
