@@ -8,8 +8,7 @@ This page is a practical hierarchy of what actually exists in Veela's Achievemen
 
 When a call moves downward in the hierarchy, review risk goes up:
 
-- 🟢 Plugin UI/domain code is easiest to reason about.
-- 🟡 Dalamud managed services/libraries are normal plugin-development surfaces.
+- 🟢 Ordinary plugin code and supported Dalamud services/libraries are safe/expected surfaces.
 - 🟠 ClientStructs/native adapters are policy-sensitive and must stay small.
 - 🔴 Raw memory, signatures, low-level hooks, and direct achievement-progress request queues are blocked/deprecated for current mainline.
 
@@ -34,10 +33,10 @@ Layer B 🟢 Plugin UI and command shell
 Layer C 🟢 Plugin domain/state
   Configuration, TrackedAchievementStore, TrackedAchievementPresetStore, AchievementProgress, AchievementInfo
 
-Layer D 🟢/🟡 Data and progress interpretation
+Layer D 🟢 Data and progress interpretation
   AchievementCatalog, AchievementProgressService, Lumina Achievement rows, IUnlockState completion checks
 
-Layer E 🟡 Dalamud service boundary
+Layer E 🟢 Dalamud service boundary
   IDalamudPluginInterface, ICommandManager, IDataManager, IUnlockState, IClientState, IFramework, UiBuilder
 
 Layer F 🟠 Isolated native/ClientStructs adapters
@@ -57,7 +56,7 @@ flowchart TB
     A["Player action 🟢"] --> B["TrackerWindow / ConfigWindow 🟢"]
     B --> C["Plugin methods 🟢"]
     C --> D["Stores + models 🟢"]
-    C --> E["Dalamud config/window/command services 🟡"]
+    C --> E["Dalamud config/window/command services 🟢"]
     D --> E
 ```
 
@@ -69,7 +68,7 @@ flowchart TB
     B --> C["NativeAchievementNavigator.OpenAchievement(id) 🟠"]
     C --> D["AgentAchievement.Instance()->OpenById(id) 🟠"]
     B --> E["ClientAchievementProgressSource.BeginObservation(id, 8s) 🟠"]
-    F["Framework.Update 🟡"] --> G["ClientAchievementProgressSource.UpdateCache() 🟠"]
+    F["Framework.Update 🟢"] --> G["ClientAchievementProgressSource.UpdateCache() 🟠"]
     G --> H["Achievement.Instance() local slot 🟠"]
 ```
 
@@ -77,24 +76,24 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    A["Framework.Update 🟡"] --> B["Plugin.RefreshCosmicCacheFromLiveState() 🟢/🟡"]
-    B --> C["ClientState.TerritoryType == Sinus Ardorum 🟡"]
+    A["Framework.Update 🟢"] --> B["Plugin.RefreshCosmicCacheFromLiveState() 🟢"]
+    B --> C["ClientState.TerritoryType == Sinus Ardorum 🟢"]
     B --> D["CosmicClassProgressProvider.RefreshCacheFromLiveScores() 🟠"]
     D --> E["WKSManager.Instance()->State.Scores 🟠"]
     D --> F["CosmicClassScoreCache 🟢"]
-    F --> G["PluginInterface.SavePluginConfig 🟡"]
+    F --> G["PluginInterface.SavePluginConfig 🟢"]
 ```
 
 ## Diagram 4: progress display decision
 
 ```mermaid
 flowchart TB
-    A["UI needs progress text 🟢"] --> B["AchievementCatalog.TryGetRow(id) 🟢/🟡"]
+    A["UI needs progress text 🟢"] --> B["AchievementCatalog.TryGetRow(id) 🟢"]
     B --> C["AchievementProgressService.GetProgress(row) 🟢"]
     C --> D["Cosmic provider for 3702-3739 🟠"]
     C --> E["Observed progress cache 🟠"]
-    C --> F["IUnlockState completion check 🟡"]
-    C --> G["Lumina target fallback 🟡"]
+    C --> F["IUnlockState completion check 🟢"]
+    C --> G["Lumina target fallback 🟢"]
     D --> H["AchievementProgress.ToDisplayText() 🟢"]
     E --> H
     F --> H

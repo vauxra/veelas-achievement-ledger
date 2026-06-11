@@ -8,33 +8,33 @@ This map follows the refactored code layout. The goal is to show what each impor
 
 - `A += B` in older docs meant “subscribe B as an event handler on event A.” In this page it is written explicitly as **subscribe**.
 - `Draw...` methods are ImGui UI code. They are redrawn every frame, but the inside of `if (ImGui.Button(...))` only runs on the click frame.
-- TLP labels: 🟢 plugin/domain, 🟡 Dalamud managed, 🟠 native/ClientStructs adapter, 🔴 blocked/deprecated.
+- Component labels: 🟢 safe/supported plugin or Dalamud layer, 🟠 native/ClientStructs adapter, 🔴 blocked/deprecated.
 
 ## `Plugin.cs` — app entry point / wiring
 
-### `Plugin()` 🟢/🟡
+### `Plugin()` 🟢
 
 Purpose: create the application object, services, and windows.
 
 ```text
 Plugin()
-├─ LoadAndNormalizeConfiguration() 🟢/🟡
+├─ LoadAndNormalizeConfiguration() 🟢
 ├─ CreateTrackedAchievementStore() 🟢
-├─ new AchievementCatalog(DataManager) 🟢/🟡
+├─ new AchievementCatalog(DataManager) 🟢
 ├─ new ClientAchievementProgressSource() 🟠
 ├─ new CosmicClassProgressProvider(cache, SaveConfiguration) 🟠
 ├─ new NativeAchievementNavigator() 🟠
-├─ new AchievementProgressService(UnlockState, progressSource, cosmicProvider) 🟢/🟡/🟠
+├─ new AchievementProgressService(UnlockState, progressSource, cosmicProvider) 🟢/🟠
 ├─ new TrackerWindow(this) 🟢
 ├─ new ConfigWindow(this) 🟢
-├─ RegisterWindows() 🟡
-├─ RegisterCommand() 🟡
-└─ RegisterDalamudCallbacks() 🟡
+├─ RegisterWindows() 🟢
+├─ RegisterCommand() 🟢
+└─ RegisterDalamudCallbacks() 🟢
 ```
 
 See also: [Whole plugin hierarchy](./00-whole-plugin-hierarchy.md), [Data model map](./05-data-model-map.md).
 
-### `RegisterDalamudCallbacks()` / `UnregisterDalamudCallbacks()` 🟡
+### `RegisterDalamudCallbacks()` / `UnregisterDalamudCallbacks()` 🟢
 
 Purpose: subscribe/unsubscribe from Dalamud events cleanly.
 
@@ -48,7 +48,7 @@ RegisterDalamudCallbacks()
 └─ subscribe ClientState.Logout to ResetProgressStateOnLogout
 ```
 
-TLP: 🟡 because this uses Dalamud lifecycle services. Dispose unregisters the same callbacks.
+TLP: 🟢 because this uses Dalamud lifecycle services. Dispose unregisters the same callbacks.
 
 ### `OpenAchievementForUpdate(uint achievementId)` 🟢/🟠
 
@@ -64,7 +64,7 @@ OpenAchievementForUpdate(id)
 
 Method links: [Big picture native open path](./01-big-picture.md#native-achievement-open-path), [Safety map](./06-safety-map.md#native-achievement-ui-actions).
 
-### `OnFrameworkUpdate(IFramework framework)` 🟡/🟠
+### `OnFrameworkUpdate(IFramework framework)` 🟢/🟠
 
 ```text
 OnFrameworkUpdate(framework)
@@ -74,11 +74,11 @@ OnFrameworkUpdate(framework)
 
 This is not a server polling loop. It reads local state only.
 
-### `RefreshCosmicCacheFromLiveState()` 🟢/🟡/🟠
+### `RefreshCosmicCacheFromLiveState()` 🟢/🟠
 
 ```text
 RefreshCosmicCacheFromLiveState()
-├─ IsInSinusArdorum() uses ClientState.TerritoryType 🟡
+├─ IsInSinusArdorum() uses ClientState.TerritoryType 🟢
 ├─ CosmicCacheRefreshIsDue() 🟢
 └─ CosmicClassProgressProvider.RefreshCacheFromLiveScores() 🟠
 ```
@@ -127,7 +127,7 @@ TryRecordObservedSlot(...) 🟠
 
 No hook/event interception is used here.
 
-## `AchievementProgressService.cs` — progress decision service 🟢/🟡/🟠
+## `AchievementProgressService.cs` — progress decision service 🟢/🟠
 
 ```text
 GetProgress(Achievement row)
@@ -135,9 +135,9 @@ GetProgress(Achievement row)
 │  └─ CosmicClassProgressProvider.GetProgress(row.RowId) 🟠
 ├─ if progressSource.TryGetProgress(row.RowId, out current, out max) 🟠
 │  └─ AchievementProgress.Numeric(current, max) 🟢
-├─ if !UnlockState.IsAchievementListLoaded 🟡
+├─ if !UnlockState.IsAchievementListLoaded 🟢
 │  └─ CompletionListNotLoaded or TargetKnown 🟢
-├─ if UnlockState.IsAchievementComplete(row) 🟡
+├─ if UnlockState.IsAchievementComplete(row) 🟢
 │  └─ Complete 🟢
 └─ TargetKnown / Incomplete / Unavailable 🟢
 ```
@@ -151,7 +151,7 @@ GetProgress(achievementId)
 │  ├─ WKSManager.Instance() 🟠
 │  ├─ manager->IsLoaded 🟠
 │  ├─ manager->State.Scores.ToArray() 🟠
-│  └─ SaveScoresToCache(liveScores) 🟢/🟡
+│  └─ SaveScoresToCache(liveScores) 🟢
 ├─ TryReadCachedScores() 🟢
 ├─ CalculateCurrentScore(scores, rule) 🟢
 └─ AchievementProgress.Numeric(current, target) or DataNotAvailable 🟢
@@ -159,11 +159,11 @@ GetProgress(achievementId)
 
 See: [Cosmic Class cache flow](./03-cosmic-cache-flow.md).
 
-## `Configuration.cs` and stores — saved/in-memory state 🟢/🟡
+## `Configuration.cs` and stores — saved/in-memory state 🟢
 
 ```text
-Configuration.Save() 🟢/🟡
-└─ Plugin.PluginInterface.SavePluginConfig(this) 🟡
+Configuration.Save() 🟢
+└─ Plugin.PluginInterface.SavePluginConfig(this) 🟢
 
 TrackedAchievementStore.LoadFrom(ids) 🟢
 └─ in-memory sanitized ordered ID list
@@ -189,8 +189,8 @@ DrawRowInspectButton(id)
 └─ NativeAchievementNavigator.OpenAchievement(id) 🟠
 
 GetProgressText(id)
-├─ AchievementCatalog.TryGetRow(id) 🟢/🟡
-└─ AchievementProgressService.GetProgress(row) 🟢/🟡/🟠
+├─ AchievementCatalog.TryGetRow(id) 🟢
+└─ AchievementProgressService.GetProgress(row) 🟢/🟠
 ```
 
 ## `ConfigWindow.cs` — config/search/preset UI 🟢
@@ -210,6 +210,6 @@ DrawTrackedAchievementRow(id)
 
 DrawSearchResultRow(result)
 ├─ TrackedAchievementStore.TryAdd(result.Id) 🟢
-├─ Plugin.SaveTrackedAchievements() 🟢/🟡
+├─ Plugin.SaveTrackedAchievements() 🟢
 └─ DrawCosmicProgressIfAvailable(result.Id) 🟠 for Cosmic IDs
 ```

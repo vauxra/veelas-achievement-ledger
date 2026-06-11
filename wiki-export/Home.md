@@ -9,7 +9,7 @@ This folder is a human-friendly map of the C# codebase. It is written for someon
 1. [Home / code map](Home) — this page, reading order, color legend, and mental model.
 2. [Whole plugin hierarchy](Whole-plugin-hierarchy) — the full top-down map of the plugin.
 3. [Big picture](Big-picture) — user actions, component level, and important call chains.
-4. [Function call map](Function-call-map) — important functions, what they call, and TLP layer labels.
+4. [Function call map](Function-call-map) — important functions, what they call, and component safety labels.
 5. [Cosmic Class cache flow](Cosmic-Class-cache-flow) — exactly where Cosmic scores are read and saved.
 6. [UI/window map](UI-window-map) — buttons and what code they trigger.
 7. [Data model map](Data-model-map) — saved config, in-memory state, load/save timing, and Dalamud best-practice notes.
@@ -21,11 +21,10 @@ This folder is a human-friendly map of the C# codebase. It is written for someon
 
 ## TLP / layer color legend
 
-This wiki uses traffic-light color labels to show what layer a method or component touches:
+This wiki uses traffic-light color labels to show what kind of component the plugin is touching and how safe/expected that surface is:
 
-- 🟢 **TLP-GREEN — plugin-owned safe layer:** VAL windows, stores, models, pure formatting, config models.
-- 🟡 **TLP-YELLOW — Dalamud managed layer:** injected Dalamud services, WindowSystem, ImGui helpers, Lumina data reads, plugin config save/load.
-- 🟠 **TLP-AMBER — native/ClientStructs read or UI adapter:** small isolated adapters touching `AgentAchievement`, `Achievement.Instance()`, or `WKSManager`.
+- 🟢 **TLP-GREEN — safe/supported component layer:** ordinary plugin code plus supported Dalamud services/libraries such as `WindowSystem`, ImGui helpers, `IDataManager`, `IUnlockState`, `IClientState`, `IFramework`, and plugin config APIs.
+- 🟠 **TLP-AMBER — native/ClientStructs read or UI adapter:** isolated adapters touching game-client surfaces such as `AgentAchievement`, `Achievement.Instance()`, or `WKSManager`. Acceptable when small, read-only/user-guided, and documented.
 - 🔴 **TLP-RED — blocked/deprecated path:** raw memory scans, signatures, low-level hooks, `Dalamud.Hooking`, direct achievement-progress request queues. These should not be present in current mainline.
 
 ## Mental model

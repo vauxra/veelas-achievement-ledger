@@ -17,7 +17,7 @@ Version: `v0.2.0.20`
 ## Persistence summary
 
 ```text
-Persistent file-backed state 🟢/🟡
+Persistent file-backed state 🟢
 └─ Configuration object
    ├─ TrackedAchievementIds
    ├─ TrackedAchievementPresets
@@ -36,10 +36,10 @@ The plugin follows the normal Dalamud pattern: one serializable `IPluginConfigur
 ## Load timing
 
 ```text
-Dalamud creates Plugin 🟡
+Dalamud creates Plugin 🟢
 └─ Plugin.Plugin() constructor 🟢
-   ├─ LoadAndNormalizeConfiguration() 🟢/🟡
-   │  ├─ PluginInterface.GetPluginConfig() 🟡
+   ├─ LoadAndNormalizeConfiguration() 🟢
+   │  ├─ PluginInterface.GetPluginConfig() 🟢
    │  ├─ if null: new Configuration() 🟢
    │  └─ Configuration.Normalize() 🟢
    ├─ CreateTrackedAchievementStore() 🟢
@@ -51,19 +51,19 @@ Dalamud creates Plugin 🟡
 
 ```text
 User edits tracked list 🟢
-└─ Plugin.SaveTrackedAchievements() 🟢/🟡
+└─ Plugin.SaveTrackedAchievements() 🟢
    ├─ Configuration.TrackedAchievementIds = TrackedAchievementStore.ToConfigList() 🟢
-   └─ Configuration.Save() -> PluginInterface.SavePluginConfig(this) 🟡
+   └─ Configuration.Save() -> PluginInterface.SavePluginConfig(this) 🟢
 
 User edits presets/search setting 🟢
-└─ Plugin.SaveConfiguration() 🟢/🟡
-   └─ Configuration.Save() -> PluginInterface.SavePluginConfig(this) 🟡
+└─ Plugin.SaveConfiguration() 🟢
+   └─ Configuration.Save() -> PluginInterface.SavePluginConfig(this) 🟢
 
 Cosmic live scores observed 🟠
 └─ CosmicClassProgressProvider.SaveScoresToCache(liveScores) 🟠
    ├─ CosmicClassScoreCache.Scores = values 🟢
    ├─ CosmicClassScoreCache.ObservedAtUnixSeconds = now 🟢
-   └─ saveCache callback -> Plugin.SaveConfiguration() 🟢/🟡
+   └─ saveCache callback -> Plugin.SaveConfiguration() 🟢
 ```
 
 ## `Configuration.cs`
@@ -86,8 +86,8 @@ Normalize() 🟢
 ├─ TrackedAchievementPresetStore.Normalize(TrackedAchievementPresets) 🟢
 └─ CosmicClassProgressProvider.Normalize(CosmicClassScoreCache) 🟠
 
-Save() 🟢/🟡
-└─ Plugin.PluginInterface.SavePluginConfig(this) 🟡
+Save() 🟢
+└─ Plugin.PluginInterface.SavePluginConfig(this) 🟢
 ```
 
 ## `TrackedAchievementStore.cs`

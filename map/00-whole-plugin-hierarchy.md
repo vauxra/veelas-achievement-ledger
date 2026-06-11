@@ -41,16 +41,16 @@ Plugin 🟢
 ├─ owns Configuration 🟢
 ├─ owns TrackedAchievementStore 🟢
 ├─ owns AchievementCatalog 🟢
-│  └─ uses IDataManager / Lumina sheets 🟡
+│  └─ uses IDataManager / Lumina sheets 🟢
 ├─ owns ClientAchievementProgressSource 🟠
 │  └─ reads Achievement.Instance() local progress slot only during bounded observation windows
 ├─ owns CosmicClassProgressProvider 🟠
 │  ├─ reads WKSManager.Instance() local scores
-│  └─ writes Configuration.CosmicClassScoreCache through Plugin.SaveConfiguration 🟡
+│  └─ writes Configuration.CosmicClassScoreCache through Plugin.SaveConfiguration 🟢
 ├─ owns NativeAchievementNavigator 🟠
 │  └─ uses AgentAchievement.Instance() native Achievement UI
 ├─ owns AchievementProgressService 🟢
-│  ├─ uses IUnlockState 🟡
+│  ├─ uses IUnlockState 🟢
 │  ├─ uses ClientAchievementProgressSource 🟠
 │  └─ uses CosmicClassProgressProvider 🟠
 ├─ owns TrackerWindow 🟢
@@ -62,24 +62,24 @@ Plugin 🟢
 ## Startup lifecycle
 
 ```text
-Dalamud loads plugin 🟡
+Dalamud loads plugin 🟢
 └─ new Plugin() 🟢
    ├─ LoadAndNormalizeConfiguration()
-   │  └─ PluginInterface.GetPluginConfig() 🟡
+   │  └─ PluginInterface.GetPluginConfig() 🟢
    ├─ Configuration.Normalize()
    ├─ TrackedAchievementStore.LoadFrom(config IDs)
    ├─ create catalog/progress/navigation/Cosmic services
    ├─ create windows
-   ├─ WindowSystem.AddWindow(...) 🟡
-   ├─ CommandManager.AddHandler("/val", OnCommand) 🟡
-   ├─ register UI draw/open callbacks 🟡
-   ├─ register Framework.Update 🟡
-   └─ register ClientState login/logout resets 🟡
+   ├─ WindowSystem.AddWindow(...) 🟢
+   ├─ CommandManager.AddHandler("/val", OnCommand) 🟢
+   ├─ register UI draw/open callbacks 🟢
+   ├─ register Framework.Update 🟢
+   └─ register ClientState login/logout resets 🟢
 ```
 
 ## Runtime boundaries
 
 - 🟢 Most code is plugin-owned UI, models, stores, and formatting.
-- 🟡 Dalamud services provide config persistence, commands, UI draw callbacks, Lumina data, unlock/completion checks, zone/login state, and framework ticks.
+- 🟢 Dalamud services provide config persistence, commands, UI draw callbacks, Lumina data, unlock/completion checks, zone/login state, and framework ticks.
 - 🟠 Native adapters are isolated to three files: `NativeAchievementNavigator`, `ClientAchievementProgressSource`, and `CosmicClassProgressProvider`.
 - 🔴 Current mainline should not contain hook observer classes, `Dalamud.Hooking`, signatures, raw-memory scans, or direct achievement-progress request queues.

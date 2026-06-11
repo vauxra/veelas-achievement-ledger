@@ -26,9 +26,9 @@ It does **not** directly request achievement progress from the server in current
 
 ```text
 Plugin 🟢
-├─ Configuration 🟢 persisted by PluginInterface 🟡
+├─ Configuration 🟢 persisted by PluginInterface 🟢
 ├─ TrackedAchievementStore 🟢 in-memory ordered IDs
-├─ AchievementCatalog 🟢 + IDataManager/Lumina 🟡
+├─ AchievementCatalog 🟢 + IDataManager/Lumina 🟢
 ├─ ClientAchievementProgressSource 🟠 bounded local progress-slot observation
 ├─ CosmicClassProgressProvider 🟠 WKSManager score reads + config cache
 ├─ NativeAchievementNavigator 🟠 AgentAchievement native UI adapter
@@ -112,13 +112,13 @@ User clicks Close Achievements 🟢
 ```text
 User searches in ConfigWindow 🟢
 └─ ConfigWindow.GetVisibleSearchResults() 🟢
-   ├─ AchievementCatalog.Search(query) 🟢/🟡
-   └─ AchievementProgressService.IsComplete(row) 🟢/🟡
+   ├─ AchievementCatalog.Search(query) 🟢
+   └─ AchievementProgressService.IsComplete(row) 🟢
 User clicks Add 🟢
 └─ TrackedAchievementStore.TryAdd(achievementId) 🟢
-   └─ Plugin.SaveTrackedAchievements() 🟢/🟡
+   └─ Plugin.SaveTrackedAchievements() 🟢
       ├─ Configuration.TrackedAchievementIds = store.ToConfigList() 🟢
-      └─ Configuration.Save() -> PluginInterface.SavePluginConfig(this) 🟡
+      └─ Configuration.Save() -> PluginInterface.SavePluginConfig(this) 🟢
 ```
 
 ### Remove/reorder tracked achievements
@@ -126,7 +126,7 @@ User clicks Add 🟢
 ```text
 User clicks X / Top / Up / Down / Bottom 🟢
 └─ TrackedAchievementStore.Remove/Move...(id) 🟢
-   └─ Plugin.SaveTrackedAchievements() 🟢/🟡
+   └─ Plugin.SaveTrackedAchievements() 🟢
 ```
 
 ### Save/read/rename/delete presets
@@ -134,8 +134,8 @@ User clicks X / Top / Up / Down / Bottom 🟢
 ```text
 User clicks preset icons 🟢
 └─ TrackedAchievementPresetStore.SavePreset/Rename/Delete/FindPreset(...) 🟢
-   └─ Plugin.SaveConfiguration() 🟢/🟡
-      └─ PluginInterface.SavePluginConfig(Configuration) 🟡
+   └─ Plugin.SaveConfiguration() 🟢
+      └─ PluginInterface.SavePluginConfig(Configuration) 🟢
 ```
 
 ### Toggle hide-completed search filter
@@ -143,7 +143,7 @@ User clicks preset icons 🟢
 ```text
 User checks Hide completed 🟢
 └─ Configuration.HideCompletedInSearch = value 🟢
-   └─ Plugin.SaveConfiguration() 🟢/🟡
+   └─ Plugin.SaveConfiguration() 🟢
 ```
 
 ## Where achievement IDs come from
@@ -158,19 +158,19 @@ After that, most UI flows use IDs from `TrackedAchievementStore.AchievementIds`.
 ## Achievement getter/setter hierarchy
 
 ```text
-AchievementCatalog.TryGetRow(id) 🟢/🟡
+AchievementCatalog.TryGetRow(id) 🟢
 └─ returns Lumina Achievement row metadata: name, category, data target rows
 
 AchievementProgressService.GetProgress(row) 🟢
 ├─ CosmicClassProgressProvider.GetProgress(id) 🟠 for Cosmic IDs 3702-3739
 ├─ ClientAchievementProgressSource.TryGetProgress(id, out current, out max) 🟠
-├─ IUnlockState.IsAchievementListLoaded / IsAchievementComplete(row) 🟡
-└─ AchievementProgress.TargetKnown(...) from Lumina target data 🟢/🟡
+├─ IUnlockState.IsAchievementListLoaded / IsAchievementComplete(row) 🟢
+└─ AchievementProgress.TargetKnown(...) from Lumina target data 🟢
 
 TrackedAchievementStore.TryAdd/Remove/Move... 🟢
 └─ changes in-memory list only until Plugin.SaveTrackedAchievements() persists it
 
-Configuration.Save() 🟢/🟡
+Configuration.Save() 🟢
 └─ PluginInterface.SavePluginConfig(this) writes Dalamud plugin config using standard Dalamud persistence
 ```
 
@@ -192,7 +192,7 @@ AchievementProgressService.GetProgress(row) 🟢
    ├─ map achievement ID 3702-3739 to class score indexes + target 🟢
    ├─ TryReadLiveScores() 🟠
    │  └─ WKSManager.Instance()->State.Scores 🟠
-   ├─ SaveScoresToCache(...) 🟢/🟡
-   │  └─ Plugin.SaveConfiguration() -> SavePluginConfig 🟡
+   ├─ SaveScoresToCache(...) 🟢
+   │  └─ Plugin.SaveConfiguration() -> SavePluginConfig 🟢
    └─ fallback to cached scores or Data not available 🟢
 ```
