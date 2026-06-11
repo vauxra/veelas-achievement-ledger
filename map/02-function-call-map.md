@@ -1,6 +1,6 @@
 # Function call map
 
-Version: `v0.2.0.30`
+Version: `v0.2.0.31`
 
 This map follows the refactored code layout. The goal is to show what each important method does, what it calls, and which layer it touches.
 
@@ -19,8 +19,11 @@ Purpose: create the application object, services, and windows.
 ```text
 Plugin()
 ├─ LoadAndNormalizeConfiguration() 🟢
-├─ CreateTrackedAchievementStore() 🟢
 ├─ new AchievementCatalog(DataManager) 🟢
+├─ CreateTrackedAchievementStore() 🟢
+│  ├─ Configuration.TrackedAchievementIds 🟢
+│  ├─ AchievementCatalog.IsManuallyViewable(id) 🟢
+│  └─ TrackedAchievementStore.LoadFrom(filteredIds) 🟢
 ├─ new ClientAchievementProgressSource() 🟡
 ├─ new CosmicClassProgressProvider(cache, SaveConfiguration) 🟡
 ├─ new NativeAchievementNavigator() 🟡
@@ -33,6 +36,8 @@ Plugin()
 ```
 
 See also: [Whole plugin hierarchy](./00-whole-plugin-hierarchy.md), [Data model map](./05-data-model-map.md).
+
+Startup intentionally filters saved tracked IDs before loading the in-memory list. Hidden or non-manually-viewable rows are dropped on load rather than kept as stale tracked entries.
 
 ### `RegisterDalamudCallbacks()` / `UnregisterDalamudCallbacks()` 🟢
 
@@ -161,6 +166,28 @@ GetProgress(achievementId)
 
 See: [Cosmic Class cache flow](./03-cosmic-cache-flow.md).
 
+## `AchievementCatalog.cs` — Lumina achievement catalog 🟢
+
+```text
+Search(query)
+├─ IDataManager.GetExcelSheet<Achievement>() 🟢
+├─ ToInfo(row) 🟢
+├─ reject blank names 🟢
+├─ IsManuallyViewable(row.RowId) 🟢
+│  ├─ TryGetRow(id) 🟢
+│  ├─ require valid AchievementCategory 🟢
+│  ├─ reject AchievementCategory.HideCategory 🟢
+│  ├─ reject AchievementHideCondition.HideAchievement 🟢
+│  └─ reject AchievementHideCondition.HideName 🟢
+├─ optional name/category query match 🟢
+└─ order/take results 🟢
+
+TryGetRow(id)
+└─ IDataManager.GetExcelSheet<Achievement>().TryGetRow(id) 🟢
+```
+
+This is the central selection boundary for tracking. VAL only offers achievements that should be manually visible in the native Achievement menu; hidden seasonal/category rows remain readable as Lumina metadata but are not selectable for tracking.
+
 ## `Configuration.cs` and stores — saved/in-memory state 🟢
 
 ```text
@@ -211,6 +238,7 @@ DrawTrackedAchievementRow(id)
 └─ NativeAchievementNavigator.OpenAchievement(id) for inspect 🟡
 
 DrawSearchResultRow(result)
+├─ AchievementCatalog.IsManuallyViewable(result.Id) 🟢
 ├─ TrackedAchievementStore.TryAdd(result.Id) 🟢
 ├─ Plugin.SaveTrackedAchievements() 🟢
 └─ DrawCosmicProgressIfAvailable(result.Id) 🟡 for Cosmic IDs

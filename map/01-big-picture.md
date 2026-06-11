@@ -1,6 +1,6 @@
 # Big picture
 
-Version: `v0.2.0.30`
+Version: `v0.2.0.31`
 
 ## Navigation outline
 
@@ -114,13 +114,19 @@ User clicks Close Achievements 🟢
 User searches in ConfigWindow 🟢
 └─ ConfigWindow.GetVisibleSearchResults() 🟢
    ├─ AchievementCatalog.Search(query) 🟢
+   │  └─ AchievementCatalog.IsManuallyViewable(id) 🟢
+   │     ├─ requires visible AchievementCategory.HideCategory == false 🟢
+   │     └─ rejects AchievementHideCondition HideAchievement/HideName 🟢
    └─ AchievementProgressService.IsComplete(row) 🟢
 User clicks Add 🟢
-└─ TrackedAchievementStore.TryAdd(achievementId) 🟢
+└─ AchievementCatalog.IsManuallyViewable(achievementId) 🟢
+   └─ TrackedAchievementStore.TryAdd(achievementId) 🟢
    └─ Plugin.SaveTrackedAchievements() 🟢
       ├─ Configuration.TrackedAchievementIds = store.ToConfigList() 🟢
       └─ Configuration.Save() -> PluginInterface.SavePluginConfig(this) 🟢
 ```
+
+Hidden or non-manually-viewable Lumina rows are intentionally excluded from selection. Example: old hidden Seasonal Event achievements with `AchievementCategory.HideCategory = true` are not offered for tracking because the native Achievement menu cannot manually display them.
 
 ### Remove/reorder tracked achievements
 
@@ -135,6 +141,7 @@ User clicks X / Top / Up / Down / Bottom 🟢
 ```text
 User clicks preset icons 🟢
 └─ TrackedAchievementPresetStore.SavePreset/Rename/Delete/FindPreset(...) 🟢
+   ├─ read/load filters ids through AchievementCatalog.IsManuallyViewable(id) 🟢
    └─ Plugin.SaveConfiguration() 🟢
       └─ PluginInterface.SavePluginConfig(Configuration) 🟢
 ```
@@ -151,8 +158,15 @@ User checks Hide completed 🟢
 
 Achievement IDs enter the system from two places:
 
-1. **Search results**: `AchievementCatalog.Search(query)` reads Lumina `Achievement` rows through Dalamud `IDataManager`. Each result has an `Id`/`RowId`. When the player clicks Add, that ID becomes tracked.
-2. **Saved config**: `PluginInterface.GetPluginConfig()` loads `Configuration.TrackedAchievementIds`, then `TrackedAchievementStore.LoadFrom(ids)` builds the in-memory ordered list.
+1. **Search results**: `AchievementCatalog.Search(query)` reads Lumina `Achievement` rows through Dalamud `IDataManager`, then keeps only rows that `AchievementCatalog.IsManuallyViewable(id)` accepts. Each result has an `Id`/`RowId`. When the player clicks Add, that ID is checked again before it becomes tracked.
+2. **Saved config**: `PluginInterface.GetPluginConfig()` loads `Configuration.TrackedAchievementIds`, then `CreateTrackedAchievementStore()` filters saved IDs through `AchievementCatalog.IsManuallyViewable(id)` before `TrackedAchievementStore.LoadFrom(ids)` builds the in-memory ordered list.
+
+The manually-viewable filter rejects:
+
+- missing/invalid Achievement rows
+- blank achievement names
+- hidden categories (`AchievementCategory.HideCategory`)
+- hide conditions that hide the achievement or its name (`HideAchievement`, `HideName`)
 
 After that, most UI flows use IDs from `TrackedAchievementStore.AchievementIds`.
 

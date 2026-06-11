@@ -1,6 +1,6 @@
 # File index
 
-Version: `v0.2.0.30`
+Version: `v0.2.0.31`
 
 ## What this page is for
 
@@ -81,20 +81,20 @@ Members found:
 - line 20: `private static readonly TimeSpan AchievementUpdateMaximumLockout = TimeSpan.FromSeconds(15);`
 - line 21: `private static readonly TimeSpan AchievementObservationWindow = AchievementUpdateMaximumLockout;`
 - line 22: `private static readonly TimeSpan CosmicCacheRefreshInterval = TimeSpan.FromSeconds(30);`
-- line 38: `public Configuration Configuration { get; }`
-- line 39: `public TrackedAchievementStore TrackedAchievements { get; }`
-- line 40: `public AchievementCatalog AchievementCatalog { get; }`
-- line 41: `public AchievementProgressService AchievementProgressService { get; }`
-- line 42: `public IAchievementProgressSource AchievementProgressSource { get; }`
-- line 43: `public ClientAchievementProgressSource ClientAchievementProgressSource { get; }`
-- line 44: `public CosmicClassProgressProvider CosmicClassProgressProvider { get; }`
-- line 45: `public NativeAchievementNavigator NativeAchievementNavigator { get; }`
-- line 46: `public WindowSystem WindowSystem { get; } = new("VeelasAchievementLedger");`
-- line 50: `private TrackerWindow TrackerWindow { get; }`
-- line 51: `private ConfigWindow ConfigWindow { get; }`
-- line 55: `public Plugin()`
-- line 73: `public void Dispose()`
-- line 82: `public void SaveTrackedAchievements()`
+- line 42: `public Configuration Configuration { get; }`
+- line 43: `public TrackedAchievementStore TrackedAchievements { get; }`
+- line 44: `public AchievementCatalog AchievementCatalog { get; }`
+- line 45: `public AchievementProgressService AchievementProgressService { get; }`
+- line 46: `public IAchievementProgressSource AchievementProgressSource { get; }`
+- line 47: `public ClientAchievementProgressSource ClientAchievementProgressSource { get; }`
+- line 48: `public CosmicClassProgressProvider CosmicClassProgressProvider { get; }`
+- line 49: `public NativeAchievementNavigator NativeAchievementNavigator { get; }`
+- line 50: `public WindowSystem WindowSystem { get; } = new("VeelasAchievementLedger");`
+- line 54: `private TrackerWindow TrackerWindow { get; }`
+- line 55: `private ConfigWindow ConfigWindow { get; }`
+- line 62: `public Plugin()`
+- line 80: `public void Dispose()`
+- line 89: `public void SaveTrackedAchievements()`
 - line 88: `public void SaveConfiguration()`
 - line 105: `public bool CanOpenAchievementForUpdate => this.AchievementUpdateOpenRemaining == TimeSpan.Zero;`
 - line 107: `public bool OpenAchievementForUpdate(uint achievementId)`
@@ -123,9 +123,10 @@ Types: `AchievementCatalog`
 Members found:
 - line 14: `public AchievementCatalog(IDataManager dataManager)`
 - line 19: `public IEnumerable<AchievementInfo> Search(string query, int limit = 50)`
-- line 43: `public bool TryGet(uint achievementId, out AchievementInfo achievementInfo)`
-- line 58: `public bool TryGetRow(uint achievementId, out Achievement achievement)`
-- line 66: `private AchievementInfo ToInfo(Achievement achievement)`
+- line 44: `public bool TryGet(uint achievementId, out AchievementInfo achievementInfo)`
+- line 59: `public bool TryGetRow(uint achievementId, out Achievement achievement)`
+- line 67: `public bool IsManuallyViewable(uint achievementId)`
+- line 92: `private AchievementInfo ToInfo(Achievement achievement)`
 
 ## `AchievementTracker/Services/AchievementProgressService.cs`
 

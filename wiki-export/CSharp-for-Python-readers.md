@@ -1,6 +1,6 @@
 # C# primer for Python readers
 
-Version: `v0.2.0.30`
+Version: `v0.2.0.31`
 
 This document explains the C# conventions used in Veela's Achievement Ledger by comparing them to Python ideas.
 

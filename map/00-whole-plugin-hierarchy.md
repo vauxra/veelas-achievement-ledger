@@ -1,6 +1,6 @@
 # Whole plugin hierarchy
 
-Version: `v0.2.0.30`
+Version: `v0.2.0.31`
 
 This is the broad map of the entire plugin. Read it top-to-bottom like a Python package map.
 
@@ -19,7 +19,7 @@ AchievementTracker/
 │  ├─ TrackedAchievement.cs          # tracked achievement item
 │  └─ TrackedAchievementPreset.cs    # named saved tracked list
 ├─ Services/                         # work/helper classes
-│  ├─ AchievementCatalog.cs          # reads Lumina achievement/category data
+│  ├─ AchievementCatalog.cs          # reads Lumina achievement/category data and filters manually-viewable rows
 │  ├─ AchievementProgressService.cs  # decides what progress text to show
 │  ├─ ClientAchievementProgressSource.cs
 │  │                                  # bounded observed-progress cache after user-guided opens

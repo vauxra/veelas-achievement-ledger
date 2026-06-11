@@ -1,6 +1,6 @@
 # UI/window map
 
-Version: `v0.2.0.30`
+Version: `v0.2.0.31`
 
 The UI code is in `AchievementTracker/Windows/`. It uses ImGui, which is immediate-mode UI: every `Draw...` method is called repeatedly, but button bodies only run when clicked.
 
@@ -95,7 +95,7 @@ DrawPresetControls()
 Preset actions change only plugin config:
 
 - save current tracked list
-- select/load preset immediately
+- select/load preset immediately, filtering preset IDs through `AchievementCatalog.IsManuallyViewable(id)` before they enter the tracked list
 - read selected preset again
 - rename selected preset
 - delete selected preset
@@ -127,15 +127,16 @@ DrawSearchAndAdd()
 ├─ DrawHideCompletedCheckbox()
 ├─ DrawSearchInput()
 ├─ GetVisibleSearchResults()
+│  └─ AchievementCatalog.Search(query) filters hidden/non-manually-viewable rows
 └─ DrawSearchResultRow(result)
    ├─ DrawSearchResultAction(...)
-   │  ├─ Add
+   │  ├─ Add, guarded by AchievementCatalog.IsManuallyViewable(id)
    │  ├─ Remove
    │  └─ Full label
    └─ DrawSearchResultDetails(result)
 ```
 
-Risk: low. Search reads Lumina data and plugin config. The magnifying-glass button opens native Achievement UI by direct user click.
+Risk: low. Search reads Lumina data and plugin config. It excludes hidden categories and achievement/name hide conditions so users can only add achievements that should be manually viewable in the native Achievement menu. The magnifying-glass button opens native Achievement UI by direct user click.
 
 ## Why UI nesting still exists
 

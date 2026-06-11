@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0.30",
+  "version": "0.2.0.31",
   "purpose": "Source locator backing map/07-file-index.md; function behavior is documented in map/02-function-call-map.md.",
   "entries": [
     {
@@ -310,15 +310,19 @@
           "signature": "public IEnumerable<AchievementInfo> Search(string query, int limit = 50)"
         },
         {
-          "line": 43,
+          "line": 44,
           "signature": "public bool TryGet(uint achievementId, out AchievementInfo achievementInfo)"
         },
         {
-          "line": 58,
+          "line": 59,
           "signature": "public bool TryGetRow(uint achievementId, out Achievement achievement)"
         },
         {
-          "line": 66,
+          "line": 67,
+          "signature": "public bool IsManuallyViewable(uint achievementId)"
+        },
+        {
+          "line": 92,
           "signature": "private AchievementInfo ToInfo(Achievement achievement)"
         }
       ]

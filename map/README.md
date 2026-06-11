@@ -1,6 +1,6 @@
 # Code map for Veela's Achievement Ledger
 
-Version: `v0.2.0.30`
+Version: `v0.2.0.31`
 
 This folder is a human-friendly map of the C# codebase. It is written for someone who is more comfortable with Python than C# and wants to know which plugin, Dalamud, and game-client components are touched.
 

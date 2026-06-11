@@ -1,6 +1,6 @@
 # Function call map
 
-Version: `v0.2.0.30`
+Version: `v0.2.0.31`
 
 This map follows the refactored code layout. The goal is to show what each important method does, what it calls, and which layer it touches.
 
@@ -19,8 +19,11 @@ Purpose: create the application object, services, and windows.
 ```text
 Plugin()
 ├─ LoadAndNormalizeConfiguration() 🟢
-├─ CreateTrackedAchievementStore() 🟢
 ├─ new AchievementCatalog(DataManager) 🟢
+├─ CreateTrackedAchievementStore() 🟢
+│  ├─ Configuration.TrackedAchievementIds 🟢
+│  ├─ AchievementCatalog.IsManuallyViewable(id) 🟢
+│  └─ TrackedAchievementStore.LoadFrom(filteredIds) 🟢
 ├─ new ClientAchievementProgressSource() 🟡
 ├─ new CosmicClassProgressProvider(cache, SaveConfiguration) 🟡
 ├─ new NativeAchievementNavigator() 🟡
@@ -32,7 +35,9 @@ Plugin()
 └─ RegisterDalamudCallbacks() 🟢
 ```
 
-See also: [Whole plugin hierarchy](Whole-plugin-hierarchy), [Data model map](Data-model-map).
+See also: [Whole plugin hierarchy](./00-whole-plugin-hierarchy.md), [Data model map](./05-data-model-map.md).
+
+Startup intentionally filters saved tracked IDs before loading the in-memory list. Hidden or non-manually-viewable rows are dropped on load rather than kept as stale tracked entries.
 
 ### `RegisterDalamudCallbacks()` / `UnregisterDalamudCallbacks()` 🟢
 
@@ -64,7 +69,7 @@ OpenAchievementForUpdate(id)
 └─ if window was closed: Waiting for data countdown, max 15s with 1.0-1.5s minimum 🟢
 ```
 
-Method links: [Big picture native open path](Big-picture#native-achievement-open-path), [Safety map](Safety-map#native-achievement-ui-actions).
+Method links: [Big picture native open path](./01-big-picture.md#native-achievement-open-path), [Safety map](./06-safety-map.md#native-achievement-ui-actions).
 
 ### `OnFrameworkUpdate(IFramework framework)` 🟢/🟡
 
@@ -85,7 +90,7 @@ RefreshCosmicCacheFromLiveState()
 └─ CosmicClassProgressProvider.RefreshCacheFromLiveScores() 🟡
 ```
 
-See: [Cosmic Class cache flow](Cosmic-Class-cache-flow).
+See: [Cosmic Class cache flow](./03-cosmic-cache-flow.md).
 
 ## `NativeAchievementNavigator.cs` — native Achievement UI adapter 🟡
 
@@ -159,7 +164,29 @@ GetProgress(achievementId)
 └─ AchievementProgress.Numeric(current, target) or DataNotAvailable 🟢
 ```
 
-See: [Cosmic Class cache flow](Cosmic-Class-cache-flow).
+See: [Cosmic Class cache flow](./03-cosmic-cache-flow.md).
+
+## `AchievementCatalog.cs` — Lumina achievement catalog 🟢
+
+```text
+Search(query)
+├─ IDataManager.GetExcelSheet<Achievement>() 🟢
+├─ ToInfo(row) 🟢
+├─ reject blank names 🟢
+├─ IsManuallyViewable(row.RowId) 🟢
+│  ├─ TryGetRow(id) 🟢
+│  ├─ require valid AchievementCategory 🟢
+│  ├─ reject AchievementCategory.HideCategory 🟢
+│  ├─ reject AchievementHideCondition.HideAchievement 🟢
+│  └─ reject AchievementHideCondition.HideName 🟢
+├─ optional name/category query match 🟢
+└─ order/take results 🟢
+
+TryGetRow(id)
+└─ IDataManager.GetExcelSheet<Achievement>().TryGetRow(id) 🟢
+```
+
+This is the central selection boundary for tracking. VAL only offers achievements that should be manually visible in the native Achievement menu; hidden seasonal/category rows remain readable as Lumina metadata but are not selectable for tracking.
 
 ## `Configuration.cs` and stores — saved/in-memory state 🟢
 
@@ -174,7 +201,7 @@ TrackedAchievementPresetStore.SavePreset/Rename/Delete/Normalize 🟢
 └─ modifies Configuration.TrackedAchievementPresets in memory; Plugin.SaveConfiguration persists
 ```
 
-See: [Data model map](Data-model-map).
+See: [Data model map](./05-data-model-map.md).
 
 ## `TrackerWindow.cs` — main UI 🟢
 
@@ -211,6 +238,7 @@ DrawTrackedAchievementRow(id)
 └─ NativeAchievementNavigator.OpenAchievement(id) for inspect 🟡
 
 DrawSearchResultRow(result)
+├─ AchievementCatalog.IsManuallyViewable(result.Id) 🟢
 ├─ TrackedAchievementStore.TryAdd(result.Id) 🟢
 ├─ Plugin.SaveTrackedAchievements() 🟢
 └─ DrawCosmicProgressIfAvailable(result.Id) 🟡 for Cosmic IDs

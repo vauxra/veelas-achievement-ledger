@@ -1,6 +1,6 @@
 # Safety map
 
-Version: `v0.2.0.30`
+Version: `v0.2.0.31`
 
 This file maps the potentially sensitive areas and what they do.
 
@@ -85,6 +85,29 @@ Purpose:
 - local WKS/Cosmic score display
 - no server call
 - no achievement progress request
+
+## Tracking selection boundary
+
+File:
+
+```text
+AchievementTracker/Services/AchievementCatalog.cs
+```
+
+Boundary:
+
+```text
+AchievementCatalog.Search(query)
+└─ AchievementCatalog.IsManuallyViewable(id)
+   ├─ rejects hidden Achievement categories
+   └─ rejects HideAchievement / HideName conditions
+```
+
+Purpose:
+
+- keeps search/add limited to achievements the player should be able to manually view in the native Achievement menu
+- filters preset loads and startup saved IDs before they enter `TrackedAchievementStore`
+- prevents hidden seasonal/category rows from being tracked when native `OpenById` would show “Unable to Display this Achievement”
 
 ## Backend/network/privacy checks
 

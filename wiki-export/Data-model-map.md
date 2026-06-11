@@ -1,6 +1,6 @@
 # Data model map
 
-Version: `v0.2.0.30`
+Version: `v0.2.0.31`
 
 ## Navigation outline
 
@@ -39,13 +39,17 @@ The plugin follows the normal Dalamud pattern: one serializable `IPluginConfigur
 Dalamud creates Plugin 🟢
 └─ Plugin.Plugin() constructor 🟢
    ├─ LoadAndNormalizeConfiguration() 🟢
-   │  ├─ PluginInterface.GetPluginConfig() 🟢
-   │  ├─ if null: new Configuration() 🟢
-   │  └─ Configuration.Normalize() 🟢
+   │  └─ PluginInterface.GetPluginConfig() as Configuration 🟢
+   │     └─ Configuration.Normalize() 🟢
+   ├─ new AchievementCatalog(DataManager) 🟢
    ├─ CreateTrackedAchievementStore() 🟢
-   │  └─ TrackedAchievementStore.LoadFrom(Configuration.TrackedAchievementIds) 🟢
+   │  ├─ Configuration.TrackedAchievementIds 🟢
+   │  ├─ AchievementCatalog.IsManuallyViewable(id) 🟢
+   │  └─ TrackedAchievementStore.LoadFrom(filteredIds) 🟢
    └─ new CosmicClassProgressProvider(Configuration.CosmicClassScoreCache, SaveConfiguration) 🟡
 ```
+
+Saved tracked IDs are filtered on startup. If a previously-saved ID now belongs to a hidden category or hide condition, it is dropped before entering `TrackedAchievementStore`.
 
 ## Save timing
 
@@ -103,6 +107,28 @@ MoveToTop/MoveUp/MoveDown/MoveToBottom(id) 🟢
 ```
 
 Persistence happens only when caller invokes `Plugin.SaveTrackedAchievements()`.
+
+Tracking selection is guarded before IDs reach this store: search/add, preset load, and startup load all call `AchievementCatalog.IsManuallyViewable(id)` so the store only receives rows that should be manually displayable in the native Achievement menu.
+
+## `AchievementCatalog.cs`
+
+Lumina-backed catalog and selection boundary.
+
+```text
+Search(query) 🟢
+├─ reads Lumina Achievement rows through IDataManager 🟢
+├─ rejects blank names 🟢
+├─ IsManuallyViewable(id) 🟢
+└─ maps rows to AchievementInfo 🟢
+
+IsManuallyViewable(id) 🟢
+├─ rejects missing rows 🟢
+├─ rejects invalid/hidden categories 🟢
+├─ rejects HideAchievement / HideName hide conditions 🟢
+└─ rejects blank names 🟢
+```
+
+`AchievementCategory.HideCategory` is treated as not manually viewable. That keeps old hidden Seasonal Event rows out of tracking selection even though Lumina still exposes their metadata.
 
 ## `TrackedAchievementPresetStore.cs`
 

@@ -1,6 +1,6 @@
 # Dalamud hierarchy model for Veela's Achievement Ledger
 
-Version: `v0.2.0.30`
+Version: `v0.2.0.31`
 
 This page is a practical hierarchy of what actually exists in Veela's Achievement Ledger. The old single Mermaid diagram was too dense, so this version uses several smaller diagrams and a flat layer table.
 
@@ -15,7 +15,7 @@ When a call moves downward in the hierarchy, review risk goes up:
 ## Version snapshot
 
 - Plugin project: `VeelasAchievementLedger`
-- Plugin version: `0.2.0.30`
+- Plugin version: `0.2.0.31`
 - Project SDK: `Dalamud.NET.Sdk/15.0.0`
 - Package lock: `DalamudPackager 15.0.0`, `DotNet.ReproducibleBuilds 1.2.39`
 
