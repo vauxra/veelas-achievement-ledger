@@ -42,17 +42,17 @@ Plugin 🟢
 ├─ owns TrackedAchievementStore 🟢
 ├─ owns AchievementCatalog 🟢
 │  └─ uses IDataManager / Lumina sheets 🟢
-├─ owns ClientAchievementProgressSource 🟠
+├─ owns ClientAchievementProgressSource 🟡
 │  └─ reads Achievement.Instance() local progress slot only during bounded observation windows
-├─ owns CosmicClassProgressProvider 🟠
+├─ owns CosmicClassProgressProvider 🟡
 │  ├─ reads WKSManager.Instance() local scores
 │  └─ writes Configuration.CosmicClassScoreCache through Plugin.SaveConfiguration 🟢
-├─ owns NativeAchievementNavigator 🟠
+├─ owns NativeAchievementNavigator 🟡
 │  └─ uses AgentAchievement.Instance() native Achievement UI
 ├─ owns AchievementProgressService 🟢
 │  ├─ uses IUnlockState 🟢
-│  ├─ uses ClientAchievementProgressSource 🟠
-│  └─ uses CosmicClassProgressProvider 🟠
+│  ├─ uses ClientAchievementProgressSource 🟡
+│  └─ uses CosmicClassProgressProvider 🟡
 ├─ owns TrackerWindow 🟢
 │  └─ calls Plugin/service methods from main UI buttons
 └─ owns ConfigWindow 🟢
@@ -81,5 +81,5 @@ Dalamud loads plugin 🟢
 
 - 🟢 Most code is plugin-owned UI, models, stores, and formatting.
 - 🟢 Dalamud services provide config persistence, commands, UI draw callbacks, Lumina data, unlock/completion checks, zone/login state, and framework ticks.
-- 🟠 Native adapters are isolated to three files: `NativeAchievementNavigator`, `ClientAchievementProgressSource`, and `CosmicClassProgressProvider`.
+- 🟡 Native adapters are isolated to three files: `NativeAchievementNavigator`, `ClientAchievementProgressSource`, and `CosmicClassProgressProvider`.
 - 🔴 Current mainline should not contain hook observer classes, `Dalamud.Hooking`, signatures, raw-memory scans, or direct achievement-progress request queues.

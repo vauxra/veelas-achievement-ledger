@@ -29,9 +29,9 @@ Plugin 🟢
 ├─ Configuration 🟢 persisted by PluginInterface 🟢
 ├─ TrackedAchievementStore 🟢 in-memory ordered IDs
 ├─ AchievementCatalog 🟢 + IDataManager/Lumina 🟢
-├─ ClientAchievementProgressSource 🟠 bounded local progress-slot observation
-├─ CosmicClassProgressProvider 🟠 WKSManager score reads + config cache
-├─ NativeAchievementNavigator 🟠 AgentAchievement native UI adapter
+├─ ClientAchievementProgressSource 🟡 bounded local progress-slot observation
+├─ CosmicClassProgressProvider 🟡 WKSManager score reads + config cache
+├─ NativeAchievementNavigator 🟡 AgentAchievement native UI adapter
 ├─ AchievementProgressService 🟢 progress decision service
 ├─ TrackerWindow 🟢 main /val window
 └─ ConfigWindow 🟢 config/search/presets/help window
@@ -70,12 +70,12 @@ User clicks Update Next 🟢
 └─ TrackerWindow.OpenNextTrackedAchievementForUpdate() 🟢
    ├─ TrackerWindow.GetNextTrackedAchievementId() 🟢
    │  ├─ TrackedAchievementStore.AchievementIds 🟢
-   │  └─ ClientAchievementProgressSource.TryGetCachedObservation(id) 🟠
-   └─ Plugin.OpenAchievementForUpdate(achievementId) 🟢/🟠
+   │  └─ ClientAchievementProgressSource.TryGetCachedObservation(id) 🟡
+   └─ Plugin.OpenAchievementForUpdate(achievementId) 🟢/🟡
       ├─ checks CanOpenAchievementForUpdate lockout 🟢
-      ├─ NativeAchievementNavigator.OpenAchievement(achievementId) 🟠
-      │  └─ AgentAchievement.Instance()->OpenById(achievementId) 🟠
-      ├─ ClientAchievementProgressSource.BeginObservation(achievementId, 8s) 🟠
+      ├─ NativeAchievementNavigator.OpenAchievement(achievementId) 🟡
+      │  └─ AgentAchievement.Instance()->OpenById(achievementId) 🟡
+      ├─ ClientAchievementProgressSource.BeginObservation(achievementId, 8s) 🟡
       └─ sets nextAchievementUpdateOpenAt 🟢
 ```
 
@@ -84,7 +84,7 @@ User clicks Update Next 🟢
 ```text
 User clicks row sync/reload icon 🟢
 └─ TrackerWindow.DrawRowUpdateButton(id) or ConfigWindow.DrawTrackedUpdateButton(id) 🟢
-   └─ Plugin.OpenAchievementForUpdate(id) 🟢/🟠
+   └─ Plugin.OpenAchievementForUpdate(id) 🟢/🟡
 ```
 
 ### Inspect/open without update intent
@@ -92,8 +92,8 @@ User clicks row sync/reload icon 🟢
 ```text
 User clicks magnifying glass 🟢
 └─ TrackerWindow.OpenNativeAchievement(id) or ConfigWindow.DrawInspectButton(id) 🟢
-   └─ NativeAchievementNavigator.OpenAchievement(id) 🟠
-      └─ AgentAchievement.Instance()->OpenById(id) 🟠
+   └─ NativeAchievementNavigator.OpenAchievement(id) 🟡
+      └─ AgentAchievement.Instance()->OpenById(id) 🟡
 ```
 
 This path intentionally does not start the update lockout/observation timer.
@@ -103,8 +103,8 @@ This path intentionally does not start the update lockout/observation timer.
 ```text
 User clicks Close Achievements 🟢
 └─ TrackerWindow.DrawCloseAchievementsButton() 🟢
-   └─ NativeAchievementNavigator.CloseAchievements() 🟠
-      └─ AgentAchievement.Instance()->Hide() 🟠
+   └─ NativeAchievementNavigator.CloseAchievements() 🟡
+      └─ AgentAchievement.Instance()->Hide() 🟡
 ```
 
 ### Add achievement from search
@@ -162,8 +162,8 @@ AchievementCatalog.TryGetRow(id) 🟢
 └─ returns Lumina Achievement row metadata: name, category, data target rows
 
 AchievementProgressService.GetProgress(row) 🟢
-├─ CosmicClassProgressProvider.GetProgress(id) 🟠 for Cosmic IDs 3702-3739
-├─ ClientAchievementProgressSource.TryGetProgress(id, out current, out max) 🟠
+├─ CosmicClassProgressProvider.GetProgress(id) 🟡 for Cosmic IDs 3702-3739
+├─ ClientAchievementProgressSource.TryGetProgress(id, out current, out max) 🟡
 ├─ IUnlockState.IsAchievementListLoaded / IsAchievementComplete(row) 🟢
 └─ AchievementProgress.TargetKnown(...) from Lumina target data 🟢
 
@@ -180,18 +180,18 @@ Configuration.Save() 🟢
 
 ```text
 Plugin.OpenAchievementForUpdate(achievementId) 🟢
-└─ NativeAchievementNavigator.OpenAchievement(achievementId) 🟠 custom VAL adapter
-   └─ AgentAchievement.Instance()->OpenById(achievementId) 🟠 FFXIV native UI agent call
+└─ NativeAchievementNavigator.OpenAchievement(achievementId) 🟡 custom VAL adapter
+   └─ AgentAchievement.Instance()->OpenById(achievementId) 🟡 FFXIV native UI agent call
 ```
 
 ## Cosmic Class path
 
 ```text
 AchievementProgressService.GetProgress(row) 🟢
-└─ CosmicClassProgressProvider.GetProgress(row.RowId) 🟠
+└─ CosmicClassProgressProvider.GetProgress(row.RowId) 🟡
    ├─ map achievement ID 3702-3739 to class score indexes + target 🟢
-   ├─ TryReadLiveScores() 🟠
-   │  └─ WKSManager.Instance()->State.Scores 🟠
+   ├─ TryReadLiveScores() 🟡
+   │  └─ WKSManager.Instance()->State.Scores 🟡
    ├─ SaveScoresToCache(...) 🟢
    │  └─ Plugin.SaveConfiguration() -> SavePluginConfig 🟢
    └─ fallback to cached scores or Data not available 🟢

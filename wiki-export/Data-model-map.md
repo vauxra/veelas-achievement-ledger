@@ -24,10 +24,10 @@ Persistent file-backed state 🟢
    ├─ CosmicClassScoreCache
    └─ HideCompletedInSearch
 
-In-memory-only state 🟢/🟠
+In-memory-only state 🟢/🟡
 ├─ TrackedAchievementStore.achievementIds 🟢
-├─ ClientAchievementProgressSource.cachedProgress 🟠
-├─ ClientAchievementProgressSource.observationDeadlines 🟠
+├─ ClientAchievementProgressSource.cachedProgress 🟡
+├─ ClientAchievementProgressSource.observationDeadlines 🟡
 └─ Plugin lockout/cosmic refresh timestamps 🟢
 ```
 
@@ -44,7 +44,7 @@ Dalamud creates Plugin 🟢
    │  └─ Configuration.Normalize() 🟢
    ├─ CreateTrackedAchievementStore() 🟢
    │  └─ TrackedAchievementStore.LoadFrom(Configuration.TrackedAchievementIds) 🟢
-   └─ new CosmicClassProgressProvider(Configuration.CosmicClassScoreCache, SaveConfiguration) 🟠
+   └─ new CosmicClassProgressProvider(Configuration.CosmicClassScoreCache, SaveConfiguration) 🟡
 ```
 
 ## Save timing
@@ -59,8 +59,8 @@ User edits presets/search setting 🟢
 └─ Plugin.SaveConfiguration() 🟢
    └─ Configuration.Save() -> PluginInterface.SavePluginConfig(this) 🟢
 
-Cosmic live scores observed 🟠
-└─ CosmicClassProgressProvider.SaveScoresToCache(liveScores) 🟠
+Cosmic live scores observed 🟡
+└─ CosmicClassProgressProvider.SaveScoresToCache(liveScores) 🟡
    ├─ CosmicClassScoreCache.Scores = values 🟢
    ├─ CosmicClassScoreCache.ObservedAtUnixSeconds = now 🟢
    └─ saveCache callback -> Plugin.SaveConfiguration() 🟢
@@ -84,7 +84,7 @@ Methods:
 ```text
 Normalize() 🟢
 ├─ TrackedAchievementPresetStore.Normalize(TrackedAchievementPresets) 🟢
-└─ CosmicClassProgressProvider.Normalize(CosmicClassScoreCache) 🟠
+└─ CosmicClassProgressProvider.Normalize(CosmicClassScoreCache) 🟡
 
 Save() 🟢
 └─ Plugin.PluginInterface.SavePluginConfig(this) 🟢
@@ -131,7 +131,7 @@ CosmicClassScoreCache 🟢
 Writer:
 
 ```text
-CosmicClassProgressProvider.SaveScoresToCache(liveScores) 🟠
+CosmicClassProgressProvider.SaveScoresToCache(liveScores) 🟡
 ```
 
 Reader:
@@ -145,9 +145,9 @@ CosmicClassProgressProvider.TryReadCachedScores() 🟢
 `ClientAchievementProgressSource` keeps observed normal achievement progress in memory only:
 
 ```text
-cachedProgress: Dictionary<uint, ObservedAchievementProgress> 🟠
-observationDeadlines: Dictionary<uint, DateTimeOffset> 🟠
-observedCompletions: HashSet<uint> 🟠
+cachedProgress: Dictionary<uint, ObservedAchievementProgress> 🟡
+observationDeadlines: Dictionary<uint, DateTimeOffset> 🟡
+observedCompletions: HashSet<uint> 🟡
 ```
 
 These values are not saved to plugin config. They reset on plugin reload/login/logout.

@@ -24,7 +24,7 @@ This folder is a human-friendly map of the C# codebase. It is written for someon
 This wiki uses traffic-light color labels to show what kind of component the plugin is touching and how safe/expected that surface is:
 
 - 🟢 **TLP-GREEN — safe/supported component layer:** ordinary plugin code plus supported Dalamud services/libraries such as `WindowSystem`, ImGui helpers, `IDataManager`, `IUnlockState`, `IClientState`, `IFramework`, and plugin config APIs.
-- 🟠 **TLP-AMBER — native/ClientStructs read or UI adapter:** isolated adapters touching game-client surfaces such as `AgentAchievement`, `Achievement.Instance()`, or `WKSManager`. Acceptable when small, read-only/user-guided, and documented.
+- 🟡 **TLP-YELLOW — native/ClientStructs read or UI adapter:** isolated adapters touching game-client surfaces such as `AgentAchievement`, `Achievement.Instance()`, or `WKSManager`. Acceptable when small, read-only/user-guided, and documented.
 - 🔴 **TLP-RED — blocked/deprecated path:** raw memory scans, signatures, low-level hooks, `Dalamud.Hooking`, direct achievement-progress request queues. These should not be present in current mainline.
 
 ## Mental model

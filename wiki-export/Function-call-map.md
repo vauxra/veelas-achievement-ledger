@@ -8,7 +8,7 @@ This map follows the refactored code layout. The goal is to show what each impor
 
 - `A += B` in older docs meant “subscribe B as an event handler on event A.” In this page it is written explicitly as **subscribe**.
 - `Draw...` methods are ImGui UI code. They are redrawn every frame, but the inside of `if (ImGui.Button(...))` only runs on the click frame.
-- Component labels: 🟢 safe/supported plugin or Dalamud layer, 🟠 native/ClientStructs adapter, 🔴 blocked/deprecated.
+- Component labels: 🟢 safe/supported plugin or Dalamud layer, 🟡 native/ClientStructs adapter, 🔴 blocked/deprecated.
 
 ## `Plugin.cs` — app entry point / wiring
 
@@ -21,10 +21,10 @@ Plugin()
 ├─ LoadAndNormalizeConfiguration() 🟢
 ├─ CreateTrackedAchievementStore() 🟢
 ├─ new AchievementCatalog(DataManager) 🟢
-├─ new ClientAchievementProgressSource() 🟠
-├─ new CosmicClassProgressProvider(cache, SaveConfiguration) 🟠
-├─ new NativeAchievementNavigator() 🟠
-├─ new AchievementProgressService(UnlockState, progressSource, cosmicProvider) 🟢/🟠
+├─ new ClientAchievementProgressSource() 🟡
+├─ new CosmicClassProgressProvider(cache, SaveConfiguration) 🟡
+├─ new NativeAchievementNavigator() 🟡
+├─ new AchievementProgressService(UnlockState, progressSource, cosmicProvider) 🟢/🟡
 ├─ new TrackerWindow(this) 🟢
 ├─ new ConfigWindow(this) 🟢
 ├─ RegisterWindows() 🟢
@@ -50,67 +50,67 @@ RegisterDalamudCallbacks()
 
 TLP: 🟢 because this uses Dalamud lifecycle services. Dispose unregisters the same callbacks.
 
-### `OpenAchievementForUpdate(uint achievementId)` 🟢/🟠
+### `OpenAchievementForUpdate(uint achievementId)` 🟢/🟡
 
 Purpose: shared lockout-protected path for update-intent native opens.
 
 ```text
 OpenAchievementForUpdate(id)
 ├─ CanOpenAchievementForUpdate 🟢
-├─ NativeAchievementNavigator.OpenAchievement(id) 🟠
-├─ ClientAchievementProgressSource.BeginObservation(id, 8 seconds) 🟠
+├─ NativeAchievementNavigator.OpenAchievement(id) 🟡
+├─ ClientAchievementProgressSource.BeginObservation(id, 8 seconds) 🟡
 └─ set nextAchievementUpdateOpenAt 🟢
 ```
 
 Method links: [Big picture native open path](Big-picture#native-achievement-open-path), [Safety map](Safety-map#native-achievement-ui-actions).
 
-### `OnFrameworkUpdate(IFramework framework)` 🟢/🟠
+### `OnFrameworkUpdate(IFramework framework)` 🟢/🟡
 
 ```text
 OnFrameworkUpdate(framework)
-├─ ClientAchievementProgressSource.UpdateCache() 🟠
-└─ RefreshCosmicCacheFromLiveState() 🟠
+├─ ClientAchievementProgressSource.UpdateCache() 🟡
+└─ RefreshCosmicCacheFromLiveState() 🟡
 ```
 
 This is not a server polling loop. It reads local state only.
 
-### `RefreshCosmicCacheFromLiveState()` 🟢/🟠
+### `RefreshCosmicCacheFromLiveState()` 🟢/🟡
 
 ```text
 RefreshCosmicCacheFromLiveState()
 ├─ IsInSinusArdorum() uses ClientState.TerritoryType 🟢
 ├─ CosmicCacheRefreshIsDue() 🟢
-└─ CosmicClassProgressProvider.RefreshCacheFromLiveScores() 🟠
+└─ CosmicClassProgressProvider.RefreshCacheFromLiveScores() 🟡
 ```
 
 See: [Cosmic Class cache flow](Cosmic-Class-cache-flow).
 
-## `NativeAchievementNavigator.cs` — native Achievement UI adapter 🟠
+## `NativeAchievementNavigator.cs` — native Achievement UI adapter 🟡
 
 Custom VAL class; not derived from a system component. It wraps ClientStructs native UI agent calls.
 
 ```text
 OpenAchievement(achievementId)
 ├─ reject id == 0
-├─ AgentAchievement.Instance() 🟠
+├─ AgentAchievement.Instance() 🟡
 ├─ agent null-check
-└─ agent->OpenById(achievementId) 🟠
+└─ agent->OpenById(achievementId) 🟡
 
 CloseAchievements()
-├─ AgentAchievement.Instance() 🟠
+├─ AgentAchievement.Instance() 🟡
 ├─ agent null-check
-└─ agent->Hide() 🟠
+└─ agent->Hide() 🟡
 ```
 
-## `ClientAchievementProgressSource.cs` — bounded observation cache 🟠
+## `ClientAchievementProgressSource.cs` — bounded observation cache 🟡
 
 ```text
-BeginObservation(id, duration) 🟠
+BeginObservation(id, duration) 🟡
 └─ records a deadline for this exact id
 
-UpdateCache() 🟠
+UpdateCache() 🟡
 ├─ PruneExpiredObservations()
-├─ Achievement.Instance() 🟠
+├─ Achievement.Instance() 🟡
 └─ TryRecordObservedSlot(
       ProgressRequestState == Loaded,
       ProgressAchievementId,
@@ -118,7 +118,7 @@ UpdateCache() 🟠
       ProgressMax,
       "Achievement state slot")
 
-TryRecordObservedSlot(...) 🟠
+TryRecordObservedSlot(...) 🟡
 ├─ require loaded, id != 0, max != 0
 ├─ require active observation window for same id
 ├─ RecordObservedProgress(id, current, max, source)
@@ -127,13 +127,13 @@ TryRecordObservedSlot(...) 🟠
 
 No hook/event interception is used here.
 
-## `AchievementProgressService.cs` — progress decision service 🟢/🟠
+## `AchievementProgressService.cs` — progress decision service 🟢/🟡
 
 ```text
 GetProgress(Achievement row)
-├─ if CosmicClassProgressProvider.Handles(row.RowId) 🟠
-│  └─ CosmicClassProgressProvider.GetProgress(row.RowId) 🟠
-├─ if progressSource.TryGetProgress(row.RowId, out current, out max) 🟠
+├─ if CosmicClassProgressProvider.Handles(row.RowId) 🟡
+│  └─ CosmicClassProgressProvider.GetProgress(row.RowId) 🟡
+├─ if progressSource.TryGetProgress(row.RowId, out current, out max) 🟡
 │  └─ AchievementProgress.Numeric(current, max) 🟢
 ├─ if !UnlockState.IsAchievementListLoaded 🟢
 │  └─ CompletionListNotLoaded or TargetKnown 🟢
@@ -142,15 +142,15 @@ GetProgress(Achievement row)
 └─ TargetKnown / Incomplete / Unavailable 🟢
 ```
 
-## `CosmicClassProgressProvider.cs` — Cosmic score adapter 🟠
+## `CosmicClassProgressProvider.cs` — Cosmic score adapter 🟡
 
 ```text
 GetProgress(achievementId)
 ├─ GetRule(achievementId) maps 3702-3739 to class indexes/targets 🟢
-├─ TryReadLiveScores() 🟠
-│  ├─ WKSManager.Instance() 🟠
-│  ├─ manager->IsLoaded 🟠
-│  ├─ manager->State.Scores.ToArray() 🟠
+├─ TryReadLiveScores() 🟡
+│  ├─ WKSManager.Instance() 🟡
+│  ├─ manager->IsLoaded 🟡
+│  ├─ manager->State.Scores.ToArray() 🟡
 │  └─ SaveScoresToCache(liveScores) 🟢
 ├─ TryReadCachedScores() 🟢
 ├─ CalculateCurrentScore(scores, rule) 🟢
@@ -178,19 +178,19 @@ See: [Data model map](Data-model-map).
 
 ```text
 Draw()
-├─ AchievementProgressSource.UpdateCache() 🟠
+├─ AchievementProgressSource.UpdateCache() 🟡
 ├─ DrawTopButtons()
 └─ DrawTrackedAchievementList()
 
 DrawRowUpdateButton(id)
-└─ Plugin.OpenAchievementForUpdate(id) 🟢/🟠
+└─ Plugin.OpenAchievementForUpdate(id) 🟢/🟡
 
 DrawRowInspectButton(id)
-└─ NativeAchievementNavigator.OpenAchievement(id) 🟠
+└─ NativeAchievementNavigator.OpenAchievement(id) 🟡
 
 GetProgressText(id)
 ├─ AchievementCatalog.TryGetRow(id) 🟢
-└─ AchievementProgressService.GetProgress(row) 🟢/🟠
+└─ AchievementProgressService.GetProgress(row) 🟢/🟡
 ```
 
 ## `ConfigWindow.cs` — config/search/preset UI 🟢
@@ -205,11 +205,11 @@ Draw()
 
 DrawTrackedAchievementRow(id)
 ├─ move/remove/update/inspect buttons 🟢
-├─ Plugin.OpenAchievementForUpdate(id) for update 🟢/🟠
-└─ NativeAchievementNavigator.OpenAchievement(id) for inspect 🟠
+├─ Plugin.OpenAchievementForUpdate(id) for update 🟢/🟡
+└─ NativeAchievementNavigator.OpenAchievement(id) for inspect 🟡
 
 DrawSearchResultRow(result)
 ├─ TrackedAchievementStore.TryAdd(result.Id) 🟢
 ├─ Plugin.SaveTrackedAchievements() 🟢
-└─ DrawCosmicProgressIfAvailable(result.Id) 🟠 for Cosmic IDs
+└─ DrawCosmicProgressIfAvailable(result.Id) 🟡 for Cosmic IDs
 ```

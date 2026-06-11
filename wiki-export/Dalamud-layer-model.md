@@ -9,7 +9,7 @@ This page is a practical hierarchy of what actually exists in Veela's Achievemen
 When a call moves downward in the hierarchy, review risk goes up:
 
 - 🟢 Ordinary plugin code and supported Dalamud services/libraries are safe/expected surfaces.
-- 🟠 ClientStructs/native adapters are policy-sensitive and must stay small.
+- 🟡 ClientStructs/native adapters are policy-sensitive and must stay small.
 - 🔴 Raw memory, signatures, low-level hooks, and direct achievement-progress request queues are blocked/deprecated for current mainline.
 
 ## Version snapshot
@@ -39,10 +39,10 @@ Layer D 🟢 Data and progress interpretation
 Layer E 🟢 Dalamud service boundary
   IDalamudPluginInterface, ICommandManager, IDataManager, IUnlockState, IClientState, IFramework, UiBuilder
 
-Layer F 🟠 Isolated native/ClientStructs adapters
+Layer F 🟡 Isolated native/ClientStructs adapters
   NativeAchievementNavigator, ClientAchievementProgressSource, CosmicClassProgressProvider
 
-Layer G 🟠 FFXIV native/client state surfaces
+Layer G 🟡 FFXIV native/client state surfaces
   AgentAchievement, Achievement singleton progress slot, WKSManager.State.Scores
 
 Layer X 🔴 Blocked/deprecated
@@ -65,11 +65,11 @@ flowchart TB
 ```mermaid
 flowchart TB
     A["Click Update Next / row reload 🟢"] --> B["Plugin.OpenAchievementForUpdate(id) 🟢"]
-    B --> C["NativeAchievementNavigator.OpenAchievement(id) 🟠"]
-    C --> D["AgentAchievement.Instance()->OpenById(id) 🟠"]
-    B --> E["ClientAchievementProgressSource.BeginObservation(id, 8s) 🟠"]
-    F["Framework.Update 🟢"] --> G["ClientAchievementProgressSource.UpdateCache() 🟠"]
-    G --> H["Achievement.Instance() local slot 🟠"]
+    B --> C["NativeAchievementNavigator.OpenAchievement(id) 🟡"]
+    C --> D["AgentAchievement.Instance()->OpenById(id) 🟡"]
+    B --> E["ClientAchievementProgressSource.BeginObservation(id, 8s) 🟡"]
+    F["Framework.Update 🟢"] --> G["ClientAchievementProgressSource.UpdateCache() 🟡"]
+    G --> H["Achievement.Instance() local slot 🟡"]
 ```
 
 ## Diagram 3: Cosmic Class score/cache flow
@@ -78,8 +78,8 @@ flowchart TB
 flowchart TB
     A["Framework.Update 🟢"] --> B["Plugin.RefreshCosmicCacheFromLiveState() 🟢"]
     B --> C["ClientState.TerritoryType == Sinus Ardorum 🟢"]
-    B --> D["CosmicClassProgressProvider.RefreshCacheFromLiveScores() 🟠"]
-    D --> E["WKSManager.Instance()->State.Scores 🟠"]
+    B --> D["CosmicClassProgressProvider.RefreshCacheFromLiveScores() 🟡"]
+    D --> E["WKSManager.Instance()->State.Scores 🟡"]
     D --> F["CosmicClassScoreCache 🟢"]
     F --> G["PluginInterface.SavePluginConfig 🟢"]
 ```
@@ -90,8 +90,8 @@ flowchart TB
 flowchart TB
     A["UI needs progress text 🟢"] --> B["AchievementCatalog.TryGetRow(id) 🟢"]
     B --> C["AchievementProgressService.GetProgress(row) 🟢"]
-    C --> D["Cosmic provider for 3702-3739 🟠"]
-    C --> E["Observed progress cache 🟠"]
+    C --> D["Cosmic provider for 3702-3739 🟡"]
+    C --> E["Observed progress cache 🟡"]
     C --> F["IUnlockState completion check 🟢"]
     C --> G["Lumina target fallback 🟢"]
     D --> H["AchievementProgress.ToDisplayText() 🟢"]
