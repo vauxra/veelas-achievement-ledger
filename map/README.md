@@ -18,6 +18,8 @@ This folder is a human-friendly map of the C# codebase. It is written for someon
 10. [C# primer for Python readers](./08-csharp-for-python-readers.md) — C# concepts used in this plugin, translated into Python mental models.
 11. [Dalamud layer model](./09-dalamud-layer-model.md) — simplified hierarchy diagrams for VAL, Dalamud services, ClientStructs/native surfaces, and guardrails.
 
+Regeneration/publishing note: keep the current wiki structure and use [GitHub Wiki regeneration notes](./WIKI-REGENERATION.md) when rebuilding `wiki-export/` or republishing the GitHub Wiki.
+
 
 ## TLP / layer color legend
 
