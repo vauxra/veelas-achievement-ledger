@@ -23,10 +23,10 @@
     "IsTestingExclusive": true,
     "DownloadLinkInstall": "",
     "DownloadLinkUpdate": "",
-    "LastUpdate": "1781191610",
-    "TestingAssemblyVersion": "0.2.0.30",
+    "LastUpdate": "1781194858",
+    "TestingAssemblyVersion": "0.2.0.31",
     "TestingDalamudApiLevel": 15,
-    "TestingChangelog": "Testing-only custom-repo build: adaptive Achievement update pacing. If the native Achievement window is closed, update actions show Waiting for data with a 15 second max and a 1.0-1.5 second minimum. If the window is already open, update actions use only a 1.0-1.5 second Request cooldown. No plugin-originated progress requests are added.",
-    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.30/VeelasAchievementLedger_0_2_0_30.zip"
+    "TestingChangelog": "Testing-only custom-repo build: hide/non-viewable Achievement rows are excluded from search/add, preset loads, and saved tracked-list startup so VAL only tracks achievements that can be manually viewed in the native Achievement menu.",
+    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.31/VeelasAchievementLedger_0_2_0_31.zip"
   }
 ]

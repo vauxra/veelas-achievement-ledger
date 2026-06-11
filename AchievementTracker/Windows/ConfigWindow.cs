@@ -266,7 +266,7 @@ public sealed class ConfigWindow : Window
             return;
         }
 
-        this.plugin.TrackedAchievements.LoadFrom(preset.AchievementIds);
+        this.plugin.TrackedAchievements.LoadFrom(preset.AchievementIds.Where(this.plugin.AchievementCatalog.IsManuallyViewable));
         this.plugin.SaveTrackedAchievements();
     }
 
@@ -423,7 +423,7 @@ public sealed class ConfigWindow : Window
         var results = this.GetVisibleSearchResults();
         if (results.Count == 0)
         {
-            ImGui.TextDisabled("No matching achievements found.");
+            ImGui.TextDisabled("No matching manually viewable achievements found.");
             return;
         }
 
@@ -498,7 +498,9 @@ public sealed class ConfigWindow : Window
 
     private void DrawSearchAddButton(uint achievementId)
     {
-        if (ImGui.Button("Add") && this.plugin.TrackedAchievements.TryAdd(achievementId))
+        if (ImGui.Button("Add")
+            && this.plugin.AchievementCatalog.IsManuallyViewable(achievementId)
+            && this.plugin.TrackedAchievements.TryAdd(achievementId))
         {
             this.plugin.SaveTrackedAchievements();
         }

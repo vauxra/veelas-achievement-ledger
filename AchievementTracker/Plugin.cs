@@ -6,6 +6,7 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using System;
+using System.Linq;
 
 namespace AchievementTracker;
 
@@ -61,8 +62,8 @@ public sealed class Plugin : IDalamudPlugin
     public Plugin()
     {
         this.Configuration = LoadAndNormalizeConfiguration();
-        this.TrackedAchievements = this.CreateTrackedAchievementStore();
         this.AchievementCatalog = new AchievementCatalog(DataManager);
+        this.TrackedAchievements = this.CreateTrackedAchievementStore();
         this.ClientAchievementProgressSource = new ClientAchievementProgressSource();
         this.AchievementProgressSource = this.ClientAchievementProgressSource;
         this.CosmicClassProgressProvider = new CosmicClassProgressProvider(this.Configuration.CosmicClassScoreCache, this.SaveConfiguration);
@@ -247,7 +248,7 @@ public sealed class Plugin : IDalamudPlugin
     private TrackedAchievementStore CreateTrackedAchievementStore()
     {
         var store = new TrackedAchievementStore();
-        store.LoadFrom(this.Configuration.TrackedAchievementIds);
+        store.LoadFrom(this.Configuration.TrackedAchievementIds.Where(this.AchievementCatalog.IsManuallyViewable));
         return store;
     }
 

@@ -25,7 +25,8 @@ public sealed class AchievementCatalog
 
         var results = sheet
             .Select(this.ToInfo)
-            .Where(info => !string.IsNullOrWhiteSpace(info.Name));
+            .Where(info => !string.IsNullOrWhiteSpace(info.Name))
+            .Where(info => this.IsManuallyViewable(info.Id));
 
         if (!string.IsNullOrWhiteSpace(normalizedQuery))
         {
@@ -61,6 +62,31 @@ public sealed class AchievementCatalog
         // https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IDataManager
         var sheet = this.dataManager.GetExcelSheet<Achievement>();
         return sheet.TryGetRow(achievementId, out achievement);
+    }
+
+    public bool IsManuallyViewable(uint achievementId)
+    {
+        if (!this.TryGetRow(achievementId, out var achievement))
+        {
+            return false;
+        }
+
+        if (!achievement.AchievementCategory.IsValid
+            || achievement.AchievementCategory.Value.HideCategory)
+        {
+            return false;
+        }
+
+        if (achievement.AchievementHideCondition.IsValid)
+        {
+            var hideCondition = achievement.AchievementHideCondition.Value;
+            if (hideCondition.HideAchievement || hideCondition.HideName)
+            {
+                return false;
+            }
+        }
+
+        return !string.IsNullOrWhiteSpace(achievement.Name.ToString());
     }
 
     private AchievementInfo ToInfo(Achievement achievement)
