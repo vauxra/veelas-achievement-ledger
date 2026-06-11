@@ -1,0 +1,796 @@
+[
+  {
+    "path": "AchievementTracker/Configuration.cs",
+    "classes": [
+      "Configuration"
+    ],
+    "methods": [
+      [
+        18,
+        "public CosmicClassScoreCache CosmicClassScoreCache { get; set; } = new();"
+      ],
+      [
+        22,
+        "public void Normalize()"
+      ],
+      [
+        28,
+        "public void Save()"
+      ]
+    ]
+  },
+  {
+    "path": "AchievementTracker/Models/AchievementInfo.cs",
+    "classes": [
+      "AchievementInfo"
+    ],
+    "methods": [
+      [
+        3,
+        "public sealed record AchievementInfo("
+      ]
+    ]
+  },
+  {
+    "path": "AchievementTracker/Models/AchievementProgress.cs",
+    "classes": [
+      "AchievementProgressKind",
+      "AchievementProgress"
+    ],
+    "methods": [
+      [
+        14,
+        "public sealed record AchievementProgress(AchievementProgressKind Kind, int? Current = null, int? Required = null)"
+      ],
+      [
+        16,
+        "public static AchievementProgress CompletionListNotLoaded() => new(AchievementProgressKind.CompletionListNotLoaded);"
+      ],
+      [
+        18,
+        "public static AchievementProgress Complete() => new(AchievementProgressKind.Complete);"
+      ],
+      [
+        20,
+        "public static AchievementProgress Incomplete() => new(AchievementProgressKind.Incomplete);"
+      ],
+      [
+        22,
+        "public static AchievementProgress Numeric(int current, int required) => new(AchievementProgressKind.Numeric, current, required);"
+      ],
+      [
+        24,
+        "public static AchievementProgress TargetKnown(int required) => new(AchievementProgressKind.TargetKnown, null, required);"
+      ],
+      [
+        26,
+        "public static AchievementProgress Unavailable() => new(AchievementProgressKind.Unavailable);"
+      ],
+      [
+        28,
+        "public static AchievementProgress DataNotAvailable() => new(AchievementProgressKind.DataNotAvailable);"
+      ],
+      [
+        30,
+        "public string ToDisplayText()"
+      ]
+    ]
+  },
+  {
+    "path": "AchievementTracker/Models/CosmicClassScoreCache.cs",
+    "classes": [
+      "CosmicClassScoreCache"
+    ],
+    "methods": []
+  },
+  {
+    "path": "AchievementTracker/Models/TrackedAchievement.cs",
+    "classes": [
+      "TrackedAchievement"
+    ],
+    "methods": [
+      [
+        3,
+        "public sealed record TrackedAchievement(uint AchievementId);"
+      ]
+    ]
+  },
+  {
+    "path": "AchievementTracker/Models/TrackedAchievementPreset.cs",
+    "classes": [
+      "TrackedAchievementPreset"
+    ],
+    "methods": []
+  },
+  {
+    "path": "AchievementTracker/Plugin.cs",
+    "classes": [
+      "Plugin"
+    ],
+    "methods": [
+      [
+        18,
+        "private static readonly TimeSpan AchievementUpdateOpenLockout = TimeSpan.FromSeconds(5);"
+      ],
+      [
+        19,
+        "private static readonly TimeSpan CosmicCacheRefreshInterval = TimeSpan.FromSeconds(30);"
+      ],
+      [
+        48,
+        "public WindowSystem WindowSystem { get; } = new(\"VeelasAchievementLedger\");"
+      ],
+      [
+        58,
+        "public Plugin()"
+      ],
+      [
+        77,
+        "public void Dispose()"
+      ],
+      [
+        88,
+        "public void SaveTrackedAchievements()"
+      ],
+      [
+        94,
+        "public void SaveConfiguration()"
+      ],
+      [
+        113,
+        "public bool OpenAchievementForUpdate(uint achievementId)"
+      ],
+      [
+        131,
+        "public void ToggleMainUi() => this.TrackerWindow.Toggle();"
+      ],
+      [
+        133,
+        "public void OpenMainUi() => this.TrackerWindow.IsOpen = true;"
+      ],
+      [
+        135,
+        "public void ToggleConfigUi() => this.ConfigWindow.Toggle();"
+      ],
+      [
+        137,
+        "public void OpenConfigUi(bool help = false)"
+      ],
+      [
+        150,
+        "private static Configuration LoadAndNormalizeConfiguration()"
+      ],
+      [
+        157,
+        "private TrackedAchievementStore CreateTrackedAchievementStore()"
+      ],
+      [
+        164,
+        "private void RegisterWindows()"
+      ],
+      [
+        170,
+        "private void RegisterCommand()"
+      ],
+      [
+        178,
+        "private void RegisterDalamudCallbacks()"
+      ],
+      [
+        188,
+        "private void UnregisterDalamudCallbacks()"
+      ],
+      [
+        201,
+        "private void InstallPassiveAchievementObserver()"
+      ],
+      [
+        209,
+        "private void ResetProgressState()"
+      ],
+      [
+        215,
+        "private void ResetProgressStateOnLogout(int type, int code) => this.ResetProgressState();"
+      ],
+      [
+        219,
+        "private void OnFrameworkUpdate(IFramework framework)"
+      ],
+      [
+        224,
+        "private void RefreshCosmicCacheFromLiveState()"
+      ],
+      [
+        241,
+        "private static bool IsInSinusArdorum() => ClientState.TerritoryType == SinusArdorumTerritoryTypeId;"
+      ],
+      [
+        243,
+        "private bool CosmicCacheRefreshIsDue() => DateTimeOffset.UtcNow >= this.nextCosmicCacheRefreshAt;"
+      ],
+      [
+        247,
+        "private void OnCommand(string command, string args)"
+      ]
+    ]
+  },
+  {
+    "path": "AchievementTracker/Services/AchievementCatalog.cs",
+    "classes": [
+      "AchievementCatalog"
+    ],
+    "methods": [
+      [
+        14,
+        "public AchievementCatalog(IDataManager dataManager)"
+      ],
+      [
+        19,
+        "public IEnumerable<AchievementInfo> Search(string query, int limit = 50)"
+      ],
+      [
+        43,
+        "public bool TryGet(uint achievementId, out AchievementInfo achievementInfo)"
+      ],
+      [
+        58,
+        "public bool TryGetRow(uint achievementId, out Achievement achievement)"
+      ],
+      [
+        66,
+        "private AchievementInfo ToInfo(Achievement achievement)"
+      ]
+    ]
+  },
+  {
+    "path": "AchievementTracker/Services/AchievementProgressService.cs",
+    "classes": [
+      "AchievementProgressService"
+    ],
+    "methods": [
+      [
+        14,
+        "public AchievementProgressService(IUnlockState unlockState, IAchievementProgressSource? progressSource = null, CosmicClassProgressProvider? cosmicClassProgressProvider = null)"
+      ],
+      [
+        21,
+        "public AchievementProgress GetProgress(Achievement achievement)"
+      ],
+      [
+        56,
+        "public bool IsComplete(Achievement achievement)"
+      ],
+      [
+        59,
+        "private static int? GetRequiredTarget(Achievement achievement)"
+      ]
+    ]
+  },
+  {
+    "path": "AchievementTracker/Services/ClientAchievementProgressSource.cs",
+    "classes": [
+      "struct",
+      "ClientAchievementProgressSource"
+    ],
+    "methods": [
+      [
+        7,
+        "public readonly record struct ObservedAchievementProgress(uint Current, uint Max, DateTimeOffset ObservedAt, string Source);"
+      ],
+      [
+        15,
+        "private readonly Dictionary<uint, ObservedAchievementProgress> cachedProgress = new();"
+      ],
+      [
+        18,
+        "public void UpdateCache()"
+      ],
+      [
+        46,
+        "public void RecordObservedProgress(uint achievementId, uint current, uint max, string source)"
+      ],
+      [
+        60,
+        "public void RecordObservedCompletion(uint achievementId, string source)"
+      ],
+      [
+        66,
+        "public void ClearCache()"
+      ],
+      [
+        72,
+        "public bool TryGetProgress(uint achievementId, out uint current, out uint max)"
+      ],
+      [
+        87,
+        "public bool TryGetObservation(uint achievementId, out ObservedAchievementProgress progress)"
+      ],
+      [
+        93,
+        "public bool IsObservedComplete(uint achievementId) => this.observedCompletions.Contains(achievementId);"
+      ]
+    ]
+  },
+  {
+    "path": "AchievementTracker/Services/CosmicClassProgressProvider.cs",
+    "classes": [
+      "CosmicClassProgressProvider",
+      "CosmicAchievementRule",
+      "CosmicScoreAggregation"
+    ],
+    "methods": [
+      [
+        35,
+        "public CosmicClassProgressProvider(CosmicClassScoreCache cache, Action saveCache)"
+      ],
+      [
+        44,
+        "public bool Handles(uint achievementId) => GetRule(achievementId) is not null;"
+      ],
+      [
+        46,
+        "public void RefreshCacheFromLiveScores() => _ = this.TryReadLiveScores();"
+      ],
+      [
+        48,
+        "public AchievementProgress GetProgress(uint achievementId)"
+      ],
+      [
+        66,
+        "public string GetDiagnostics()"
+      ],
+      [
+        80,
+        "public static bool IsCosmicClassAchievement(uint achievementId) => GetRule(achievementId) is not null;"
+      ],
+      [
+        84,
+        "private static CosmicAchievementRule? GetRule(uint achievementId)"
+      ],
+      [
+        130,
+        "private static CosmicAchievementRule Single(int index, int target) => new([index], target, CosmicScoreAggregation.Maximum);"
+      ],
+      [
+        132,
+        "private static CosmicAchievementRule Any(int[] indexes, int target) => new(indexes, target, CosmicScoreAggregation.Maximum);"
+      ],
+      [
+        134,
+        "private static CosmicAchievementRule Every(int[] indexes, int target) => new(indexes, target, CosmicScoreAggregation.Minimum);"
+      ],
+      [
+        136,
+        "private static int CalculateCurrentScore(IReadOnlyList<int> scores, CosmicAchievementRule rule)"
+      ],
+      [
+        145,
+        "private static void NormalizeCache(CosmicClassScoreCache scoreCache)"
+      ],
+      [
+        155,
+        "private int[]? TryReadCachedScores()"
+      ],
+      [
+        169,
+        "private unsafe int[]? TryReadLiveScores(bool saveWhenAvailable = true)"
+      ],
+      [
+        192,
+        "private void SaveScoresToCache(int[] liveScores)"
+      ],
+      [
+        199,
+        "private unsafe string GetLiveStateSummary()"
+      ],
+      [
+        210,
+        "private bool ScoresEqualCache(IReadOnlyList<int> liveScores)"
+      ],
+      [
+        228,
+        "private sealed record CosmicAchievementRule(int[] ScoreIndexes, int TargetScore, CosmicScoreAggregation Aggregation);"
+      ]
+    ]
+  },
+  {
+    "path": "AchievementTracker/Services/IAchievementProgressSource.cs",
+    "classes": [
+      "IAchievementProgressSource"
+    ],
+    "methods": []
+  },
+  {
+    "path": "AchievementTracker/Services/NativeAchievementNavigator.cs",
+    "classes": [
+      "NativeAchievementNavigator"
+    ],
+    "methods": [
+      [
+        11,
+        "public bool OpenAchievement(uint achievementId)"
+      ],
+      [
+        31,
+        "public bool CloseAchievements()"
+      ]
+    ]
+  },
+  {
+    "path": "AchievementTracker/Services/PassiveAchievementProgressObserver.cs",
+    "classes": [
+      "PassiveAchievementProgressObserver"
+    ],
+    "methods": [
+      [
+        21,
+        "public PassiveAchievementProgressObserver("
+      ],
+      [
+        48,
+        "public void Dispose()"
+      ],
+      [
+        60,
+        "private void OnReceiveAchievementProgress(Achievement* thisPtr, uint id, uint current, uint max)"
+      ],
+      [
+        69,
+        "private void OnSetAchievementCompleted(Achievement* thisPtr, uint achievementId)"
+      ]
+    ]
+  },
+  {
+    "path": "AchievementTracker/Services/TrackedAchievementPresetStore.cs",
+    "classes": [
+      "TrackedAchievementPresetStore"
+    ],
+    "methods": [
+      [
+        13,
+        "public static string SanitizeName(string? rawName)"
+      ],
+      [
+        33,
+        "public static void Normalize(List<TrackedAchievementPreset> presets)"
+      ],
+      [
+        54,
+        "public static bool SavePreset(List<TrackedAchievementPreset> presets, string rawName, IEnumerable<uint> achievementIds, out string savedName)"
+      ],
+      [
+        89,
+        "public static bool RenamePreset(List<TrackedAchievementPreset> presets, string currentName, string rawNewName, out string renamedTo)"
+      ],
+      [
+        115,
+        "public static bool DeletePreset(List<TrackedAchievementPreset> presets, string name)"
+      ],
+      [
+        121,
+        "public static TrackedAchievementPreset? FindPreset(List<TrackedAchievementPreset> presets, string name)"
+      ],
+      [
+        124,
+        "private static List<uint> SanitizeAchievementIds(IEnumerable<uint> achievementIds)"
+      ]
+    ]
+  },
+  {
+    "path": "AchievementTracker/Services/TrackedAchievementStore.cs",
+    "classes": [
+      "TrackedAchievementStore"
+    ],
+    "methods": [
+      [
+        13,
+        "public bool TryAdd(uint achievementId)"
+      ],
+      [
+        29,
+        "public bool Remove(uint achievementId) => this.achievementIds.Remove(achievementId);"
+      ],
+      [
+        31,
+        "public bool MoveToTop(uint achievementId)"
+      ],
+      [
+        44,
+        "public bool MoveUp(uint achievementId)"
+      ],
+      [
+        57,
+        "public bool MoveDown(uint achievementId)"
+      ],
+      [
+        70,
+        "public bool MoveToBottom(uint achievementId)"
+      ],
+      [
+        83,
+        "public void LoadFrom(IEnumerable<uint> achievementIds)"
+      ],
+      [
+        92,
+        "public List<uint> ToConfigList() => [.. this.achievementIds];"
+      ]
+    ]
+  },
+  {
+    "path": "AchievementTracker/Windows/ConfigWindow.cs",
+    "classes": [
+      "ConfigWindow",
+      "ConfigSection"
+    ],
+    "methods": [
+      [
+        20,
+        "public ConfigWindow(Plugin plugin)"
+      ],
+      [
+        41,
+        "public void OpenConfig()"
+      ],
+      [
+        47,
+        "public void OpenHelp()"
+      ],
+      [
+        55,
+        "public override void Draw()"
+      ],
+      [
+        63,
+        "private void DrawHeader()"
+      ],
+      [
+        75,
+        "private void DrawLeftNavigation()"
+      ],
+      [
+        83,
+        "private void DrawNavItem(string label, ConfigSection section)"
+      ],
+      [
+        91,
+        "private void DrawSelectedPage()"
+      ],
+      [
+        109,
+        "private void DrawPresetControls()"
+      ],
+      [
+        127,
+        "private void DrawPresetNameInput()"
+      ],
+      [
+        138,
+        "private void DrawPresetSaveButton()"
+      ],
+      [
+        157,
+        "private void DrawPresetPicker()"
+      ],
+      [
+        176,
+        "private void DrawPresetPickerItem(string presetName)"
+      ],
+      [
+        192,
+        "private void DrawPresetReadButton()"
+      ],
+      [
+        202,
+        "private void DrawPresetRenameButton()"
+      ],
+      [
+        220,
+        "private void DrawPresetDeleteButton()"
+      ],
+      [
+        238,
+        "private void EnsureSelectedPresetIsValid()"
+      ],
+      [
+        255,
+        "private bool SelectedPresetExists()"
+      ],
+      [
+        261,
+        "private void LoadSelectedPreset()"
+      ],
+      [
+        275,
+        "private void DrawTrackedAchievementsPage()"
+      ],
+      [
+        297,
+        "private void DrawTrackedManagement()"
+      ],
+      [
+        315,
+        "private void DrawTrackedAchievementRow(uint achievementId)"
+      ],
+      [
+        342,
+        "private void DrawMoveButton(string label, string tooltip, Func<bool> moveAction)"
+      ],
+      [
+        352,
+        "private bool DrawTrackedRemoveButton(uint achievementId)"
+      ],
+      [
+        359,
+        "private void DrawTrackedUpdateButton(uint achievementId)"
+      ],
+      [
+        380,
+        "private void DrawInspectButton(uint achievementId)"
+      ],
+      [
+        390,
+        "private void DrawManagedAchievement(uint achievementId)"
+      ],
+      [
+        398,
+        "private bool RemoveTrackedAchievement(uint achievementId)"
+      ],
+      [
+        411,
+        "private void DrawSearchAndAdd()"
+      ],
+      [
+        436,
+        "private void DrawHideCompletedCheckbox()"
+      ],
+      [
+        448,
+        "private void DrawSearchInput()"
+      ],
+      [
+        461,
+        "private System.Collections.Generic.List<AchievementTracker.Models.AchievementInfo> GetVisibleSearchResults()"
+      ],
+      [
+        469,
+        "private void DrawSearchResultRow(AchievementTracker.Models.AchievementInfo result)"
+      ],
+      [
+        482,
+        "private void DrawSearchResultAction(uint achievementId, bool canAdd, bool alreadyTracked)"
+      ],
+      [
+        499,
+        "private void DrawSearchAddButton(uint achievementId)"
+      ],
+      [
+        511,
+        "private void DrawSearchRemoveButton(uint achievementId)"
+      ],
+      [
+        524,
+        "private void DrawSearchFullLabel(uint achievementId)"
+      ],
+      [
+        531,
+        "private void DrawSearchResultDetails(AchievementTracker.Models.AchievementInfo result)"
+      ],
+      [
+        542,
+        "private void DrawCategoryPath(string categoryPath)"
+      ],
+      [
+        550,
+        "private void DrawCosmicProgressIfAvailable(uint achievementId)"
+      ],
+      [
+        561,
+        "private bool IsComplete(uint achievementId)"
+      ],
+      [
+        567,
+        "private void DrawHelp()"
+      ],
+      [
+        594,
+        "private void DrawWrappedBullet(string text)"
+      ],
+      [
+        601,
+        "private void OpenAchievementForUpdate(uint achievementId)"
+      ],
+      [
+        613,
+        "private void DrawUpdateOpenLockoutStatus()"
+      ],
+      [
+        622,
+        "private void AddTooltip(string text)"
+      ]
+    ]
+  },
+  {
+    "path": "AchievementTracker/Windows/TrackerWindow.cs",
+    "classes": [
+      "TrackerWindow"
+    ],
+    "methods": [
+      [
+        16,
+        "public TrackerWindow(Plugin plugin)"
+      ],
+      [
+        29,
+        "public override void Draw()"
+      ],
+      [
+        38,
+        "private void DrawTopButtons()"
+      ],
+      [
+        49,
+        "private void DrawConfigureButton()"
+      ],
+      [
+        59,
+        "private void DrawUpdateNextButton()"
+      ],
+      [
+        80,
+        "private void DrawCloseAchievementsButton()"
+      ],
+      [
+        98,
+        "private void DrawTrackedAchievementList()"
+      ],
+      [
+        113,
+        "private void DrawAchievement(uint achievementId)"
+      ],
+      [
+        131,
+        "private void DrawRowUpdateButton(uint achievementId)"
+      ],
+      [
+        152,
+        "private void DrawRowInspectButton(uint achievementId)"
+      ],
+      [
+        162,
+        "private string GetProgressText(uint achievementId)"
+      ],
+      [
+        172,
+        "private string GetLastObservedText(uint achievementId)"
+      ],
+      [
+        181,
+        "private void OpenNextTrackedAchievementForUpdate()"
+      ],
+      [
+        190,
+        "private uint? GetNextTrackedAchievementId()"
+      ],
+      [
+        216,
+        "private void OpenNativeAchievementForUpdate(uint achievementId)"
+      ],
+      [
+        228,
+        "private void OpenNativeAchievement(uint achievementId)"
+      ],
+      [
+        238,
+        "private void DrawUpdateOpenLockoutStatus()"
+      ],
+      [
+        247,
+        "private static void AddTooltip(string text)"
+      ],
+      [
+        255,
+        "private static string FormatAge(DateTimeOffset observedAt)"
+      ]
+    ]
+  }
+]
