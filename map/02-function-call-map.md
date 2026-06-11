@@ -1,7 +1,6 @@
 # Function call map
 
-> **Documentation release:** `v0.2.0.20` / testing prerelease architecture refresh.
-> **TLP legend:** 🟢 plugin/domain code, 🟡 Dalamud managed services or UI/data libraries, 🟠 isolated ClientStructs/native adapters, 🔴 blocked/deprecated policy paths.
+Version: `v0.2.0.20`
 
 This map follows the refactored code layout. The goal is to show what each important method does, what it calls, and which layer it touches.
 

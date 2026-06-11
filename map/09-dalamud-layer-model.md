@@ -1,7 +1,6 @@
 # Dalamud hierarchy model for Veela's Achievement Ledger
 
-> **Documentation release:** `v0.2.0.20` / testing prerelease architecture refresh.
-> **TLP legend:** 🟢 plugin/domain code, 🟡 Dalamud managed services or UI/data libraries, 🟠 isolated ClientStructs/native adapters, 🔴 blocked/deprecated policy paths.
+Version: `v0.2.0.20`
 
 This page is a practical hierarchy of what actually exists in Veela's Achievement Ledger. The old single Mermaid diagram was too dense, so this version uses several smaller diagrams and a flat layer table.
 

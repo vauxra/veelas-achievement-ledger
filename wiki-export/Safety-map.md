@@ -1,7 +1,7 @@
 # Safety map
 
-> **Documentation release:** `v0.2.0.20` / testing prerelease architecture refresh.
-> **TLP legend:** 🟢 plugin/domain code, 🟡 Dalamud managed services or UI/data libraries, 🟠 isolated ClientStructs/native adapters, 🔴 blocked/deprecated policy paths.
+Version: `v0.2.0.20`
+
 This file maps the potentially sensitive areas and what they do.
 
 ## No direct direct progress requests

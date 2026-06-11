@@ -1,7 +1,6 @@
 # Whole plugin hierarchy
 
-> **Documentation release:** `v0.2.0.20` / testing prerelease architecture refresh.
-> **TLP legend:** 🟢 plugin/domain code, 🟡 Dalamud managed services or UI/data libraries, 🟠 isolated ClientStructs/native adapters, 🔴 blocked/deprecated policy paths.
+Version: `v0.2.0.20`
 
 This is the broad map of the entire plugin. Read it top-to-bottom like a Python package map.
 

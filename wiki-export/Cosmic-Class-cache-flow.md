@@ -1,7 +1,7 @@
 # Cosmic Class cache flow
 
-> **Documentation release:** `v0.2.0.20` / testing prerelease architecture refresh.
-> **TLP legend:** 🟢 plugin/domain code, 🟡 Dalamud managed services or UI/data libraries, 🟠 isolated ClientStructs/native adapters, 🔴 blocked/deprecated policy paths.
+Version: `v0.2.0.20`
+
 ## Short answer to your question
 
 This function is **where the plugin decides whether to update the Cosmic cache**:

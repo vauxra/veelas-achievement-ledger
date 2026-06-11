@@ -1,7 +1,7 @@
 # C# primer for Python readers
 
-> **Documentation release:** `v0.2.0.20` / testing prerelease architecture refresh.
-> **TLP legend:** 🟢 plugin/domain code, 🟡 Dalamud managed services or UI/data libraries, 🟠 isolated ClientStructs/native adapters, 🔴 blocked/deprecated policy paths.
+Version: `v0.2.0.20`
+
 This document explains the C# conventions used in Veela's Achievement Ledger by comparing them to Python ideas.
 
 ## Files, namespaces, and classes

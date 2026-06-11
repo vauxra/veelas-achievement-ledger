@@ -1,7 +1,6 @@
 # Code map for Veela's Achievement Ledger
 
-> **Documentation release:** `v0.2.0.20` / testing prerelease architecture refresh.
-> **TLP legend:** 🟢 plugin/domain code, 🟡 Dalamud managed services or UI/data libraries, 🟠 isolated ClientStructs/native adapters, 🔴 blocked/deprecated policy paths.
+Version: `v0.2.0.20`
 
 This folder is a human-friendly map of the C# codebase. It is written for someone who is more comfortable with Python than C# and wants to know which plugin, Dalamud, and game-client components are touched.
 
@@ -18,6 +17,7 @@ This folder is a human-friendly map of the C# codebase. It is written for someon
 9. [File index](File-index) — source-file locator for jumping from wiki concepts to concrete classes/methods.
 10. [C# primer for Python readers](CSharp-for-Python-readers) — C# concepts used in this plugin, translated into Python mental models.
 11. [Dalamud layer model](Dalamud-layer-model) — simplified hierarchy diagrams for VAL, Dalamud services, ClientStructs/native surfaces, and guardrails.
+
 
 ## TLP / layer color legend
 
