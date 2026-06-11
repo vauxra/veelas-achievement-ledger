@@ -2,13 +2,6 @@
 
 Version: `v0.2.0.20`
 
-## Related function map entries
-
-- [`Plugin()` load wiring](./02-function-call-map.md#plugin-constructor)
-- [`Configuration.Save()` and tracked/preset stores](./02-function-call-map.md#configuration-and-stores)
-- [`CosmicClassProgressProvider` cache methods](./02-function-call-map.md#cosmicclassprogressprovider)
-- [`ClientAchievementProgressSource` observed-progress cache](./02-function-call-map.md#clientachievementprogresssource)
-
 ## Navigation outline
 
 - [Persistence summary](#persistence-summary)
@@ -109,7 +102,7 @@ Remove(id) 🟢
 MoveToTop/MoveUp/MoveDown/MoveToBottom(id) 🟢
 ```
 
-Persistence happens only when caller invokes [`Plugin.SaveTrackedAchievements()`](./02-function-call-map.md#configuration-and-stores).
+Persistence happens only when caller invokes `Plugin.SaveTrackedAchievements()`.
 
 ## `TrackedAchievementPresetStore.cs`
 
@@ -123,7 +116,7 @@ FindPreset(name) 🟢
 Normalize(presets) 🟢
 ```
 
-This store sanitizes names and IDs, but it does not write files directly. The caller modifies `Configuration.TrackedAchievementPresets` and then calls [`Plugin.SaveConfiguration()`](./02-function-call-map.md#configuration-and-stores).
+This store sanitizes names and IDs, but it does not write files directly. The caller modifies `Configuration.TrackedAchievementPresets` and then calls `Plugin.SaveConfiguration()`.
 
 ## `CosmicClassScoreCache.cs`
 

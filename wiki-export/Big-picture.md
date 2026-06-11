@@ -2,15 +2,6 @@
 
 Version: `v0.2.0.20`
 
-## Related function map entries
-
-- [`Plugin.OpenAchievementForUpdate(...)`](Function-call-map#plugin-openachievementforupdate)
-- [`NativeAchievementNavigator.OpenAchievement(...)`](Function-call-map#nativeachievementnavigator)
-- [`ClientAchievementProgressSource.BeginObservation(...)`](Function-call-map#clientachievementprogresssource)
-- [`AchievementProgressService.GetProgress(...)`](Function-call-map#achievementprogressservice)
-- [`CosmicClassProgressProvider.GetProgress(...)`](Function-call-map#cosmicclassprogressprovider)
-- [`Configuration.Save()` and tracked/preset stores](Function-call-map#configuration-and-stores)
-
 ## Navigation outline
 
 - [What the plugin does](#what-the-plugin-does)
@@ -159,8 +150,8 @@ User checks Hide completed 🟢
 
 Achievement IDs enter the system from two places:
 
-1. **Search results**: [`AchievementCatalog.Search(query)`](Function-call-map#achievementprogressservice) reads Lumina `Achievement` rows through Dalamud `IDataManager`. Each result has an `Id`/`RowId`. When the player clicks Add, that ID becomes tracked.
-2. **Saved config**: `PluginInterface.GetPluginConfig()` loads `Configuration.TrackedAchievementIds`, then [`TrackedAchievementStore.LoadFrom(ids)`](Function-call-map#configuration-and-stores) builds the in-memory ordered list.
+1. **Search results**: `AchievementCatalog.Search(query)` reads Lumina `Achievement` rows through Dalamud `IDataManager`. Each result has an `Id`/`RowId`. When the player clicks Add, that ID becomes tracked.
+2. **Saved config**: `PluginInterface.GetPluginConfig()` loads `Configuration.TrackedAchievementIds`, then `TrackedAchievementStore.LoadFrom(ids)` builds the in-memory ordered list.
 
 After that, most UI flows use IDs from `TrackedAchievementStore.AchievementIds`.
 

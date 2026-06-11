@@ -2,16 +2,6 @@
 
 Version: `v0.2.0.20`
 
-## Related function map entries
-
-- [`Plugin.OpenAchievementForUpdate(...)`](./02-function-call-map.md#plugin-openachievementforupdate)
-- [`Plugin.RefreshCosmicCacheFromLiveState()`](./02-function-call-map.md#plugin-refreshcosmiccachefromlivestate)
-- [`NativeAchievementNavigator`](./02-function-call-map.md#nativeachievementnavigator)
-- [`ClientAchievementProgressSource`](./02-function-call-map.md#clientachievementprogresssource)
-- [`CosmicClassProgressProvider`](./02-function-call-map.md#cosmicclassprogressprovider)
-- [`AchievementProgressService`](./02-function-call-map.md#achievementprogressservice)
-
-
 This page is a practical hierarchy of what actually exists in Veela's Achievement Ledger. The old single Mermaid diagram was too dense, so this version uses several smaller diagrams and a flat layer table.
 
 ## Rule of thumb

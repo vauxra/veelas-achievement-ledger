@@ -2,17 +2,6 @@
 
 Version: `v0.2.0.20`
 
-## Function map class links
-
-- [`Plugin.cs` methods](./02-function-call-map.md#plugin-constructor)
-- [`NativeAchievementNavigator.cs` methods](./02-function-call-map.md#nativeachievementnavigator)
-- [`ClientAchievementProgressSource.cs` methods](./02-function-call-map.md#clientachievementprogresssource)
-- [`AchievementProgressService.cs` methods](./02-function-call-map.md#achievementprogressservice)
-- [`CosmicClassProgressProvider.cs` methods](./02-function-call-map.md#cosmicclassprogressprovider)
-- [`Configuration.cs` and store methods](./02-function-call-map.md#configuration-and-stores)
-- [`TrackerWindow.cs` methods](./02-function-call-map.md#trackerwindow)
-- [`ConfigWindow.cs` methods](./02-function-call-map.md#configwindow)
-
 ## What this page is for
 
 This is a source locator, not a duplicate of the function-call map.

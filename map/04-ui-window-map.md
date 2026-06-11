@@ -2,14 +2,6 @@
 
 Version: `v0.2.0.20`
 
-## Related function map entries
-
-- [`TrackerWindow` methods](./02-function-call-map.md#trackerwindow)
-- [`ConfigWindow` methods](./02-function-call-map.md#configwindow)
-- [`Plugin.OpenAchievementForUpdate(...)`](./02-function-call-map.md#plugin-openachievementforupdate)
-- [`NativeAchievementNavigator.OpenAchievement(...)`](./02-function-call-map.md#nativeachievementnavigator)
-
-
 The UI code is in `AchievementTracker/Windows/`. It uses ImGui, which is immediate-mode UI: every `Draw...` method is called repeatedly, but button bodies only run when clicked.
 
 ## Main window: `TrackerWindow.cs`
@@ -41,24 +33,24 @@ TrackerWindow.Draw()
 - **Update Next**
   - calls `OpenNextTrackedAchievementForUpdate()`
   - chooses the first unobserved achievement, otherwise the oldest observed achievement
-  - calls [`Plugin.OpenAchievementForUpdate(id)`](./02-function-call-map.md#plugin-openachievementforupdate)
+  - calls `Plugin.OpenAchievementForUpdate(id)`
   - uses shared 5-second update-open lockout
   - risk: low-to-medium because it opens native Achievement UI, but only on click
 
 - **Close Achievements**
-  - calls [`NativeAchievementNavigator.CloseAchievements()`](./02-function-call-map.md#nativeachievementnavigator)
+  - calls `NativeAchievementNavigator.CloseAchievements()`
   - internally calls `AgentAchievement.Instance()->Hide()`
   - risk: low-to-medium native UI action, user-click only
 
 ### Row buttons
 
 - Reload icon
-  - calls [`Plugin.OpenAchievementForUpdate(id)`](./02-function-call-map.md#plugin-openachievementforupdate)
+  - calls `Plugin.OpenAchievementForUpdate(id)`
   - shared lockout applies
   - intended as update-action open
 
 - Magnifying glass
-  - calls [`NativeAchievementNavigator.OpenAchievement(id)`](./02-function-call-map.md#nativeachievementnavigator)
+  - calls `NativeAchievementNavigator.OpenAchievement(id)`
   - lockout does not apply
   - intended as inspect/open action
 
