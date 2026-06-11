@@ -23,10 +23,10 @@
     "IsTestingExclusive": true,
     "DownloadLinkInstall": "",
     "DownloadLinkUpdate": "",
-    "LastUpdate": "1781183960",
-    "TestingAssemblyVersion": "0.2.0.20",
+    "LastUpdate": "1781187496",
+    "TestingAssemblyVersion": "0.2.0.21",
     "TestingDalamudApiLevel": 15,
-    "TestingChangelog": "Testing-only custom-repo build: hook observer removed, native Achievement-window assisted progress uses bounded local observation, Cosmic Class score cache remains read-only, and architecture wiki docs were refreshed with version tags, TLP layers, user action flows, persistence notes, and simplified diagrams.",
-    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.20/VeelasAchievementLedger_0_2_0_20.zip"
+    "TestingChangelog": "Testing-only custom-repo build: universal native Achievement update-open lockout reduced from 5 seconds to 1 second; prior bounded local observation, read-only Cosmic Class score cache, and architecture docs remain in place.",
+    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.21/VeelasAchievementLedger_0_2_0_21.zip"
   }
 ]

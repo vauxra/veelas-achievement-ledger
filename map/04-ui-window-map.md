@@ -1,6 +1,6 @@
 # UI/window map
 
-Version: `v0.2.0.20`
+Version: `v0.2.0.21`
 
 The UI code is in `AchievementTracker/Windows/`. It uses ImGui, which is immediate-mode UI: every `Draw...` method is called repeatedly, but button bodies only run when clicked.
 
@@ -34,7 +34,7 @@ TrackerWindow.Draw()
   - calls `OpenNextTrackedAchievementForUpdate()`
   - chooses the first unobserved achievement, otherwise the oldest observed achievement
   - calls `Plugin.OpenAchievementForUpdate(id)`
-  - uses shared 5-second update-open lockout
+  - uses shared 1-second update-open lockout
   - risk: low-to-medium because it opens native Achievement UI, but only on click
 
 - **Close Achievements**

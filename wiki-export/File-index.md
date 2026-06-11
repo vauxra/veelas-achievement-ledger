@@ -1,6 +1,6 @@
 # File index
 
-Version: `v0.2.0.20`
+Version: `v0.2.0.21`
 
 ## What this page is for
 
@@ -76,7 +76,7 @@ Members found:
 Types: `Plugin`
 
 Members found:
-- line 18: `private static readonly TimeSpan AchievementUpdateOpenLockout = TimeSpan.FromSeconds(5);`
+- line 18: `private static readonly TimeSpan AchievementUpdateOpenLockout = TimeSpan.FromSeconds(1);`
 - line 19: `private static readonly TimeSpan AchievementObservationWindow = TimeSpan.FromSeconds(8);`
 - line 20: `private static readonly TimeSpan CosmicCacheRefreshInterval = TimeSpan.FromSeconds(30);`
 - line 38: `public Configuration Configuration { get; }`

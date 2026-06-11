@@ -1,6 +1,6 @@
 # Safety map
 
-Version: `v0.2.0.20`
+Version: `v0.2.0.21`
 
 This file maps the potentially sensitive areas and what they do.
 

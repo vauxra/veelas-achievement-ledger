@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0.20",
+  "version": "0.2.0.21",
   "purpose": "Source locator backing map/07-file-index.md; function behavior is documented in map/02-function-call-map.md.",
   "entries": [
     {
@@ -147,7 +147,7 @@
       "members": [
         {
           "line": 18,
-          "signature": "private static readonly TimeSpan AchievementUpdateOpenLockout = TimeSpan.FromSeconds(5);"
+          "signature": "private static readonly TimeSpan AchievementUpdateOpenLockout = TimeSpan.FromSeconds(1);"
         },
         {
           "line": 19,
