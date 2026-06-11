@@ -13,7 +13,7 @@ Start here:
 7. [Safety map](./06-safety-map.md) — direct-request/automation boundaries.
 8. [File index](./07-file-index.md) — every C# file and its main members.
 9. [C# primer for Python readers](./08-csharp-for-python-readers.md) — C# concepts used in this plugin, translated into Python mental models.
-10. [Dalamud layer model](./09-dalamud-layer-model.md) — OSI-style hierarchy of Dalamud, ClientStructs, plugin code, native game surfaces, and version groupings.
+10. [Dalamud layer model](./09-dalamud-layer-model.md) — practical hierarchy of VAL plugin code, Dalamud services, native adapters, game surfaces, guardrails, and version groupings.
 
 ## Mental model
 

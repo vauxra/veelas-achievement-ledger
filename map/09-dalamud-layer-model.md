@@ -1,13 +1,15 @@
-# Dalamud layer model for Veela's Achievement Ledger
+# Dalamud hierarchy model for Veela's Achievement Ledger
 
-This is an OSI-style mental model for the plugin: each layer is a lower-level system that the layer above depends on. The higher you go, the more the code is ordinary plugin/product logic. The lower you go, the closer the code is to Dalamud, ClientStructs, native game UI, or raw game state.
+This page is a practical hierarchy of what actually exists in Veela's Achievement Ledger. It follows the plugin's real dependency shape instead of forcing a fixed number of layers. Read it as a dependency map: player-facing workflow sits at the top, plugin code and Dalamud services sit in the middle, and game-client/native state sits at the bottom.
+
+The important rule of thumb: when work moves downward in this hierarchy, review risk goes up. Ordinary UI/domain changes are easy to reason about. ClientStructs/native adapters are policy-sensitive and must stay small, documented, and justified. Raw memory, signatures, and low-level hooks are now repo blockers.
 
 ## Version snapshot
 
 Generated from this working tree and local Dalamud dev environment.
 
 - Plugin project: `VeelasAchievementLedger`
-- Plugin version: `0.2.0.17`
+- Plugin version: `0.2.0.18`
 - Project SDK: `Dalamud.NET.Sdk/15.0.0`
 - Package lock:
   - `DalamudPackager` resolved `15.0.0`
@@ -35,179 +37,212 @@ For this repo, use these practical meanings:
 - **Local runtime/dev snapshot:** `/home/micheal/.xlcore/dalamud/Hooks/dev`, commit `8323fad...`, with `Dalamud.dll 15.0.2.0`.
 - **Data/native helper libraries:** bundled assemblies such as Lumina and FFXIVClientStructs each carry separate versions.
 
-## OSI-style layer diagram
-
-```text
-Layer 8 — Product intent / player workflow
-  Veela's Achievement Ledger behavior:
-  track achievements, open native Achievement entries, show observed progress, manage presets/search/help.
-
-Layer 7 — Plugin UI and commands
-  AchievementTracker/Plugin.cs
-  AchievementTracker/Windows/TrackerWindow.cs
-  AchievementTracker/Windows/ConfigWindow.cs
-  /val command, ImGui windows, buttons, help text, local UI state.
-
-Layer 6 — Plugin domain services and models
-  AchievementCatalog, AchievementProgressService, TrackedAchievementStore,
-  TrackedAchievementPresetStore, Configuration, Models/*.
-  Mostly pure C# logic over plugin config and Lumina rows.
-
-Layer 5 — Dalamud managed services
-  IDalamudPluginInterface, ICommandManager, IDataManager, IUnlockState,
-  IClientState, IFramework, IGameInteropProvider, WindowSystem.
-  These are injected/provided by Dalamud and form the normal plugin API boundary.
-
-Layer 4 — Dalamud UI/data libraries
-  Dalamud.Bindings.ImGui, Dalamud Interface helpers, Lumina/Lumina.Excel.
-  Used for drawing windows and reading game data sheets.
-
-Layer 3 — ClientStructs/native adapters in this plugin
-  NativeAchievementNavigator, ClientAchievementProgressSource,
-  PassiveAchievementProgressObserver, CosmicClassProgressProvider.
-  These are intentionally small and labeled with risk comments.
-
-Layer 2 — FFXIV client native structures/agents/hooks
-  AgentAchievement, Achievement singleton, WKSManager, native callback hooks.
-  This is local client state/UI/native callback territory.
-
-Layer 1 — Game process, local memory, and Square Enix servers
-  FFXIV process and server-originated state.
-  This plugin must not add hidden polling, synthetic game actions, telemetry, or backend calls.
-```
-
-## Mermaid hierarchy diagram
+## Hierarchy diagram
 
 ```mermaid
 flowchart TB
-    L8["Layer 8: Product workflow\nTrack / inspect / plan achievements"]
-    L7["Layer 7: Plugin UI + commands\nPlugin.cs, TrackerWindow, ConfigWindow, /val"]
-    L6["Layer 6: Plugin domain logic\nCatalog, progress service, tracked store, presets, config, models"]
-    L5["Layer 5: Dalamud managed services\nPluginInterface, CommandManager, DataManager, UnlockState, ClientState, Framework, InteropProvider"]
-    L4["Layer 4: Dalamud UI/data libraries\nImGui bindings, WindowSystem helpers, Lumina sheets"]
-    L3["Layer 3: Isolated native adapters\nNativeAchievementNavigator, ClientAchievementProgressSource, PassiveAchievementProgressObserver, CosmicClassProgressProvider"]
-    L2["Layer 2: FFXIV native client surfaces\nAgentAchievement, Achievement singleton, WKSManager, native callbacks"]
-    L1["Layer 1: Game process + server-originated state\nFFXIV process, local memory, server-provided achievement state"]
+    Player["Player workflow\nTrack achievements, inspect native entries, plan Cosmic progress, manage presets"]
 
-    L8 --> L7 --> L6 --> L5 --> L4 --> L3 --> L2 --> L1
+    Shell["Plugin shell\nPlugin.cs: command routing, window registration, config save/load, lifecycle"]
+    MainUI["Main tracker UI\nTrackerWindow: tracked rows, Update Next, row actions, status"]
+    ConfigUI["Configuration UI\nConfigWindow: tracked list, search, presets, ordering, help"]
+
+    State["App state + domain logic\nConfiguration, Models, TrackedAchievementStore, TrackedAchievementPresetStore"]
+    Catalog["Achievement catalog\nAchievementCatalog + Lumina achievement/category rows"]
+    Progress["Progress interpretation\nAchievementProgressService + IAchievementProgressSource"]
+
+    DalamudServices["Dalamud service boundary\nPluginInterface, CommandManager, DataManager, UnlockState, ClientState, Framework"]
+    UiLibs["Dalamud UI helpers\nWindowSystem, ImGui bindings, FontAwesome/IconButton helpers"]
+    DataLibs["Data libraries\nLumina, Lumina.Excel, FFXIVClientStructs types"]
+
+    NativeAdapters["Native/ClientStructs adapters\nNativeAchievementNavigator, ClientAchievementProgressSource, CosmicClassProgressProvider"]
+    BlockedAdapter["Blocked/deprecated path under current policy\nPassiveAchievementProgressObserver: Dalamud.Hooking / HookFromAddress"]
+
+    GameUi["Native game UI surfaces\nAgentAchievement, native Achievement window"]
+    GameState["Local client state\nAchievement singleton progress slot, WKSManager Cosmic score state"]
+    External["Outside the plugin\nFFXIV process and server-originated state"]
+
+    Guardrails["Repo guardrails\nNo raw memory/signatures/low-level hooks, no plugin-originated progress requests, no hidden polling, no telemetry/backend"]
+
+    Player --> Shell
+    Shell --> MainUI
+    Shell --> ConfigUI
+    MainUI --> State
+    ConfigUI --> State
+    MainUI --> Progress
+    ConfigUI --> Catalog
+    ConfigUI --> Progress
+    State --> Catalog
+    Progress --> Catalog
+    Progress --> DalamudServices
+    Catalog --> DalamudServices
+    Shell --> DalamudServices
+    MainUI --> UiLibs
+    ConfigUI --> UiLibs
+    Catalog --> DataLibs
+    NativeAdapters --> DataLibs
+    Progress --> NativeAdapters
+    NativeAdapters --> GameUi
+    NativeAdapters --> GameState
+    BlockedAdapter -. must be removed or kept out of compliant builds .-> GameState
+    GameUi --> External
+    GameState --> External
+    Guardrails -. constrain .-> Shell
+    Guardrails -. constrain .-> Progress
+    Guardrails -. constrain .-> NativeAdapters
+    Guardrails -. block .-> BlockedAdapter
 ```
 
-## Where our code lands
+## Logical groups
 
-### Layer 8: product workflow
+### Player workflow
 
-Plain-English behavior:
+What the user experiences:
 
-- Maintain a list of tracked achievements.
-- Let the player open the native Achievement entry for a tracked achievement.
-- Passively show progress when the client has exposed it.
-- Save/load reusable tracked lists as presets.
-- Show Cosmic Class score planning from locally observed score state.
+- Run `/val`.
+- Track achievements.
+- Open native Achievement entries from rows or search results.
+- See completion/progress when the client has exposed enough local data.
+- Save, load, rename, and delete tracked-list presets.
+- Use Cosmic Class score information for planning when local score state is available.
+
+This group is described by `README.md`, help text, button labels, and the UI pages. It should stay plain-English and should not expose internal implementation details unless they help the player understand risk or behavior.
+
+### Plugin shell
+
+Main file:
+
+- `AchievementTracker/Plugin.cs`
+
+Responsibilities:
+
+- Own plugin construction and disposal.
+- Load/normalize/save configuration.
+- Register `/val` and subcommands.
+- Register/unregister windows and Dalamud callbacks.
+- Hold shared services used by UI windows.
+- Apply shared lockouts for user-guided native Achievement opens.
+
+Review focus:
+
+- `Dispose()` must undo event subscriptions and release owned resources.
+- Command behavior should match README/help.
+- Long-running or per-frame work should not creep into this class without clear reason.
+
+### UI windows
 
 Files:
 
-- `README.md`
-- `map/*`
-- player-facing strings in `TrackerWindow.cs` and `ConfigWindow.cs`
+- `AchievementTracker/Windows/TrackerWindow.cs`
+- `AchievementTracker/Windows/ConfigWindow.cs`
 
-Risk: low, unless wording misrepresents what lower layers are doing.
+Responsibilities:
 
-### Layer 7: plugin UI and command layer
+- Draw the main tracker.
+- Draw config/search/preset/help UI.
+- Convert button clicks into calls on `Plugin` or domain services.
+- Keep player-facing text concise.
 
-Files/methods:
+Review focus:
 
-- `Plugin.OnCommand(...)`
-- `Plugin.ToggleMainUi()` / `OpenMainUi()` / `OpenConfigUi()`
-- `TrackerWindow.Draw()` and `Draw...` UI helpers
-- `ConfigWindow.Draw()` and `Draw...` UI helpers
+- UI code should not directly manipulate native pointers or perform heavy per-frame work.
+- Buttons should do exactly what their labels/tooltips say.
+- Config organization should stay navigable and maintainable.
 
-External components:
-
-- Dalamud command manager
-- Dalamud `WindowSystem`
-- ImGui
-
-Risk: low. The UI becomes higher-risk only where a button calls a native adapter.
-
-### Layer 6: plugin domain logic
+### App state and domain logic
 
 Files/classes:
 
-- `Configuration.cs`
-- `Models/*`
-- `TrackedAchievementStore`
-- `TrackedAchievementPresetStore`
-- `AchievementCatalog`
-- `AchievementProgressService`
+- `AchievementTracker/Configuration.cs`
+- `AchievementTracker/Models/*`
+- `AchievementTracker/Services/TrackedAchievementStore.cs`
+- `AchievementTracker/Services/TrackedAchievementPresetStore.cs`
+- `AchievementTracker/Services/AchievementCatalog.cs`
+- `AchievementTracker/Services/AchievementProgressService.cs`
 
-External components:
+Responsibilities:
 
-- plugin config
-- Lumina sheet rows through `IDataManager`
-- Dalamud `IUnlockState` for known completion state
+- Store tracked achievement IDs and presets.
+- Sanitize preset names and achievement IDs.
+- Read achievement/category metadata through the catalog.
+- Format progress/completion states for the UI.
 
-Risk: low. This layer should remain ordinary C# logic and is the safest place to add tests.
+Review focus:
 
-### Layer 5: Dalamud managed service boundary
+- This is the safest place for tests.
+- Keep this group mostly pure C# over config, models, Lumina rows, and `IUnlockState` results.
+- Avoid making domain services know about ImGui or native game pointers.
 
-Injected services in `Plugin.cs`:
+### Dalamud service boundary
+
+Injected/provided services currently used in `Plugin.cs`:
 
 - `IDalamudPluginInterface`
 - `ICommandManager`
 - `IDataManager`
 - `IUnlockState`
 - `IClientState`
-- `IGameInteropProvider`
 - `IFramework`
+- `IGameInteropProvider` currently only exists for the blocked hook observer path and should be removed if that path is removed.
 
-Our methods using this layer:
+Responsibilities:
 
-- `Plugin.RegisterDalamudCallbacks()`
-- `Plugin.UnregisterDalamudCallbacks()`
-- `Plugin.RefreshCosmicCacheFromLiveState()` uses `IClientState.TerritoryType` and `IFramework.Update` as a gate.
-- `AchievementCatalog` uses `IDataManager`.
-- `AchievementProgressService` uses `IUnlockState`.
+- Provide the plugin lifecycle, command registration, config storage, game data, unlock state, client state, and framework tick callbacks.
 
-Risk: low-to-medium. These are normal Dalamud plugin APIs, but `IFramework.Update` and `IGameInteropProvider` deserve extra review because they can become automation/hook surfaces if abused.
+Review focus:
 
-### Layer 4: UI/data support libraries
+- Event subscriptions must be paired with unsubscriptions.
+- `IFramework.Update` should stay minimal and should not become hidden gameplay automation.
+- `IGameInteropProvider` usage is a red flag under the current blocker policy when it leads to hooks or native address binding.
+
+### UI and data libraries
 
 Libraries:
 
 - `Dalamud.Bindings.ImGui`
 - `Dalamud.Interface.Components`
+- `Dalamud.Interface.Windowing`
 - `Lumina`
 - `Lumina.Excel`
+- FFXIVClientStructs type definitions where needed by isolated adapters
 
-Our methods using this layer:
+Responsibilities:
 
-- `TrackerWindow.Draw...` methods use ImGui and `ImGuiComponents.IconButton`.
-- `ConfigWindow.Draw...` methods use ImGui and FontAwesome icon buttons.
-- `AchievementCatalog` reads achievement/category sheet data.
+- Draw windows and icon buttons.
+- Read static sheet data.
+- Provide typed access to selected native/game structures through ClientStructs.
 
-Risk: low. UI and sheet reads are expected plugin behavior.
+Review focus:
 
-### Layer 3: isolated native adapters
+- ImGui and Lumina use is ordinary plugin behavior.
+- ClientStructs use should stay isolated below this group, not spread through windows or domain models.
 
-Files/classes:
+### Native and ClientStructs adapters
 
-- `NativeAchievementNavigator`
-- `ClientAchievementProgressSource`
-- `PassiveAchievementProgressObserver`
-- `CosmicClassProgressProvider`
+Current files:
 
-What they do:
+- `AchievementTracker/Services/NativeAchievementNavigator.cs`
+- `AchievementTracker/Services/ClientAchievementProgressSource.cs`
+- `AchievementTracker/Services/CosmicClassProgressProvider.cs`
+- `AchievementTracker/Services/PassiveAchievementProgressObserver.cs` — **blocked/deprecated under current repo policy because it uses low-level hooks.**
 
-- Open/close the native Achievement UI.
-- Read already-loaded local Achievement progress slot state.
-- Hook native callbacks passively and call the original function first.
-- Read local WKS/Cosmic score state for Cosmic Class planning.
+Current responsibilities:
 
-Risk: medium to medium-high. This is where `unsafe`, hooks, pointers, native agents, and ClientStructs live. The refactor keeps these surfaces isolated and labeled.
+- `NativeAchievementNavigator`: open/close the native Achievement UI from explicit user actions.
+- `ClientAchievementProgressSource`: read already-loaded local Achievement progress slot values.
+- `CosmicClassProgressProvider`: read local WKS/Cosmic score state when available and use cached values otherwise.
+- `PassiveAchievementProgressObserver`: currently hooks native callbacks; this conflicts with the current blocker rule and should not be part of a compliant build.
 
-### Layer 2: FFXIV native client surfaces
+Review focus:
 
-Native surfaces touched:
+- Keep allowed adapters small and documented.
+- Do not store raw pointers across frames.
+- Do not add plugin-originated progress requests.
+- Do not use raw memory, signatures, or low-level hooks.
+
+### Native game-client surfaces
+
+Native surfaces currently touched by adapters:
 
 - `AgentAchievement.Instance()`
 - `agent->OpenById(achievementId)`
@@ -217,76 +252,91 @@ Native surfaces touched:
 - `Achievement.ProgressAchievementId`
 - `Achievement.ProgressCurrent`
 - `Achievement.ProgressMax`
-- `Achievement.Delegates.ReceiveAchievementProgress`
-- `Achievement.Delegates.SetAchievementCompleted`
 - `WKSManager.Instance()`
 - `manager->State.Scores`
 
-Risk: medium-high. These must stay small, reviewed, and well-commented.
+Blocked/deprecated native callback surfaces currently present in old code:
 
-### Layer 1: game process and server-originated state
+- `Achievement.Delegates.ReceiveAchievementProgress`
+- `Achievement.Delegates.SetAchievementCompleted`
+- `Achievement.MemberFunctionPointers.*`
+- `HookFromAddress(...)`
 
-This is below our plugin. The plugin sees local client state that the game already has, but should not add hidden traffic or automation.
+Review focus:
 
-Out-of-scope for this safe/readable architecture:
+- User-guided native UI open is the safest current native interaction pattern in this plugin.
+- Local state reads are still sensitive and should be justified.
+- Native hooks/signature/raw-memory paths are not allowed by current repo policy.
 
-- hidden automatic progress polling
-- broad background queues
-- synthetic addon callbacks
-- packet capture
-- telemetry/backend calls
-- content ID collection
-- arbitrary DLL/plugin self-update behavior
+### Outside the plugin
 
-Risk: highest. Avoid unless explicitly isolated as a private experiment and separately reviewed.
+This includes:
+
+- FFXIV process state.
+- Square Enix server-originated achievement/completion/progress state.
+- Dalamud/XIVLauncher distribution and update channels.
+- GitHub custom repository JSON and release assets.
+
+Review focus:
+
+The plugin must not add hidden server traffic, packet capture, synthetic addon actions, telemetry, backend sync, content ID collection, or arbitrary self-update behavior.
 
 ## Call placement examples
 
 ```text
 /val command
-Layer 7: Plugin.OnCommand
-Layer 7: ToggleMainUi / OpenConfigUi
-Layer 7: WindowSystem draws UI
+Plugin shell: Plugin.OnCommand
+Plugin shell: ToggleMainUi / OpenConfigUi
+UI windows: WindowSystem draws TrackerWindow or ConfigWindow
 ```
 
 ```text
 Configure button
-Layer 7: TrackerWindow.DrawConfigureButton
-Layer 7: Plugin.ToggleConfigUi
+UI windows: TrackerWindow.DrawConfigureButton
+Plugin shell: Plugin.ToggleConfigUi
+UI windows: ConfigWindow.Draw
 ```
 
 ```text
-Tracked row reload icon
-Layer 7: TrackerWindow.DrawRowUpdateButton
-Layer 7: TrackerWindow.OpenNativeAchievementForUpdate
-Layer 7: Plugin.OpenAchievementForUpdate
-Layer 3: NativeAchievementNavigator.OpenAchievement
-Layer 2: AgentAchievement.OpenById
+Tracked row reload icon / Update Next
+UI windows: TrackerWindow row button or Update Next
+Plugin shell: Plugin.OpenAchievementForUpdate applies shared lockout
+Native adapter: NativeAchievementNavigator.OpenAchievement
+Native game UI: AgentAchievement.OpenById
 ```
 
 ```text
-Passive observed progress
-Layer 2: Native Achievement client callback occurs
-Layer 3: PassiveAchievementProgressObserver.OnReceiveAchievementProgress
-Layer 3: ClientAchievementProgressSource.RecordObservedProgress
-Layer 6/7: AchievementProgressService / UI display reads cached value
+Search result inspect button
+UI windows: ConfigWindow search result row
+Native adapter: NativeAchievementNavigator.OpenAchievement
+Native game UI: AgentAchievement.OpenById
+```
+
+```text
+Progress display
+UI windows: row asks AchievementProgressService for display state
+Domain logic: AchievementProgressService combines unlock/progress sources
+Dalamud service: IUnlockState supplies known completion state
+Native adapter: ClientAchievementProgressSource may read local progress slot
+UI windows: row renders formatted status
 ```
 
 ```text
 Cosmic Class score display
-Layer 7: UI row asks for progress
-Layer 6: AchievementProgressService.GetProgress
-Layer 3: CosmicClassProgressProvider.GetProgress
-Layer 2: WKSManager.Instance()->State.Scores, if loaded
-Layer 6: cached score fallback if live state unavailable
+UI windows: tracked/search row asks for progress
+Domain logic: AchievementProgressService delegates Cosmic Class rows
+Native adapter: CosmicClassProgressProvider checks local WKSManager scores when available
+App state: cached score fallback is used when live state is unavailable
 ```
 
-## Review checklist by layer
+## Review checklist by group
 
-- Layers 7-8: check wording, player UX, and whether buttons do only what they say.
-- Layer 6: add/keep unit tests for stores, presets, and formatting.
-- Layer 5: verify event subscriptions are paired with unsubscriptions.
-- Layer 4: verify UI is not doing heavy work per frame.
-- Layer 3: require explicit risk comments and small methods.
-- Layer 2: verify native calls are user-guided or passive and do not synthesize actions.
-- Layer 1: fail closed on hidden polling, backend calls, packet capture, or privacy-sensitive identifiers.
+- Player workflow: wording is accurate, concise, and player-visible.
+- Plugin shell: commands, config saves, lifecycle, and event unregistration are correct.
+- UI windows: buttons match labels/tooltips and do not hide heavy/native work.
+- App state/domain logic: pure logic has tests and remains separate from UI/native code.
+- Dalamud service boundary: subscriptions are symmetric; framework ticks stay minimal and non-automating.
+- UI/data libraries: ImGui/Lumina use is straightforward and does not perform surprising work per frame.
+- Native adapters: allowed ClientStructs use is isolated, documented, and does not request progress or store pointers.
+- Blocked paths: raw memory, signatures, and low-level hooks are absent from compliant builds; if needed, stop and inform Micheal/the user.
+- Outside-plugin boundary: no hidden polling, backend calls, packet capture, telemetry, content ID collection, or arbitrary self-update behavior.
