@@ -16,12 +16,11 @@ public sealed class Plugin : IDalamudPlugin
     // Risk: low. These constants do not touch game memory or the network.
     private const string CommandName = "/val";
     private const ushort SinusArdorumTerritoryTypeId = 1237;
-    private static readonly TimeSpan AchievementUpdateMinimumLockout = TimeSpan.FromSeconds(6);
-    private static readonly TimeSpan AchievementUpdateMinimumJitter = TimeSpan.Zero;
+    private static readonly TimeSpan AchievementUpdateOpenWindowMinimumLockout = TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan AchievementUpdateClosedWindowMinimumLockout = TimeSpan.FromSeconds(6);
     private static readonly TimeSpan AchievementUpdateMaximumLockout = TimeSpan.FromSeconds(15);
     private static readonly TimeSpan AchievementObservationWindow = AchievementUpdateMaximumLockout;
     private static readonly TimeSpan CosmicCacheRefreshInterval = TimeSpan.FromSeconds(30);
-    private static readonly Random AchievementUpdateJitter = new();
 
     // Component: Dalamud services.
     // Risk: low-to-medium. These are framework services supplied by Dalamud. ClientStructs/interop use is isolated in Services/.
@@ -166,7 +165,7 @@ public sealed class Plugin : IDalamudPlugin
         var now = DateTimeOffset.UtcNow;
         this.pendingAchievementUpdateId = achievementId;
         this.achievementWindowWasOpenForCurrentUpdate = achievementWindowWasOpen;
-        this.achievementUpdateMinimumOpenAt = now + CreateAchievementUpdateMinimumLockout();
+        this.achievementUpdateMinimumOpenAt = now + GetAchievementUpdateMinimumLockout(achievementWindowWasOpen);
         this.achievementUpdateMaximumOpenAt = now + AchievementUpdateMaximumLockout;
         this.ClientAchievementProgressSource.BeginObservation(achievementId, AchievementObservationWindow);
         return true;
@@ -209,13 +208,10 @@ public sealed class Plugin : IDalamudPlugin
         this.achievementUpdateMaximumOpenAt = DateTimeOffset.MinValue;
     }
 
-    private static TimeSpan CreateAchievementUpdateMinimumLockout()
-    {
-        lock (AchievementUpdateJitter)
-        {
-            return AchievementUpdateMinimumLockout + TimeSpan.FromMilliseconds(AchievementUpdateJitter.NextDouble() * AchievementUpdateMinimumJitter.TotalMilliseconds);
-        }
-    }
+    private static TimeSpan GetAchievementUpdateMinimumLockout(bool achievementWindowWasOpen)
+        => achievementWindowWasOpen
+            ? AchievementUpdateOpenWindowMinimumLockout
+            : AchievementUpdateClosedWindowMinimumLockout;
 
     // Section: public window helpers.
     // Component: ImGui windows. Risk: low.

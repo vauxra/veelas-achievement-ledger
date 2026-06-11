@@ -23,10 +23,10 @@
     "IsTestingExclusive": true,
     "DownloadLinkInstall": "",
     "DownloadLinkUpdate": "",
-    "LastUpdate": "1781196255",
-    "TestingAssemblyVersion": "0.2.0.32",
+    "LastUpdate": "1781196732",
+    "TestingAssemblyVersion": "0.2.0.33",
     "TestingDalamudApiLevel": 15,
-    "TestingChangelog": "Testing-only custom-repo build: native Achievement update-open pacing now uses a 6 second minimum lockout with the existing 15 second maximum. Closed-window update actions show Waiting for data for the 6-15s adaptive window; already-open window update actions show Request cooldown for 6s. Hidden/non-manually-viewable achievement filtering remains in place.",
-    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.32/VeelasAchievementLedger_0_2_0_32.zip"
+    "TestingChangelog": "Testing-only custom-repo build: native Achievement update-open pacing is now path-specific. If the Achievement window is already open, update actions use a 1 second Request cooldown. If the Achievement window is closed, update actions show Waiting for data with a 6 second minimum and 15 second maximum adaptive window. Hidden/non-manually-viewable achievement filtering remains in place.",
+    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.33/VeelasAchievementLedger_0_2_0_33.zip"
   }
 ]

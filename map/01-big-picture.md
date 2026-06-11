@@ -1,6 +1,6 @@
 # Big picture
 
-Version: `v0.2.0.32`
+Version: `v0.2.0.33`
 
 ## Navigation outline
 
@@ -77,7 +77,7 @@ User clicks Update Next 🟢
       ├─ NativeAchievementNavigator.OpenAchievement(achievementId) 🟡
       │  └─ AgentAchievement.Instance()->OpenById(achievementId) 🟡
       ├─ ClientAchievementProgressSource.BeginObservation(achievementId, 15s) 🟡
-      └─ sets adaptive pacing: open window = 6s cooldown; closed window = data wait for 6-15s 🟢
+      └─ sets adaptive pacing: open window = 1s cooldown; closed window = data wait for 6-15s 🟢
 ```
 
 ### Reload a specific tracked row
