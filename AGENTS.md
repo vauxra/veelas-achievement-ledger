@@ -20,7 +20,7 @@ This repo is a Final Fantasy XIV Dalamud plugin. Treat the official Dalamud docu
 - Follow Dalamud's interaction priority from the official game-interaction docs:
   1. Prefer Dalamud-provided APIs first; they are the safest and are stable outside API bumps.
   2. Use ClientStructs only when Dalamud APIs do not expose the needed behavior; keep pointer/unsafe handling small and reviewed.
-  3. Use raw memory, signatures, or low-level hooks only as an explicit last resort after design and policy review.
+  3. **Blocker:** do not use raw memory, signatures, or low-level hooks. If a requested change appears to require any of these, stop work and inform Micheal/the user that the task is blocked by this repo policy.
 - Prefer documented Dalamud services first, then Lumina/local data, then ClientStructs only when needed.
 - Keep `unsafe`/ClientStructs code isolated in small adapter classes with comments naming the component, risk level, and safety boundary.
 - Do not store raw pointers across frames.
@@ -65,9 +65,10 @@ These are explicit repo rules derived from the current Dalamud docs pages listed
 Before committing or releasing, an agent must verify and be able to answer:
 
 - Which Dalamud docs/API pages were consulted for changed APIs or standards?
-- Did any change add or alter `unsafe`, ClientStructs, hooks, native agents, `IFramework.Update`, addon lifecycle, network calls, IPC, or plugin manifest/package behavior?
+- Did any change add or alter `unsafe`, ClientStructs, native agents, `IFramework.Update`, addon lifecycle, network calls, IPC, or plugin manifest/package behavior?
 - If yes, is the code isolated, documented, disposed/unregistered, and covered by the repo's policy tripwires?
-- Does the change follow the Dalamud game-interaction priority: Dalamud API first, ClientStructs second, raw memory/hooks last?
+- Does the change avoid raw memory, signatures, and low-level hooks entirely? If not, block the commit/review and inform Micheal/the user.
+- Does the change follow the Dalamud game-interaction priority: Dalamud API first, ClientStructs second, and no raw memory/signature/low-level-hook implementation path?
 - Does the change preserve the safe public/mainline stance: native Achievement-window assisted flow, passive observation, no plugin-originated progress queues/polling/automation?
 - Are `AssemblyVersion`, `TestingAssemblyVersion`, `DalamudApiLevel`, release asset name, tag, and `pluginmaster.json` consistent?
 - Does the packed release zip contain the expected manifest fields, icon/image URLs, and no forbidden automation/backend strings?
