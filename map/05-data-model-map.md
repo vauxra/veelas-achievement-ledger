@@ -1,6 +1,6 @@
 # Data model map
 
-Version: `v0.2.0.31`
+Version: `v0.2.0.32`
 
 ## Navigation outline
 

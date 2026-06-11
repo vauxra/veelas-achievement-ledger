@@ -1,6 +1,6 @@
 # Function call map
 
-Version: `v0.2.0.31`
+Version: `v0.2.0.32`
 
 This map follows the refactored code layout. The goal is to show what each important method does, what it calls, and which layer it touches.
 
@@ -65,8 +65,8 @@ OpenAchievementForUpdate(id)
 ├─ NativeAchievementNavigator.IsAchievementWindowOpen() 🟡
 ├─ NativeAchievementNavigator.OpenAchievement(id) 🟡
 ├─ ClientAchievementProgressSource.BeginObservation(id, 15 seconds) 🟡
-├─ if window was already open: request cooldown only, 1.0-1.5s 🟢
-└─ if window was closed: Waiting for data countdown, max 15s with 1.0-1.5s minimum 🟢
+├─ if window was already open: request cooldown only, 6s 🟢
+└─ if window was closed: Waiting for data countdown, max 15s with a 6s minimum 🟢
 ```
 
 Method links: [Big picture native open path](./01-big-picture.md#native-achievement-open-path), [Safety map](./06-safety-map.md#native-achievement-ui-actions).

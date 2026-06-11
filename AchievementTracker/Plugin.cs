@@ -16,8 +16,8 @@ public sealed class Plugin : IDalamudPlugin
     // Risk: low. These constants do not touch game memory or the network.
     private const string CommandName = "/val";
     private const ushort SinusArdorumTerritoryTypeId = 1237;
-    private static readonly TimeSpan AchievementUpdateMinimumLockout = TimeSpan.FromSeconds(1);
-    private static readonly TimeSpan AchievementUpdateMinimumJitter = TimeSpan.FromMilliseconds(500);
+    private static readonly TimeSpan AchievementUpdateMinimumLockout = TimeSpan.FromSeconds(6);
+    private static readonly TimeSpan AchievementUpdateMinimumJitter = TimeSpan.Zero;
     private static readonly TimeSpan AchievementUpdateMaximumLockout = TimeSpan.FromSeconds(15);
     private static readonly TimeSpan AchievementObservationWindow = AchievementUpdateMaximumLockout;
     private static readonly TimeSpan CosmicCacheRefreshInterval = TimeSpan.FromSeconds(30);

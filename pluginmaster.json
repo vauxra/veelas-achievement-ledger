@@ -23,10 +23,10 @@
     "IsTestingExclusive": true,
     "DownloadLinkInstall": "",
     "DownloadLinkUpdate": "",
-    "LastUpdate": "1781194858",
-    "TestingAssemblyVersion": "0.2.0.31",
+    "LastUpdate": "1781196255",
+    "TestingAssemblyVersion": "0.2.0.32",
     "TestingDalamudApiLevel": 15,
-    "TestingChangelog": "Testing-only custom-repo build: hide/non-viewable Achievement rows are excluded from search/add, preset loads, and saved tracked-list startup so VAL only tracks achievements that can be manually viewed in the native Achievement menu.",
-    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.31/VeelasAchievementLedger_0_2_0_31.zip"
+    "TestingChangelog": "Testing-only custom-repo build: native Achievement update-open pacing now uses a 6 second minimum lockout with the existing 15 second maximum. Closed-window update actions show Waiting for data for the 6-15s adaptive window; already-open window update actions show Request cooldown for 6s. Hidden/non-manually-viewable achievement filtering remains in place.",
+    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.32/VeelasAchievementLedger_0_2_0_32.zip"
   }
 ]

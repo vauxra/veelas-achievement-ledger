@@ -1,6 +1,6 @@
 # File index
 
-Version: `v0.2.0.31`
+Version: `v0.2.0.32`
 
 ## What this page is for
 
@@ -76,11 +76,11 @@ Members found:
 Types: `Plugin`
 
 Members found:
-- line 18: `private static readonly TimeSpan AchievementUpdateMinimumLockout = TimeSpan.FromSeconds(1);`
-- line 19: `private static readonly TimeSpan AchievementUpdateMinimumJitter = TimeSpan.FromMilliseconds(500);`
-- line 20: `private static readonly TimeSpan AchievementUpdateMaximumLockout = TimeSpan.FromSeconds(15);`
-- line 21: `private static readonly TimeSpan AchievementObservationWindow = AchievementUpdateMaximumLockout;`
-- line 22: `private static readonly TimeSpan CosmicCacheRefreshInterval = TimeSpan.FromSeconds(30);`
+- line 19: `private static readonly TimeSpan AchievementUpdateMinimumLockout = TimeSpan.FromSeconds(6);`
+- line 20: `private static readonly TimeSpan AchievementUpdateMinimumJitter = TimeSpan.Zero;`
+- line 21: `private static readonly TimeSpan AchievementUpdateMaximumLockout = TimeSpan.FromSeconds(15);`
+- line 22: `private static readonly TimeSpan AchievementObservationWindow = AchievementUpdateMaximumLockout;`
+- line 23: `private static readonly TimeSpan CosmicCacheRefreshInterval = TimeSpan.FromSeconds(30);`
 - line 42: `public Configuration Configuration { get; }`
 - line 43: `public TrackedAchievementStore TrackedAchievements { get; }`
 - line 44: `public AchievementCatalog AchievementCatalog { get; }`

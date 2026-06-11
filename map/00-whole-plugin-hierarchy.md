@@ -1,6 +1,6 @@
 # Whole plugin hierarchy
 
-Version: `v0.2.0.31`
+Version: `v0.2.0.32`
 
 This is the broad map of the entire plugin. Read it top-to-bottom like a Python package map.
 
