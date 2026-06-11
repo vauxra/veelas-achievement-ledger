@@ -1,8 +1,8 @@
 {
   "Author": "Saagi",
-  "Name": "Veela's Achievement Ledger",
-  "Punchline": "EXPERIMENTAL: direct achievement progress updater.",
-  "Description": "Experimental / not for Dalamud publishing. Use /val to track achievements, request progress directly, and test optional timed auto updates.",
+  "Name": "Veela's Achievment Ledger Ex+",
+  "Punchline": "EXPERIMENTAL Ex+: direct achievement progress updater.",
+  "Description": "Experimental Ex+ / not for Dalamud publishing. Use /val to track achievements, request progress directly, and test optional timed auto updates.",
   "RepoUrl": "https://github.com/vauxra/veelas-achievement-ledger",
   "ApplicableVersion": "any",
   "Tags": [
@@ -10,5 +10,9 @@
     "ledger",
     "tracker",
     "utility"
+  ],
+  "IconUrl": "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png",
+  "ImageUrls": [
+    "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png"
   ]
 }
