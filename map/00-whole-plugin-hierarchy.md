@@ -1,5 +1,8 @@
 # Whole plugin hierarchy
 
+> **Documentation release:** `v0.2.0.20` / testing prerelease architecture refresh.
+> **TLP legend:** 🟢 plugin/domain code, 🟡 Dalamud managed services or UI/data libraries, 🟠 isolated ClientStructs/native adapters, 🔴 blocked/deprecated policy paths.
+
 This is the broad map of the entire plugin. Read it top-to-bottom like a Python package map.
 
 ## Repository layout
@@ -7,10 +10,9 @@ This is the broad map of the entire plugin. Read it top-to-bottom like a Python 
 ```text
 AchievementTracker/
 ├─ Plugin.cs                         # main app object, service wiring, commands, framework callbacks
-├─ Configuration.cs                  # saved plugin config/settings
+├─ Configuration.cs                  # saved plugin config/settings via Dalamud plugin config
 ├─ VeelasAchievementLedger.json      # Dalamud plugin manifest
-├─ images/
-│  └─ icon.png                       # plugin icon
+├─ images/icon.png                   # plugin icon
 ├─ Models/                           # small data/value objects
 │  ├─ AchievementInfo.cs             # display info for one achievement
 │  ├─ AchievementProgress.cs         # progress states and display text
@@ -21,12 +23,10 @@ AchievementTracker/
 │  ├─ AchievementCatalog.cs          # reads Lumina achievement/category data
 │  ├─ AchievementProgressService.cs  # decides what progress text to show
 │  ├─ ClientAchievementProgressSource.cs
-│  │                                  # passive in-memory observed progress cache
+│  │                                  # bounded observed-progress cache after user-guided opens
 │  ├─ CosmicClassProgressProvider.cs # reads local WKS scores + maps Cosmic achievements
 │  ├─ IAchievementProgressSource.cs  # interface for progress source
 │  ├─ NativeAchievementNavigator.cs  # opens/closes native Achievement UI
-│  ├─ PassiveAchievementProgressObserver.cs
-│  │                                  # hooks native callbacks, caches observations
 │  ├─ TrackedAchievementPresetStore.cs
 │  │                                  # preset save/rename/delete/load helpers
 │  └─ TrackedAchievementStore.cs     # ordered tracked achievement IDs
@@ -38,231 +38,49 @@ AchievementTracker/
 ## Main dependency graph
 
 ```text
-Plugin
-├─ owns Configuration
-├─ owns TrackedAchievementStore
-├─ owns AchievementCatalog
-│  └─ uses IDataManager / Lumina sheets
-├─ owns ClientAchievementProgressSource
-│  └─ reads Achievement.Instance() local progress slot
-├─ owns CosmicClassProgressProvider
+Plugin 🟢
+├─ owns Configuration 🟢
+├─ owns TrackedAchievementStore 🟢
+├─ owns AchievementCatalog 🟢
+│  └─ uses IDataManager / Lumina sheets 🟡
+├─ owns ClientAchievementProgressSource 🟠
+│  └─ reads Achievement.Instance() local progress slot only during bounded observation windows
+├─ owns CosmicClassProgressProvider 🟠
 │  ├─ reads WKSManager.Instance() local scores
-│  └─ writes Configuration.CosmicClassScoreCache through Plugin.SaveConfiguration
-├─ owns NativeAchievementNavigator
-│  └─ uses AgentAchievement.Instance()
-├─ owns AchievementProgressService
-│  ├─ uses IUnlockState
-│  ├─ uses ClientAchievementProgressSource
-│  └─ uses CosmicClassProgressProvider
-├─ owns PassiveAchievementProgressObserver
-│  ├─ hooks ReceiveAchievementProgress
-│  └─ hooks SetAchievementCompleted
-├─ owns TrackerWindow
+│  └─ writes Configuration.CosmicClassScoreCache through Plugin.SaveConfiguration 🟡
+├─ owns NativeAchievementNavigator 🟠
+│  └─ uses AgentAchievement.Instance() native Achievement UI
+├─ owns AchievementProgressService 🟢
+│  ├─ uses IUnlockState 🟡
+│  ├─ uses ClientAchievementProgressSource 🟠
+│  └─ uses CosmicClassProgressProvider 🟠
+├─ owns TrackerWindow 🟢
 │  └─ calls Plugin/service methods from main UI buttons
-└─ owns ConfigWindow
+└─ owns ConfigWindow 🟢
    └─ calls Plugin/service methods from config/search/preset UI
 ```
 
 ## Startup lifecycle
 
 ```text
-Dalamud loads plugin
-└─ new Plugin()
-   ├─ load Configuration from PluginInterface
+Dalamud loads plugin 🟡
+└─ new Plugin() 🟢
+   ├─ LoadAndNormalizeConfiguration()
+   │  └─ PluginInterface.GetPluginConfig() 🟡
    ├─ Configuration.Normalize()
    ├─ TrackedAchievementStore.LoadFrom(config IDs)
-   ├─ create services
+   ├─ create catalog/progress/navigation/Cosmic services
    ├─ create windows
-   ├─ InstallPassiveAchievementObserver()
-   ├─ WindowSystem.AddWindow(...)
-   ├─ CommandManager.AddHandler("/val", OnCommand)
-   ├─ register UI draw/open callbacks
-   ├─ register Framework.Update
-   └─ register ClientState.Login/Logout cache resets
+   ├─ WindowSystem.AddWindow(...) 🟡
+   ├─ CommandManager.AddHandler("/val", OnCommand) 🟡
+   ├─ register UI draw/open callbacks 🟡
+   ├─ register Framework.Update 🟡
+   └─ register ClientState login/logout resets 🟡
 ```
 
-## Shutdown lifecycle
+## Runtime boundaries
 
-```text
-Dalamud unloads plugin
-└─ Plugin.Dispose()
-   ├─ unregister UI callbacks
-   ├─ unregister Framework.Update
-   ├─ unregister ClientState.Login/Logout
-   ├─ CommandManager.RemoveHandler("/val")
-   ├─ PassiveAchievementProgressObserver.Dispose()
-   │  ├─ dispose receive hook
-   │  └─ dispose completed hook
-   └─ WindowSystem.RemoveAllWindows()
-```
-
-## User command hierarchy
-
-```text
-/val
-└─ Plugin.OnCommand(command, args)
-   ├─ no args / unknown args
-   │  └─ ToggleMainUi()
-   │     └─ TrackerWindow.Toggle()
-   ├─ config / configure / man
-   │  └─ OpenConfigUi(help: false)
-   │     └─ ConfigWindow.OpenConfig()
-   └─ help / ?
-      └─ OpenConfigUi(help: true)
-         └─ ConfigWindow.OpenHelp()
-```
-
-## Main window hierarchy
-
-```text
-TrackerWindow.Draw()
-├─ update passive local progress cache
-│  └─ AchievementProgressSource.UpdateCache()
-├─ Configure button
-│  └─ Plugin.ToggleConfigUi()
-├─ Update Next button
-│  ├─ disabled during update-open lockout
-│  ├─ GetNextTrackedAchievementId()
-│  │  ├─ choose first unobserved tracked ID
-│  │  └─ otherwise choose oldest observed tracked ID
-│  └─ OpenNativeAchievementForUpdate(id)
-│     └─ Plugin.OpenAchievementForUpdate(id)
-├─ Close Achievements button
-│  └─ NativeAchievementNavigator.CloseAchievements()
-├─ lockout status text
-└─ tracked achievement list
-   └─ DrawAchievement(id)
-      ├─ AchievementCatalog.TryGet(id)
-      ├─ AchievementCatalog.TryGetRow(id)
-      ├─ AchievementProgressService.GetProgress(row)
-      ├─ reload icon
-      │  └─ Plugin.OpenAchievementForUpdate(id)
-      ├─ magnifying glass icon
-      │  └─ NativeAchievementNavigator.OpenAchievement(id)
-      ├─ achievement name
-      ├─ progress text
-      └─ last observed text
-```
-
-## Config window hierarchy
-
-```text
-ConfigWindow.Draw()
-├─ draw left navigation
-│  ├─ Organization
-│  └─ Help
-├─ Organization selected
-│  ├─ preset management
-│  │  ├─ save preset
-│  │  ├─ select/load preset
-│  │  ├─ read selected preset
-│  │  ├─ rename preset
-│  │  └─ delete preset
-│  ├─ tracked achievement organization
-│  │  └─ per tracked row
-│  │     ├─ Top → MoveToTop → SaveTrackedAchievements
-│  │     ├─ Up → MoveUp → SaveTrackedAchievements
-│  │     ├─ Down → MoveDown → SaveTrackedAchievements
-│  │     ├─ Bottom → MoveToBottom → SaveTrackedAchievements
-│  │     ├─ Remove → RemoveTrackedAchievement → SaveTrackedAchievements
-│  │     ├─ reload → Plugin.OpenAchievementForUpdate
-│  │     ├─ magnifying glass → NativeAchievementNavigator.OpenAchievement
-│  │     └─ name/category/Cosmic progress display
-│  └─ search and add
-│     ├─ search text input
-│     ├─ hide completed checkbox
-│     ├─ clear button
-│     └─ search result row
-│        ├─ Add → TrackedAchievementStore.Add → SaveTrackedAchievements
-│        └─ magnifying glass → NativeAchievementNavigator.OpenAchievement
-└─ Help selected
-   └─ draw player-facing help text
-```
-
-## Data flow: tracked achievement list
-
-```text
-Configuration.TrackedAchievementIds  # saved on disk
-└─ Plugin constructor
-   └─ TrackedAchievementStore.LoadFrom(...)
-      └─ UI edits store in memory
-         └─ Plugin.SaveTrackedAchievements()
-            ├─ Configuration.TrackedAchievementIds = store.ToConfigList()
-            └─ Configuration.Save()
-```
-
-## Data flow: presets
-
-```text
-Configuration.Presets
-└─ TrackedAchievementPresetStore helpers
-   ├─ SavePreset(name, current tracked IDs)
-   ├─ RenamePreset(old, new)
-   ├─ DeletePreset(name)
-   └─ TryGetPreset(name)
-      └─ TrackedAchievementStore.LoadFrom(preset IDs)
-```
-
-## Data flow: normal achievement progress
-
-```text
-Player opens native Achievement UI through plugin or manually
-└─ game/client receives progress
-   └─ PassiveAchievementProgressObserver hook sees callback
-      ├─ calls original game callback first
-      └─ ClientAchievementProgressSource records progress
-         └─ AchievementProgressService.GetProgress(row)
-            └─ UI displays progress text
-```
-
-## Data flow: Cosmic Class progress
-
-```text
-Framework.Update
-└─ Plugin.RefreshCosmicCacheFromLiveState()
-   ├─ only if in Sinus Ardorum / TerritoryTypeId 1237
-   ├─ only when interval has elapsed
-   └─ CosmicClassProgressProvider.RefreshCacheFromLiveScores()
-      └─ TryReadLiveScores()
-         ├─ WKSManager.Instance()
-         ├─ manager->IsLoaded
-         ├─ manager->State.Scores
-         ├─ save changed scores to Configuration.CosmicClassScoreCache
-         └─ AchievementProgressService uses provider for Cosmic achievement rows
-```
-
-## Safety boundary map
-
-```text
-Allowed user-guided actions
-├─ AgentAchievement.OpenById(id)
-└─ AgentAchievement.Hide()
-
-Allowed passive/local reads
-├─ Achievement.Instance() progress slot
-├─ ReceiveAchievementProgress hook after original callback
-├─ SetAchievementCompleted hook after original callback
-└─ WKSManager.Instance().State.Scores in Sinus Ardorum
-
-Avoided dangerous actions
-├─ direct achievement-progress request API
-├─ automatic Update All queue
-├─ timed auto-update of achievements
-├─ event-triggered update automation
-├─ packet capture
-├─ backend/network/telemetry
-├─ ContentId storage/transmission
-└─ synthetic addon callback/fire events
-```
-
-## If you are reading C# like Python
-
-- A `class` file is usually one module-like unit.
-- Constructor name matches class name: `public Plugin()` is like `def __init__(self):`.
-- `this.foo` is like `self.foo`.
-- `private` means "helper only used inside this class."
-- `public` means other classes may call it.
-- `void` means returns nothing.
-- `bool` means returns true/false.
-- `uint` means non-negative integer.
-- `?` after a type means it can be null, like `Optional[...]` in Python typing.
+- 🟢 Most code is plugin-owned UI, models, stores, and formatting.
+- 🟡 Dalamud services provide config persistence, commands, UI draw callbacks, Lumina data, unlock/completion checks, zone/login state, and framework ticks.
+- 🟠 Native adapters are isolated to three files: `NativeAchievementNavigator`, `ClientAchievementProgressSource`, and `CosmicClassProgressProvider`.
+- 🔴 Current mainline should not contain hook observer classes, `Dalamud.Hooking`, signatures, raw-memory scans, or direct achievement-progress request queues.

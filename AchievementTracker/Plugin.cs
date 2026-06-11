@@ -16,6 +16,7 @@ public sealed class Plugin : IDalamudPlugin
     private const string CommandName = "/val";
     private const ushort SinusArdorumTerritoryTypeId = 1237;
     private static readonly TimeSpan AchievementUpdateOpenLockout = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan AchievementObservationWindow = TimeSpan.FromSeconds(8);
     private static readonly TimeSpan CosmicCacheRefreshInterval = TimeSpan.FromSeconds(30);
 
     // Component: Dalamud services.
@@ -29,9 +30,6 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IUnlockState UnlockState { get; private set; } = null!;
     // IClientState docs: https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IClientState
     [PluginService] internal static IClientState ClientState { get; private set; } = null!;
-    // IGameInteropProvider is only passed to PassiveAchievementProgressObserver for passive hooks.
-    // https://dalamud.dev/plugin-development/interaction/
-    [PluginService] internal static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
     // IFramework runs the gated Cosmic local-cache check. It does not issue direct progress requests.
     [PluginService] internal static IFramework Framework { get; private set; } = null!;
 
@@ -51,7 +49,6 @@ public sealed class Plugin : IDalamudPlugin
     // Risk: low. These only control UI windows and local throttling.
     private TrackerWindow TrackerWindow { get; }
     private ConfigWindow ConfigWindow { get; }
-    private PassiveAchievementProgressObserver? passiveAchievementProgressObserver;
     private DateTimeOffset nextCosmicCacheRefreshAt = DateTimeOffset.MinValue;
     private DateTimeOffset nextAchievementUpdateOpenAt = DateTimeOffset.MinValue;
 
@@ -68,7 +65,6 @@ public sealed class Plugin : IDalamudPlugin
         this.TrackerWindow = new TrackerWindow(this);
         this.ConfigWindow = new ConfigWindow(this);
 
-        this.InstallPassiveAchievementObserver();
         this.RegisterWindows();
         this.RegisterCommand();
         this.RegisterDalamudCallbacks();
@@ -78,8 +74,6 @@ public sealed class Plugin : IDalamudPlugin
     {
         this.UnregisterDalamudCallbacks();
         CommandManager.RemoveHandler(CommandName);
-        this.passiveAchievementProgressObserver?.Dispose();
-        this.passiveAchievementProgressObserver = null;
         this.WindowSystem.RemoveAllWindows();
     }
 
@@ -123,6 +117,7 @@ public sealed class Plugin : IDalamudPlugin
         }
 
         this.nextAchievementUpdateOpenAt = DateTimeOffset.UtcNow + AchievementUpdateOpenLockout;
+        this.ClientAchievementProgressSource.BeginObservation(achievementId, AchievementObservationWindow);
         return true;
     }
 
@@ -195,17 +190,6 @@ public sealed class Plugin : IDalamudPlugin
         ClientState.Logout -= this.ResetProgressStateOnLogout;
     }
 
-    // Section: passive progress observation.
-    // Component: hooks native client callbacks, forwards originals, then caches observed data.
-    // Risk: medium because this uses interop hooks; it does not request progress from the server.
-    private void InstallPassiveAchievementObserver()
-    {
-        this.passiveAchievementProgressObserver ??= new PassiveAchievementProgressObserver(
-            GameInteropProvider,
-            this.ClientAchievementProgressSource,
-            () => true);
-    }
-
     private void ResetProgressState()
     {
         // Login/logout only clear local progress cache. Tracked achievement IDs stay saved in config.
@@ -218,6 +202,7 @@ public sealed class Plugin : IDalamudPlugin
     // Component: gated local ClientStructs read. Risk: medium because it reads client memory; no server/network request is made.
     private void OnFrameworkUpdate(IFramework framework)
     {
+        this.ClientAchievementProgressSource.UpdateCache();
         this.RefreshCosmicCacheFromLiveState();
     }
 

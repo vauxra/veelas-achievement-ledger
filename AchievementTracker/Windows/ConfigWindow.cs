@@ -567,7 +567,7 @@ public sealed class ConfigWindow : Window
     private void DrawHelp()
     {
         ImGui.TextUnformatted("Help");
-        ImGui.TextWrapped("Veela's Achievement Ledger uses a user-guided native Achievement UI flow. Reload buttons open the game's Achievement entry; the plugin passively caches progress the client returns.");
+        ImGui.TextWrapped("Veela's Achievement Ledger uses a user-guided native Achievement UI flow. Reload buttons open the game's Achievement entry; the plugin watches briefly for matching local progress data.");
         ImGui.Separator();
 
         ImGui.TextUnformatted("Main VAL window");

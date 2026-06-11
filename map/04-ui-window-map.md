@@ -1,5 +1,7 @@
 # UI/window map
 
+> **Documentation release:** `v0.2.0.20` / testing prerelease architecture refresh.
+> **TLP legend:** 🟢 plugin/domain code, 🟡 Dalamud managed services or UI/data libraries, 🟠 isolated ClientStructs/native adapters, 🔴 blocked/deprecated policy paths.
 The UI code is in `AchievementTracker/Windows/`. It uses ImGui, which is immediate-mode UI: every `Draw...` method is called repeatedly, but button bodies only run when clicked.
 
 ## Main window: `TrackerWindow.cs`

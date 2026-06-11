@@ -1,161 +1,200 @@
 # Function call map
 
-This map follows the refactored code layout. The goal is to show what each important method does and what it calls.
+> **Documentation release:** `v0.2.0.20` / testing prerelease architecture refresh.
+> **TLP legend:** 🟢 plugin/domain code, 🟡 Dalamud managed services or UI/data libraries, 🟠 isolated ClientStructs/native adapters, 🔴 blocked/deprecated policy paths.
+
+This map follows the refactored code layout. The goal is to show what each important method does, what it calls, and which layer it touches.
 
 ## Reading convention
 
-Each section starts with the file/class, then lists call chains like:
-
-```text
-MethodA()
-└─ MethodB()
-   └─ Service.MethodC()
-```
-
-A method named `Draw...` is UI code. It is redrawn every frame, but the inside of `if (ImGui.Button(...))` only runs when you click that button.
+- `A += B` in older docs meant “subscribe B as an event handler on event A.” In this page it is written explicitly as **subscribe**.
+- `Draw...` methods are ImGui UI code. They are redrawn every frame, but the inside of `if (ImGui.Button(...))` only runs on the click frame.
+- TLP labels: 🟢 plugin/domain, 🟡 Dalamud managed, 🟠 native/ClientStructs adapter, 🔴 blocked/deprecated.
 
 ## `Plugin.cs` — app entry point / wiring
 
-### Constructor: `Plugin()`
+### `Plugin()` 🟢/🟡
 
 Purpose: create the application object, services, and windows.
 
 ```text
 Plugin()
-├─ LoadAndNormalizeConfiguration()
-├─ CreateTrackedAchievementStore()
-├─ new AchievementCatalog(DataManager)
-├─ new ClientAchievementProgressSource()
-├─ new CosmicClassProgressProvider(...)
-├─ new NativeAchievementNavigator()
-├─ new AchievementProgressService(...)
-├─ new TrackerWindow(this)
-├─ new ConfigWindow(this)
-├─ InstallPassiveAchievementObserver()
-├─ RegisterWindows()
-├─ RegisterCommand()
-└─ RegisterDalamudCallbacks()
+├─ LoadAndNormalizeConfiguration() 🟢/🟡
+├─ CreateTrackedAchievementStore() 🟢
+├─ new AchievementCatalog(DataManager) 🟢/🟡
+├─ new ClientAchievementProgressSource() 🟠
+├─ new CosmicClassProgressProvider(cache, SaveConfiguration) 🟠
+├─ new NativeAchievementNavigator() 🟠
+├─ new AchievementProgressService(UnlockState, progressSource, cosmicProvider) 🟢/🟡/🟠
+├─ new TrackerWindow(this) 🟢
+├─ new ConfigWindow(this) 🟢
+├─ RegisterWindows() 🟡
+├─ RegisterCommand() 🟡
+└─ RegisterDalamudCallbacks() 🟡
 ```
 
-Risk notes:
+See also: [Whole plugin hierarchy](Whole-plugin-hierarchy), [Data model map](Data-model-map).
 
-- Constructor itself is low risk.
-- It wires higher-risk services, but does not directly call native/game functions except service construction.
-
-### `RegisterDalamudCallbacks()` / `UnregisterDalamudCallbacks()`
+### `RegisterDalamudCallbacks()` / `UnregisterDalamudCallbacks()` 🟡
 
 Purpose: subscribe/unsubscribe from Dalamud events cleanly.
 
 ```text
 RegisterDalamudCallbacks()
-├─ UiBuilder.Draw += WindowSystem.Draw
-├─ UiBuilder.OpenMainUi += ToggleMainUi
-├─ UiBuilder.OpenConfigUi += ToggleConfigUi
-├─ Framework.Update += OnFrameworkUpdate
-├─ ClientState.Login += ResetProgressState
-└─ ClientState.Logout += ResetProgressStateOnLogout
+├─ subscribe UiBuilder.Draw to WindowSystem.Draw
+├─ subscribe UiBuilder.OpenMainUi to ToggleMainUi
+├─ subscribe UiBuilder.OpenConfigUi to ToggleConfigUi
+├─ subscribe Framework.Update to OnFrameworkUpdate
+├─ subscribe ClientState.Login to ResetProgressState
+└─ subscribe ClientState.Logout to ResetProgressStateOnLogout
 ```
 
-Risk notes:
+TLP: 🟡 because this uses Dalamud lifecycle services. Dispose unregisters the same callbacks.
 
-- `Framework.Update` is used only for the gated Cosmic local-score cache check.
-- Dispose unregisters the same callbacks so there should not be a lingering timer/event subscription.
-
-### `OpenAchievementForUpdate(uint achievementId)`
+### `OpenAchievementForUpdate(uint achievementId)` 🟢/🟠
 
 Purpose: shared lockout-protected path for update-intent native opens.
 
 ```text
 OpenAchievementForUpdate(id)
-├─ CanOpenAchievementForUpdate
-├─ NativeAchievementNavigator.OpenAchievement(id)
-└─ set nextAchievementUpdateOpenAt
+├─ CanOpenAchievementForUpdate 🟢
+├─ NativeAchievementNavigator.OpenAchievement(id) 🟠
+├─ ClientAchievementProgressSource.BeginObservation(id, 8 seconds) 🟠
+└─ set nextAchievementUpdateOpenAt 🟢
 ```
 
-Risk notes:
+Method links: [Big picture native open path](Big-picture#native-achievement-open-path), [Safety map](Safety-map#native-achievement-ui-actions).
 
-- Calls native Achievement UI only after user action.
-- Does not call `direct achievement-progress request API`.
+### `OnFrameworkUpdate(IFramework framework)` 🟡/🟠
 
-### `RefreshCosmicCacheFromLiveState()`
+```text
+OnFrameworkUpdate(framework)
+├─ ClientAchievementProgressSource.UpdateCache() 🟠
+└─ RefreshCosmicCacheFromLiveState() 🟠
+```
 
-Purpose: gate the Cosmic score cache update.
+This is not a server polling loop. It reads local state only.
+
+### `RefreshCosmicCacheFromLiveState()` 🟢/🟡/🟠
 
 ```text
 RefreshCosmicCacheFromLiveState()
-├─ IsInSinusArdorum()
-│  └─ ClientState.TerritoryType == 1237
-├─ CosmicCacheRefreshIsDue()
-└─ CosmicClassProgressProvider.RefreshCacheFromLiveScores()
+├─ IsInSinusArdorum() uses ClientState.TerritoryType 🟡
+├─ CosmicCacheRefreshIsDue() 🟢
+└─ CosmicClassProgressProvider.RefreshCacheFromLiveScores() 🟠
 ```
 
-Risk notes:
+See: [Cosmic Class cache flow](Cosmic-Class-cache-flow).
 
-- Local ClientStructs read happens in `CosmicClassProgressProvider`, not here.
-- This method only decides whether that read is allowed now.
+## `NativeAchievementNavigator.cs` — native Achievement UI adapter 🟠
 
-### `OnCommand(string command, string args)`
-
-Purpose: route `/val` commands.
+Custom VAL class; not derived from a system component. It wraps ClientStructs native UI agent calls.
 
 ```text
-OnCommand(...)
-├─ config/configure/man → OpenConfigUi()
-├─ help/? → OpenConfigUi(help: true)
-└─ anything else → ToggleMainUi()
+OpenAchievement(achievementId)
+├─ reject id == 0
+├─ AgentAchievement.Instance() 🟠
+├─ agent null-check
+└─ agent->OpenById(achievementId) 🟠
+
+CloseAchievements()
+├─ AgentAchievement.Instance() 🟠
+├─ agent null-check
+└─ agent->Hide() 🟠
 ```
 
-## `TrackerWindow.cs` — main `/val` window
+## `ClientAchievementProgressSource.cs` — bounded observation cache 🟠
 
-### `Draw()`
+```text
+BeginObservation(id, duration) 🟠
+└─ records a deadline for this exact id
 
-Purpose: draw the main tracker window.
+UpdateCache() 🟠
+├─ PruneExpiredObservations()
+├─ Achievement.Instance() 🟠
+└─ TryRecordObservedSlot(
+      ProgressRequestState == Loaded,
+      ProgressAchievementId,
+      ProgressCurrent,
+      ProgressMax,
+      "Achievement state slot")
+
+TryRecordObservedSlot(...) 🟠
+├─ require loaded, id != 0, max != 0
+├─ require active observation window for same id
+├─ RecordObservedProgress(id, current, max, source)
+└─ remove observation window
+```
+
+No hook/event interception is used here.
+
+## `AchievementProgressService.cs` — progress decision service 🟢/🟡/🟠
+
+```text
+GetProgress(Achievement row)
+├─ if CosmicClassProgressProvider.Handles(row.RowId) 🟠
+│  └─ CosmicClassProgressProvider.GetProgress(row.RowId) 🟠
+├─ if progressSource.TryGetProgress(row.RowId, out current, out max) 🟠
+│  └─ AchievementProgress.Numeric(current, max) 🟢
+├─ if !UnlockState.IsAchievementListLoaded 🟡
+│  └─ CompletionListNotLoaded or TargetKnown 🟢
+├─ if UnlockState.IsAchievementComplete(row) 🟡
+│  └─ Complete 🟢
+└─ TargetKnown / Incomplete / Unavailable 🟢
+```
+
+## `CosmicClassProgressProvider.cs` — Cosmic score adapter 🟠
+
+```text
+GetProgress(achievementId)
+├─ GetRule(achievementId) maps 3702-3739 to class indexes/targets 🟢
+├─ TryReadLiveScores() 🟠
+│  ├─ WKSManager.Instance() 🟠
+│  ├─ manager->IsLoaded 🟠
+│  ├─ manager->State.Scores.ToArray() 🟠
+│  └─ SaveScoresToCache(liveScores) 🟢/🟡
+├─ TryReadCachedScores() 🟢
+├─ CalculateCurrentScore(scores, rule) 🟢
+└─ AchievementProgress.Numeric(current, target) or DataNotAvailable 🟢
+```
+
+See: [Cosmic Class cache flow](Cosmic-Class-cache-flow).
+
+## `Configuration.cs` and stores — saved/in-memory state 🟢/🟡
+
+```text
+Configuration.Save() 🟢/🟡
+└─ Plugin.PluginInterface.SavePluginConfig(this) 🟡
+
+TrackedAchievementStore.LoadFrom(ids) 🟢
+└─ in-memory sanitized ordered ID list
+
+TrackedAchievementPresetStore.SavePreset/Rename/Delete/Normalize 🟢
+└─ modifies Configuration.TrackedAchievementPresets in memory; Plugin.SaveConfiguration persists
+```
+
+See: [Data model map](Data-model-map).
+
+## `TrackerWindow.cs` — main UI 🟢
 
 ```text
 Draw()
-├─ AchievementProgressSource.UpdateCache()
+├─ AchievementProgressSource.UpdateCache() 🟠
 ├─ DrawTopButtons()
 └─ DrawTrackedAchievementList()
+
+DrawRowUpdateButton(id)
+└─ Plugin.OpenAchievementForUpdate(id) 🟢/🟠
+
+DrawRowInspectButton(id)
+└─ NativeAchievementNavigator.OpenAchievement(id) 🟠
+
+GetProgressText(id)
+├─ AchievementCatalog.TryGetRow(id) 🟢/🟡
+└─ AchievementProgressService.GetProgress(row) 🟢/🟡/🟠
 ```
 
-### `DrawTopButtons()`
-
-```text
-DrawTopButtons()
-├─ DrawConfigureButton()
-├─ DrawUpdateNextButton()
-├─ DrawCloseAchievementsButton()
-├─ DrawUpdateOpenLockoutStatus()
-└─ ImGui.Separator()
-```
-
-Button calls:
-
-```text
-Configure → Plugin.ToggleConfigUi()
-Update Next → OpenNextTrackedAchievementForUpdate()
-Close Achievements → NativeAchievementNavigator.CloseAchievements()
-```
-
-### `DrawAchievement(uint achievementId)`
-
-```text
-DrawAchievement(id)
-├─ AchievementCatalog.TryGet(id)
-├─ GetProgressText(id)
-│  └─ AchievementProgressService.GetProgress(row)
-├─ GetLastObservedText(id)
-│  └─ ClientAchievementProgressSource.TryGetObservation(id)
-├─ DrawRowUpdateButton(id)
-│  └─ OpenNativeAchievementForUpdate(id)
-├─ DrawRowInspectButton(id)
-│  └─ NativeAchievementNavigator.OpenAchievement(id)
-└─ draw name/progress/last-observed text
-```
-
-## `ConfigWindow.cs` — configuration/search/presets/help
-
-### `Draw()`
+## `ConfigWindow.cs` — config/search/preset UI 🟢
 
 ```text
 Draw()
@@ -164,108 +203,14 @@ Draw()
 └─ DrawSelectedPage()
    ├─ DrawTrackedAchievementsPage()
    └─ DrawHelp()
+
+DrawTrackedAchievementRow(id)
+├─ move/remove/update/inspect buttons 🟢
+├─ Plugin.OpenAchievementForUpdate(id) for update 🟢/🟠
+└─ NativeAchievementNavigator.OpenAchievement(id) for inspect 🟠
+
+DrawSearchResultRow(result)
+├─ TrackedAchievementStore.TryAdd(result.Id) 🟢
+├─ Plugin.SaveTrackedAchievements() 🟢/🟡
+└─ DrawCosmicProgressIfAvailable(result.Id) 🟠 for Cosmic IDs
 ```
-
-### Preset controls
-
-```text
-DrawPresetControls()
-├─ EnsureSelectedPresetIsValid()
-├─ DrawPresetNameInput()
-├─ DrawPresetSaveButton()
-├─ DrawPresetPicker()
-├─ DrawPresetReadButton()
-├─ DrawPresetRenameButton()
-└─ DrawPresetDeleteButton()
-```
-
-Preset write paths call `Plugin.SaveConfiguration()`.
-
-### Tracked achievements page
-
-```text
-DrawTrackedAchievementsPage()
-├─ DrawPresetControls()
-├─ DrawTrackedManagement()
-│  └─ DrawTrackedAchievementRow(id)
-│     ├─ DrawMoveButton(...)
-│     ├─ DrawTrackedRemoveButton(id)
-│     ├─ DrawTrackedUpdateButton(id)
-│     ├─ DrawInspectButton(id)
-│     └─ DrawManagedAchievement(id)
-└─ DrawSearchAndAdd()
-   └─ DrawSearchResultRow(result)
-      ├─ DrawSearchResultAction(...)
-      └─ DrawSearchResultDetails(result)
-```
-
-Risk notes:
-
-- Move/add/remove/presets are plugin-config changes only.
-- Reload/update buttons call `Plugin.OpenAchievementForUpdate`, which is shared-lockout and user-guided.
-- Magnifying-glass buttons call native Achievement UI open without treating it as an update action.
-
-## `NativeAchievementNavigator.cs` — native Achievement UI
-
-```text
-OpenAchievement(id)
-├─ AgentAchievement.Instance()
-└─ agent->OpenById(id)
-
-CloseAchievements()
-├─ AgentAchievement.Instance()
-└─ agent->Hide()
-```
-
-Risk: medium because it uses ClientStructs/native agent calls. Safety: direct user action only; no achievement progress request.
-
-## `PassiveAchievementProgressObserver.cs` — passive hooks
-
-```text
-constructor
-├─ Hook ReceiveAchievementProgress
-├─ Hook SetAchievementCompleted
-└─ Enable hooks
-
-OnReceiveAchievementProgress(...)
-├─ receiveHook.Original(...)
-└─ progressSource.RecordObservedProgress(...)
-
-OnSetAchievementCompleted(...)
-├─ completedHook.Original(...)
-└─ progressSource.RecordObservedCompletion(...)
-```
-
-Risk: medium-high because hooks are native/interop. Safety: original callback runs first; plugin only caches observed results.
-
-## `ClientAchievementProgressSource.cs` — local observed progress cache
-
-```text
-UpdateCache()
-├─ Achievement.Instance()
-├─ read ProgressRequestState / ProgressAchievementId / ProgressCurrent / ProgressMax
-└─ RecordObservedProgress(...)
-```
-
-Risk: medium local ClientStructs read. Safety: no request method is called.
-
-## `CosmicClassProgressProvider.cs` — Cosmic score mapping
-
-```text
-RefreshCacheFromLiveScores()
-└─ TryReadLiveScores()
-   ├─ WKSManager.Instance()
-   ├─ manager->IsLoaded
-   ├─ manager->State.Scores.ToArray()
-   └─ SaveScoresToCache(liveScores)
-```
-
-```text
-GetProgress(achievementId)
-├─ GetRule(achievementId)
-├─ TryReadLiveScores() or TryReadCachedScores()
-├─ CalculateCurrentScore(scores, rule)
-└─ AchievementProgress.Numeric(current, target)
-```
-
-Risk: medium local ClientStructs read. Safety: no server/network request.

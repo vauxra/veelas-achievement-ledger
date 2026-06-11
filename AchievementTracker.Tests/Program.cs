@@ -14,6 +14,7 @@ var tests = new List<(string Name, Action Body)>
     ("Preset save sanitizes names and achievement ids", PresetSaveSanitizesNamesAndAchievementIds),
     ("Preset rename and delete cover CRUD", PresetRenameAndDeleteCoverCrud),
     ("Progress display formats all safe states", ProgressDisplayFormatsAllSafeStates),
+    ("Progress observation records only during bounded matching windows", ProgressObservationRecordsOnlyDuringBoundedMatchingWindows),
 };
 
 foreach (var test in tests)
@@ -148,6 +149,33 @@ static void ProgressDisplayFormatsAllSafeStates()
     AssertEqual("Current unavailable / 1,500", AchievementProgress.TargetKnown(1500).ToDisplayText());
     AssertEqual("Progress unavailable", AchievementProgress.Unavailable().ToDisplayText());
     AssertEqual("Data not available", AchievementProgress.DataNotAvailable().ToDisplayText());
+}
+
+static void ProgressObservationRecordsOnlyDuringBoundedMatchingWindows()
+{
+    var now = new DateTimeOffset(2026, 6, 10, 22, 0, 0, TimeSpan.Zero);
+    var source = new ClientAchievementProgressSource(() => now);
+
+    AssertFalse(source.TryRecordObservedSlot(isLoaded: true, achievementId: 10, current: 1, max: 5, source: "test"), "slot should not record without an observation window");
+    AssertFalse(source.TryGetCachedObservation(10, out _), "no observation should exist before window starts");
+
+    source.BeginObservation(10, TimeSpan.FromSeconds(8));
+    AssertEqualInt(1, source.ActiveObservationCount);
+    AssertFalse(source.TryRecordObservedSlot(isLoaded: true, achievementId: 11, current: 2, max: 5, source: "test"), "mismatched slot should not record");
+    AssertFalse(source.TryGetCachedObservation(11, out _), "mismatched id should not be cached");
+    AssertEqualInt(1, source.ActiveObservationCount);
+
+    AssertTrue(source.TryRecordObservedSlot(isLoaded: true, achievementId: 10, current: 3, max: 5, source: "test"), "matching loaded slot should record");
+    AssertTrue(source.TryGetCachedObservation(10, out var observation), "matching observation should be cached");
+    AssertEqualInt(3, (int)observation.Current);
+    AssertEqualInt(5, (int)observation.Max);
+    AssertEqualInt(0, source.ActiveObservationCount);
+
+    source.BeginObservation(20, TimeSpan.FromSeconds(1));
+    now = now.AddSeconds(2);
+    AssertFalse(source.TryRecordObservedSlot(isLoaded: true, achievementId: 20, current: 1, max: 5, source: "test"), "expired window should not record");
+    AssertFalse(source.TryGetCachedObservation(20, out _), "expired observation should not be cached");
+    AssertEqualInt(0, source.ActiveObservationCount);
 }
 
 static void AssertEqual(string expected, string actual)

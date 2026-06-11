@@ -171,7 +171,7 @@ public sealed class TrackerWindow : Window
 
     private string GetLastObservedText(uint achievementId)
     {
-        return this.plugin.ClientAchievementProgressSource.TryGetObservation(achievementId, out var observation)
+        return this.plugin.ClientAchievementProgressSource.TryGetCachedObservation(achievementId, out var observation)
             ? $"updated {FormatAge(observation.ObservedAt)}"
             : "not updated yet";
     }
@@ -195,7 +195,7 @@ public sealed class TrackerWindow : Window
             return null;
         }
 
-        var unobserved = trackedIds.FirstOrDefault(id => !this.plugin.ClientAchievementProgressSource.TryGetObservation(id, out _));
+        var unobserved = trackedIds.FirstOrDefault(id => !this.plugin.ClientAchievementProgressSource.TryGetCachedObservation(id, out _));
         if (unobserved != 0)
         {
             return unobserved;
@@ -205,7 +205,7 @@ public sealed class TrackerWindow : Window
             .Select(id => new
             {
                 Id = id,
-                ObservedAt = this.plugin.ClientAchievementProgressSource.TryGetObservation(id, out var observation)
+                ObservedAt = this.plugin.ClientAchievementProgressSource.TryGetCachedObservation(id, out var observation)
                     ? observation.ObservedAt
                     : DateTimeOffset.MinValue,
             })

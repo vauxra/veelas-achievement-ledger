@@ -1,5 +1,7 @@
 # Safety map
 
+> **Documentation release:** `v0.2.0.20` / testing prerelease architecture refresh.
+> **TLP legend:** 🟢 plugin/domain code, 🟡 Dalamud managed services or UI/data libraries, 🟠 isolated ClientStructs/native adapters, 🔴 blocked/deprecated policy paths.
 This file maps the potentially sensitive areas and what they do.
 
 ## No direct direct progress requests
@@ -11,7 +13,7 @@ direct achievement-progress request API
 RequestProgress
 ```
 
-The player clicks a button, the plugin opens the native Achievement UI, and then the plugin passively observes what the client receives.
+The player clicks a button, the plugin opens the native Achievement UI, and then the plugin briefly watches the matching local progress slot during a bounded observation window.
 
 ## Native Achievement UI actions
 
@@ -35,32 +37,26 @@ Purpose:
 
 These are not achievement progress request calls.
 
-## Passive achievement progress hooks
+## Bounded observed-progress cache
 
 File:
 
 ```text
-AchievementTracker/Services/PassiveAchievementProgressObserver.cs
+AchievementTracker/Services/ClientAchievementProgressSource.cs
 ```
 
-Hooks:
+Reads:
 
 ```text
-ReceiveAchievementProgress
-SetAchievementCompleted
+Achievement.Instance() local progress slot
 ```
 
-Handlers call the original function first, then cache what was observed:
+Boundary:
 
-```text
-OnReceiveAchievementProgress
-├─ original game function
-└─ RecordObservedProgress
-
-OnSetAchievementCompleted
-├─ original game function
-└─ RecordObservedCompletion
-```
+- starts only after `Plugin.OpenAchievementForUpdate(achievementId)` opens the native Achievement entry from a user click
+- records only if the loaded slot matches the active achievement ID
+- expires the observation window
+- uses no hooks, signatures, or direct progress requests
 
 ## Cosmic Class score reads
 

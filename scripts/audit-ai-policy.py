@@ -41,7 +41,7 @@ WARN_PATTERNS = [
 ]
 
 
-EXCLUDED_PREFIXES = ("docs/", ".hermes/", "released/")
+EXCLUDED_PREFIXES = ("docs/", ".hermes/", "bin/", "obj/", "released/", "map/", "wiki-export/")
 EXCLUDED_EXACT = {"scripts/audit-ai-policy.py", "scripts/adversarial-code-review.py"}
 INCLUDED_UNTRACKED_SUFFIXES = (".cs", ".csproj", ".sln", ".json", ".py")
 INCLUDED_TREE_SUFFIXES = (".cs", ".csproj", ".json", ".py", ".sh")
@@ -118,6 +118,8 @@ def scan_current_tree_for_agents_blockers() -> list[tuple[Pattern, str]]:
     findings: list[tuple[Pattern, str]] = []
     for raw_path in run_git_ls_files():
         path = Path(raw_path)
+        if not path.is_file():
+            continue
         text = path.read_text(encoding="utf-8", errors="ignore")
         for line_no, line in enumerate(text.splitlines(), start=1):
             for pattern in AGENTS_HARD_BLOCKERS:

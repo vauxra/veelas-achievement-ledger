@@ -1,118 +1,163 @@
 # Data model map
 
-## `Configuration.cs`
+> **Documentation release:** `v0.2.0.20` / testing prerelease architecture refresh.
+> **TLP legend:** 🟢 plugin/domain code, 🟡 Dalamud managed services or UI/data libraries, 🟠 isolated ClientStructs/native adapters, 🔴 blocked/deprecated policy paths.
 
-Saved plugin settings.
+## Navigation outline
+
+- [Persistence summary](#persistence-summary)
+- [Load timing](#load-timing)
+- [Save timing](#save-timing)
+- [Configuration.cs](#configurationcs)
+- [TrackedAchievementStore.cs](#trackedachievementstorecs)
+- [TrackedAchievementPresetStore.cs](#trackedachievementpresetstorecs)
+- [CosmicClassScoreCache.cs](#cosmicclassscorecachecs)
+- [Observed progress cache](#observed-progress-cache)
+- [Dalamud best-practice notes](#dalamud-best-practice-notes)
+
+## Persistence summary
 
 ```text
-Configuration
-├─ Version
-├─ HideCompletedInSearch
-├─ TrackedAchievementIds
-├─ Presets
-└─ CosmicClassScoreCache
+Persistent file-backed state 🟢/🟡
+└─ Configuration object
+   ├─ TrackedAchievementIds
+   ├─ TrackedAchievementPresets
+   ├─ CosmicClassScoreCache
+   └─ HideCompletedInSearch
+
+In-memory-only state 🟢/🟠
+├─ TrackedAchievementStore.achievementIds 🟢
+├─ ClientAchievementProgressSource.cachedProgress 🟠
+├─ ClientAchievementProgressSource.observationDeadlines 🟠
+└─ Plugin lockout/cosmic refresh timestamps 🟢
 ```
 
-Python analogy:
+The plugin follows the normal Dalamud pattern: one serializable `IPluginConfiguration` object is loaded with `PluginInterface.GetPluginConfig()` and saved with `PluginInterface.SavePluginConfig(configuration)`.
 
-```python
-@dataclass
-class Configuration:
-    version: int
-    hide_completed_in_search: bool
-    tracked_achievement_ids: list[int]
-    presets: list[TrackedAchievementPreset]
-    cosmic_class_score_cache: CosmicClassScoreCache
+## Load timing
+
+```text
+Dalamud creates Plugin 🟡
+└─ Plugin.Plugin() constructor 🟢
+   ├─ LoadAndNormalizeConfiguration() 🟢/🟡
+   │  ├─ PluginInterface.GetPluginConfig() 🟡
+   │  ├─ if null: new Configuration() 🟢
+   │  └─ Configuration.Normalize() 🟢
+   ├─ CreateTrackedAchievementStore() 🟢
+   │  └─ TrackedAchievementStore.LoadFrom(Configuration.TrackedAchievementIds) 🟢
+   └─ new CosmicClassProgressProvider(Configuration.CosmicClassScoreCache, SaveConfiguration) 🟠
+```
+
+## Save timing
+
+```text
+User edits tracked list 🟢
+└─ Plugin.SaveTrackedAchievements() 🟢/🟡
+   ├─ Configuration.TrackedAchievementIds = TrackedAchievementStore.ToConfigList() 🟢
+   └─ Configuration.Save() -> PluginInterface.SavePluginConfig(this) 🟡
+
+User edits presets/search setting 🟢
+└─ Plugin.SaveConfiguration() 🟢/🟡
+   └─ Configuration.Save() -> PluginInterface.SavePluginConfig(this) 🟡
+
+Cosmic live scores observed 🟠
+└─ CosmicClassProgressProvider.SaveScoresToCache(liveScores) 🟠
+   ├─ CosmicClassScoreCache.Scores = values 🟢
+   ├─ CosmicClassScoreCache.ObservedAtUnixSeconds = now 🟢
+   └─ saveCache callback -> Plugin.SaveConfiguration() 🟢/🟡
+```
+
+## `Configuration.cs`
+
+Saved plugin settings. This is a VAL-owned class implementing Dalamud's `IPluginConfiguration`; it is not extending a native FFXIV class.
+
+```text
+Configuration 🟢
+├─ Version
+├─ TrackedAchievementIds
+├─ TrackedAchievementPresets
+├─ CosmicClassScoreCache
+└─ HideCompletedInSearch
+```
+
+Methods:
+
+```text
+Normalize() 🟢
+├─ TrackedAchievementPresetStore.Normalize(TrackedAchievementPresets) 🟢
+└─ CosmicClassProgressProvider.Normalize(CosmicClassScoreCache) 🟠
+
+Save() 🟢/🟡
+└─ Plugin.PluginInterface.SavePluginConfig(this) 🟡
 ```
 
 ## `TrackedAchievementStore.cs`
 
-In-memory ordered tracked list.
-
-Important methods:
+In-memory ordered tracked list. It is intentionally separate from `Configuration` so UI operations can be expressed as small list operations.
 
 ```text
-LoadFrom(ids)
-ToConfigList()
-Add(id)
-Remove(id)
-MoveToTop(id)
-MoveUp(id)
-MoveDown(id)
-MoveToBottom(id)
+LoadFrom(ids) 🟢
+ToConfigList() 🟢
+TryAdd(id) 🟢
+Remove(id) 🟢
+MoveToTop/MoveUp/MoveDown/MoveToBottom(id) 🟢
 ```
 
-This is the thing the UI edits; then `Plugin.SaveTrackedAchievements()` copies it back into `Configuration` and saves.
+Persistence happens only when caller invokes `Plugin.SaveTrackedAchievements()`.
 
 ## `TrackedAchievementPresetStore.cs`
 
-Manages named saved lists.
-
-Important methods:
+Static helper for named saved lists.
 
 ```text
-SavePreset(name, ids)
-RenamePreset(oldName, newName)
-DeletePreset(name)
-TryGetPreset(name, out preset)
+SavePreset(name, ids) 🟢
+RenamePreset(oldName, newName) 🟢
+DeletePreset(name) 🟢
+FindPreset(name) 🟢
+Normalize(presets) 🟢
 ```
 
-## `AchievementProgress.cs`
-
-Represents displayable progress.
-
-Kinds:
-
-```text
-Complete
-Incomplete
-Numeric(current, target)
-TargetKnown(target)
-Unavailable
-DataNotAvailable
-CompletionListNotLoaded
-```
-
-The UI mostly calls:
-
-```text
-AchievementProgress.ToDisplayText()
-```
-
-## `AchievementInfo.cs`
-
-Display info from game data:
-
-```text
-AchievementInfo
-├─ Id
-├─ Name
-├─ CategoryName
-└─ maybe other display/category fields
-```
+This store sanitizes names and IDs, but it does not write files directly. The caller modifies `Configuration.TrackedAchievementPresets` and then calls `Plugin.SaveConfiguration()`.
 
 ## `CosmicClassScoreCache.cs`
 
-Saved Cosmic class score cache:
+Persistent snapshot for Cosmic score planning.
 
 ```text
-CosmicClassScoreCache
-├─ Scores: List<int>
-└─ UpdatedAtUtc: DateTimeOffset?
+CosmicClassScoreCache 🟢
+├─ Scores: 11 integer class scores
+└─ ObservedAtUnixSeconds: cache timestamp
 ```
 
-It stores 11 class scores in this order:
+Writer:
 
 ```text
-0  Carpenter
-1  Blacksmith
-2  Armorer
-3  Goldsmith
-4  Leatherworker
-5  Weaver
-6  Alchemist
-7  Culinarian
-8  Miner
-9  Botanist
-10 Fisher
+CosmicClassProgressProvider.SaveScoresToCache(liveScores) 🟠
 ```
+
+Reader:
+
+```text
+CosmicClassProgressProvider.TryReadCachedScores() 🟢
+```
+
+## Observed progress cache
+
+`ClientAchievementProgressSource` keeps observed normal achievement progress in memory only:
+
+```text
+cachedProgress: Dictionary<uint, ObservedAchievementProgress> 🟠
+observationDeadlines: Dictionary<uint, DateTimeOffset> 🟠
+observedCompletions: HashSet<uint> 🟠
+```
+
+These values are not saved to plugin config. They reset on plugin reload/login/logout.
+
+## Dalamud best-practice notes
+
+- ✅ Uses `IPluginConfiguration` and `PluginInterface.SavePluginConfig` for persistent plugin state.
+- ✅ Keeps config serializable and VAL-owned; no native objects are saved.
+- ✅ Uses store classes for list/preset manipulation, then explicitly saves config.
+- ✅ Keeps ClientStructs/native reads isolated and writes only ordinary numeric cache values to config.
+- ✅ Does not write arbitrary files for presets or cache.
+- ⚠️ Cosmic cache can be stale out of zone by design; UI should treat it as planning data, not authoritative live server state.

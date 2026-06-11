@@ -25,7 +25,7 @@ class Finding:
 
 
 CODE_SUFFIXES = {".cs", ".csproj", ".json", ".py", ".sln", ".sh"}
-EXCLUDED_PREFIXES = ("docs/", ".hermes/", "bin/", "obj/", "released/")
+EXCLUDED_PREFIXES = ("docs/", ".hermes/", "bin/", "obj/", "released/", "map/", "wiki-export/")
 ALLOWED_ACHIEVEMENT_REQUEST_FILES: set[str] = set()
 SCANNER_IMPLEMENTATION_FILES = {
     "scripts/audit-ai-policy.py",
@@ -231,6 +231,8 @@ def get_tracked_tree_files() -> list[str]:
 def scan_current_tree_for_agents_blockers() -> list[Finding]:
     findings: list[Finding] = []
     for path in get_tracked_tree_files():
+        if not Path(path).is_file():
+            continue
         for line_no, text in enumerate(read_file(path).splitlines(), start=1):
             lowered = text.lower()
             for token, rule, message in AGENTS_HARD_BLOCKER_TOKENS:
@@ -280,12 +282,14 @@ def scan(base: str) -> list[Finding]:
     # outside the adapter, or if request logic is paired with new timer/framework triggers.
     request_files = [
         path for path, lines in added.items()
-        if not should_skip_literal_policy_scan(path)
+        if is_code_path(path)
+        and not should_skip_literal_policy_scan(path)
         and any(any(token in text for token in REQUEST_WRAPPER_TOKENS) for _, text in lines)
     ]
     trigger_files = [
         path for path, lines in added.items()
-        if not should_skip_literal_policy_scan(path)
+        if is_code_path(path)
+        and not should_skip_literal_policy_scan(path)
         and any(any(token in text for token in AUTO_TRIGGER_TOKENS) for _, text in lines)
     ]
     disallowed_request_files = [path for path in request_files if path not in ALLOWED_ACHIEVEMENT_REQUEST_FILES]

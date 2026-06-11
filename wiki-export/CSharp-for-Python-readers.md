@@ -1,5 +1,7 @@
 # C# primer for Python readers
 
+> **Documentation release:** `v0.2.0.20` / testing prerelease architecture refresh.
+> **TLP legend:** 🟢 plugin/domain code, 🟡 Dalamud managed services or UI/data libraries, 🟠 isolated ClientStructs/native adapters, 🔴 blocked/deprecated policy paths.
 This document explains the C# conventions used in Veela's Achievement Ledger by comparing them to Python ideas.
 
 ## Files, namespaces, and classes
@@ -92,13 +94,13 @@ Common return types in this project:
 C#:
 
 ```csharp
-private PassiveAchievementProgressObserver? passiveAchievementProgressObserver;
+private ClientAchievementProgressSource? passiveAchievementProgressObserver;
 ```
 
 Python-ish:
 
 ```python
-passive_achievement_progress_observer: PassiveAchievementProgressObserver | None
+passive_achievement_progress_observer: ClientAchievementProgressSource | None
 ```
 
 A `?` after a type means the value may be `null`.
@@ -319,7 +321,7 @@ Python has no normal equivalent. Think of this as “direct native/client memory
 In this project, `unsafe` is intentionally isolated in service classes:
 
 - `NativeAchievementNavigator`
-- `PassiveAchievementProgressObserver`
+- `ClientAchievementProgressSource`
 - `ClientAchievementProgressSource`
 - parts of `CosmicClassProgressProvider`
 
@@ -331,7 +333,7 @@ Risk rule:
 
 ## Hooks
 
-`PassiveAchievementProgressObserver` uses hooks.
+`ClientAchievementProgressSource` uses hooks.
 
 Python-ish mental model:
 

@@ -1,21 +1,41 @@
 # File index
-This is a generated-ish index of real C# source files and visible members. It excludes `bin/` and `obj/` build output. Use it as a jumping-off point, not as perfect compiler documentation.
 
+> **Documentation release:** `v0.2.0.20` / testing prerelease architecture refresh.
+> **TLP legend:** 🟢 plugin/domain code, 🟡 Dalamud managed services or UI/data libraries, 🟠 isolated ClientStructs/native adapters, 🔴 blocked/deprecated policy paths.
+
+## What this page is for
+
+This is a source locator, not a duplicate of the function-call map.
+
+Use it when you already know a class or method name from another wiki page and want to jump to the file that owns it. The [Function call map](./02-function-call-map.md) explains runtime behavior; this page answers “where is that code?”
+
+## How to use
+
+- Start with [Big picture](./01-big-picture.md) or [Function call map](./02-function-call-map.md) to understand the flow.
+- Come here to find the file/class/method owner.
+- Then open the listed C# source file in the repo.
 ## `AchievementTracker/Configuration.cs`
+
 Types: `Configuration`
 
 Members found:
+- line 12: `public int Version { get; set; } = 1;`
+- line 14: `public List<uint> TrackedAchievementIds { get; set; } = [];`
+- line 16: `public List<TrackedAchievementPreset> TrackedAchievementPresets { get; set; } = [];`
 - line 18: `public CosmicClassScoreCache CosmicClassScoreCache { get; set; } = new();`
+- line 20: `public bool HideCompletedInSearch { get; set; } = true;`
 - line 22: `public void Normalize()`
 - line 28: `public void Save()`
 
 ## `AchievementTracker/Models/AchievementInfo.cs`
+
 Types: `AchievementInfo`
 
 Members found:
 - line 3: `public sealed record AchievementInfo(`
 
 ## `AchievementTracker/Models/AchievementProgress.cs`
+
 Types: `AchievementProgressKind`, `AchievementProgress`
 
 Members found:
@@ -30,49 +50,73 @@ Members found:
 - line 30: `public string ToDisplayText()`
 
 ## `AchievementTracker/Models/CosmicClassScoreCache.cs`
+
 Types: `CosmicClassScoreCache`
 
+Members found:
+- line 9: `public List<int> Scores { get; set; } = [];`
+- line 11: `public DateTimeOffset? UpdatedAtUtc { get; set; }`
+
 ## `AchievementTracker/Models/TrackedAchievement.cs`
+
 Types: `TrackedAchievement`
 
 Members found:
 - line 3: `public sealed record TrackedAchievement(uint AchievementId);`
 
 ## `AchievementTracker/Models/TrackedAchievementPreset.cs`
+
 Types: `TrackedAchievementPreset`
 
+Members found:
+- line 9: `public string Name { get; set; } = string.Empty;`
+- line 11: `public List<uint> AchievementIds { get; set; } = [];`
+
 ## `AchievementTracker/Plugin.cs`
+
 Types: `Plugin`
 
 Members found:
 - line 18: `private static readonly TimeSpan AchievementUpdateOpenLockout = TimeSpan.FromSeconds(5);`
-- line 19: `private static readonly TimeSpan CosmicCacheRefreshInterval = TimeSpan.FromSeconds(30);`
-- line 48: `public WindowSystem WindowSystem { get; } = new("VeelasAchievementLedger");`
-- line 58: `public Plugin()`
-- line 77: `public void Dispose()`
-- line 88: `public void SaveTrackedAchievements()`
-- line 94: `public void SaveConfiguration()`
-- line 113: `public bool OpenAchievementForUpdate(uint achievementId)`
-- line 131: `public void ToggleMainUi() => this.TrackerWindow.Toggle();`
-- line 133: `public void OpenMainUi() => this.TrackerWindow.IsOpen = true;`
-- line 135: `public void ToggleConfigUi() => this.ConfigWindow.Toggle();`
-- line 137: `public void OpenConfigUi(bool help = false)`
-- line 150: `private static Configuration LoadAndNormalizeConfiguration()`
-- line 157: `private TrackedAchievementStore CreateTrackedAchievementStore()`
-- line 164: `private void RegisterWindows()`
-- line 170: `private void RegisterCommand()`
-- line 178: `private void RegisterDalamudCallbacks()`
-- line 188: `private void UnregisterDalamudCallbacks()`
-- line 201: `private void InstallPassiveAchievementObserver()`
-- line 209: `private void ResetProgressState()`
-- line 215: `private void ResetProgressStateOnLogout(int type, int code) => this.ResetProgressState();`
-- line 219: `private void OnFrameworkUpdate(IFramework framework)`
-- line 224: `private void RefreshCosmicCacheFromLiveState()`
-- line 241: `private static bool IsInSinusArdorum() => ClientState.TerritoryType == SinusArdorumTerritoryTypeId;`
-- line 243: `private bool CosmicCacheRefreshIsDue() => DateTimeOffset.UtcNow >= this.nextCosmicCacheRefreshAt;`
-- line 247: `private void OnCommand(string command, string args)`
+- line 19: `private static readonly TimeSpan AchievementObservationWindow = TimeSpan.FromSeconds(8);`
+- line 20: `private static readonly TimeSpan CosmicCacheRefreshInterval = TimeSpan.FromSeconds(30);`
+- line 38: `public Configuration Configuration { get; }`
+- line 39: `public TrackedAchievementStore TrackedAchievements { get; }`
+- line 40: `public AchievementCatalog AchievementCatalog { get; }`
+- line 41: `public AchievementProgressService AchievementProgressService { get; }`
+- line 42: `public IAchievementProgressSource AchievementProgressSource { get; }`
+- line 43: `public ClientAchievementProgressSource ClientAchievementProgressSource { get; }`
+- line 44: `public CosmicClassProgressProvider CosmicClassProgressProvider { get; }`
+- line 45: `public NativeAchievementNavigator NativeAchievementNavigator { get; }`
+- line 46: `public WindowSystem WindowSystem { get; } = new("VeelasAchievementLedger");`
+- line 50: `private TrackerWindow TrackerWindow { get; }`
+- line 51: `private ConfigWindow ConfigWindow { get; }`
+- line 55: `public Plugin()`
+- line 73: `public void Dispose()`
+- line 82: `public void SaveTrackedAchievements()`
+- line 88: `public void SaveConfiguration()`
+- line 105: `public bool CanOpenAchievementForUpdate => this.AchievementUpdateOpenRemaining == TimeSpan.Zero;`
+- line 107: `public bool OpenAchievementForUpdate(uint achievementId)`
+- line 126: `public void ToggleMainUi() => this.TrackerWindow.Toggle();`
+- line 128: `public void OpenMainUi() => this.TrackerWindow.IsOpen = true;`
+- line 130: `public void ToggleConfigUi() => this.ConfigWindow.Toggle();`
+- line 132: `public void OpenConfigUi(bool help = false)`
+- line 145: `private static Configuration LoadAndNormalizeConfiguration()`
+- line 152: `private TrackedAchievementStore CreateTrackedAchievementStore()`
+- line 159: `private void RegisterWindows()`
+- line 165: `private void RegisterCommand()`
+- line 173: `private void RegisterDalamudCallbacks()`
+- line 183: `private void UnregisterDalamudCallbacks()`
+- line 193: `private void ResetProgressState()`
+- line 199: `private void ResetProgressStateOnLogout(int type, int code) => this.ResetProgressState();`
+- line 203: `private void OnFrameworkUpdate(IFramework framework)`
+- line 209: `private void RefreshCosmicCacheFromLiveState()`
+- line 226: `private static bool IsInSinusArdorum() => ClientState.TerritoryType == SinusArdorumTerritoryTypeId;`
+- line 228: `private bool CosmicCacheRefreshIsDue() => DateTimeOffset.UtcNow >= this.nextCosmicCacheRefreshAt;`
+- line 232: `private void OnCommand(string command, string args)`
 
 ## `AchievementTracker/Services/AchievementCatalog.cs`
+
 Types: `AchievementCatalog`
 
 Members found:
@@ -83,6 +127,7 @@ Members found:
 - line 66: `private AchievementInfo ToInfo(Achievement achievement)`
 
 ## `AchievementTracker/Services/AchievementProgressService.cs`
+
 Types: `AchievementProgressService`
 
 Members found:
@@ -92,20 +137,29 @@ Members found:
 - line 59: `private static int? GetRequiredTarget(Achievement achievement)`
 
 ## `AchievementTracker/Services/ClientAchievementProgressSource.cs`
+
 Types: `struct`, `ClientAchievementProgressSource`
 
 Members found:
-- line 7: `public readonly record struct ObservedAchievementProgress(uint Current, uint Max, DateTimeOffset ObservedAt, string Source);`
-- line 15: `private readonly Dictionary<uint, ObservedAchievementProgress> cachedProgress = new();`
-- line 18: `public void UpdateCache()`
-- line 46: `public void RecordObservedProgress(uint achievementId, uint current, uint max, string source)`
-- line 60: `public void RecordObservedCompletion(uint achievementId, string source)`
-- line 66: `public void ClearCache()`
-- line 72: `public bool TryGetProgress(uint achievementId, out uint current, out uint max)`
-- line 87: `public bool TryGetObservation(uint achievementId, out ObservedAchievementProgress progress)`
-- line 93: `public bool IsObservedComplete(uint achievementId) => this.observedCompletions.Contains(achievementId);`
+- line 8: `public readonly record struct ObservedAchievementProgress(uint Current, uint Max, DateTimeOffset ObservedAt, string Source);`
+- line 17: `private readonly Dictionary<uint, ObservedAchievementProgress> cachedProgress = new();`
+- line 18: `private readonly Dictionary<uint, DateTimeOffset> observationDeadlines = new();`
+- line 22: `public ClientAchievementProgressSource()`
+- line 27: `public ClientAchievementProgressSource(Func<DateTimeOffset> nowProvider)`
+- line 32: `public int ActiveObservationCount => this.observationDeadlines.Count;`
+- line 34: `public void BeginObservation(uint achievementId, TimeSpan duration)`
+- line 45: `public void UpdateCache()`
+- line 75: `public bool TryRecordObservedSlot(bool isLoaded, uint achievementId, uint current, uint max, string source)`
+- line 93: `public void RecordObservedProgress(uint achievementId, uint current, uint max, string source)`
+- line 107: `public void ClearCache()`
+- line 114: `public bool TryGetProgress(uint achievementId, out uint current, out uint max)`
+- line 129: `public bool TryGetObservation(uint achievementId, out ObservedAchievementProgress progress)`
+- line 135: `public bool TryGetCachedObservation(uint achievementId, out ObservedAchievementProgress progress)`
+- line 138: `public bool IsObservedComplete(uint achievementId) => this.observedCompletions.Contains(achievementId);`
+- line 140: `private void PruneExpiredObservations()`
 
 ## `AchievementTracker/Services/CosmicClassProgressProvider.cs`
+
 Types: `CosmicClassProgressProvider`, `CosmicAchievementRule`, `CosmicScoreAggregation`
 
 Members found:
@@ -129,25 +183,21 @@ Members found:
 - line 228: `private sealed record CosmicAchievementRule(int[] ScoreIndexes, int TargetScore, CosmicScoreAggregation Aggregation);`
 
 ## `AchievementTracker/Services/IAchievementProgressSource.cs`
+
 Types: `IAchievementProgressSource`
 
+No public/private member signatures found by the simple indexer.
+
 ## `AchievementTracker/Services/NativeAchievementNavigator.cs`
+
 Types: `NativeAchievementNavigator`
 
 Members found:
 - line 11: `public bool OpenAchievement(uint achievementId)`
 - line 31: `public bool CloseAchievements()`
 
-## `AchievementTracker/Services/PassiveAchievementProgressObserver.cs`
-Types: `PassiveAchievementProgressObserver`
-
-Members found:
-- line 21: `public PassiveAchievementProgressObserver(`
-- line 48: `public void Dispose()`
-- line 60: `private void OnReceiveAchievementProgress(Achievement* thisPtr, uint id, uint current, uint max)`
-- line 69: `private void OnSetAchievementCompleted(Achievement* thisPtr, uint achievementId)`
-
 ## `AchievementTracker/Services/TrackedAchievementPresetStore.cs`
+
 Types: `TrackedAchievementPresetStore`
 
 Members found:
@@ -160,9 +210,11 @@ Members found:
 - line 124: `private static List<uint> SanitizeAchievementIds(IEnumerable<uint> achievementIds)`
 
 ## `AchievementTracker/Services/TrackedAchievementStore.cs`
+
 Types: `TrackedAchievementStore`
 
 Members found:
+- line 11: `public IReadOnlyList<uint> AchievementIds => this.achievementIds;`
 - line 13: `public bool TryAdd(uint achievementId)`
 - line 29: `public bool Remove(uint achievementId) => this.achievementIds.Remove(achievementId);`
 - line 31: `public bool MoveToTop(uint achievementId)`
@@ -173,6 +225,7 @@ Members found:
 - line 92: `public List<uint> ToConfigList() => [.. this.achievementIds];`
 
 ## `AchievementTracker/Windows/ConfigWindow.cs`
+
 Types: `ConfigWindow`, `ConfigSection`
 
 Members found:
@@ -224,6 +277,7 @@ Members found:
 - line 622: `private void AddTooltip(string text)`
 
 ## `AchievementTracker/Windows/TrackerWindow.cs`
+
 Types: `TrackerWindow`
 
 Members found:

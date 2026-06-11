@@ -1,104 +1,199 @@
 # Big picture
 
+> **Documentation release:** `v0.2.0.20` / testing prerelease architecture refresh.
+> **TLP legend:** 🟢 plugin/domain code, 🟡 Dalamud managed services or UI/data libraries, 🟠 isolated ClientStructs/native adapters, 🔴 blocked/deprecated policy paths.
+
+## Navigation outline
+
+- [What the plugin does](#what-the-plugin-does)
+- [Top-level object graph](#top-level-object-graph)
+- [All user actions](#all-user-actions)
+- [Where achievement IDs come from](#where-achievement-ids-come-from)
+- [Achievement getter/setter hierarchy](#achievement-gettersetter-hierarchy)
+- [Native Achievement open path](#native-achievement-open-path)
+- [Cosmic Class path](#cosmic-class-path)
+
+## What the plugin does
+
 Veela's Achievement Ledger is a Dalamud plugin with three main jobs:
 
 1. Let the player choose achievements to track.
 2. Help the player open the native FFXIV Achievement window/entry for those achievements.
-3. Passively display progress that the client has already loaded or observed.
+3. Display progress from safe sources the client already has or that were observed during a bounded user-guided window.
 
-It does **not** directly request achievement progress from the server.
+It does **not** directly request achievement progress from the server in current mainline.
 
 ## Top-level object graph
 
 ```text
-Plugin
-├─ Configuration
-│  ├─ tracked achievement IDs
-│  ├─ preset lists
-│  ├─ search/config options
-│  └─ CosmicClassScoreCache
-├─ TrackedAchievementStore
-│  └─ in-memory ordered list of tracked IDs
-├─ AchievementCatalog
-│  └─ Lumina sheet lookup for names/categories/rows
-├─ ClientAchievementProgressSource
-│  └─ passive/observed achievement progress cache
-├─ CosmicClassProgressProvider
-│  └─ local WKS/Cosmic score reader + cache mapper
-├─ NativeAchievementNavigator
-│  └─ opens/closes native Achievement UI through AgentAchievement
-├─ AchievementProgressService
-│  └─ combines complete/incomplete/local-progress display logic
-├─ PassiveAchievementProgressObserver
-│  └─ hooks native progress/completion callbacks and caches observations
-├─ TrackerWindow
-│  └─ main `/val` window
-└─ ConfigWindow
-   └─ configure/search/presets/help window
+Plugin 🟢
+├─ Configuration 🟢 persisted by PluginInterface 🟡
+├─ TrackedAchievementStore 🟢 in-memory ordered IDs
+├─ AchievementCatalog 🟢 + IDataManager/Lumina 🟡
+├─ ClientAchievementProgressSource 🟠 bounded local progress-slot observation
+├─ CosmicClassProgressProvider 🟠 WKSManager score reads + config cache
+├─ NativeAchievementNavigator 🟠 AgentAchievement native UI adapter
+├─ AchievementProgressService 🟢 progress decision service
+├─ TrackerWindow 🟢 main /val window
+└─ ConfigWindow 🟢 config/search/presets/help window
 ```
 
-## Runtime event flow
-
-```text
-Plugin constructor
-├─ loads saved config
-├─ normalizes config
-├─ builds services/windows
-├─ installs passive progress observer hooks
-├─ registers /val command
-├─ registers UI draw callbacks
-├─ registers Framework.Update
-└─ registers login/logout cache resets
-```
-
-## Main user flows
+## All user actions
 
 ### Open the ledger
 
 ```text
-User runs /val
-└─ Plugin.OnCommand(...)
-   └─ TrackerWindow.Toggle()
+User runs /val 🟢
+└─ Plugin.OnCommand(command, args) 🟢
+   └─ TrackerWindow.Toggle() 🟢
 ```
 
-### Configure tracked achievements
+### Open configuration
 
 ```text
-User clicks Configure or runs /val config
-└─ Plugin.OpenConfigUi()
-   └─ ConfigWindow.OpenConfig()
-      └─ ConfigWindow.Draw()
+User clicks Configure or runs /val config|configure|man 🟢
+└─ Plugin.OpenConfigUi(help: false) 🟢
+   └─ ConfigWindow.OpenConfig() 🟢
 ```
 
-### Update/open a tracked achievement
+### Open Help directly
 
 ```text
-User clicks Update Next or row reload icon
-└─ Plugin.OpenAchievementForUpdate(achievementId)
-   ├─ checks 5-second shared lockout
-   ├─ NativeAchievementNavigator.OpenAchievement(achievementId)
-   │  └─ AgentAchievement.Instance()->OpenById(achievementId)
-   └─ starts 5-second lockout
+User runs /val help or /val ? 🟢
+└─ Plugin.OpenConfigUi(help: true) 🟢
+   └─ ConfigWindow.OpenHelp() 🟢
 ```
 
-### Passive progress observation
+### Update/open the next tracked achievement
 
 ```text
-Native game/client receives achievement progress
-└─ PassiveAchievementProgressObserver.OnReceiveAchievementProgress(...)
-   ├─ calls original game function first
-   └─ ClientAchievementProgressSource.RecordObservedProgress(...)
+User clicks Update Next 🟢
+└─ TrackerWindow.OpenNextTrackedAchievementForUpdate() 🟢
+   ├─ TrackerWindow.GetNextTrackedAchievementId() 🟢
+   │  ├─ TrackedAchievementStore.AchievementIds 🟢
+   │  └─ ClientAchievementProgressSource.TryGetCachedObservation(id) 🟠
+   └─ Plugin.OpenAchievementForUpdate(achievementId) 🟢/🟠
+      ├─ checks CanOpenAchievementForUpdate lockout 🟢
+      ├─ NativeAchievementNavigator.OpenAchievement(achievementId) 🟠
+      │  └─ AgentAchievement.Instance()->OpenById(achievementId) 🟠
+      ├─ ClientAchievementProgressSource.BeginObservation(achievementId, 8s) 🟠
+      └─ sets nextAchievementUpdateOpenAt 🟢
 ```
 
-### Cosmic Class progress
+### Reload a specific tracked row
 
 ```text
-Dalamud framework tick
-└─ Plugin.OnFrameworkUpdate(...)
-   └─ Plugin.RefreshCosmicCacheFromLiveState()
-      ├─ if not Sinus Ardorum territory 1237: return
-      ├─ if less than 30 seconds since last read: return
-      └─ CosmicClassProgressProvider.RefreshCacheFromLiveScores()
-         └─ TryReadLiveScores()
-            └─ WKSManager.Instance()->State.Scores
+User clicks row sync/reload icon 🟢
+└─ TrackerWindow.DrawRowUpdateButton(id) or ConfigWindow.DrawTrackedUpdateButton(id) 🟢
+   └─ Plugin.OpenAchievementForUpdate(id) 🟢/🟠
+```
+
+### Inspect/open without update intent
+
+```text
+User clicks magnifying glass 🟢
+└─ TrackerWindow.OpenNativeAchievement(id) or ConfigWindow.DrawInspectButton(id) 🟢
+   └─ NativeAchievementNavigator.OpenAchievement(id) 🟠
+      └─ AgentAchievement.Instance()->OpenById(id) 🟠
+```
+
+This path intentionally does not start the update lockout/observation timer.
+
+### Close native Achievements window
+
+```text
+User clicks Close Achievements 🟢
+└─ TrackerWindow.DrawCloseAchievementsButton() 🟢
+   └─ NativeAchievementNavigator.CloseAchievements() 🟠
+      └─ AgentAchievement.Instance()->Hide() 🟠
+```
+
+### Add achievement from search
+
+```text
+User searches in ConfigWindow 🟢
+└─ ConfigWindow.GetVisibleSearchResults() 🟢
+   ├─ AchievementCatalog.Search(query) 🟢/🟡
+   └─ AchievementProgressService.IsComplete(row) 🟢/🟡
+User clicks Add 🟢
+└─ TrackedAchievementStore.TryAdd(achievementId) 🟢
+   └─ Plugin.SaveTrackedAchievements() 🟢/🟡
+      ├─ Configuration.TrackedAchievementIds = store.ToConfigList() 🟢
+      └─ Configuration.Save() -> PluginInterface.SavePluginConfig(this) 🟡
+```
+
+### Remove/reorder tracked achievements
+
+```text
+User clicks X / Top / Up / Down / Bottom 🟢
+└─ TrackedAchievementStore.Remove/Move...(id) 🟢
+   └─ Plugin.SaveTrackedAchievements() 🟢/🟡
+```
+
+### Save/read/rename/delete presets
+
+```text
+User clicks preset icons 🟢
+└─ TrackedAchievementPresetStore.SavePreset/Rename/Delete/FindPreset(...) 🟢
+   └─ Plugin.SaveConfiguration() 🟢/🟡
+      └─ PluginInterface.SavePluginConfig(Configuration) 🟡
+```
+
+### Toggle hide-completed search filter
+
+```text
+User checks Hide completed 🟢
+└─ Configuration.HideCompletedInSearch = value 🟢
+   └─ Plugin.SaveConfiguration() 🟢/🟡
+```
+
+## Where achievement IDs come from
+
+Achievement IDs enter the system from two places:
+
+1. **Search results**: `AchievementCatalog.Search(query)` reads Lumina `Achievement` rows through Dalamud `IDataManager`. Each result has an `Id`/`RowId`. When the player clicks Add, that ID becomes tracked.
+2. **Saved config**: `PluginInterface.GetPluginConfig()` loads `Configuration.TrackedAchievementIds`, then `TrackedAchievementStore.LoadFrom(ids)` builds the in-memory ordered list.
+
+After that, most UI flows use IDs from `TrackedAchievementStore.AchievementIds`.
+
+## Achievement getter/setter hierarchy
+
+```text
+AchievementCatalog.TryGetRow(id) 🟢/🟡
+└─ returns Lumina Achievement row metadata: name, category, data target rows
+
+AchievementProgressService.GetProgress(row) 🟢
+├─ CosmicClassProgressProvider.GetProgress(id) 🟠 for Cosmic IDs 3702-3739
+├─ ClientAchievementProgressSource.TryGetProgress(id, out current, out max) 🟠
+├─ IUnlockState.IsAchievementListLoaded / IsAchievementComplete(row) 🟡
+└─ AchievementProgress.TargetKnown(...) from Lumina target data 🟢/🟡
+
+TrackedAchievementStore.TryAdd/Remove/Move... 🟢
+└─ changes in-memory list only until Plugin.SaveTrackedAchievements() persists it
+
+Configuration.Save() 🟢/🟡
+└─ PluginInterface.SavePluginConfig(this) writes Dalamud plugin config using standard Dalamud persistence
+```
+
+## Native Achievement open path
+
+`NativeAchievementNavigator` is custom plugin code. It is not a subclass/derivation of a Dalamud class. It is a small wrapper we own around the ClientStructs/native `AgentAchievement` surface.
+
+```text
+Plugin.OpenAchievementForUpdate(achievementId) 🟢
+└─ NativeAchievementNavigator.OpenAchievement(achievementId) 🟠 custom VAL adapter
+   └─ AgentAchievement.Instance()->OpenById(achievementId) 🟠 FFXIV native UI agent call
+```
+
+## Cosmic Class path
+
+```text
+AchievementProgressService.GetProgress(row) 🟢
+└─ CosmicClassProgressProvider.GetProgress(row.RowId) 🟠
+   ├─ map achievement ID 3702-3739 to class score indexes + target 🟢
+   ├─ TryReadLiveScores() 🟠
+   │  └─ WKSManager.Instance()->State.Scores 🟠
+   ├─ SaveScoresToCache(...) 🟢/🟡
+   │  └─ Plugin.SaveConfiguration() -> SavePluginConfig 🟡
+   └─ fallback to cached scores or Data not available 🟢
 ```
