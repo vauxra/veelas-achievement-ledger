@@ -18,11 +18,11 @@
     "IsTestingExclusive": true,
     "DownloadLinkInstall": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.13/VeelasAchievementLedger_0_2_0_13.zip",
     "DownloadLinkUpdate": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.13/VeelasAchievementLedger_0_2_0_13.zip",
-    "LastUpdate": "1781186611",
-    "TestingAssemblyVersion": "0.2.0.13",
+    "LastUpdate": "1781194984",
+    "TestingAssemblyVersion": "0.2.0.14",
     "TestingDalamudApiLevel": 15,
-    "TestingChangelog": "Experimental Ex+ build: distinct name/icon for the direct-request experimental branch.",
-    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.13/VeelasAchievementLedger_0_2_0_13.zip",
+    "TestingChangelog": "Experimental testing build: hide/non-viewable Achievement rows are excluded from search/add, preset loads, and saved tracked-list startup so VAL Ex+ only tracks achievements that can be manually viewed in the native Achievement menu.",
+    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.14/VeelasAchievementLedger_0_2_0_14.zip",
     "IconUrl": "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png",
     "ImageUrls": [
       "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png"

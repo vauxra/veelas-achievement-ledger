@@ -204,7 +204,7 @@ public sealed class ConfigWindow : Window
             return;
         }
 
-        this.plugin.TrackedAchievements.LoadFrom(preset.AchievementIds);
+        this.plugin.TrackedAchievements.LoadFrom(preset.AchievementIds.Where(this.plugin.AchievementCatalog.IsManuallyViewable));
         this.plugin.SaveTrackedAchievements();
         this.plugin.ResetAutoUpdateCountdownIfActive();
     }
@@ -363,7 +363,7 @@ public sealed class ConfigWindow : Window
 
         if (results.Count == 0)
         {
-            ImGui.TextDisabled("No matching achievements found.");
+            ImGui.TextDisabled("No matching manually viewable achievements found.");
             return;
         }
 
@@ -375,7 +375,7 @@ public sealed class ConfigWindow : Window
 
             if (canAdd)
             {
-                if (ImGui.Button("Add"))
+                if (ImGui.Button("Add") && this.plugin.AchievementCatalog.IsManuallyViewable(result.Id))
                 {
                     if (this.plugin.TrackedAchievements.TryAdd(result.Id))
                     {
