@@ -6,6 +6,10 @@ namespace AchievementTracker.Services;
 
 public readonly record struct ObservedAchievementProgress(uint Current, uint Max, DateTimeOffset ObservedAt, string Source);
 
+// Component: in-memory observed progress cache.
+// Risk level: medium.
+// Why: reads local ClientStructs Achievement state slots.
+// Safety boundary: reads already-loaded local state only; does not call direct achievement-progress request API.
 public unsafe sealed class ClientAchievementProgressSource : IAchievementProgressSource
 {
     private readonly Dictionary<uint, ObservedAchievementProgress> cachedProgress = new();
@@ -13,8 +17,13 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
 
     public void UpdateCache()
     {
-        // ClientStructs stage-2 interaction is documented as a Dalamud-supported fallback:
-        // https://dalamud.dev/plugin-development/interaction/
+        // What this does:
+        // - Reads the client's current Achievement progress slot.
+        // - Stores it if the slot says progress is loaded.
+        // What this does NOT do:
+        // - It does not ask the server for new progress.
+        // - It does not open UI or trigger gameplay actions.
+        // ClientStructs interaction docs: https://dalamud.dev/plugin-development/interaction/
         var achievement = Achievement.Instance();
         if (achievement == null)
         {
@@ -31,11 +40,7 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
             return;
         }
 
-        this.cachedProgress[achievementId] = new ObservedAchievementProgress(current, max, DateTimeOffset.UtcNow, "Achievement state slot");
-        if (current >= max)
-        {
-            this.observedCompletions.Add(achievementId);
-        }
+        this.RecordObservedProgress(achievementId, current, max, "Achievement state slot");
     }
 
     public void RecordObservedProgress(uint achievementId, uint current, uint max, string source)
@@ -67,7 +72,6 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
     public bool TryGetProgress(uint achievementId, out uint current, out uint max)
     {
         this.UpdateCache();
-
         if (this.cachedProgress.TryGetValue(achievementId, out var progress))
         {
             current = progress.Current;

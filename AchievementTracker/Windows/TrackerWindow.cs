@@ -24,17 +24,40 @@ public sealed class TrackerWindow : Window
         };
     }
 
+    // Section: main /val window draw loop.
+    // Component: ImGui UI. Risk: low; button clicks call clearly named Plugin/service methods.
     public override void Draw()
     {
         this.plugin.AchievementProgressSource.UpdateCache();
+        this.DrawTopButtons();
+        this.DrawTrackedAchievementList();
+    }
 
+    // Section: top toolbar.
+    // Component: user-guided native Achievement UI actions. Risk: low-to-medium; native opens are button-driven and rate-limited.
+    private void DrawTopButtons()
+    {
+        this.DrawConfigureButton();
+        ImGui.SameLine();
+        this.DrawUpdateNextButton();
+        ImGui.SameLine();
+        this.DrawCloseAchievementsButton();
+        this.DrawUpdateOpenLockoutStatus();
+        ImGui.Separator();
+    }
+
+    private void DrawConfigureButton()
+    {
         if (ImGui.Button("Configure"))
         {
             this.plugin.ToggleConfigUi();
         }
-        AddTooltip("Open configuration.");
 
-        ImGui.SameLine();
+        AddTooltip("Open configuration.");
+    }
+
+    private void DrawUpdateNextButton()
+    {
         var updateOpenLocked = !this.plugin.CanOpenAchievementForUpdate;
         if (updateOpenLocked)
         {
@@ -43,11 +66,7 @@ public sealed class TrackerWindow : Window
 
         if (ImGui.Button("Update Next"))
         {
-            var nextId = this.GetNextTrackedAchievementId();
-            if (nextId.HasValue)
-            {
-                this.OpenNativeAchievementForUpdate(nextId.Value);
-            }
+            this.OpenNextTrackedAchievementForUpdate();
         }
 
         if (updateOpenLocked)
@@ -56,21 +75,28 @@ public sealed class TrackerWindow : Window
         }
 
         AddTooltip("Open the next tracked Achievement entry.");
+    }
 
-        ImGui.SameLine();
-        if (ImGui.Button("Close Achievements"))
+    private void DrawCloseAchievementsButton()
+    {
+        if (!ImGui.Button("Close Achievements"))
         {
-            if (!this.plugin.NativeAchievementNavigator.CloseAchievements())
-            {
-                ImGui.TextDisabled("Could not close Achievements right now.");
-            }
+            AddTooltip("Close the native Achievements window.");
+            return;
         }
+
+        if (!this.plugin.NativeAchievementNavigator.CloseAchievements())
+        {
+            ImGui.TextDisabled("Could not close Achievements right now.");
+        }
+
         AddTooltip("Close the native Achievements window.");
+    }
 
-        this.DrawUpdateOpenLockoutStatus();
-
-        ImGui.Separator();
-
+    // Section: tracked achievement rows.
+    // Component: plugin data + UI. Risk: low, except reload/search icons call native UI wrappers.
+    private void DrawTrackedAchievementList()
+    {
         var trackedIds = this.plugin.TrackedAchievements.AchievementIds.ToList();
         if (trackedIds.Count == 0)
         {
@@ -87,13 +113,23 @@ public sealed class TrackerWindow : Window
     private void DrawAchievement(uint achievementId)
     {
         _ = this.plugin.AchievementCatalog.TryGet(achievementId, out var info);
-        var progressText = "Progress unavailable";
-        if (this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row))
-        {
-            progressText = this.plugin.AchievementProgressService.GetProgress(row).ToDisplayText();
-        }
+        var progressText = this.GetProgressText(achievementId);
+        var updatedText = this.GetLastObservedText(achievementId);
 
         ImGui.PushID((int)achievementId);
+        this.DrawRowUpdateButton(achievementId);
+        ImGui.SameLine();
+        this.DrawRowInspectButton(achievementId);
+        ImGui.SameLine();
+        ImGui.TextWrapped(info.Name);
+        ImGui.TextDisabled(progressText);
+        ImGui.SameLine();
+        ImGui.TextDisabled(updatedText);
+        ImGui.PopID();
+    }
+
+    private void DrawRowUpdateButton(uint achievementId)
+    {
         var updateOpenLocked = !this.plugin.CanOpenAchievementForUpdate;
         if (updateOpenLocked)
         {
@@ -111,25 +147,44 @@ public sealed class TrackerWindow : Window
         }
 
         AddTooltip("Open native Achievement entry to update.");
+    }
 
-        ImGui.SameLine();
+    private void DrawRowInspectButton(uint achievementId)
+    {
         if (ImGuiComponents.IconButton(FontAwesomeIcon.Search))
         {
             this.OpenNativeAchievement(achievementId);
         }
+
         AddTooltip("Open in Achievements.");
+    }
 
-        ImGui.SameLine();
-        ImGui.TextWrapped(info.Name);
-        ImGui.TextDisabled(progressText);
+    private string GetProgressText(uint achievementId)
+    {
+        if (!this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row))
+        {
+            return "Progress unavailable";
+        }
 
-        var updatedText = this.plugin.ClientAchievementProgressSource.TryGetObservation(achievementId, out var observation)
+        return this.plugin.AchievementProgressService.GetProgress(row).ToDisplayText();
+    }
+
+    private string GetLastObservedText(uint achievementId)
+    {
+        return this.plugin.ClientAchievementProgressSource.TryGetObservation(achievementId, out var observation)
             ? $"updated {FormatAge(observation.ObservedAt)}"
             : "not updated yet";
+    }
 
-        ImGui.SameLine();
-        ImGui.TextDisabled(updatedText);
-        ImGui.PopID();
+    // Section: choosing and opening achievements.
+    // Component: user-guided native Achievement UI action. Risk: low-to-medium; no progress request is called directly.
+    private void OpenNextTrackedAchievementForUpdate()
+    {
+        var nextId = this.GetNextTrackedAchievementId();
+        if (nextId.HasValue)
+        {
+            this.OpenNativeAchievementForUpdate(nextId.Value);
+        }
     }
 
     private uint? GetNextTrackedAchievementId()
@@ -160,12 +215,14 @@ public sealed class TrackerWindow : Window
 
     private void OpenNativeAchievementForUpdate(uint achievementId)
     {
-        if (!this.plugin.OpenAchievementForUpdate(achievementId))
+        if (this.plugin.OpenAchievementForUpdate(achievementId))
         {
-            ImGui.TextDisabled(this.plugin.CanOpenAchievementForUpdate
-                ? "Could not open Achievements right now."
-                : "Achievement update opens are cooling down.");
+            return;
         }
+
+        ImGui.TextDisabled(this.plugin.CanOpenAchievementForUpdate
+            ? "Could not open Achievements right now."
+            : "Achievement update opens are cooling down.");
     }
 
     private void OpenNativeAchievement(uint achievementId)
@@ -176,6 +233,8 @@ public sealed class TrackerWindow : Window
         }
     }
 
+    // Section: small UI formatting helpers.
+    // Component: pure UI. Risk: low.
     private void DrawUpdateOpenLockoutStatus()
     {
         var remaining = this.plugin.AchievementUpdateOpenRemaining;

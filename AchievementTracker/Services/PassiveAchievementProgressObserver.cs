@@ -5,6 +5,11 @@ using System;
 
 namespace AchievementTracker.Services;
 
+// Component: passive native Achievement progress observation.
+// Risk level: medium-high.
+// Why: uses hooks around native client functions.
+// Safety boundary: each hook calls the original client function first, then records what the client already received.
+// It does not request progress, poll the server, or synthesize addon callbacks.
 public unsafe sealed class PassiveAchievementProgressObserver : IDisposable
 {
     private readonly ClientAchievementProgressSource progressSource;
@@ -23,9 +28,6 @@ public unsafe sealed class PassiveAchievementProgressObserver : IDisposable
 
         try
         {
-            // Passive observation only. These hooks forward the original client call and cache
-            // progress already returned to the native Achievement UI.
-            // https://dalamud.dev/plugin-development/interaction/
             this.receiveHook = interopProvider.HookFromAddress<Achievement.Delegates.ReceiveAchievementProgress>(
                 Achievement.MemberFunctionPointers.ReceiveAchievementProgress,
                 this.OnReceiveAchievementProgress);
@@ -57,13 +59,18 @@ public unsafe sealed class PassiveAchievementProgressObserver : IDisposable
 
     private void OnReceiveAchievementProgress(Achievement* thisPtr, uint id, uint current, uint max)
     {
+        // Required safety rule: forward the original client function first.
         this.receiveHook!.Original(thisPtr, id, current, max);
+
+        // Then cache the already-observed data for our UI.
         this.progressSource.RecordObservedProgress(id, current, max, "Achievement window");
     }
 
     private void OnSetAchievementCompleted(Achievement* thisPtr, uint achievementId)
     {
+        // Required safety rule: forward the original client function first.
         this.completedHook!.Original(thisPtr, achievementId);
+
         if (this.completionTriggerEnabledProvider())
         {
             this.progressSource.RecordObservedCompletion(achievementId, "Achievement completed");

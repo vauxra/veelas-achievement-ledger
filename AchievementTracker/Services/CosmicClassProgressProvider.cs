@@ -6,6 +6,10 @@ using System.Linq;
 
 namespace AchievementTracker.Services;
 
+// Component: Cosmic Class achievement progress mapping.
+// Risk level: medium.
+// Why: reads local WKS/Cosmic ClientStructs state.
+// Safety boundary: reads already-loaded local scores only; no server request, packet capture, or addon callback.
 public sealed class CosmicClassProgressProvider
 {
     public const int ScoreCount = 11;
@@ -35,6 +39,8 @@ public sealed class CosmicClassProgressProvider
         NormalizeCache(this.cache);
     }
 
+    // Section: public entry points.
+    // Component: UI progress service calls. Risk: low; these mostly compute from cached/local data.
     public bool Handles(uint achievementId) => GetRule(achievementId) is not null;
 
     public void RefreshCacheFromLiveScores() => _ = this.TryReadLiveScores();
@@ -53,9 +59,7 @@ public sealed class CosmicClassProgressProvider
             return AchievementProgress.DataNotAvailable();
         }
 
-        var current = rule.Aggregation == CosmicScoreAggregation.Minimum
-            ? rule.ScoreIndexes.Min(index => scores[index])
-            : rule.ScoreIndexes.Max(index => scores[index]);
+        var current = CalculateCurrentScore(scores, rule);
         return AchievementProgress.Numeric(Math.Max(0, current), rule.TargetScore);
     }
 
@@ -75,6 +79,8 @@ public sealed class CosmicClassProgressProvider
 
     public static bool IsCosmicClassAchievement(uint achievementId) => GetRule(achievementId) is not null;
 
+    // Section: achievement ID to score-target rules.
+    // Component: static mapping table. Risk: low; wrong values would show wrong planning progress but do not affect game state.
     private static CosmicAchievementRule? GetRule(uint achievementId)
     {
         return achievementId switch
@@ -127,6 +133,15 @@ public sealed class CosmicClassProgressProvider
 
     private static CosmicAchievementRule Every(int[] indexes, int target) => new(indexes, target, CosmicScoreAggregation.Minimum);
 
+    private static int CalculateCurrentScore(IReadOnlyList<int> scores, CosmicAchievementRule rule)
+    {
+        return rule.Aggregation == CosmicScoreAggregation.Minimum
+            ? rule.ScoreIndexes.Min(index => scores[index])
+            : rule.ScoreIndexes.Max(index => scores[index]);
+    }
+
+    // Section: cache normalization and reads.
+    // Component: plugin-local config cache. Risk: low.
     private static void NormalizeCache(CosmicClassScoreCache scoreCache)
     {
         scoreCache.Scores ??= [];
@@ -148,6 +163,9 @@ public sealed class CosmicClassProgressProvider
         return this.cache.Scores.ToArray();
     }
 
+    // Section: live local ClientStructs score read.
+    // Component: WKS/Cosmic local state. Risk: medium.
+    // This is the method that actually reads scores: WKSManager.Instance()->State.Scores.
     private unsafe int[]? TryReadLiveScores(bool saveWhenAvailable = true)
     {
         var manager = WKSManager.Instance();
@@ -165,12 +183,17 @@ public sealed class CosmicClassProgressProvider
         liveScores = liveScores.Take(ScoreCount).Select(score => Math.Max(0, score)).ToArray();
         if (saveWhenAvailable && !this.ScoresEqualCache(liveScores))
         {
-            this.cache.Scores = liveScores.ToList();
-            this.cache.UpdatedAtUtc = DateTimeOffset.UtcNow;
-            this.saveCache();
+            this.SaveScoresToCache(liveScores);
         }
 
         return liveScores;
+    }
+
+    private void SaveScoresToCache(int[] liveScores)
+    {
+        this.cache.Scores = liveScores.ToList();
+        this.cache.UpdatedAtUtc = DateTimeOffset.UtcNow;
+        this.saveCache();
     }
 
     private unsafe string GetLiveStateSummary()

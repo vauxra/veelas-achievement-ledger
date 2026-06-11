@@ -11,28 +11,32 @@ namespace AchievementTracker;
 
 public sealed class Plugin : IDalamudPlugin
 {
+    // Component: command routing and safety timing.
+    // Risk: low. These constants do not touch game memory or the network.
     private const string CommandName = "/val";
     private const ushort SinusArdorumTerritoryTypeId = 1237;
     private static readonly TimeSpan AchievementUpdateOpenLockout = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan CosmicCacheRefreshInterval = TimeSpan.FromSeconds(30);
 
-    // Dalamud service injection pattern:
-    // https://dalamud.dev/plugin-development/project-layout
+    // Component: Dalamud services.
+    // Risk: low-to-medium. These are framework services supplied by Dalamud. ClientStructs/interop use is isolated in Services/.
+    // Dalamud service injection pattern: https://dalamud.dev/plugin-development/project-layout
     [PluginService] internal static IDalamudPluginInterface PluginInterface { get; private set; } = null!;
     [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
     // IDataManager docs: https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IDataManager
     [PluginService] internal static IDataManager DataManager { get; private set; } = null!;
     // IUnlockState docs: https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IUnlockState
     [PluginService] internal static IUnlockState UnlockState { get; private set; } = null!;
-    // IClientState login/logout events are used to scope cached progress to the current character.
-    // https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IClientState
+    // IClientState docs: https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IClientState
     [PluginService] internal static IClientState ClientState { get; private set; } = null!;
-    // Passive hooks observe native achievement UI progress flow; they do not issue requests.
+    // IGameInteropProvider is only passed to PassiveAchievementProgressObserver for passive hooks.
     // https://dalamud.dev/plugin-development/interaction/
     [PluginService] internal static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
-    // Framework update is used only to passively refresh local Cosmic score cache from loaded client state.
+    // IFramework runs the gated Cosmic local-cache check. It does not issue direct progress requests.
     [PluginService] internal static IFramework Framework { get; private set; } = null!;
 
+    // Component: public app state/services used by windows.
+    // Risk: mixed. Native/unsafe work is behind named service classes so UI code can stay readable.
     public Configuration Configuration { get; }
     public TrackedAchievementStore TrackedAchievements { get; }
     public AchievementCatalog AchievementCatalog { get; }
@@ -43,6 +47,8 @@ public sealed class Plugin : IDalamudPlugin
     public NativeAchievementNavigator NativeAchievementNavigator { get; }
     public WindowSystem WindowSystem { get; } = new("VeelasAchievementLedger");
 
+    // Component: private app objects and timers.
+    // Risk: low. These only control UI windows and local throttling.
     private TrackerWindow TrackerWindow { get; }
     private ConfigWindow ConfigWindow { get; }
     private PassiveAchievementProgressObserver? passiveAchievementProgressObserver;
@@ -51,10 +57,8 @@ public sealed class Plugin : IDalamudPlugin
 
     public Plugin()
     {
-        this.Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-        this.Configuration.Normalize();
-        this.TrackedAchievements = new TrackedAchievementStore();
-        this.TrackedAchievements.LoadFrom(this.Configuration.TrackedAchievementIds);
+        this.Configuration = LoadAndNormalizeConfiguration();
+        this.TrackedAchievements = this.CreateTrackedAchievementStore();
         this.AchievementCatalog = new AchievementCatalog(DataManager);
         this.ClientAchievementProgressSource = new ClientAchievementProgressSource();
         this.AchievementProgressSource = this.ClientAchievementProgressSource;
@@ -63,37 +67,24 @@ public sealed class Plugin : IDalamudPlugin
         this.AchievementProgressService = new AchievementProgressService(UnlockState, this.AchievementProgressSource, this.CosmicClassProgressProvider);
         this.TrackerWindow = new TrackerWindow(this);
         this.ConfigWindow = new ConfigWindow(this);
+
         this.InstallPassiveAchievementObserver();
-        this.WindowSystem.AddWindow(this.TrackerWindow);
-        this.WindowSystem.AddWindow(this.ConfigWindow);
-
-        CommandManager.AddHandler(CommandName, new CommandInfo(this.OnCommand)
-        {
-            HelpMessage = "Open Veela's Achievement Ledger.",
-        });
-
-        PluginInterface.UiBuilder.Draw += this.WindowSystem.Draw;
-        PluginInterface.UiBuilder.OpenMainUi += this.ToggleMainUi;
-        PluginInterface.UiBuilder.OpenConfigUi += this.ToggleConfigUi;
-        Framework.Update += this.OnFrameworkUpdate;
-        ClientState.Login += this.ResetProgressState;
-        ClientState.Logout += this.ResetProgressStateOnLogout;
+        this.RegisterWindows();
+        this.RegisterCommand();
+        this.RegisterDalamudCallbacks();
     }
 
     public void Dispose()
     {
-        PluginInterface.UiBuilder.Draw -= this.WindowSystem.Draw;
-        PluginInterface.UiBuilder.OpenMainUi -= this.ToggleMainUi;
-        PluginInterface.UiBuilder.OpenConfigUi -= this.ToggleConfigUi;
-        Framework.Update -= this.OnFrameworkUpdate;
-        ClientState.Login -= this.ResetProgressState;
-        ClientState.Logout -= this.ResetProgressStateOnLogout;
+        this.UnregisterDalamudCallbacks();
         CommandManager.RemoveHandler(CommandName);
         this.passiveAchievementProgressObserver?.Dispose();
         this.passiveAchievementProgressObserver = null;
         this.WindowSystem.RemoveAllWindows();
     }
 
+    // Section: saving configuration.
+    // Component: Dalamud plugin config. Risk: low; saves only plugin-local settings.
     public void SaveTrackedAchievements()
     {
         this.Configuration.TrackedAchievementIds = this.TrackedAchievements.ToConfigList();
@@ -106,7 +97,8 @@ public sealed class Plugin : IDalamudPlugin
         this.Configuration.Save();
     }
 
-
+    // Section: shared update-open lockout.
+    // Component: user-guided native Achievement UI opening. Risk: low-to-medium; calls a native UI agent only after a button click.
     public TimeSpan AchievementUpdateOpenRemaining
     {
         get
@@ -134,6 +126,8 @@ public sealed class Plugin : IDalamudPlugin
         return true;
     }
 
+    // Section: public window helpers.
+    // Component: ImGui windows. Risk: low.
     public void ToggleMainUi() => this.TrackerWindow.Toggle();
 
     public void OpenMainUi() => this.TrackerWindow.IsOpen = true;
@@ -145,13 +139,65 @@ public sealed class Plugin : IDalamudPlugin
         if (help)
         {
             this.ConfigWindow.OpenHelp();
+            return;
         }
-        else
-        {
-            this.ConfigWindow.OpenConfig();
-        }
+
+        this.ConfigWindow.OpenConfig();
     }
 
+    // Section: startup wiring helpers.
+    // Component: app construction. Risk: low; keeps constructor readable.
+    private static Configuration LoadAndNormalizeConfiguration()
+    {
+        var configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+        configuration.Normalize();
+        return configuration;
+    }
+
+    private TrackedAchievementStore CreateTrackedAchievementStore()
+    {
+        var store = new TrackedAchievementStore();
+        store.LoadFrom(this.Configuration.TrackedAchievementIds);
+        return store;
+    }
+
+    private void RegisterWindows()
+    {
+        this.WindowSystem.AddWindow(this.TrackerWindow);
+        this.WindowSystem.AddWindow(this.ConfigWindow);
+    }
+
+    private void RegisterCommand()
+    {
+        CommandManager.AddHandler(CommandName, new CommandInfo(this.OnCommand)
+        {
+            HelpMessage = "Open Veela's Achievement Ledger.",
+        });
+    }
+
+    private void RegisterDalamudCallbacks()
+    {
+        PluginInterface.UiBuilder.Draw += this.WindowSystem.Draw;
+        PluginInterface.UiBuilder.OpenMainUi += this.ToggleMainUi;
+        PluginInterface.UiBuilder.OpenConfigUi += this.ToggleConfigUi;
+        Framework.Update += this.OnFrameworkUpdate;
+        ClientState.Login += this.ResetProgressState;
+        ClientState.Logout += this.ResetProgressStateOnLogout;
+    }
+
+    private void UnregisterDalamudCallbacks()
+    {
+        PluginInterface.UiBuilder.Draw -= this.WindowSystem.Draw;
+        PluginInterface.UiBuilder.OpenMainUi -= this.ToggleMainUi;
+        PluginInterface.UiBuilder.OpenConfigUi -= this.ToggleConfigUi;
+        Framework.Update -= this.OnFrameworkUpdate;
+        ClientState.Login -= this.ResetProgressState;
+        ClientState.Logout -= this.ResetProgressStateOnLogout;
+    }
+
+    // Section: passive progress observation.
+    // Component: hooks native client callbacks, forwards originals, then caches observed data.
+    // Risk: medium because this uses interop hooks; it does not request progress from the server.
     private void InstallPassiveAchievementObserver()
     {
         this.passiveAchievementProgressObserver ??= new PassiveAchievementProgressObserver(
@@ -166,6 +212,10 @@ public sealed class Plugin : IDalamudPlugin
         this.AchievementProgressSource.ClearCache();
     }
 
+    private void ResetProgressStateOnLogout(int type, int code) => this.ResetProgressState();
+
+    // Section: Cosmic Class local score cache.
+    // Component: gated local ClientStructs read. Risk: medium because it reads client memory; no server/network request is made.
     private void OnFrameworkUpdate(IFramework framework)
     {
         this.RefreshCosmicCacheFromLiveState();
@@ -173,24 +223,27 @@ public sealed class Plugin : IDalamudPlugin
 
     private void RefreshCosmicCacheFromLiveState()
     {
-        if (ClientState.TerritoryType != SinusArdorumTerritoryTypeId)
+        if (!IsInSinusArdorum())
         {
             this.nextCosmicCacheRefreshAt = DateTimeOffset.MinValue;
             return;
         }
 
-        var now = DateTimeOffset.UtcNow;
-        if (now < this.nextCosmicCacheRefreshAt)
+        if (!this.CosmicCacheRefreshIsDue())
         {
             return;
         }
 
-        this.nextCosmicCacheRefreshAt = now + CosmicCacheRefreshInterval;
+        this.nextCosmicCacheRefreshAt = DateTimeOffset.UtcNow + CosmicCacheRefreshInterval;
         this.CosmicClassProgressProvider.RefreshCacheFromLiveScores();
     }
 
-    private void ResetProgressStateOnLogout(int type, int code) => this.ResetProgressState();
+    private static bool IsInSinusArdorum() => ClientState.TerritoryType == SinusArdorumTerritoryTypeId;
 
+    private bool CosmicCacheRefreshIsDue() => DateTimeOffset.UtcNow >= this.nextCosmicCacheRefreshAt;
+
+    // Section: chat command routing.
+    // Component: user commands. Risk: low.
     private void OnCommand(string command, string args)
     {
         var normalized = args.Trim().ToLowerInvariant();
