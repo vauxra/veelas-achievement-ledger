@@ -18,7 +18,7 @@ public sealed class ConfigWindow : Window
     private string selectedPresetName = string.Empty;
 
     public ConfigWindow(Plugin plugin)
-        : base("Veela's Achievment Ledger Ex+ Config##AchievementLedgerConfig")
+        : base("Veela's Achievement Ledger Ex Mid Config##AchievementLedgerConfig")
     {
         this.plugin = plugin;
         this.SizeConstraints = new WindowSizeConstraints

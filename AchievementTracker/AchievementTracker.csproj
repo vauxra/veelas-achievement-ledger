@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
-    <Version>0.2.0.14</Version>
+    <Version>0.2.0.15</Version>
     <AssemblyName>VeelasAchievementLedger</AssemblyName>
     <RootNamespace>AchievementTracker</RootNamespace>
     <Authors>Saagi</Authors>
     <PackageProjectUrl>https://github.com/vauxra/veelas-achievement-ledger</PackageProjectUrl>
-    <IconUrl>https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png</IconUrl>
+    <IconUrl>https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-ex-mid/AchievementTracker/images/icon.png</IconUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <IsPackable>false</IsPackable>
     <!-- AllowUnsafeBlocks is required for isolated ClientStructs adapters; see https://dalamud.dev/plugin-development/interaction/. -->
