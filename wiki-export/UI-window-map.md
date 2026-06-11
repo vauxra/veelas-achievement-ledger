@@ -1,6 +1,6 @@
 # UI/window map
 
-Version: `v0.2.0.21`
+Version: `v0.2.0.22`
 
 The UI code is in `AchievementTracker/Windows/`. It uses ImGui, which is immediate-mode UI: every `Draw...` method is called repeatedly, but button bodies only run when clicked.
 

@@ -1,6 +1,6 @@
 # Cosmic Class cache flow
 
-Version: `v0.2.0.21`
+Version: `v0.2.0.22`
 
 ## Short answer to your question
 

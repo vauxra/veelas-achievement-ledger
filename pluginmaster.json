@@ -23,10 +23,10 @@
     "IsTestingExclusive": true,
     "DownloadLinkInstall": "",
     "DownloadLinkUpdate": "",
-    "LastUpdate": "1781187496",
-    "TestingAssemblyVersion": "0.2.0.21",
+    "LastUpdate": "1781187844",
+    "TestingAssemblyVersion": "0.2.0.22",
     "TestingDalamudApiLevel": 15,
-    "TestingChangelog": "Testing-only custom-repo build: universal native Achievement update-open lockout reduced from 5 seconds to 1 second; prior bounded local observation, read-only Cosmic Class score cache, and architecture docs remain in place.",
-    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.21/VeelasAchievementLedger_0_2_0_21.zip"
+    "TestingChangelog": "Testing-only custom-repo build: corrective version bump for Dalamud update detection; universal native Achievement update-open lockout is 1 second.",
+    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.22/VeelasAchievementLedger_0_2_0_22.zip"
   }
 ]

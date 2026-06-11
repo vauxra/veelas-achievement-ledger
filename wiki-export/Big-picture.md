@@ -1,6 +1,6 @@
 # Big picture
 
-Version: `v0.2.0.21`
+Version: `v0.2.0.22`
 
 ## Navigation outline
 
