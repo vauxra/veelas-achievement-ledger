@@ -32,6 +32,25 @@ SCANNER_IMPLEMENTATION_FILES = {
     "scripts/adversarial-code-review.py",
 }
 
+TREE_SCAN_PREFIXES = ("AchievementTracker/", "AchievementTracker.Tests/", "scripts/")
+
+AGENTS_HARD_BLOCKER_TOKENS: list[tuple[str, str, str]] = [
+    ("Dalamud.Hooking", "agents-hard-blocker", "AGENTS.md blocker: low-level hooks are not allowed."),
+    ("HookFromAddress", "agents-hard-blocker", "AGENTS.md blocker: low-level hooks are not allowed."),
+    ("Hook<", "agents-hard-blocker", "AGENTS.md blocker: low-level hooks are not allowed."),
+    ("MemberFunctionPointers", "agents-hard-blocker", "AGENTS.md blocker: native function pointer binding is not allowed."),
+    ("SigScanner", "agents-hard-blocker", "AGENTS.md blocker: signatures/signature scanning are not allowed."),
+    ("SignatureAttribute", "agents-hard-blocker", "AGENTS.md blocker: signatures/signature scanning are not allowed."),
+    ("[Signature", "agents-hard-blocker", "AGENTS.md blocker: signatures/signature scanning are not allowed."),
+    ("ScanText", "agents-hard-blocker", "AGENTS.md blocker: signatures/signature scanning are not allowed."),
+    ("ScanData", "agents-hard-blocker", "AGENTS.md blocker: signatures/signature scanning are not allowed."),
+    ("GetStaticAddress", "agents-hard-blocker", "AGENTS.md blocker: raw-memory/static-address paths are not allowed."),
+    ("RequestAchievementProgress", "agents-hard-blocker", "AGENTS.md blocker: plugin-originated achievement progress requests are not allowed."),
+    ("HttpClient", "agents-hard-blocker", "AGENTS.md blocker: backend/network calls need explicit design/privacy review."),
+    ("WebSocket", "agents-hard-blocker", "AGENTS.md blocker: backend/network calls need explicit design/privacy review."),
+    ("ContentId", "agents-hard-blocker", "AGENTS.md blocker: content ID collection/use needs explicit privacy review."),
+]
+
 SECRET_RE = re.compile(
     r"(?i)(api[_-]?key|secret|password|passwd|token|private[_-]?key)\s*[:=]\s*['\"][^'\"]{8,}['\"]"
 )
@@ -192,8 +211,37 @@ def should_skip_literal_policy_scan(path: str) -> bool:
     return path in SCANNER_IMPLEMENTATION_FILES
 
 
+def is_tree_scanned_path(path: str) -> bool:
+    norm = path.replace("\\", "/")
+    return (
+        norm.startswith(TREE_SCAN_PREFIXES)
+        and norm not in SCANNER_IMPLEMENTATION_FILES
+        and Path(norm).suffix in CODE_SUFFIXES
+    )
+
+
+def get_tracked_tree_files() -> list[str]:
+    result = run(["git", "ls-files"])
+    if result.returncode != 0:
+        print(result.stderr, file=sys.stderr)
+        raise SystemExit(result.returncode)
+    return sorted(line for line in result.stdout.splitlines() if is_tree_scanned_path(line))
+
+
+def scan_current_tree_for_agents_blockers() -> list[Finding]:
+    findings: list[Finding] = []
+    for path in get_tracked_tree_files():
+        for line_no, text in enumerate(read_file(path).splitlines(), start=1):
+            lowered = text.lower()
+            for token, rule, message in AGENTS_HARD_BLOCKER_TOKENS:
+                if token.lower() in lowered:
+                    findings.append(Finding("FAIL", path, line_no, rule, message))
+    return findings
+
+
 def scan(base: str) -> list[Finding]:
     findings: list[Finding] = []
+    findings.extend(scan_current_tree_for_agents_blockers())
     diff = get_diff(base)
     added = added_lines_by_file(diff)
     include_untracked_as_added(added)

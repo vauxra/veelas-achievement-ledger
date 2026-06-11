@@ -44,6 +44,29 @@ WARN_PATTERNS = [
 EXCLUDED_PREFIXES = ("docs/", ".hermes/", "released/")
 EXCLUDED_EXACT = {"scripts/audit-ai-policy.py", "scripts/adversarial-code-review.py"}
 INCLUDED_UNTRACKED_SUFFIXES = (".cs", ".csproj", ".sln", ".json", ".py")
+INCLUDED_TREE_SUFFIXES = (".cs", ".csproj", ".json", ".py", ".sh")
+TREE_SCAN_PREFIXES = ("AchievementTracker/", "AchievementTracker.Tests/", "scripts/")
+TREE_SCAN_EXACT_EXCLUDES = {
+    "scripts/audit-ai-policy.py",
+    "scripts/adversarial-code-review.py",
+}
+
+AGENTS_HARD_BLOCKERS = [
+    Pattern("Dalamud.Hooking", "FAIL", "AGENTS.md blocker: low-level hooks are not allowed."),
+    Pattern("HookFromAddress", "FAIL", "AGENTS.md blocker: low-level hooks are not allowed."),
+    Pattern("Hook<", "FAIL", "AGENTS.md blocker: low-level hooks are not allowed."),
+    Pattern("MemberFunctionPointers", "FAIL", "AGENTS.md blocker: native function pointer binding is not allowed."),
+    Pattern("SigScanner", "FAIL", "AGENTS.md blocker: signatures/signature scanning are not allowed."),
+    Pattern("SignatureAttribute", "FAIL", "AGENTS.md blocker: signatures/signature scanning are not allowed."),
+    Pattern("[Signature", "FAIL", "AGENTS.md blocker: signatures/signature scanning are not allowed."),
+    Pattern("ScanText", "FAIL", "AGENTS.md blocker: signatures/signature scanning are not allowed."),
+    Pattern("ScanData", "FAIL", "AGENTS.md blocker: signatures/signature scanning are not allowed."),
+    Pattern("GetStaticAddress", "FAIL", "AGENTS.md blocker: raw-memory/static-address paths are not allowed."),
+    Pattern("RequestAchievementProgress", "FAIL", "AGENTS.md blocker: plugin-originated achievement progress requests are not allowed."),
+    Pattern("HttpClient", "FAIL", "AGENTS.md blocker: backend/network calls need explicit design/privacy review."),
+    Pattern("WebSocket", "FAIL", "AGENTS.md blocker: backend/network calls need explicit design/privacy review."),
+    Pattern("ContentId", "FAIL", "AGENTS.md blocker: content ID collection/use needs explicit privacy review."),
+]
 
 
 def is_scanned_path(path: str) -> bool:
@@ -74,6 +97,35 @@ def run_git_diff(base: str) -> str:
     return "\n".join(chunks)
 
 
+def is_tree_scanned_path(path: str) -> bool:
+    normalized = path.replace("\\", "/")
+    return (
+        normalized.startswith(TREE_SCAN_PREFIXES)
+        and normalized not in TREE_SCAN_EXACT_EXCLUDES
+        and normalized.endswith(INCLUDED_TREE_SUFFIXES)
+    )
+
+
+def run_git_ls_files() -> list[str]:
+    result = subprocess.run(["git", "ls-files"], check=False, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if result.returncode != 0:
+        print(result.stderr, file=sys.stderr)
+        raise SystemExit(result.returncode)
+    return [line for line in result.stdout.splitlines() if is_tree_scanned_path(line)]
+
+
+def scan_current_tree_for_agents_blockers() -> list[tuple[Pattern, str]]:
+    findings: list[tuple[Pattern, str]] = []
+    for raw_path in run_git_ls_files():
+        path = Path(raw_path)
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        for line_no, line in enumerate(text.splitlines(), start=1):
+            for pattern in AGENTS_HARD_BLOCKERS:
+                if pattern.token.lower() in line.lower():
+                    findings.append((pattern, f"{pattern.message} ({raw_path}:{line_no})"))
+    return findings
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--diff", default="HEAD", help="Git revision/base to diff against, default HEAD")
@@ -82,6 +134,7 @@ def main() -> int:
     diff = run_git_diff(args.diff)
     lowered = diff.lower()
     findings: list[tuple[Pattern, str]] = []
+    findings.extend(scan_current_tree_for_agents_blockers())
 
     for pattern in FAIL_PATTERNS + WARN_PATTERNS:
         token = pattern.token.lower()
