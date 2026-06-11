@@ -1,6 +1,6 @@
 # Function call map
 
-Version: `v0.2.0.22`
+Version: `v0.2.0.30`
 
 This map follows the refactored code layout. The goal is to show what each important method does, what it calls, and which layer it touches.
 
@@ -52,14 +52,16 @@ TLP: 🟢 because this uses Dalamud lifecycle services. Dispose unregisters the 
 
 ### `OpenAchievementForUpdate(uint achievementId)` 🟢/🟡
 
-Purpose: shared lockout-protected path for update-intent native opens.
+Purpose: shared adaptive pacing path for update-intent native opens.
 
 ```text
 OpenAchievementForUpdate(id)
 ├─ CanOpenAchievementForUpdate 🟢
+├─ NativeAchievementNavigator.IsAchievementWindowOpen() 🟡
 ├─ NativeAchievementNavigator.OpenAchievement(id) 🟡
-├─ ClientAchievementProgressSource.BeginObservation(id, 8 seconds) 🟡
-└─ set nextAchievementUpdateOpenAt 🟢
+├─ ClientAchievementProgressSource.BeginObservation(id, 15 seconds) 🟡
+├─ if window was already open: request cooldown only, 1.0-1.5s 🟢
+└─ if window was closed: Waiting for data countdown, max 15s with 1.0-1.5s minimum 🟢
 ```
 
 Method links: [Big picture native open path](./01-big-picture.md#native-achievement-open-path), [Safety map](./06-safety-map.md#native-achievement-ui-actions).

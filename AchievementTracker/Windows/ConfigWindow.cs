@@ -612,10 +612,10 @@ public sealed class ConfigWindow : Window
 
     private void DrawUpdateOpenLockoutStatus()
     {
-        var remaining = this.plugin.AchievementUpdateOpenRemaining;
-        if (remaining > TimeSpan.Zero)
+        var status = this.plugin.AchievementUpdateOpenStatusText;
+        if (!string.IsNullOrEmpty(status))
         {
-            ImGui.TextDisabled($"Achievement update opens available in {Math.Ceiling(remaining.TotalSeconds):0}s");
+            ImGui.TextDisabled(status);
         }
     }
 

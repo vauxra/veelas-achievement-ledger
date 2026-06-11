@@ -1,6 +1,6 @@
 # Dalamud hierarchy model for Veela's Achievement Ledger
 
-Version: `v0.2.0.22`
+Version: `v0.2.0.30`
 
 This page is a practical hierarchy of what actually exists in Veela's Achievement Ledger. The old single Mermaid diagram was too dense, so this version uses several smaller diagrams and a flat layer table.
 
@@ -15,7 +15,7 @@ When a call moves downward in the hierarchy, review risk goes up:
 ## Version snapshot
 
 - Plugin project: `VeelasAchievementLedger`
-- Plugin version: `0.2.0.22`
+- Plugin version: `0.2.0.30`
 - Project SDK: `Dalamud.NET.Sdk/15.0.0`
 - Package lock: `DalamudPackager 15.0.0`, `DotNet.ReproducibleBuilds 1.2.39`
 
@@ -67,7 +67,7 @@ flowchart TB
     A["Click Update Next / row reload 🟢"] --> B["Plugin.OpenAchievementForUpdate(id) 🟢"]
     B --> C["NativeAchievementNavigator.OpenAchievement(id) 🟡"]
     C --> D["AgentAchievement.Instance()->OpenById(id) 🟡"]
-    B --> E["ClientAchievementProgressSource.BeginObservation(id, 8s) 🟡"]
+    B --> E["ClientAchievementProgressSource.BeginObservation(id, 15s) 🟡"]
     F["Framework.Update 🟢"] --> G["ClientAchievementProgressSource.UpdateCache() 🟡"]
     G --> H["Achievement.Instance() local slot 🟡"]
 ```

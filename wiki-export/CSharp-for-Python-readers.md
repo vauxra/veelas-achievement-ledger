@@ -1,6 +1,6 @@
 # C# primer for Python readers
 
-Version: `v0.2.0.22`
+Version: `v0.2.0.30`
 
 This document explains the C# conventions used in Veela's Achievement Ledger by comparing them to Python ideas.
 
@@ -156,7 +156,9 @@ A property with only `get;` is read-only from outside the class after constructi
 C#:
 
 ```csharp
-private static readonly TimeSpan AchievementUpdateOpenLockout = TimeSpan.FromSeconds(1);
+private static readonly TimeSpan AchievementUpdateMinimumLockout = TimeSpan.FromSeconds(1);
+private static readonly TimeSpan AchievementUpdateMinimumJitter = TimeSpan.FromMilliseconds(500);
+private static readonly TimeSpan AchievementUpdateMaximumLockout = TimeSpan.FromSeconds(15);
 ```
 
 Python-ish:

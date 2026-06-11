@@ -1,6 +1,6 @@
 # UI/window map
 
-Version: `v0.2.0.22`
+Version: `v0.2.0.30`
 
 The UI code is in `AchievementTracker/Windows/`. It uses ImGui, which is immediate-mode UI: every `Draw...` method is called repeatedly, but button bodies only run when clicked.
 
@@ -34,7 +34,7 @@ TrackerWindow.Draw()
   - calls `OpenNextTrackedAchievementForUpdate()`
   - chooses the first unobserved achievement, otherwise the oldest observed achievement
   - calls `Plugin.OpenAchievementForUpdate(id)`
-  - uses shared 1-second update-open lockout
+  - uses adaptive update-open pacing: closed native window waits for data up to 15s with a 1.0-1.5s minimum; already-open native window uses only a 1.0-1.5s request cooldown
   - risk: low-to-medium because it opens native Achievement UI, but only on click
 
 - **Close Achievements**
@@ -46,7 +46,7 @@ TrackerWindow.Draw()
 
 - Reload icon
   - calls `Plugin.OpenAchievementForUpdate(id)`
-  - shared lockout applies
+  - shared adaptive pacing applies
   - intended as update-action open
 
 - Magnifying glass
@@ -117,7 +117,7 @@ DrawTrackedManagement()
 Risk notes:
 
 - Top/Up/Down/Bottom/remove only change local plugin config.
-- Reload/update-open calls the shared lockout path and opens native Achievement UI.
+- Reload/update-open calls the shared adaptive pacing path and opens native Achievement UI.
 - Magnifying glass opens native Achievement UI as inspect action.
 
 ### Search column

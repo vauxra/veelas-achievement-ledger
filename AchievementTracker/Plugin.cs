@@ -15,9 +15,12 @@ public sealed class Plugin : IDalamudPlugin
     // Risk: low. These constants do not touch game memory or the network.
     private const string CommandName = "/val";
     private const ushort SinusArdorumTerritoryTypeId = 1237;
-    private static readonly TimeSpan AchievementUpdateOpenLockout = TimeSpan.FromSeconds(1);
-    private static readonly TimeSpan AchievementObservationWindow = TimeSpan.FromSeconds(8);
+    private static readonly TimeSpan AchievementUpdateMinimumLockout = TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan AchievementUpdateMinimumJitter = TimeSpan.FromMilliseconds(500);
+    private static readonly TimeSpan AchievementUpdateMaximumLockout = TimeSpan.FromSeconds(15);
+    private static readonly TimeSpan AchievementObservationWindow = AchievementUpdateMaximumLockout;
     private static readonly TimeSpan CosmicCacheRefreshInterval = TimeSpan.FromSeconds(30);
+    private static readonly Random AchievementUpdateJitter = new();
 
     // Component: Dalamud services.
     // Risk: low-to-medium. These are framework services supplied by Dalamud. ClientStructs/interop use is isolated in Services/.
@@ -50,7 +53,10 @@ public sealed class Plugin : IDalamudPlugin
     private TrackerWindow TrackerWindow { get; }
     private ConfigWindow ConfigWindow { get; }
     private DateTimeOffset nextCosmicCacheRefreshAt = DateTimeOffset.MinValue;
-    private DateTimeOffset nextAchievementUpdateOpenAt = DateTimeOffset.MinValue;
+    private DateTimeOffset achievementUpdateMinimumOpenAt = DateTimeOffset.MinValue;
+    private DateTimeOffset achievementUpdateMaximumOpenAt = DateTimeOffset.MinValue;
+    private uint pendingAchievementUpdateId;
+    private bool achievementWindowWasOpenForCurrentUpdate;
 
     public Plugin()
     {
@@ -97,12 +103,51 @@ public sealed class Plugin : IDalamudPlugin
     {
         get
         {
-            var remaining = this.nextAchievementUpdateOpenAt - DateTimeOffset.UtcNow;
+            var remaining = this.GetAchievementUpdateOpenAt(DateTimeOffset.UtcNow) - DateTimeOffset.UtcNow;
             return remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero;
         }
     }
 
     public bool CanOpenAchievementForUpdate => this.AchievementUpdateOpenRemaining == TimeSpan.Zero;
+
+    public string AchievementUpdateOpenStatusText
+    {
+        get
+        {
+            var now = DateTimeOffset.UtcNow;
+            var openAt = this.GetAchievementUpdateOpenAt(now);
+            if (openAt <= now)
+            {
+                return string.Empty;
+            }
+
+            if (now < this.achievementUpdateMinimumOpenAt)
+            {
+                if (!this.achievementWindowWasOpenForCurrentUpdate)
+                {
+                    var dataRemaining = this.achievementUpdateMaximumOpenAt - now;
+                    return $"Waiting for data. ({Math.Ceiling(dataRemaining.TotalSeconds):0}s)";
+                }
+
+                var remaining = this.achievementUpdateMinimumOpenAt - now;
+                return $"Request cooldown. ({Math.Ceiling(remaining.TotalSeconds):0}s)";
+            }
+
+            if (this.achievementWindowWasOpenForCurrentUpdate)
+            {
+                return string.Empty;
+            }
+
+            if (this.pendingAchievementUpdateId != 0
+                && this.ClientAchievementProgressSource.HasActiveObservation(this.pendingAchievementUpdateId))
+            {
+                var remaining = this.achievementUpdateMaximumOpenAt - now;
+                return $"Waiting for data. ({Math.Ceiling(remaining.TotalSeconds):0}s)";
+            }
+
+            return "Waiting for data.";
+        }
+    }
 
     public bool OpenAchievementForUpdate(uint achievementId)
     {
@@ -111,14 +156,64 @@ public sealed class Plugin : IDalamudPlugin
             return false;
         }
 
+        var achievementWindowWasOpen = this.NativeAchievementNavigator.IsAchievementWindowOpen();
         if (!this.NativeAchievementNavigator.OpenAchievement(achievementId))
         {
             return false;
         }
 
-        this.nextAchievementUpdateOpenAt = DateTimeOffset.UtcNow + AchievementUpdateOpenLockout;
+        var now = DateTimeOffset.UtcNow;
+        this.pendingAchievementUpdateId = achievementId;
+        this.achievementWindowWasOpenForCurrentUpdate = achievementWindowWasOpen;
+        this.achievementUpdateMinimumOpenAt = now + CreateAchievementUpdateMinimumLockout();
+        this.achievementUpdateMaximumOpenAt = now + AchievementUpdateMaximumLockout;
         this.ClientAchievementProgressSource.BeginObservation(achievementId, AchievementObservationWindow);
         return true;
+    }
+
+    private DateTimeOffset GetAchievementUpdateOpenAt(DateTimeOffset now)
+    {
+        if (this.pendingAchievementUpdateId == 0 || now >= this.achievementUpdateMaximumOpenAt)
+        {
+            this.ClearAchievementUpdateLockout();
+            return DateTimeOffset.MinValue;
+        }
+
+        var minimumRemaining = this.achievementUpdateMinimumOpenAt - now;
+        if (minimumRemaining > TimeSpan.Zero)
+        {
+            return this.achievementUpdateMinimumOpenAt;
+        }
+
+        if (this.achievementWindowWasOpenForCurrentUpdate)
+        {
+            this.ClearAchievementUpdateLockout();
+            return DateTimeOffset.MinValue;
+        }
+
+        if (this.ClientAchievementProgressSource.HasActiveObservation(this.pendingAchievementUpdateId))
+        {
+            return this.achievementUpdateMaximumOpenAt;
+        }
+
+        this.ClearAchievementUpdateLockout();
+        return DateTimeOffset.MinValue;
+    }
+
+    private void ClearAchievementUpdateLockout()
+    {
+        this.pendingAchievementUpdateId = 0;
+        this.achievementWindowWasOpenForCurrentUpdate = false;
+        this.achievementUpdateMinimumOpenAt = DateTimeOffset.MinValue;
+        this.achievementUpdateMaximumOpenAt = DateTimeOffset.MinValue;
+    }
+
+    private static TimeSpan CreateAchievementUpdateMinimumLockout()
+    {
+        lock (AchievementUpdateJitter)
+        {
+            return AchievementUpdateMinimumLockout + TimeSpan.FromMilliseconds(AchievementUpdateJitter.NextDouble() * AchievementUpdateMinimumJitter.TotalMilliseconds);
+        }
     }
 
     // Section: public window helpers.

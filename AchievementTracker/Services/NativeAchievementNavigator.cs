@@ -8,6 +8,12 @@ namespace AchievementTracker.Services;
 // Safety boundary: methods are called from user button clicks only and do not call direct progress-request methods.
 public unsafe sealed class NativeAchievementNavigator
 {
+    public bool IsAchievementWindowOpen()
+    {
+        var agent = AgentAchievement.Instance();
+        return agent != null && (agent->IsAgentActive() || agent->IsAddonShown());
+    }
+
     public bool OpenAchievement(uint achievementId)
     {
         // What this does:

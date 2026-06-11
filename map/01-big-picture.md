@@ -1,6 +1,6 @@
 # Big picture
 
-Version: `v0.2.0.22`
+Version: `v0.2.0.30`
 
 ## Navigation outline
 
@@ -72,11 +72,12 @@ User clicks Update Next 🟢
    │  ├─ TrackedAchievementStore.AchievementIds 🟢
    │  └─ ClientAchievementProgressSource.TryGetCachedObservation(id) 🟡
    └─ Plugin.OpenAchievementForUpdate(achievementId) 🟢/🟡
-      ├─ checks CanOpenAchievementForUpdate lockout 🟢
+      ├─ checks CanOpenAchievementForUpdate adaptive pacing 🟢
+      ├─ NativeAchievementNavigator.IsAchievementWindowOpen() 🟡
       ├─ NativeAchievementNavigator.OpenAchievement(achievementId) 🟡
       │  └─ AgentAchievement.Instance()->OpenById(achievementId) 🟡
-      ├─ ClientAchievementProgressSource.BeginObservation(achievementId, 8s) 🟡
-      └─ sets nextAchievementUpdateOpenAt 🟢
+      ├─ ClientAchievementProgressSource.BeginObservation(achievementId, 15s) 🟡
+      └─ sets adaptive pacing: open window = 1.0-1.5s cooldown; closed window = data wait up to 15s 🟢
 ```
 
 ### Reload a specific tracked row

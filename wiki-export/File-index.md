@@ -1,6 +1,6 @@
 # File index
 
-Version: `v0.2.0.22`
+Version: `v0.2.0.30`
 
 ## What this page is for
 
@@ -76,9 +76,11 @@ Members found:
 Types: `Plugin`
 
 Members found:
-- line 18: `private static readonly TimeSpan AchievementUpdateOpenLockout = TimeSpan.FromSeconds(1);`
-- line 19: `private static readonly TimeSpan AchievementObservationWindow = TimeSpan.FromSeconds(8);`
-- line 20: `private static readonly TimeSpan CosmicCacheRefreshInterval = TimeSpan.FromSeconds(30);`
+- line 18: `private static readonly TimeSpan AchievementUpdateMinimumLockout = TimeSpan.FromSeconds(1);`
+- line 19: `private static readonly TimeSpan AchievementUpdateMinimumJitter = TimeSpan.FromMilliseconds(500);`
+- line 20: `private static readonly TimeSpan AchievementUpdateMaximumLockout = TimeSpan.FromSeconds(15);`
+- line 21: `private static readonly TimeSpan AchievementObservationWindow = AchievementUpdateMaximumLockout;`
+- line 22: `private static readonly TimeSpan CosmicCacheRefreshInterval = TimeSpan.FromSeconds(30);`
 - line 38: `public Configuration Configuration { get; }`
 - line 39: `public TrackedAchievementStore TrackedAchievements { get; }`
 - line 40: `public AchievementCatalog AchievementCatalog { get; }`
@@ -155,6 +157,7 @@ Members found:
 - line 129: `public bool TryGetObservation(uint achievementId, out ObservedAchievementProgress progress)`
 - line 135: `public bool TryGetCachedObservation(uint achievementId, out ObservedAchievementProgress progress)`
 - line 138: `public bool IsObservedComplete(uint achievementId) => this.observedCompletions.Contains(achievementId);`
+- line 140: `public bool HasActiveObservation(uint achievementId)`
 - line 140: `private void PruneExpiredObservations()`
 
 ## `AchievementTracker/Services/CosmicClassProgressProvider.cs`

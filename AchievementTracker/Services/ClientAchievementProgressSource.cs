@@ -137,6 +137,12 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
 
     public bool IsObservedComplete(uint achievementId) => this.observedCompletions.Contains(achievementId);
 
+    public bool HasActiveObservation(uint achievementId)
+    {
+        this.PruneExpiredObservations();
+        return this.observationDeadlines.ContainsKey(achievementId);
+    }
+
     private void PruneExpiredObservations()
     {
         if (this.observationDeadlines.Count == 0)
