@@ -6,17 +6,17 @@ This folder is a human-friendly map of the C# codebase. It is written for someon
 
 ## Ordered reading list
 
-1. [Home / code map](./README.md) — this page, reading order, color legend, and mental model.
-2. [Whole plugin hierarchy](./00-whole-plugin-hierarchy.md) — the full top-down map of the plugin.
-3. [Big picture](./01-big-picture.md) — user actions, component level, and important call chains.
-4. [Function call map](./02-function-call-map.md) — important functions, what they call, and component safety labels.
-5. [Cosmic Class cache flow](./03-cosmic-cache-flow.md) — exactly where Cosmic scores are read and saved.
-6. [UI/window map](./04-ui-window-map.md) — buttons and what code they trigger.
-7. [Data model map](./05-data-model-map.md) — saved config, in-memory state, load/save timing, and Dalamud best-practice notes.
-8. [Safety map](./06-safety-map.md) — direct-request/automation boundaries.
-9. [File index](./07-file-index.md) — source-file locator for jumping from wiki concepts to concrete classes/methods.
-10. [C# primer for Python readers](./08-csharp-for-python-readers.md) — C# concepts used in this plugin, translated into Python mental models.
-11. [Dalamud layer model](./09-dalamud-layer-model.md) — simplified hierarchy diagrams for VAL, Dalamud services, ClientStructs/native surfaces, and guardrails.
+1. [Home / code map](Home) — this page, reading order, color legend, and mental model.
+2. [Whole plugin hierarchy](Whole-plugin-hierarchy) — the full top-down map of the plugin.
+3. [Big picture](Big-picture) — user actions, component level, and important call chains.
+4. [Function call map](Function-call-map) — important functions, what they call, and component safety labels.
+5. [Cosmic Class cache flow](Cosmic-Class-cache-flow) — exactly where Cosmic scores are read and saved.
+6. [UI/window map](UI-window-map) — buttons and what code they trigger.
+7. [Data model map](Data-model-map) — saved config, in-memory state, load/save timing, and Dalamud best-practice notes.
+8. [Safety map](Safety-map) — direct-request/automation boundaries.
+9. [File index](File-index) — source-file locator for jumping from wiki concepts to concrete classes/methods.
+10. [C# primer for Python readers](CSharp-for-Python-readers) — C# concepts used in this plugin, translated into Python mental models.
+11. [Dalamud layer model](Dalamud-layer-model) — simplified hierarchy diagrams for VAL, Dalamud services, ClientStructs/native surfaces, and guardrails.
 
 
 ## TLP / layer color legend

@@ -35,7 +35,7 @@ Plugin()
 └─ RegisterDalamudCallbacks() 🟢
 ```
 
-See also: [Whole plugin hierarchy](./00-whole-plugin-hierarchy.md), [Data model map](./05-data-model-map.md).
+See also: [Whole plugin hierarchy](Whole-plugin-hierarchy), [Data model map](Data-model-map).
 
 Startup intentionally filters saved tracked IDs before loading the in-memory list. Hidden or non-manually-viewable rows are dropped on load rather than kept as stale tracked entries.
 
@@ -69,7 +69,7 @@ OpenAchievementForUpdate(id)
 └─ if window was closed: Waiting for data countdown, max 15s with a 6s minimum 🟢
 ```
 
-Method links: [Big picture native open path](./01-big-picture.md#native-achievement-open-path), [Safety map](./06-safety-map.md#native-achievement-ui-actions).
+Method links: [Big picture native open path](Big-picture#native-achievement-open-path), [Safety map](Safety-map#native-achievement-ui-actions).
 
 ### `OnFrameworkUpdate(IFramework framework)` 🟢/🟡
 
@@ -90,7 +90,7 @@ RefreshCosmicCacheFromLiveState()
 └─ CosmicClassProgressProvider.RefreshCacheFromLiveScores() 🟡
 ```
 
-See: [Cosmic Class cache flow](./03-cosmic-cache-flow.md).
+See: [Cosmic Class cache flow](Cosmic-Class-cache-flow).
 
 ## `NativeAchievementNavigator.cs` — native Achievement UI adapter 🟡
 
@@ -164,7 +164,7 @@ GetProgress(achievementId)
 └─ AchievementProgress.Numeric(current, target) or DataNotAvailable 🟢
 ```
 
-See: [Cosmic Class cache flow](./03-cosmic-cache-flow.md).
+See: [Cosmic Class cache flow](Cosmic-Class-cache-flow).
 
 ## `AchievementCatalog.cs` — Lumina achievement catalog 🟢
 
@@ -201,7 +201,7 @@ TrackedAchievementPresetStore.SavePreset/Rename/Delete/Normalize 🟢
 └─ modifies Configuration.TrackedAchievementPresets in memory; Plugin.SaveConfiguration persists
 ```
 
-See: [Data model map](./05-data-model-map.md).
+See: [Data model map](Data-model-map).
 
 ## `TrackerWindow.cs` — main UI 🟢
 

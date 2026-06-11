@@ -6,11 +6,11 @@ Version: `v0.2.0.33`
 
 This is a source locator, not a duplicate of the function-call map.
 
-Use it when you already know a class or method name from another wiki page and want to jump to the file that owns it. The [Function call map](./02-function-call-map.md) explains runtime behavior; this page answers “where is that code?”
+Use it when you already know a class or method name from another wiki page and want to jump to the file that owns it. The [Function call map](Function-call-map) explains runtime behavior; this page answers “where is that code?”
 
 ## How to use
 
-- Start with [Big picture](./01-big-picture.md) or [Function call map](./02-function-call-map.md) to understand the flow.
+- Start with [Big picture](Big-picture) or [Function call map](Function-call-map) to understand the flow.
 - Come here to find the file/class/method owner.
 - Then open the listed C# source file in the repo.
 ## `AchievementTracker/Configuration.cs`
