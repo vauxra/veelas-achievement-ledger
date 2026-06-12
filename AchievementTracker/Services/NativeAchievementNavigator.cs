@@ -46,6 +46,18 @@ public unsafe sealed class NativeAchievementNavigator
         return true;
     }
 
+    public bool ShowAchievementWindow()
+    {
+        var agent = AgentAchievement.Instance();
+        if (agent == null)
+        {
+            return false;
+        }
+
+        agent->Show();
+        return true;
+    }
+
     public bool TryParkAchievementWindow()
     {
         var addon = this.gameGui.GetAddonByName(AchievementAddonName, 1);

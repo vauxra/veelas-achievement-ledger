@@ -57,6 +57,8 @@ public sealed class Plugin : IDalamudPlugin
     private PassiveAchievementProgressObserver? passiveAchievementProgressObserver;
     private AchievementActivityUpdateObserver? activityUpdateObserver;
     private DateTimeOffset nextCosmicCacheRefreshAt = DateTimeOffset.MinValue;
+    private bool pendingNativeAchievementScaleReset;
+    private DateTimeOffset pendingNativeAchievementScaleResetUntil = DateTimeOffset.MinValue;
 
     public Plugin()
     {
@@ -160,8 +162,11 @@ public sealed class Plugin : IDalamudPlugin
 
     public void ResetNativeAchievementWindowScale()
     {
-        var reset = this.NativeAchievementNavigator.ResetAchievementWindowScale();
-        this.DebugLog($"VAL DebugTrace NativeWindowScaleReset reset={reset}");
+        var shown = this.NativeAchievementNavigator.IsOpen || this.NativeAchievementNavigator.ShowAchievementWindow();
+        var reset = shown && this.NativeAchievementNavigator.ResetAchievementWindowScale();
+        this.pendingNativeAchievementScaleReset = shown && !reset;
+        this.pendingNativeAchievementScaleResetUntil = DateTimeOffset.UtcNow.AddSeconds(5);
+        this.DebugLog($"VAL DebugTrace NativeWindowScaleReset shown={shown} reset={reset} pending={this.pendingNativeAchievementScaleReset}");
     }
 
     public void DebugLog(string message)
@@ -252,7 +257,23 @@ public sealed class Plugin : IDalamudPlugin
     private void OnFrameworkUpdate(IFramework framework)
     {
         this.AchievementProgressUpdater.Tick();
+        this.TryCompletePendingNativeAchievementScaleReset();
         this.RefreshCosmicCacheFromLiveState();
+    }
+
+    private void TryCompletePendingNativeAchievementScaleReset()
+    {
+        if (!this.pendingNativeAchievementScaleReset)
+        {
+            return;
+        }
+
+        var reset = this.NativeAchievementNavigator.ResetAchievementWindowScale();
+        if (reset || DateTimeOffset.UtcNow >= this.pendingNativeAchievementScaleResetUntil)
+        {
+            this.pendingNativeAchievementScaleReset = false;
+            this.DebugLog($"VAL DebugTrace NativeWindowScaleResetPendingComplete reset={reset}");
+        }
     }
 
     private void RefreshCosmicCacheFromLiveState()
