@@ -6,17 +6,28 @@ namespace AchievementTracker.Services;
 
 public sealed class AchievementProgressUpdater
 {
+    private static readonly TimeSpan ColdNativeWindowMinimumWait = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan ColdNativeWindowMaximumWait = TimeSpan.FromSeconds(15);
+    private static readonly TimeSpan WarmNativeInputBuffer = TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan WarmNativeMaximumWait = TimeSpan.FromSeconds(5);
+
     private readonly AchievementProgressRequestScheduler scheduler;
     private readonly ClientAchievementProgressSource progressSource;
+    private readonly NativeAchievementNavigator nativeAchievementNavigator;
     private readonly Func<IReadOnlyList<uint>> autoUpdateIdsProvider;
     private readonly Func<bool> autoUpdateEnabledProvider;
     private readonly Func<int> autoUpdateIntervalSecondsProvider;
     private readonly Func<int> updateSpacingSecondsProvider;
     private readonly Action<string> debugLog;
     private DateTimeOffset nextAutoUpdateAt = DateTimeOffset.MinValue;
+    private ActiveNativeAchievementRequest? activeNativeRequest;
+    private bool batchInProgress;
+    private bool nativeWindowWasOpenBeforeBatch;
+    private bool nativeWindowOpenedByVal;
 
     public AchievementProgressUpdater(
         ClientAchievementProgressSource progressSource,
+        NativeAchievementNavigator nativeAchievementNavigator,
         Func<IReadOnlyList<uint>> autoUpdateIdsProvider,
         Func<bool> autoUpdateEnabledProvider,
         Func<int> autoUpdateIntervalSecondsProvider,
@@ -25,6 +36,7 @@ public sealed class AchievementProgressUpdater
     {
         this.scheduler = new AchievementProgressRequestScheduler();
         this.progressSource = progressSource;
+        this.nativeAchievementNavigator = nativeAchievementNavigator;
         this.autoUpdateIdsProvider = autoUpdateIdsProvider;
         this.autoUpdateEnabledProvider = autoUpdateEnabledProvider;
         this.autoUpdateIntervalSecondsProvider = autoUpdateIntervalSecondsProvider;
@@ -32,7 +44,7 @@ public sealed class AchievementProgressUpdater
         this.debugLog = debugLog;
     }
 
-    public int PendingCount => this.scheduler.PendingCount;
+    public int PendingCount => this.scheduler.PendingCount + (this.activeNativeRequest.HasValue ? 1 : 0);
 
     public DateTimeOffset? NextDueAt => this.scheduler.NextDueAt;
 
@@ -65,7 +77,7 @@ public sealed class AchievementProgressUpdater
 
         var baseSpacingSeconds = Math.Clamp(this.updateSpacingSecondsProvider(), 0, 3600);
         this.scheduler.EnqueueUpdateAll(ids, reason, TimeSpan.FromSeconds(baseSpacingSeconds));
-        this.debugLog($"VAL DebugTrace QueueUpdateAll reason={reason} count={ids.Count} pending={this.scheduler.PendingCount} spacingSeconds={baseSpacingSeconds} jitterSeconds=1-2 backoffSeconds=5");
+        this.debugLog($"VAL DebugTrace QueueUpdateAll reason={reason} count={ids.Count} pending={this.PendingCount} spacingSeconds={baseSpacingSeconds} jitterSeconds=1-2 backoffSeconds=5 executor=native-agent");
     }
 
     public void Tick()
@@ -74,18 +86,22 @@ public sealed class AchievementProgressUpdater
 
         var now = DateTimeOffset.UtcNow;
         this.MaybeEnqueueAutoUpdate(now);
+        this.ProcessActiveNativeRequest(now);
 
-        if (this.scheduler.TryTakeDueRequest(now, out var request))
+        if (!this.activeNativeRequest.HasValue && this.scheduler.TryTakeDueRequest(now, out var request))
         {
-            this.progressSource.RequestProgress(request.AchievementId, request.Reason);
-            this.debugLog($"VAL DebugTrace RequestDequeued id={request.AchievementId} reason={request.Reason} pending={this.scheduler.PendingCount}");
+            this.StartNativeRequest(request, now);
         }
+
+        this.FinishBatchIfIdle();
     }
 
     public void Clear()
     {
         this.scheduler.Clear();
+        this.activeNativeRequest = null;
         this.nextAutoUpdateAt = DateTimeOffset.MinValue;
+        this.FinishBatchIfIdle(force: true);
     }
 
     public void ResetAutoUpdateCountdown()
@@ -97,6 +113,96 @@ public sealed class AchievementProgressUpdater
     private static bool IsUpdateAllReason(string reason)
         => string.Equals(reason, "manual-update-all", StringComparison.Ordinal)
             || string.Equals(reason, "auto-update", StringComparison.Ordinal);
+
+    private void StartNativeRequest(ScheduledAchievementProgressRequest request, DateTimeOffset now)
+    {
+        if (!this.batchInProgress)
+        {
+            this.nativeWindowWasOpenBeforeBatch = this.nativeAchievementNavigator.IsOpen;
+            this.nativeWindowOpenedByVal = !this.nativeWindowWasOpenBeforeBatch;
+            this.batchInProgress = true;
+            this.debugLog($"VAL DebugTrace NativeBatchStart wasOpen={this.nativeWindowWasOpenBeforeBatch}");
+        }
+
+        var nativeWindowOpenBeforeRequest = this.nativeAchievementNavigator.IsOpen;
+        var coldOpen = !nativeWindowOpenBeforeRequest;
+        if (!this.nativeAchievementNavigator.OpenAchievement(request.AchievementId))
+        {
+            this.debugLog($"VAL DebugTrace NativeOpenFailed id={request.AchievementId} reason={request.Reason} pending={this.scheduler.PendingCount}");
+            return;
+        }
+
+        if (coldOpen)
+        {
+            this.nativeWindowOpenedByVal = true;
+        }
+
+        var minimumWait = coldOpen ? ColdNativeWindowMinimumWait : WarmNativeInputBuffer;
+        var maximumWait = coldOpen ? ColdNativeWindowMaximumWait : WarmNativeMaximumWait;
+        this.activeNativeRequest = new ActiveNativeAchievementRequest(
+            request.AchievementId,
+            request.Reason,
+            now,
+            now + minimumWait,
+            now + maximumWait,
+            coldOpen);
+
+        this.debugLog($"VAL DebugTrace NativeOpenSent id={request.AchievementId} reason={request.Reason} cold={coldOpen} minWaitSeconds={minimumWait.TotalSeconds:0} maxWaitSeconds={maximumWait.TotalSeconds:0} pending={this.scheduler.PendingCount}");
+    }
+
+    private void ProcessActiveNativeRequest(DateTimeOffset now)
+    {
+        if (!this.activeNativeRequest.HasValue)
+        {
+            return;
+        }
+
+        var request = this.activeNativeRequest.Value;
+        if (now < request.MinimumCompleteAt)
+        {
+            return;
+        }
+
+        if (this.progressSource.TryGetFreshObservation(request.AchievementId, request.StartedAt, out var progress))
+        {
+            this.debugLog($"VAL DebugTrace NativeOpenLoaded id={request.AchievementId} reason={request.Reason} current={progress.Current} max={progress.Max} source={progress.Source} elapsedMs={(now - request.StartedAt).TotalMilliseconds:0}");
+            this.activeNativeRequest = null;
+            return;
+        }
+
+        if (now >= request.TimeoutAt)
+        {
+            this.debugLog($"VAL DebugTrace NativeOpenTimeout id={request.AchievementId} reason={request.Reason} cold={request.ColdOpen} elapsedMs={(now - request.StartedAt).TotalMilliseconds:0}");
+            this.activeNativeRequest = null;
+        }
+    }
+
+    private void FinishBatchIfIdle(bool force = false)
+    {
+        if (!this.batchInProgress)
+        {
+            return;
+        }
+
+        if (!force && (this.activeNativeRequest.HasValue || this.scheduler.HasPendingRequests))
+        {
+            return;
+        }
+
+        if (this.nativeWindowOpenedByVal && !this.nativeWindowWasOpenBeforeBatch)
+        {
+            var closed = this.nativeAchievementNavigator.CloseAchievementWindow();
+            this.debugLog($"VAL DebugTrace NativeBatchAutoClose closed={closed}");
+        }
+        else
+        {
+            this.debugLog("VAL DebugTrace NativeBatchLeaveOpen reason=window-was-open-before-batch");
+        }
+
+        this.batchInProgress = false;
+        this.nativeWindowWasOpenBeforeBatch = false;
+        this.nativeWindowOpenedByVal = false;
+    }
 
     private void MaybeEnqueueAutoUpdate(DateTimeOffset now)
     {
@@ -114,7 +220,7 @@ public sealed class AchievementProgressUpdater
             return;
         }
 
-        if (now < this.nextAutoUpdateAt || this.scheduler.HasPendingRequests)
+        if (now < this.nextAutoUpdateAt || this.scheduler.HasPendingRequests || this.activeNativeRequest.HasValue)
         {
             return;
         }
@@ -124,4 +230,12 @@ public sealed class AchievementProgressUpdater
         this.nextAutoUpdateAt = now + interval;
         this.debugLog($"VAL DebugTrace AutoUpdateScheduled next={this.nextAutoUpdateAt:O} included={ids.Count}");
     }
+
+    private readonly record struct ActiveNativeAchievementRequest(
+        uint AchievementId,
+        string Reason,
+        DateTimeOffset StartedAt,
+        DateTimeOffset MinimumCompleteAt,
+        DateTimeOffset TimeoutAt,
+        bool ColdOpen);
 }

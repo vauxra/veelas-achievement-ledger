@@ -57,7 +57,7 @@ public sealed class ConfigWindow : Window
         }
         this.AddTooltip("Open tracker window.");
         ImGui.TextDisabled("Tracked items are saved between logouts.");
-        ImGui.TextDisabled("Experimental branch: reload buttons request progress directly without opening the Achievement window.");
+        ImGui.TextDisabled("Experimental branch: reload buttons open native Achievement entries, read the progress slot, then auto-close if VAL opened the window.");
         ImGui.Separator();
 
         this.DrawLeftNavigation();
@@ -478,7 +478,7 @@ public sealed class ConfigWindow : Window
     private void DrawExperimentalAutoUpdateSettings()
     {
         ImGui.TextUnformatted("Experimental auto update");
-        ImGui.TextDisabled("Direct progress requests. Countdown runs before the first cycle.");
+        ImGui.TextDisabled("Native Achievement opens. Countdown runs before the first cycle.");
 
         var enabled = this.plugin.Configuration.ExperimentalAutoUpdateEnabled;
         if (ImGui.Checkbox("Enable auto update", ref enabled))
@@ -635,11 +635,12 @@ public sealed class ConfigWindow : Window
     private void DrawHelp()
     {
         ImGui.TextUnformatted("Help");
-        ImGui.TextWrapped("Disclaimer: This experimental addon uses direct progress requests, timers, and local ClientStructs reads that are discouraged for normal Dalamud submissions. Use may have consequences for your account, including a ban.");
+        ImGui.TextWrapped("Disclaimer: This experimental addon uses native Achievement UI opens, timers, and local ClientStructs reads that are discouraged for normal Dalamud submissions when automated. Use may have consequences for your account, including a ban.");
         ImGui.Separator();
 
         ImGui.TextUnformatted("Main VAL window");
         this.DrawWrappedBullet("Shows your tracked achievements, progress, last update time, and row actions.");
+        this.DrawWrappedBullet("Reload buttons and Update All open native Achievement entries, then VAL reads the already-populated progress slot.");
         this.DrawWrappedBullet("Update All queues progress updates for tracked achievements. Items updated in the last 30 seconds are skipped by Update All.");
         this.DrawWrappedBullet("Stop Update Tasks disables auto update and clears queued update tasks.");
         this.DrawWrappedBullet("Use the magnifying glass to open that achievement in the native Achievements window.");

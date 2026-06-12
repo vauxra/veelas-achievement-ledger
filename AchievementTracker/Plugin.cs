@@ -69,6 +69,7 @@ public sealed class Plugin : IDalamudPlugin
         this.NativeAchievementNavigator = new NativeAchievementNavigator();
         this.AchievementProgressUpdater = new AchievementProgressUpdater(
             this.ClientAchievementProgressSource,
+            this.NativeAchievementNavigator,
             () => this.Configuration.GetAutoUpdateTrackedAchievementIds(),
             () => this.Configuration.ExperimentalAutoUpdateEnabled,
             () => this.Configuration.ExperimentalAutoUpdateIntervalSeconds,

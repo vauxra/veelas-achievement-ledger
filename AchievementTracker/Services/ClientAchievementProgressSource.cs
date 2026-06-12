@@ -51,23 +51,11 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
         }
     }
 
-    public bool RequestProgress(uint achievementId, string reason)
+    public bool TryGetFreshObservation(uint achievementId, DateTimeOffset notBefore, out ObservedAchievementProgress progress)
     {
-        // Experimental branch only: this calls the ClientStructs achievement progress request path directly.
-        // FFXIVClientStructs XML documents RequestAchievementProgress as: "Requests Achievement Progress from the server."
-        // This intentionally accepts the risk described in https://dalamud.dev/plugin-publishing/restrictions
-        // and is not positioned for Dalamud publishing.
-        var achievement = Achievement.Instance();
-        if (achievement == null)
-        {
-            this.debugLog($"VAL DebugTrace RequestProgressFailed id={achievementId} reason={reason} achievementInstance=null");
-            return false;
-        }
-
-        this.debugLog($"VAL DebugTrace RequestProgress id={achievementId} reason={reason} beforeState={achievement->ProgressRequestState} beforeSlot={achievement->ProgressAchievementId} beforeCurrent={achievement->ProgressCurrent} beforeMax={achievement->ProgressMax}");
-        achievement->RequestAchievementProgress(achievementId);
-        this.debugLog($"VAL DebugTrace RequestProgressSent id={achievementId} afterState={achievement->ProgressRequestState} afterSlot={achievement->ProgressAchievementId} afterCurrent={achievement->ProgressCurrent} afterMax={achievement->ProgressMax}");
-        return true;
+        this.UpdateCache();
+        return this.cachedProgress.TryGetValue(achievementId, out progress)
+            && progress.ObservedAt >= notBefore;
     }
 
     public void RecordObservedProgress(uint achievementId, uint current, uint max, string source)
