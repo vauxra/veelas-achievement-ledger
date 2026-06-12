@@ -3,6 +3,20 @@
 
 A lightweight assistive achievement organizer and tracker for FFXIV.
 
+## Table of contents
+
+- [Main branch big picture](#main-branch-big-picture)
+- [Status](#status)
+- [Basic use](#basic-use)
+- [Cosmic Class progress](#cosmic-class-progress)
+- [Development notes](#development-notes)
+- [Build](#build)
+- [References](#references)
+
+## Main branch big picture
+
+For a tree-style map of the addon architecture and current `origin/main` runtime flow, see [`docs/main-branch-addon-flow.md`](docs/main-branch-addon-flow.md). It traces filenames and method/function calls down to the state, services, native UI surfaces, and return values each flow touches.
+
 ## Status
 
 Beta build. Current features:
@@ -45,11 +59,7 @@ This is read-only local ClientStructs state. It does not request achievement pro
 
 ## Development notes
 
-This project used AI-assisted development, with human review and testing. See:
-
-- [`AI-DECLARATION.md`](AI-DECLARATION.md)
-- [`docs/development/due-diligence.md`](docs/development/due-diligence.md)
-- [`docs/cosmic-class-achievement-progress-research.md`](docs/cosmic-class-achievement-progress-research.md)
+This project used AI-assisted development, with human review and testing. See [`AI-DECLARATION.md`](AI-DECLARATION.md).
 
 ## Build
 
