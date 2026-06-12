@@ -484,10 +484,16 @@ public sealed class ConfigWindow : Window
         if (ImGui.Checkbox("Enable auto update", ref enabled))
         {
             this.plugin.Configuration.ExperimentalAutoUpdateEnabled = enabled;
+            if (enabled)
+            {
+                this.plugin.Configuration.TriggerAutoUpdatesEnabled = false;
+                this.plugin.ClearUpdateQueue("auto-update-enabled");
+            }
+
             this.plugin.SaveConfiguration();
             this.plugin.ResetAutoUpdateCountdownIfActive();
         }
-        this.AddTooltip("Run timed updates.");
+        this.AddTooltip("Run timed updates. Mutually exclusive with event-triggered updates.");
 
         ImGui.SameLine();
         if (ImGui.Button("Stop Update Tasks"))
@@ -561,9 +567,15 @@ public sealed class ConfigWindow : Window
         if (ImGui.Checkbox("Enable event-triggered updates", ref triggerAutoUpdates))
         {
             this.plugin.Configuration.TriggerAutoUpdatesEnabled = triggerAutoUpdates;
+            if (triggerAutoUpdates)
+            {
+                this.plugin.Configuration.ExperimentalAutoUpdateEnabled = false;
+                this.plugin.ClearUpdateQueue("event-trigger-enabled");
+            }
+
             this.plugin.SaveConfiguration();
         }
-        this.AddTooltip("Allow event-based updates.");
+        this.AddTooltip("Allow event-based updates. Mutually exclusive with timed auto update.");
 
         var respectAutoSelection = this.plugin.Configuration.TriggerUpdatesRespectAutoUpdateSelection;
         if (ImGui.Checkbox("Event triggers only update achievements checked Auto", ref respectAutoSelection))

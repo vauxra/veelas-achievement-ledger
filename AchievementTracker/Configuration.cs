@@ -78,6 +78,11 @@ public sealed class Configuration : IPluginConfiguration
 
         this.ExperimentalAutoUpdateIntervalSeconds = Math.Clamp(this.ExperimentalAutoUpdateIntervalSeconds, 1, 86_400);
         this.ExperimentalUpdateSpacingSeconds = Math.Clamp(this.ExperimentalUpdateSpacingSeconds, 0, 3_600);
+        if (this.ExperimentalAutoUpdateEnabled && this.TriggerAutoUpdatesEnabled)
+        {
+            this.TriggerAutoUpdatesEnabled = false;
+        }
+
         this.CosmicClassScoreCache ??= new CosmicClassScoreCache();
         TrackedAchievementPresetStore.Normalize(this.TrackedAchievementPresets);
     }
