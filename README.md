@@ -14,6 +14,38 @@
 
 A lightweight experimental achievement organizer and tracker for FFXIV.
 
+## Table of contents
+
+- [Big picture](#big-picture)
+- [Expected flow summary](#expected-flow-summary)
+- [Status](#status)
+- [Basic use](#basic-use)
+- [Cosmic Class score progress](#cosmic-class-score-progress)
+- [Experimental behavior notes](#experimental-behavior-notes)
+- [Development notes](#development-notes)
+- [Build](#build)
+- [References](#references)
+
+## Big picture
+
+For a tree-style map of the `val-experimental` architecture and runtime flow, see [`docs/val-experimental-addon-flow.md`](docs/val-experimental-addon-flow.md). It traces filenames and method/function calls down to the state, queues, native UI surfaces, hooks, reads, writes, and return values each flow touches.
+
+## Expected flow summary
+
+Plain-English testing flow:
+
+1. **Open VAL:** run `/val` to open the main ledger, or `/val config` to open configuration directly.
+2. **Configure tracked achievements:** open **Configure** → **Tracked Achievements**, search for achievements, add them, reorder them, and optionally save/load a preset.
+3. **Choose update membership:** each tracked row has an **Auto** checkbox. Timed auto update uses only the checked rows; **Include all tracked in auto update** and **Include none** bulk-edit that set.
+4. **Set cooldowns/timing:** open **Auto update** and set **Seconds between auto update cycles** plus **Base seconds between update calls**. The branch also adds a 1-2 second jitter and a 5-second same-achievement backoff.
+5. **Pick one automation mode:** timed auto update and event-triggered updates are mutually exclusive. Enabling one disables the other and clears pending update tasks.
+6. **Run updates:** row reload, **Update All**, timed auto update, or enabled event triggers queue native Achievement-window opens. VAL opens each native Achievement entry, waits for local progress to populate, reads the local progress slot, then moves to the next queued item.
+7. **Window parking/rescale:** during queued updates, VAL may briefly open the native Achievement window, shrink it to a tiny parked size, and move it out of the way. If **Restore Achievement window scale/position after updates** is enabled, VAL restores the original size/position before closing or leaving the window open. If that option is disabled, the branch may close/leave the parked window without restoring it.
+8. **Inspect safely after parking:** magnifying-glass **Open in Achievements** buttons try to restore the parked native Achievement window before opening the selected entry.
+9. **Recover if needed:** if the native Achievement window stays tiny after a test, use **Reset native Achievement window scale** in Config → Auto update to open/show it and reset it to 100% scale.
+
+⚠ **Flash / UI motion warning:** queued updates can rapidly open, shrink, move, restore, and close the native FFXIV Achievement window. If flashing, sudden UI motion, or rapid window changes bother you, leave timed/event-triggered updates disabled and use manual inspection opens instead.
+
 ## Status
 
 Experimental build on `val-experimental`. Current features:
