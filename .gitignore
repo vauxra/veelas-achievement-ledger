@@ -18,3 +18,8 @@ packages/
 
 # Local dev-plugin drops
 released/
+
+# Local/unpublished wiki and research docs
+docs/
+map/
+wiki-export/
