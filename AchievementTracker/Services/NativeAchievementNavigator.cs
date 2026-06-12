@@ -92,13 +92,34 @@ public unsafe sealed class NativeAchievementNavigator
         return true;
     }
 
+    public bool ResetAchievementWindowScale()
+    {
+        var addon = this.gameGui.GetAddonByName(AchievementAddonName, 1);
+        if (addon.IsNull || addon.Address == IntPtr.Zero)
+        {
+            this.parkedState = null;
+            return false;
+        }
+
+        var unitBase = (AtkUnitBase*)addon.Address;
+        if (unitBase == null)
+        {
+            this.parkedState = null;
+            return false;
+        }
+
+        unitBase->SetScale(1.0f, false);
+        this.parkedState = null;
+        return true;
+    }
+
     public bool CloseAchievementWindow()
     {
-        this.parkedState = null;
+        var restored = this.RestoreParkedAchievementWindow();
         var agent = AgentAchievement.Instance();
         if (agent == null || !this.IsOpen)
         {
-            return false;
+            return restored;
         }
 
         agent->Hide();

@@ -525,6 +525,12 @@ public sealed class ConfigWindow : Window
         }
         this.AddTooltip("Write VAL DebugTrace logs.");
 
+        if (ImGui.Button("Reset native Achievement window scale"))
+        {
+            this.plugin.ResetNativeAchievementWindowScale();
+        }
+        this.AddTooltip("Set the currently open native Achievement window back to 100% scale if a parking test leaves it shrunk.");
+
         var trackedIds = this.plugin.TrackedAchievements.AchievementIds.ToList();
         if (ImGui.Button("Include all tracked in auto update"))
         {

@@ -152,6 +152,12 @@ public sealed class Plugin : IDalamudPlugin
         this.DebugLog("VAL DebugTrace AutoUpdateStopped queueCleared=true");
     }
 
+    public void ResetNativeAchievementWindowScale()
+    {
+        var reset = this.NativeAchievementNavigator.ResetAchievementWindowScale();
+        this.DebugLog($"VAL DebugTrace NativeWindowScaleReset reset={reset}");
+    }
+
     public void DebugLog(string message)
     {
         if (this.Configuration.ExperimentalDebugLoggingEnabled)
