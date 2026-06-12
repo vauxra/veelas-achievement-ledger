@@ -33,6 +33,8 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IFramework Framework { get; private set; } = null!;
     // Dalamud service injection pattern: https://dalamud.dev/plugin-development/project-layout
     [PluginService] internal static IPluginLog PluginLog { get; private set; } = null!;
+    // IGameGui is used on this experimental branch to find and park the native Achievement addon after AgentAchievement opens it.
+    [PluginService] internal static IGameGui GameGui { get; private set; } = null!;
     // Chat/log activity is used on this experimental branch to trigger scoped tracked-achievement refreshes.
     // https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IChatGui
     [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
@@ -66,7 +68,7 @@ public sealed class Plugin : IDalamudPlugin
         this.ClientAchievementProgressSource = new ClientAchievementProgressSource(this.DebugLog);
         this.AchievementProgressSource = this.ClientAchievementProgressSource;
         this.CosmicClassProgressProvider = new CosmicClassProgressProvider(this.Configuration.CosmicClassScoreCache, this.SaveConfiguration);
-        this.NativeAchievementNavigator = new NativeAchievementNavigator();
+        this.NativeAchievementNavigator = new NativeAchievementNavigator(GameGui);
         this.AchievementProgressUpdater = new AchievementProgressUpdater(
             this.ClientAchievementProgressSource,
             this.NativeAchievementNavigator,

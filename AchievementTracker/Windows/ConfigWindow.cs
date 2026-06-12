@@ -57,7 +57,7 @@ public sealed class ConfigWindow : Window
         }
         this.AddTooltip("Open tracker window.");
         ImGui.TextDisabled("Tracked items are saved between logouts.");
-        ImGui.TextDisabled("Experimental branch: reload buttons open native Achievement entries, read the progress slot, then auto-close if VAL opened the window.");
+        ImGui.TextDisabled("Experimental branch: reload buttons open native Achievement entries, shrink/park the Achievement window, read the progress slot, then auto-close if VAL opened it.");
         ImGui.Separator();
 
         this.DrawLeftNavigation();

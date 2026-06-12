@@ -147,7 +147,8 @@ public sealed class AchievementProgressUpdater
             now + maximumWait,
             coldOpen);
 
-        this.debugLog($"VAL DebugTrace NativeOpenSent id={request.AchievementId} reason={request.Reason} cold={coldOpen} minWaitSeconds={minimumWait.TotalSeconds:0} maxWaitSeconds={maximumWait.TotalSeconds:0} pending={this.scheduler.PendingCount}");
+        var parked = this.nativeAchievementNavigator.TryParkAchievementWindow();
+        this.debugLog($"VAL DebugTrace NativeOpenSent id={request.AchievementId} reason={request.Reason} cold={coldOpen} parked={parked} minWaitSeconds={minimumWait.TotalSeconds:0} maxWaitSeconds={maximumWait.TotalSeconds:0} pending={this.scheduler.PendingCount}");
     }
 
     private void ProcessActiveNativeRequest(DateTimeOffset now)
@@ -158,6 +159,11 @@ public sealed class AchievementProgressUpdater
         }
 
         var request = this.activeNativeRequest.Value;
+        if (!this.nativeAchievementNavigator.HasParkedWindow && this.nativeAchievementNavigator.TryParkAchievementWindow())
+        {
+            this.debugLog($"VAL DebugTrace NativeWindowParked id={request.AchievementId} scale=0.55 x=20 y=20");
+        }
+
         if (now < request.MinimumCompleteAt)
         {
             return;
@@ -196,7 +202,8 @@ public sealed class AchievementProgressUpdater
         }
         else
         {
-            this.debugLog("VAL DebugTrace NativeBatchLeaveOpen reason=window-was-open-before-batch");
+            var restored = this.nativeAchievementNavigator.RestoreParkedAchievementWindow();
+            this.debugLog($"VAL DebugTrace NativeBatchLeaveOpen reason=window-was-open-before-batch restored={restored}");
         }
 
         this.batchInProgress = false;
