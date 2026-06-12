@@ -18,11 +18,11 @@
     "IsTestingExclusive": true,
     "DownloadLinkInstall": "",
     "DownloadLinkUpdate": "",
-    "LastUpdate": "1781230633",
-    "TestingAssemblyVersion": "0.2.0.24",
+    "LastUpdate": "1781233136",
+    "TestingAssemblyVersion": "0.2.0.25",
     "TestingDalamudApiLevel": 15,
-    "TestingChangelog": "Experimental Ex prerelease. Moves Include all tracked in auto update / Include none to the Tracked Achievements page under preset management, while keeping optional Achievement window scale/position restore after queued updates and magnifying-glass inspection restore behavior.",
-    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.24/VeelasAchievementLedger_0_2_0_24.zip",
+    "TestingChangelog": "Experimental Ex prerelease. Fixes native Achievement window normalization for Open in Achievements and Reset native Achievement window scale by retrying until the addon is ready, restoring parked scale/position when available and otherwise resetting to normal scale.",
+    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.25/VeelasAchievementLedger_0_2_0_25.zip",
     "IconUrl": "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png",
     "ImageUrls": [
       "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png"

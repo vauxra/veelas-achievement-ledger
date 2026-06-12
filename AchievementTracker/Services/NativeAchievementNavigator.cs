@@ -87,7 +87,7 @@ public unsafe sealed class NativeAchievementNavigator
 
         var state = this.parkedState.Value;
         var addon = this.gameGui.GetAddonByName(AchievementAddonName, 1);
-        if (addon.IsNull || addon.Address == IntPtr.Zero)
+        if (addon.IsNull || !addon.IsReady || !addon.IsVisible || addon.Address == IntPtr.Zero)
         {
             return false;
         }
@@ -107,22 +107,30 @@ public unsafe sealed class NativeAchievementNavigator
     public bool ResetAchievementWindowScale()
     {
         var addon = this.gameGui.GetAddonByName(AchievementAddonName, 1);
-        if (addon.IsNull || addon.Address == IntPtr.Zero)
+        if (addon.IsNull || !addon.IsReady || !addon.IsVisible || addon.Address == IntPtr.Zero)
         {
-            this.parkedState = null;
             return false;
         }
 
         var unitBase = (AtkUnitBase*)addon.Address;
         if (unitBase == null)
         {
-            this.parkedState = null;
             return false;
         }
 
         unitBase->SetScale(1.0f, false);
         this.parkedState = null;
         return true;
+    }
+
+    public bool RestoreParkedAchievementWindowOrResetScale()
+    {
+        if (this.RestoreParkedAchievementWindow())
+        {
+            return true;
+        }
+
+        return !this.HasParkedWindow && this.ResetAchievementWindowScale();
     }
 
     public bool CloseAchievementWindow(bool restoreParkedWindow = true)
