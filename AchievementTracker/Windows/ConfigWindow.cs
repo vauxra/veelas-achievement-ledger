@@ -179,6 +179,27 @@ public sealed class ConfigWindow : Window
         this.AddTooltip("Delete selected list.");
     }
 
+    private void DrawAutoUpdateBulkControls()
+    {
+        var trackedIds = this.plugin.TrackedAchievements.AchievementIds.ToList();
+        if (ImGui.Button("Include all tracked in auto update"))
+        {
+            this.plugin.Configuration.AutoUpdateAchievementIds = trackedIds.ToList();
+            this.plugin.SaveConfiguration();
+            this.plugin.ResetAutoUpdateCountdownIfActive();
+        }
+        this.AddTooltip("Check Auto for all tracked achievements in the current tracked list.");
+
+        ImGui.SameLine();
+        if (ImGui.Button("Include none"))
+        {
+            this.plugin.Configuration.AutoUpdateAchievementIds.Clear();
+            this.plugin.SaveConfiguration();
+            this.plugin.ResetAutoUpdateCountdownIfActive();
+        }
+        this.AddTooltip("Uncheck Auto for all tracked achievements.");
+    }
+
     private void EnsureSelectedPresetIsValid()
     {
         TrackedAchievementPresetStore.Normalize(this.plugin.Configuration.TrackedAchievementPresets);
@@ -213,6 +234,7 @@ public sealed class ConfigWindow : Window
     private void DrawTrackedAchievementsPage()
     {
         this.DrawPresetControls();
+        this.DrawAutoUpdateBulkControls();
         ImGui.Separator();
 
         var spacing = ImGui.GetStyle().ItemSpacing.X;
@@ -552,23 +574,6 @@ public sealed class ConfigWindow : Window
         }
         this.AddTooltip("Set the currently open native Achievement window back to 100% scale if a parking test leaves it shrunk.");
 
-        var trackedIds = this.plugin.TrackedAchievements.AchievementIds.ToList();
-        if (ImGui.Button("Include all tracked in auto update"))
-        {
-            this.plugin.Configuration.AutoUpdateAchievementIds = trackedIds.ToList();
-            this.plugin.SaveConfiguration();
-            this.plugin.ResetAutoUpdateCountdownIfActive();
-        }
-        this.AddTooltip("Check Auto for all tracked.");
-
-        ImGui.SameLine();
-        if (ImGui.Button("Include none"))
-        {
-            this.plugin.Configuration.AutoUpdateAchievementIds.Clear();
-            this.plugin.SaveConfiguration();
-            this.plugin.ResetAutoUpdateCountdownIfActive();
-        }
-        this.AddTooltip("Uncheck Auto for all tracked.");
     }
 
 
