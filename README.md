@@ -17,6 +17,8 @@ A lightweight assistive achievement organizer and tracker for FFXIV.
 
 For a tree-style map of the addon architecture and current `origin/main` runtime flow, see [`docs/main-branch-addon-flow.md`](docs/main-branch-addon-flow.md). It traces filenames and method/function calls down to the state, services, native UI surfaces, and return values each flow touches.
 
+An experimental branch, [`val-experimental`](https://github.com/vauxra/veelas-achievement-ledger/tree/val-experimental), offers more automation for private/testing use, including timed/event-triggered update queues and native Achievement-window parking/rescaling. That branch is intentionally not the safer public/mainline flow described here.
+
 ## Status
 
 Beta build. Current features:
