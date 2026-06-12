@@ -31,7 +31,7 @@ Beta build. Current features:
 - Reorder tracked achievements with Top, Up, Down, and Bottom controls.
 - Show completion status, known target counts, observed numeric progress, and when progress was last observed.
 - Use the reload icon or **Update Next** to open tracked achievements in the game Achievement window.
-- Shared 5-second safety lockout for update-intent opens from **Update Next** and row reload buttons.
+- Shared update-open safety lockout for update-intent opens from **Update Next** and row reload buttons: already-open Achievement windows use a short request cooldown, while closed-window opens wait longer for data.
 - Close the native Achievements window from the ledger with **Close Achievements**.
 - Open rows/search results in the native Achievement window with the magnifying-glass button.
 - Show cached Cosmic Class score progress after the score data has been observed in Cosmic content.
