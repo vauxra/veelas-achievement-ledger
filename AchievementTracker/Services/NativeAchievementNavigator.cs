@@ -8,7 +8,7 @@ namespace AchievementTracker.Services;
 public unsafe sealed class NativeAchievementNavigator
 {
     private const string AchievementAddonName = "Achievement";
-    private const float ParkedScale = 0.55f;
+    public const float ParkedScale = 0.1375f;
     private const short ParkedX = 20;
     private const short ParkedY = 20;
 

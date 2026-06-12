@@ -479,6 +479,7 @@ public sealed class ConfigWindow : Window
     {
         ImGui.TextUnformatted("Experimental auto update");
         ImGui.TextDisabled("Native Achievement opens. Countdown runs before the first cycle.");
+        ImGui.TextDisabled("Timed auto update and event-triggered updates cannot both be enabled.");
 
         var enabled = this.plugin.Configuration.ExperimentalAutoUpdateEnabled;
         if (ImGui.Checkbox("Enable auto update", ref enabled))
@@ -562,6 +563,7 @@ public sealed class ConfigWindow : Window
     {
         ImGui.TextUnformatted("Trigger auto updates");
         ImGui.TextDisabled("When enabled, matching game events queue updates for tracked achievements in that category.");
+        ImGui.TextDisabled("Event-triggered updates and timed auto update cannot both be enabled.");
 
         var triggerAutoUpdates = this.plugin.Configuration.TriggerAutoUpdatesEnabled;
         if (ImGui.Checkbox("Enable event-triggered updates", ref triggerAutoUpdates))
@@ -595,6 +597,34 @@ public sealed class ConfigWindow : Window
 
         ImGui.Separator();
         ImGui.TextDisabled("Choose exactly which event types can trigger updates:");
+        var allEventTypesEnabled = this.plugin.Configuration.TriggerOnMinerActivities
+            && this.plugin.Configuration.TriggerOnMiningActivities
+            && this.plugin.Configuration.TriggerOnQuarryingActivities
+            && this.plugin.Configuration.TriggerOnBotanistActivities
+            && this.plugin.Configuration.TriggerOnLoggingActivities
+            && this.plugin.Configuration.TriggerOnHarvestingActivities
+            && this.plugin.Configuration.TriggerOnFisherActivities
+            && this.plugin.Configuration.TriggerOnFishingActivities
+            && this.plugin.Configuration.TriggerOnSpearfishingActivities
+            && this.plugin.Configuration.TriggerOnCrafterActivities
+            && this.plugin.Configuration.TriggerOnCraftingActivities
+            && this.plugin.Configuration.TriggerOnCraftingLogActivities;
+        this.DrawTriggerCheckbox("All event types", allEventTypesEnabled, value =>
+        {
+            this.plugin.Configuration.TriggerOnMinerActivities = value;
+            this.plugin.Configuration.TriggerOnMiningActivities = value;
+            this.plugin.Configuration.TriggerOnQuarryingActivities = value;
+            this.plugin.Configuration.TriggerOnBotanistActivities = value;
+            this.plugin.Configuration.TriggerOnLoggingActivities = value;
+            this.plugin.Configuration.TriggerOnHarvestingActivities = value;
+            this.plugin.Configuration.TriggerOnFisherActivities = value;
+            this.plugin.Configuration.TriggerOnFishingActivities = value;
+            this.plugin.Configuration.TriggerOnSpearfishingActivities = value;
+            this.plugin.Configuration.TriggerOnCrafterActivities = value;
+            this.plugin.Configuration.TriggerOnCraftingActivities = value;
+            this.plugin.Configuration.TriggerOnCraftingLogActivities = value;
+        });
+
         this.DrawTriggerCheckbox("All Miner", this.plugin.Configuration.TriggerOnMinerActivities, value =>
         {
             this.plugin.Configuration.TriggerOnMinerActivities = value;
