@@ -1,8 +1,8 @@
 {
   "Author": "Saagi",
-  "Name": "Veela's Achievement Ledger Ex Mid",
-  "Punchline": "EXPERIMENTAL Ex Mid: native Achievement updater.",
-  "Description": "Experimental Ex Mid / not for Dalamud publishing. Use /val to track achievements, open native Achievement entries, and test optional timed auto updates.",
+  "Name": "Veela's Achievement Ledger Ex",
+  "Punchline": "EXPERIMENTAL Ex: native Achievement updater.",
+  "Description": "Experimental Ex / not for Dalamud publishing. Use /val to track achievements, open native Achievement entries, and test optional timed auto updates.",
   "RepoUrl": "https://github.com/vauxra/veelas-achievement-ledger",
   "ApplicableVersion": "any",
   "Tags": [
@@ -11,8 +11,8 @@
     "tracker",
     "utility"
   ],
-  "IconUrl": "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-ex-mid/AchievementTracker/images/icon.png",
+  "IconUrl": "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png",
   "ImageUrls": [
-    "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-ex-mid/AchievementTracker/images/icon.png"
+    "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png"
   ]
 }

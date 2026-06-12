@@ -13,7 +13,7 @@ public sealed class TrackerWindow : Window
 {
     private readonly Plugin plugin;
     public TrackerWindow(Plugin plugin)
-        : base("Veela's Achievement Ledger Ex Mid##AchievementLedgerLive")
+        : base("Veela's Achievement Ledger Ex##AchievementLedgerLive")
     {
         this.plugin = plugin;
         this.SizeConstraints = new WindowSizeConstraints

@@ -1,31 +1,31 @@
 [
   {
     "Author": "Saagi",
-    "Name": "Veela's Achievement Ledger Ex Mid",
+    "Name": "Veela's Achievement Ledger Ex",
     "InternalName": "VeelasAchievementLedger",
-    "AssemblyVersion": "0.2.0.21",
-    "Description": "Experimental Ex Mid branch build. Branch is based on val-experimental and uses native Achievement UI opens instead of direct progress requests for local agent/dev-plugin testing before any published release.",
+    "AssemblyVersion": "0.0.0.0",
+    "Description": "Experimental Ex branch build. Branch is based on val-experimental and uses native Achievement UI opens instead of direct progress requests for local agent/dev-plugin testing before any published release.",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 15,
-    "Punchline": "Experimental Ex Mid native Achievement testing build for /val.",
+    "Punchline": "Experimental Ex native Achievement testing build for /val.",
     "RepoUrl": "https://github.com/vauxra/veelas-achievement-ledger",
     "Tags": [
       "achievement",
       "tracker",
       "utility"
     ],
-    "IsHide": true,
+    "IsHide": false,
     "IsTestingExclusive": true,
     "DownloadLinkInstall": "",
     "DownloadLinkUpdate": "",
-    "LastUpdate": "1781217785",
-    "TestingAssemblyVersion": "0.2.0.21",
+    "LastUpdate": "1781226764",
+    "TestingAssemblyVersion": "0.2.0.22",
     "TestingDalamudApiLevel": 15,
-    "TestingChangelog": "Local agent/dev build branch based on val-experimental. Update queues use native Achievement UI opens with restore-before-close behavior, quarter-size window parking, reset-scale button that opens the Achievement window before resetting, mutually exclusive timed auto/event-trigger update modes, and an all-event-types trigger toggle. No published custom-repo release links yet.",
-    "DownloadLinkTesting": "",
-    "IconUrl": "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-ex-mid/AchievementTracker/images/icon.png",
+    "TestingChangelog": "Experimental Ex prerelease. Uses native Achievement UI opens plus passive progress-slot reads; no plugin-originated direct progress-request call or remote-service call. Includes flash/UI motion warning, quarter-size window parking with restore-before-close, reset-scale recovery, mutually exclusive timed auto/event-trigger update modes, and an all-event-types trigger toggle.",
+    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.22/VeelasAchievementLedger_0_2_0_22.zip",
+    "IconUrl": "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png",
     "ImageUrls": [
-      "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-ex-mid/AchievementTracker/images/icon.png"
+      "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png"
     ]
   }
 ]

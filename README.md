@@ -1,20 +1,16 @@
-# Veela's Achievement Ledger Ex Mid
+# Veela's Achievement Ledger Ex
 [![AI-DECLARATION: copilot](https://img.shields.io/badge/䷼%20AI--DECLARATION-copilot-fee2e2?labelColor=fee2e2)](https://ai-declaration.md)
 
-> [!WARNING]
-> **Experimental branch — not intended for normal Dalamud repository submission.**
+> [!CAUTION]
+> **FLASH / UI MOTION WARNING — EXPERIMENTAL BUILD.**
 >
-> This repo intentionally tests behavior that Dalamud generally discourages for plugin submissions. Use it only if you understand and accept the risk, including possible account consequences.
+> This build can briefly open, shrink, move, restore, and close the native FFXIV Achievement window while running update tasks. If flashing, sudden UI motion, or rapid window changes bother you, disable timed/event-triggered updates and use manual native Achievement opens instead.
 >
-> This branch may break or stress the spirit of these guidelines:
+> This is an experimental Ex branch build for private/testing use, not a normal Dalamud repository submission build. Use it only if you understand and accept the risk, including possible account consequences.
 >
-> - plugin-originated achievement progress requests instead of only user-opened native UI flow,
-> - automatic/timed request queues and event-triggered refreshes without a fresh direct click for every request,
-> - framework-update timers used to schedule or refresh progress-related state,
-> - ClientStructs reads for game-system state that Dalamud services do not expose,
-> - experimental diagnostics and behavior intended for private testing rather than polished public distribution.
+> Current progress refreshes use native Achievement UI opens plus passive reads of the already-populated local progress slot. The plugin source does **not** call `RequestAchievementProgress`, create remote-service calls, capture packets, synthesize addon submissions, execute actions, automate movement, or perform gameplay botting.
 >
-> It does **not** attempt movement, crafting/gathering automation, action execution, synthetic addon submissions, packet capture, backend telemetry, or gameplay botting.
+> It still uses timers/event triggers, native UI opens, window parking/rescaling, and isolated ClientStructs reads, which remain experimental and may be discouraged for normal submission.
 
 A lightweight experimental achievement organizer and tracker for FFXIV.
 
@@ -32,22 +28,25 @@ Experimental build on `val-experimental`. Current features:
 - Save, read, rename, and delete reusable tracked-achievement presets.
 - Selecting a preset loads it immediately; the Read button reloads the selected preset on demand.
 - Choose which tracked rows are included in timed auto update.
-- Queue direct progress updates with row reload, **Update All**, timed auto update, or enabled event triggers.
-- Space queued update requests with a configurable base delay plus jitter.
+- Queue native Achievement UI assisted updates with row reload, **Update All**, timed auto update, or enabled event triggers.
+- Timed auto update and event-triggered updates are mutually exclusive; enabling one disables the other.
+- The native Achievement window is temporarily parked at a very small scale during queued updates, then restored before closing.
+- A reset-scale button opens the native Achievement window and restores its scale if a test leaves it shrunk.
 - Show completion status, known target counts, observed progress, and supported Cosmic Class score progress.
 - Cache Cosmic Class score values after they are observed in Cosmic content so they remain visible outside the zone.
 - Use the magnifying-glass button to open the native Achievement entry.
 
-The plugin has no backend, telemetry, cloud sync, packet capture, movement automation, action-use automation, or synthetic addon submission flow.
+The plugin has no direct backend/network integration, remote analytics, cloud sync, packet capture, movement automation, action-use automation, or synthetic addon submission flow.
 
 ## Basic use
 
 1. Run `/val`.
 2. Click **Configure** and add achievements from **Tracked Achievements**.
 3. Optional: save your current tracked list as a preset.
-4. Use the row reload icon or **Update All** to request progress updates for tracked achievements.
-5. Optional: enable timed auto update or event triggers on the experimental branch.
+4. Use the row reload icon or **Update All** to open native Achievement entries and cache observed progress.
+5. Optional: enable either timed auto update or event triggers on the experimental branch; both cannot be enabled at once.
 6. Use the magnifying-glass button when you want to inspect the native Achievement entry.
+7. If the native Achievement window ever stays shrunk, use **Reset native Achievement window scale** in Config → Auto update.
 
 Tracked achievements, presets, auto-update settings, and cached Cosmic Class scores are saved between logouts.
 
@@ -75,15 +74,15 @@ The current class-index mapping is based on the observed 11-value WKS score arra
 
 This branch deliberately differs from the safer public/beta design:
 
-- Direct progress requests are made from plugin controls.
-- **Update All** and timed auto update can queue multiple requests.
-- Event triggers can queue scoped updates after supported gathering, fishing, crafting, or completion events.
+- Update tasks can be queued from **Update All**, timed auto update, or event triggers.
+- Update tasks open the native Achievement UI for matching tracked achievements, then VAL passively reads the local progress slot populated by that native UI.
+- Timed auto update and event-triggered updates cannot both be enabled at the same time.
+- The native Achievement window may briefly shrink, move, restore, and close during queued updates.
 - Auto-update timing uses seconds and waits for the first countdown before the first cycle.
-- Request spacing includes jitter, including when the base spacing is set to `0`.
 - `Stop Update Tasks` disables auto update and clears pending update tasks.
 - Help includes Cosmic diagnostics for test feedback.
 
-Do not present this branch as official-submission-safe without removing or redesigning the experimental request/timer behavior.
+Do not present this branch as official-submission-safe without removing or redesigning the experimental timer/event-trigger/window-parking behavior.
 
 ## Development notes
 

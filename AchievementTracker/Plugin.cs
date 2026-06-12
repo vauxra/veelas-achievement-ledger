@@ -89,7 +89,7 @@ public sealed class Plugin : IDalamudPlugin
 
         CommandManager.AddHandler(CommandName, new CommandInfo(this.OnCommand)
         {
-            HelpMessage = "Open Veela's Achievement Ledger Ex Mid.",
+            HelpMessage = "Open Veela's Achievement Ledger Ex.",
         });
 
         PluginInterface.UiBuilder.Draw += this.WindowSystem.Draw;

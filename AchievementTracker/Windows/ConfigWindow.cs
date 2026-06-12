@@ -18,7 +18,7 @@ public sealed class ConfigWindow : Window
     private string selectedPresetName = string.Empty;
 
     public ConfigWindow(Plugin plugin)
-        : base("Veela's Achievement Ledger Ex Mid Config##AchievementLedgerConfig")
+        : base("Veela's Achievement Ledger Ex Config##AchievementLedgerConfig")
     {
         this.plugin = plugin;
         this.SizeConstraints = new WindowSizeConstraints
@@ -56,8 +56,9 @@ public sealed class ConfigWindow : Window
             this.plugin.OpenMainUi();
         }
         this.AddTooltip("Open tracker window.");
-        ImGui.TextDisabled("Tracked items are saved between logouts.");
-        ImGui.TextDisabled("Experimental branch: reload buttons open native Achievement entries, shrink/park the Achievement window, read the progress slot, then auto-close if VAL opened it.");
+        this.DrawDisabledWrapped("Tracked items are saved between logouts.");
+        this.DrawDisabledWrapped("⚠ FLASH / UI motion warning: queued updates can briefly open, shrink, move, restore, and close the native Achievement window.");
+        this.DrawDisabledWrapped("Experimental branch: reload buttons open native Achievement entries, shrink/park the Achievement window, read the progress slot, then auto-close if VAL opened it.");
         ImGui.Separator();
 
         this.DrawLeftNavigation();
@@ -466,20 +467,24 @@ public sealed class ConfigWindow : Window
         var rightWidth = Math.Max(360f, availableWidth - leftWidth - spacing);
 
         ImGui.BeginChild("##AutoUpdateSettingsColumn", new Vector2(leftWidth, 0), true);
+        ImGui.PushTextWrapPos(ImGui.GetContentRegionAvail().X);
         this.DrawExperimentalAutoUpdateSettings();
+        ImGui.PopTextWrapPos();
         ImGui.EndChild();
 
         ImGui.SameLine();
         ImGui.BeginChild("##EventTriggerSettingsColumn", new Vector2(rightWidth, 0), true);
+        ImGui.PushTextWrapPos(ImGui.GetContentRegionAvail().X);
         this.DrawTriggerAutoUpdateSettings();
+        ImGui.PopTextWrapPos();
         ImGui.EndChild();
     }
 
     private void DrawExperimentalAutoUpdateSettings()
     {
         ImGui.TextUnformatted("Experimental auto update");
-        ImGui.TextDisabled("Native Achievement opens. Countdown runs before the first cycle.");
-        ImGui.TextDisabled("Timed auto update and event-triggered updates cannot both be enabled.");
+        this.DrawDisabledWrapped("Native Achievement opens. Countdown runs before the first cycle.");
+        this.DrawDisabledWrapped("Timed auto update and event-triggered updates cannot both be enabled.");
 
         var enabled = this.plugin.Configuration.ExperimentalAutoUpdateEnabled;
         if (ImGui.Checkbox("Enable auto update", ref enabled))
@@ -562,8 +567,8 @@ public sealed class ConfigWindow : Window
     private void DrawTriggerAutoUpdateSettings()
     {
         ImGui.TextUnformatted("Trigger auto updates");
-        ImGui.TextDisabled("When enabled, matching game events queue updates for tracked achievements in that category.");
-        ImGui.TextDisabled("Event-triggered updates and timed auto update cannot both be enabled.");
+        this.DrawDisabledWrapped("When enabled, matching game events queue updates for tracked achievements in that category.");
+        this.DrawDisabledWrapped("Event-triggered updates and timed auto update cannot both be enabled.");
 
         var triggerAutoUpdates = this.plugin.Configuration.TriggerAutoUpdatesEnabled;
         if (ImGui.Checkbox("Enable event-triggered updates", ref triggerAutoUpdates))
@@ -596,7 +601,7 @@ public sealed class ConfigWindow : Window
         this.AddTooltip("Mark completions when observed.");
 
         ImGui.Separator();
-        ImGui.TextDisabled("Choose exactly which event types can trigger updates:");
+        this.DrawDisabledWrapped("Choose exactly which event types can trigger updates:");
         var allEventTypesEnabled = this.plugin.Configuration.TriggerOnMinerActivities
             && this.plugin.Configuration.TriggerOnMiningActivities
             && this.plugin.Configuration.TriggerOnQuarryingActivities
@@ -683,13 +688,17 @@ public sealed class ConfigWindow : Window
     private void DrawHelp()
     {
         ImGui.TextUnformatted("Help");
-        ImGui.TextWrapped("Disclaimer: This experimental addon uses native Achievement UI opens, timers, and local ClientStructs reads that are discouraged for normal Dalamud submissions when automated. Use may have consequences for your account, including a ban.");
+        this.DrawDisabledWrapped("⚠ FLASH / UI motion warning: queued updates can briefly open, shrink, move, restore, and close the native Achievement window.");
+        ImGui.TextWrapped("Disclaimer: This experimental addon uses native Achievement UI opens, timers, window parking/rescaling, and local ClientStructs reads that are discouraged for normal Dalamud submissions when automated. Use may have consequences for your account, including a ban.");
         ImGui.Separator();
 
         ImGui.TextUnformatted("Main VAL window");
         this.DrawWrappedBullet("Shows your tracked achievements, progress, last update time, and row actions.");
         this.DrawWrappedBullet("Reload buttons and Update All open native Achievement entries, then VAL reads the already-populated progress slot.");
-        this.DrawWrappedBullet("Update All queues progress updates for tracked achievements. Items updated in the last 30 seconds are skipped by Update All.");
+        this.DrawWrappedBullet("Update All queues native Achievement UI assisted progress updates for tracked achievements. Items updated in the last 30 seconds are skipped by Update All.");
+        this.DrawWrappedBullet("Timed auto update and event-triggered updates cannot both be enabled at the same time.");
+        this.DrawWrappedBullet("During queued updates, VAL temporarily parks the native Achievement window at a very small scale, then restores scale and position before closing it.");
+        this.DrawWrappedBullet("Reset native Achievement window scale opens the native window first, then restores it to 100% scale if a parking test leaves it shrunk.");
         this.DrawWrappedBullet("Stop Update Tasks disables auto update and clears queued update tasks.");
         this.DrawWrappedBullet("Use the magnifying glass to open that achievement in the native Achievements window.");
 
@@ -706,6 +715,14 @@ public sealed class ConfigWindow : Window
         this.DrawWrappedBullet("Search adds achievements to the tracked list; Clear resets the search bar.");
         this.DrawWrappedBullet("Cosmic Class achievements show cached score progress in tracked and search rows when scores have been observed in Cosmic content.");
         this.DrawWrappedBullet("Cosmic score cache refreshes passively while WKS/Cosmic data is loaded and remains available outside the zone.");
+    }
+
+    private void DrawDisabledWrapped(string text)
+    {
+        var disabledColor = ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled];
+        ImGui.PushStyleColor(ImGuiCol.Text, disabledColor);
+        ImGui.TextWrapped(text);
+        ImGui.PopStyleColor();
     }
 
     private void DrawWrappedBullet(string text)
