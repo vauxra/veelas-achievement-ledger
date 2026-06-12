@@ -78,6 +78,7 @@ public sealed class Plugin : IDalamudPlugin
             () => this.Configuration.ExperimentalAutoUpdateEnabled,
             () => this.Configuration.ExperimentalAutoUpdateIntervalSeconds,
             () => this.Configuration.ExperimentalUpdateSpacingSeconds,
+            () => this.Configuration.RestoreNativeAchievementWindowAfterUpdates,
             this.DebugLog);
         this.AchievementProgressService = new AchievementProgressService(UnlockState, this.AchievementProgressSource, this.CosmicClassProgressProvider);
         this.TrackerWindow = new TrackerWindow(this);
@@ -158,6 +159,14 @@ public sealed class Plugin : IDalamudPlugin
     {
         this.AchievementProgressUpdater.Clear();
         this.DebugLog($"VAL DebugTrace UpdateQueueCleared reason={reason}");
+    }
+
+    public bool OpenNativeAchievementForInspection(uint achievementId)
+    {
+        var opened = this.NativeAchievementNavigator.OpenAchievement(achievementId);
+        var restored = opened && this.NativeAchievementNavigator.RestoreParkedAchievementWindow();
+        this.DebugLog($"VAL DebugTrace NativeInspectionOpen id={achievementId} opened={opened} restoredScalePosition={restored}");
+        return opened;
     }
 
     public void ResetNativeAchievementWindowScale()

@@ -61,6 +61,8 @@ public sealed class Configuration : IPluginConfiguration
 
     public bool ExperimentalDebugLoggingEnabled { get; set; } = true;
 
+    public bool RestoreNativeAchievementWindowAfterUpdates { get; set; } = true;
+
     public List<uint> GetAutoUpdateTrackedAchievementIds()
         => AutoUpdateSelection.SelectIncludedTrackedAchievements(this.TrackedAchievementIds, this.AutoUpdateAchievementIds);
 

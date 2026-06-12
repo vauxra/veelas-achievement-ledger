@@ -289,7 +289,7 @@ public sealed class ConfigWindow : Window
             ImGui.SameLine();
             if (ImGuiComponents.IconButton(FontAwesomeIcon.Search))
             {
-                this.plugin.NativeAchievementNavigator.OpenAchievement(achievementId);
+                this.plugin.OpenNativeAchievementForInspection(achievementId);
             }
             this.AddTooltip("Open in Achievements.");
 
@@ -394,7 +394,7 @@ public sealed class ConfigWindow : Window
                 ImGui.SameLine();
                 if (ImGuiComponents.IconButton(FontAwesomeIcon.Search))
                 {
-                    this.plugin.NativeAchievementNavigator.OpenAchievement(result.Id);
+                    this.plugin.OpenNativeAchievementForInspection(result.Id);
                 }
                 this.AddTooltip("Open in Achievements.");
             }
@@ -411,7 +411,7 @@ public sealed class ConfigWindow : Window
                 ImGui.SameLine();
                 if (ImGuiComponents.IconButton(FontAwesomeIcon.Search))
                 {
-                    this.plugin.NativeAchievementNavigator.OpenAchievement(result.Id);
+                    this.plugin.OpenNativeAchievementForInspection(result.Id);
                 }
                 this.AddTooltip("Open in Achievements.");
             }
@@ -421,7 +421,7 @@ public sealed class ConfigWindow : Window
                 ImGui.SameLine();
                 if (ImGuiComponents.IconButton(FontAwesomeIcon.Search))
                 {
-                    this.plugin.NativeAchievementNavigator.OpenAchievement(result.Id);
+                    this.plugin.OpenNativeAchievementForInspection(result.Id);
                 }
                 this.AddTooltip("Open in Achievements.");
             }
@@ -536,6 +536,15 @@ public sealed class ConfigWindow : Window
             this.plugin.SaveConfiguration();
         }
         this.AddTooltip("Write VAL DebugTrace logs.");
+
+        ImGui.Separator();
+        var restoreWindowAfterUpdates = this.plugin.Configuration.RestoreNativeAchievementWindowAfterUpdates;
+        if (ImGui.Checkbox("Restore Achievement window scale/position after updates", ref restoreWindowAfterUpdates))
+        {
+            this.plugin.Configuration.RestoreNativeAchievementWindowAfterUpdates = restoreWindowAfterUpdates;
+            this.plugin.SaveConfiguration();
+        }
+        this.AddTooltip("Restore the native Achievement window's original scale and position after queued update tasks. Magnifying-glass opens always restore before showing the entry.");
 
         if (ImGui.Button("Reset native Achievement window scale"))
         {
@@ -697,7 +706,8 @@ public sealed class ConfigWindow : Window
         this.DrawWrappedBullet("Reload buttons and Update All open native Achievement entries, then VAL reads the already-populated progress slot.");
         this.DrawWrappedBullet("Update All queues native Achievement UI assisted progress updates for tracked achievements. Items updated in the last 30 seconds are skipped by Update All.");
         this.DrawWrappedBullet("Timed auto update and event-triggered updates cannot both be enabled at the same time.");
-        this.DrawWrappedBullet("During queued updates, VAL temporarily parks the native Achievement window at a very small scale, then restores scale and position before closing it.");
+        this.DrawWrappedBullet("During queued updates, VAL temporarily parks the native Achievement window at a very small scale; restoring original scale/position after updates is configurable under Auto update.");
+        this.DrawWrappedBullet("Magnifying-glass Open in Achievements buttons restore the parked Achievement window scale/position before showing the selected entry.");
         this.DrawWrappedBullet("Reset native Achievement window scale opens the native window first, then restores it to 100% scale if a parking test leaves it shrunk.");
         this.DrawWrappedBullet("Stop Update Tasks disables auto update and clears queued update tasks.");
         this.DrawWrappedBullet("Use the magnifying glass to open that achievement in the native Achievements window.");

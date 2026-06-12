@@ -30,7 +30,8 @@ Experimental build on `val-experimental`. Current features:
 - Choose which tracked rows are included in timed auto update.
 - Queue native Achievement UI assisted updates with row reload, **Update All**, timed auto update, or enabled event triggers.
 - Timed auto update and event-triggered updates are mutually exclusive; enabling one disables the other.
-- The native Achievement window is temporarily parked at a very small scale during queued updates, then restored before closing.
+- The native Achievement window is temporarily parked at a very small scale during queued updates; restoring original scale/position after updates is configurable.
+- Magnifying-glass Open in Achievements buttons restore the parked native Achievement window scale/position before showing the selected entry.
 - A reset-scale button opens the native Achievement window and restores its scale if a test leaves it shrunk.
 - Show completion status, known target counts, observed progress, and supported Cosmic Class score progress.
 - Cache Cosmic Class score values after they are observed in Cosmic content so they remain visible outside the zone.
@@ -77,7 +78,8 @@ This branch deliberately differs from the safer public/beta design:
 - Update tasks can be queued from **Update All**, timed auto update, or event triggers.
 - Update tasks open the native Achievement UI for matching tracked achievements, then VAL passively reads the local progress slot populated by that native UI.
 - Timed auto update and event-triggered updates cannot both be enabled at the same time.
-- The native Achievement window may briefly shrink, move, restore, and close during queued updates.
+- The native Achievement window may briefly shrink, move, restore, and close during queued updates; restoring original scale/position after updates is configurable.
+- Magnifying-glass Open in Achievements buttons restore the parked native Achievement window scale/position before inspection.
 - Auto-update timing uses seconds and waits for the first countdown before the first cycle.
 - `Stop Update Tasks` disables auto update and clears pending update tasks.
 - Help includes Cosmic diagnostics for test feedback.

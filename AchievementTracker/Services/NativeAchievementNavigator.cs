@@ -86,7 +86,6 @@ public unsafe sealed class NativeAchievementNavigator
         }
 
         var state = this.parkedState.Value;
-        this.parkedState = null;
         var addon = this.gameGui.GetAddonByName(AchievementAddonName, 1);
         if (addon.IsNull || addon.Address == IntPtr.Zero)
         {
@@ -101,6 +100,7 @@ public unsafe sealed class NativeAchievementNavigator
 
         unitBase->SetScale(state.Scale, false);
         unitBase->SetPosition(state.X, state.Y);
+        this.parkedState = null;
         return true;
     }
 
@@ -125,9 +125,9 @@ public unsafe sealed class NativeAchievementNavigator
         return true;
     }
 
-    public bool CloseAchievementWindow()
+    public bool CloseAchievementWindow(bool restoreParkedWindow = true)
     {
-        var restored = this.RestoreParkedAchievementWindow();
+        var restored = restoreParkedWindow && this.RestoreParkedAchievementWindow();
         var agent = AgentAchievement.Instance();
         if (agent == null || !this.IsOpen)
         {

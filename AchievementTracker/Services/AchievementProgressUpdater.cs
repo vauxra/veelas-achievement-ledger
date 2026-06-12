@@ -18,6 +18,7 @@ public sealed class AchievementProgressUpdater
     private readonly Func<bool> autoUpdateEnabledProvider;
     private readonly Func<int> autoUpdateIntervalSecondsProvider;
     private readonly Func<int> updateSpacingSecondsProvider;
+    private readonly Func<bool> restoreNativeWindowAfterUpdatesProvider;
     private readonly Action<string> debugLog;
     private DateTimeOffset nextAutoUpdateAt = DateTimeOffset.MinValue;
     private ActiveNativeAchievementRequest? activeNativeRequest;
@@ -32,6 +33,7 @@ public sealed class AchievementProgressUpdater
         Func<bool> autoUpdateEnabledProvider,
         Func<int> autoUpdateIntervalSecondsProvider,
         Func<int> updateSpacingSecondsProvider,
+        Func<bool> restoreNativeWindowAfterUpdatesProvider,
         Action<string> debugLog)
     {
         this.scheduler = new AchievementProgressRequestScheduler();
@@ -41,6 +43,7 @@ public sealed class AchievementProgressUpdater
         this.autoUpdateEnabledProvider = autoUpdateEnabledProvider;
         this.autoUpdateIntervalSecondsProvider = autoUpdateIntervalSecondsProvider;
         this.updateSpacingSecondsProvider = updateSpacingSecondsProvider;
+        this.restoreNativeWindowAfterUpdatesProvider = restoreNativeWindowAfterUpdatesProvider;
         this.debugLog = debugLog;
     }
 
@@ -195,15 +198,16 @@ public sealed class AchievementProgressUpdater
             return;
         }
 
+        var restoreAfterUpdate = this.restoreNativeWindowAfterUpdatesProvider();
         if (this.nativeWindowOpenedByVal && !this.nativeWindowWasOpenBeforeBatch)
         {
-            var closed = this.nativeAchievementNavigator.CloseAchievementWindow();
-            this.debugLog($"VAL DebugTrace NativeBatchAutoClose closed={closed}");
+            var closed = this.nativeAchievementNavigator.CloseAchievementWindow(restoreAfterUpdate);
+            this.debugLog($"VAL DebugTrace NativeBatchAutoClose closed={closed} restoreScalePosition={restoreAfterUpdate}");
         }
         else
         {
-            var restored = this.nativeAchievementNavigator.RestoreParkedAchievementWindow();
-            this.debugLog($"VAL DebugTrace NativeBatchLeaveOpen reason=window-was-open-before-batch restored={restored}");
+            var restored = restoreAfterUpdate && this.nativeAchievementNavigator.RestoreParkedAchievementWindow();
+            this.debugLog($"VAL DebugTrace NativeBatchLeaveOpen reason=window-was-open-before-batch restored={restored} restoreScalePosition={restoreAfterUpdate}");
         }
 
         this.batchInProgress = false;

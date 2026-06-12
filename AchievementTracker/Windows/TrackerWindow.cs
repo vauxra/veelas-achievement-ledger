@@ -92,7 +92,7 @@ public sealed class TrackerWindow : Window
         ImGui.SameLine();
         if (ImGuiComponents.IconButton(FontAwesomeIcon.Search))
         {
-            this.plugin.NativeAchievementNavigator.OpenAchievement(achievementId);
+            this.plugin.OpenNativeAchievementForInspection(achievementId);
         }
         AddTooltip("Open in Achievements.");
 
