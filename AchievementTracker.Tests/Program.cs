@@ -18,6 +18,7 @@ var tests = new List<(string Name, Action Body)>
     ("Update all keeps jitter when base spacing is zero", UpdateAllKeepsJitterWhenBaseSpacingIsZero),
     ("Request scheduler applies five second per-achievement backoff", RequestSchedulerAppliesFiveSecondPerAchievementBackoff),
     ("Auto updater selects only explicitly included tracked achievements", AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements),
+    ("Completion filters wait for loaded achievement state", CompletionFiltersWaitForLoadedAchievementState),
     ("Activity classifier matches finish mining to miner category", ActivityClassifierMatchesFinishMiningToMinerCategory),
     ("Activity classifier selects tracked achievements by category path", ActivityClassifierSelectsTrackedAchievementsByCategoryPath),
 };
@@ -214,6 +215,18 @@ static void RequestSchedulerAppliesFiveSecondPerAchievementBackoff()
 static void AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements()
 {
     AssertSequence(AutoUpdateSelection.SelectIncludedTrackedAchievements([1, 2, 3, 4], [2, 4, 999]), [2, 4]);
+}
+
+static void CompletionFiltersWaitForLoadedAchievementState()
+{
+    AssertTrue(SearchCompletionFilterPolicy.CanEvaluate("All", completionStateLoaded: false), "All search should not depend on completion state");
+    AssertFalse(SearchCompletionFilterPolicy.CanEvaluate("Completed", completionStateLoaded: false), "Completed search should wait for loaded completion state");
+    AssertFalse(SearchCompletionFilterPolicy.CanEvaluate("Incomplete", completionStateLoaded: false), "Incomplete search should wait for loaded completion state");
+    AssertTrue(SearchCompletionFilterPolicy.CanEvaluate("Completed", completionStateLoaded: true), "Completed search can run after completion state loads");
+    AssertTrue(SearchCompletionFilterPolicy.Matches("Completed", isComplete: true), "completed filter should match completed rows");
+    AssertFalse(SearchCompletionFilterPolicy.Matches("Completed", isComplete: false), "completed filter should reject incomplete rows");
+    AssertTrue(SearchCompletionFilterPolicy.Matches("Incomplete", isComplete: false), "incomplete filter should match incomplete rows");
+    AssertFalse(SearchCompletionFilterPolicy.Matches("Incomplete", isComplete: true), "incomplete filter should reject completed rows");
 }
 
 static void ActivityClassifierMatchesFinishMiningToMinerCategory()

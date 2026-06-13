@@ -367,6 +367,13 @@ public sealed class TrackerWindow : Window
         }
         AddTooltip("Sort achievement names alphabetically.");
 
+        if (!SearchCompletionFilterPolicy.CanEvaluate(this.plugin.Configuration.SearchCompletionFilter, this.plugin.AchievementProgressService.AreCompletionStatesLoaded))
+        {
+            ImGui.Separator();
+            ImGui.TextDisabled("Open the in-game Achievements window first so completion states can load.");
+            return;
+        }
+
         var trackedIds = this.plugin.TrackedAchievements.AchievementIds;
         var results = this.SortSearchResults(this.plugin.AchievementCatalog.Search(this.achievementSearchQuery, 5000)
                 .Where(this.MatchesSelectedCategory)
@@ -777,12 +784,7 @@ public sealed class TrackerWindow : Window
     }
 
     private bool MatchesCompletionFilter(AchievementInfo info)
-        => this.plugin.Configuration.SearchCompletionFilter switch
-        {
-            "Completed" => this.IsComplete(info.Id),
-            "Incomplete" => !this.IsComplete(info.Id),
-            _ => true,
-        };
+        => SearchCompletionFilterPolicy.Matches(this.plugin.Configuration.SearchCompletionFilter, this.IsComplete(info.Id));
 
     private bool ShouldShowTrackedIcon(string iconName)
         => !this.hideTrackedIcons || !this.plugin.Configuration.HiddenTrackedAchievementIcons.Contains(iconName);
