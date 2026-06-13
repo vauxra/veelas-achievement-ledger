@@ -33,7 +33,6 @@ public sealed class ConfigWindow : Window
     private enum ConfigSection
     {
         AutoUpdate,
-        TrackedAchievements,
         Ui,
         Help,
     }
@@ -46,7 +45,7 @@ public sealed class ConfigWindow : Window
 
     public void OpenTrackedAchievements()
     {
-        this.selectedSection = ConfigSection.TrackedAchievements;
+        this.selectedSection = ConfigSection.Ui;
         this.IsOpen = true;
     }
 
@@ -76,9 +75,6 @@ public sealed class ConfigWindow : Window
             case ConfigSection.AutoUpdate:
                 this.DrawAutoUpdatePage();
                 break;
-            case ConfigSection.TrackedAchievements:
-                this.DrawTrackedAchievementsPage();
-                break;
             case ConfigSection.Ui:
                 this.DrawUiPage();
                 break;
@@ -94,7 +90,6 @@ public sealed class ConfigWindow : Window
     {
         ImGui.BeginChild("##ConfigNavigation", new Vector2(180, 0), true);
         this.DrawNavItem("Auto update", ConfigSection.AutoUpdate);
-        this.DrawNavItem("Tracked Achievements", ConfigSection.TrackedAchievements);
         this.DrawNavItem("UI", ConfigSection.Ui);
         this.DrawNavItem("Help", ConfigSection.Help);
         ImGui.EndChild();
@@ -569,11 +564,6 @@ public sealed class ConfigWindow : Window
         }
         this.AddTooltip("Write AchieveEx DebugTrace logs.");
 
-        if (ImGui.Button("Restore default Achievement window scale"))
-        {
-            this.plugin.ResetNativeAchievementWindowScale();
-        }
-        this.AddTooltip("Open/show the native Achievement window if needed, then restore its scale to the default 100% while keeping its current position.");
 
         ImGui.Separator();
     }
@@ -914,6 +904,12 @@ public sealed class ConfigWindow : Window
     private void DrawHelp()
     {
         ImGui.TextUnformatted("Help");
+        if (ImGui.Button("Restore default Achievement window scale"))
+        {
+            this.plugin.ResetNativeAchievementWindowScale();
+        }
+        this.AddTooltip("Open/show the native Achievement window if needed, then restore its scale to the default 100% while keeping its current position.");
+        ImGui.Separator();
         this.DrawDisabledWrapped("⚠ FLASH / UI motion warning: queued updates can briefly open, shrink, move, restore, and close the native Achievement window.");
         ImGui.TextWrapped("Disclaimer: This experimental addon uses native Achievement UI opens, timers, window parking/rescaling, and local ClientStructs reads that are discouraged for normal Dalamud submissions when automated. Use may have consequences for your account, including a ban.");
         ImGui.Separator();
@@ -923,7 +919,7 @@ public sealed class ConfigWindow : Window
         this.DrawWrappedBullet("Reload buttons and Update All open native Achievement entries, then Achieve Ex+ reads the already-populated progress slot.");
         this.DrawWrappedBullet("Update All queues native Achievement UI assisted progress updates for tracked achievements. Items updated in the last 30 seconds are skipped by Update All.");
         this.DrawWrappedBullet("Timed auto update and event-triggered updates cannot both be enabled at the same time.");
-        this.DrawWrappedBullet("Queued update tasks no longer change the native Achievement window scale or position.");
+        this.DrawWrappedBullet("If the native Achievement window is already open before an update batch, update actions do not move or scale it.");
         this.DrawWrappedBullet("Magnifying-glass Open in Achievements buttons restore the parked Achievement window scale/position before showing the selected entry.");
         this.DrawWrappedBullet("Magnifying-glass inspection opens restore any parked Achievement window state before showing the entry.");
         this.DrawWrappedBullet("Stop Update Tasks disables auto update and clears queued update tasks.");
@@ -932,7 +928,6 @@ public sealed class ConfigWindow : Window
         ImGui.Separator();
         ImGui.TextUnformatted("Config sections");
         this.DrawWrappedBullet("Auto update: controls timed update cycles, request spacing, debug logs, included tracked rows, and event-triggered updates.");
-        this.DrawWrappedBullet("Tracked Achievements: manages tracked rows, ordering, search, add/remove, Cosmic score planning, and native Achievement opens.");
         this.DrawWrappedBullet("Help: explains the windows, controls, and risk notes.");
 
         ImGui.Separator();

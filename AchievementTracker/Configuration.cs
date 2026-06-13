@@ -177,14 +177,11 @@ public sealed class Configuration : IPluginConfiguration
     }
 
     private static List<string> NormalizeHiddenTrackedAchievementIcons(List<string>? values, string[] allowed)
-    {
-        var normalized = NormalizeStringSet(values, allowed);
-        return normalized.Count == 0 ? allowed.ToList() : normalized;
-    }
+        => NormalizeStringSet(values, allowed);
 
     private static List<string> NormalizeShownStringSet(List<string>? shownValues, List<string>? legacyHiddenValues, string[] allowed)
     {
-        if (shownValues is not null && shownValues.Count > 0)
+        if (shownValues is not null)
         {
             return NormalizeStringSet(shownValues, allowed);
         }

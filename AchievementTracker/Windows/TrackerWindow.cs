@@ -22,8 +22,9 @@ public sealed class TrackerWindow : Window
     private string presetNameInput = string.Empty;
     private string selectedPresetName = string.Empty;
     private string achievementSearchQuery = string.Empty;
-    private string selectedCategoryFilter = string.Empty;
-    private string selectedSubcategoryFilter = string.Empty;
+    private bool categoryFilterAll = true;
+    private readonly HashSet<string> selectedCategoryFilters = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> selectedSubcategoryFilters = new(StringComparer.OrdinalIgnoreCase);
 
     public TrackerWindow(Plugin plugin)
         : base("Achieve Ex+##AchieveExPlusLive", ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoBringToFrontOnFocus)
@@ -253,14 +254,8 @@ public sealed class TrackerWindow : Window
 
     private void DrawAchievementCategoryColumn()
     {
-        ImGui.TextUnformatted("Achievement Categories");
-        if (ImGui.Button("All categories"))
-        {
-            this.selectedCategoryFilter = string.Empty;
-            this.selectedSubcategoryFilter = string.Empty;
-        }
-        AddTooltip("Show all categories.");
-
+        ImGui.TextUnformatted("Achievement categories");
+        ImGui.TextDisabled("Click to select one category. Ctrl-click to add/remove multiple categories or subcategories.");
         ImGui.Separator();
         var categoryEntries = this.plugin.AchievementCatalog.Search(string.Empty, 5000)
             .Select(info => (Info: info, Parts: SplitCategoryPath(info.CategoryName), Sort: this.GetGameSortKey(info)))
@@ -272,12 +267,10 @@ public sealed class TrackerWindow : Window
 
         foreach (var categoryGroup in categoryEntries)
         {
-            var selectedCategory = string.Equals(this.selectedCategoryFilter, categoryGroup.Key, StringComparison.OrdinalIgnoreCase)
-                && string.IsNullOrWhiteSpace(this.selectedSubcategoryFilter);
+            var selectedCategory = this.selectedCategoryFilters.Contains(categoryGroup.Key);
             if (ImGui.Selectable(categoryGroup.Key, selectedCategory))
             {
-                this.selectedCategoryFilter = categoryGroup.Key;
-                this.selectedSubcategoryFilter = string.Empty;
+                this.ToggleCategoryFilter(categoryGroup.Key);
             }
 
             var subcategories = categoryGroup
@@ -294,13 +287,15 @@ public sealed class TrackerWindow : Window
             ImGui.Indent(12);
             foreach (var subcategoryGroup in subcategories)
             {
-                var selected = string.Equals(this.selectedCategoryFilter, categoryGroup.Key, StringComparison.OrdinalIgnoreCase)
-                    && string.Equals(this.selectedSubcategoryFilter, subcategoryGroup.Key, StringComparison.OrdinalIgnoreCase);
+                var subcategoryKey = BuildSubcategoryFilterKey(categoryGroup.Key, subcategoryGroup.Key);
+                var selected = this.selectedSubcategoryFilters.Contains(subcategoryKey);
+                ImGui.PushID(subcategoryKey);
                 if (ImGui.Selectable(subcategoryGroup.Key, selected))
                 {
-                    this.selectedCategoryFilter = categoryGroup.Key;
-                    this.selectedSubcategoryFilter = subcategoryGroup.Key;
+                    this.ToggleSubcategoryFilter(categoryGroup.Key, subcategoryGroup.Key);
                 }
+
+                ImGui.PopID();
             }
 
             ImGui.Unindent(12);
@@ -319,12 +314,19 @@ public sealed class TrackerWindow : Window
         }
         AddTooltip("Clear search text.");
 
-        if (ImGui.Button("All categories"))
+        ImGui.TextUnformatted("Category:");
+        ImGui.SameLine();
+        if (ImGui.RadioButton("All", this.categoryFilterAll))
         {
-            this.selectedCategoryFilter = string.Empty;
-            this.selectedSubcategoryFilter = string.Empty;
+            this.categoryFilterAll = true;
         }
-        AddTooltip("Clear category and subcategory filters.");
+        AddTooltip("Ignore selected categories.");
+        ImGui.SameLine();
+        if (ImGui.RadioButton("Selected", !this.categoryFilterAll))
+        {
+            this.categoryFilterAll = false;
+        }
+        AddTooltip("Filter by selected categories/subcategories from the Achievement categories column. Ctrl-click there to select multiple.");
 
         ImGui.TextUnformatted("Completion:");
         ImGui.SameLine();
@@ -787,20 +789,65 @@ public sealed class TrackerWindow : Window
 
     private bool MatchesSelectedCategory(AchievementInfo info)
     {
-        if (string.IsNullOrWhiteSpace(this.selectedCategoryFilter))
+        if (this.categoryFilterAll)
         {
             return true;
         }
 
         var parts = SplitCategoryPath(info.CategoryName);
-        if (!string.Equals(parts.Category, this.selectedCategoryFilter, StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrWhiteSpace(parts.Category))
         {
             return false;
         }
 
-        return string.IsNullOrWhiteSpace(this.selectedSubcategoryFilter)
-            || string.Equals(parts.Subcategory, this.selectedSubcategoryFilter, StringComparison.OrdinalIgnoreCase);
+        if (this.selectedCategoryFilters.Contains(parts.Category))
+        {
+            return true;
+        }
+
+        return !string.IsNullOrWhiteSpace(parts.Subcategory)
+            && this.selectedSubcategoryFilters.Contains(BuildSubcategoryFilterKey(parts.Category, parts.Subcategory));
     }
+
+    private void ToggleCategoryFilter(string category)
+    {
+        var ctrl = ImGui.GetIO().KeyCtrl;
+        this.categoryFilterAll = false;
+        if (!ctrl)
+        {
+            this.selectedCategoryFilters.Clear();
+            this.selectedSubcategoryFilters.Clear();
+            this.selectedCategoryFilters.Add(category);
+            return;
+        }
+
+        if (!this.selectedCategoryFilters.Add(category))
+        {
+            this.selectedCategoryFilters.Remove(category);
+        }
+    }
+
+    private void ToggleSubcategoryFilter(string category, string subcategory)
+    {
+        var ctrl = ImGui.GetIO().KeyCtrl;
+        var key = BuildSubcategoryFilterKey(category, subcategory);
+        this.categoryFilterAll = false;
+        if (!ctrl)
+        {
+            this.selectedCategoryFilters.Clear();
+            this.selectedSubcategoryFilters.Clear();
+            this.selectedSubcategoryFilters.Add(key);
+            return;
+        }
+
+        if (!this.selectedSubcategoryFilters.Add(key))
+        {
+            this.selectedSubcategoryFilters.Remove(key);
+        }
+    }
+
+    private static string BuildSubcategoryFilterKey(string category, string subcategory)
+        => $"{category}>{subcategory}";
 
     private bool IsComplete(uint achievementId)
         => this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row)

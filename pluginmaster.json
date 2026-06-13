@@ -19,9 +19,9 @@
     "DownloadLinkInstall": "",
     "DownloadLinkUpdate": "",
     "LastUpdate": "1781233136",
-    "TestingAssemblyVersion": "0.3.0.7",
+    "TestingAssemblyVersion": "0.3.0.8",
     "TestingDalamudApiLevel": 15,
-    "TestingChangelog": "Experimental Ex+ local layout build. Adds Restore default Achievement window scale button below debug prints in Auto update; inspection/manual restore now falls back to default scale if no parked/user scale is available.",
+    "TestingChangelog": "Experimental Ex+ local layout build. Update actions no longer move/scale an already-open Achievement window; scale reset moved to Help; search category filters use All/Selected radio mode with Ctrl multi-select; UI checkbox groups can deselect all; Tracked Achievements config page removed.",
     "DownloadLinkTesting": "",
     "IconUrl": "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png",
     "ImageUrls": [
