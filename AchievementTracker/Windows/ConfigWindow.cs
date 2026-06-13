@@ -34,6 +34,7 @@ public sealed class ConfigWindow : Window
     {
         AutoUpdate,
         TrackedAchievements,
+        Ui,
         Help,
     }
 
@@ -78,6 +79,9 @@ public sealed class ConfigWindow : Window
             case ConfigSection.TrackedAchievements:
                 this.DrawTrackedAchievementsPage();
                 break;
+            case ConfigSection.Ui:
+                this.DrawUiPage();
+                break;
             case ConfigSection.Help:
                 this.DrawHelp();
                 break;
@@ -91,6 +95,7 @@ public sealed class ConfigWindow : Window
         ImGui.BeginChild("##ConfigNavigation", new Vector2(180, 0), true);
         this.DrawNavItem("Auto update", ConfigSection.AutoUpdate);
         this.DrawNavItem("Tracked Achievements", ConfigSection.TrackedAchievements);
+        this.DrawNavItem("UI", ConfigSection.Ui);
         this.DrawNavItem("Help", ConfigSection.Help);
         ImGui.EndChild();
     }
@@ -704,6 +709,79 @@ public sealed class ConfigWindow : Window
         ImGui.Unindent(18);
     }
 
+    private void DrawUiPage()
+    {
+        ImGui.TextUnformatted("Main panel column order");
+        this.DrawOrderEditor(this.plugin.Configuration.MainColumnOrder, ["Lists", "Search Categories", "Search Results", "Tracked Achievements"], "columns");
+
+        ImGui.Separator();
+        ImGui.TextUnformatted("Main panel navigation order");
+        this.DrawOrderEditor(this.plugin.Configuration.MainNavigationOrder, ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"], "nav");
+
+        ImGui.Separator();
+        ImGui.TextUnformatted("Hide tracked achievement icons when eye toggle is active");
+        this.DrawHiddenIconToggle("Auto update");
+        this.DrawHiddenIconToggle("Remove");
+        this.DrawHiddenIconToggle("Refresh");
+        this.DrawHiddenIconToggle("Open");
+    }
+
+    private void DrawOrderEditor(System.Collections.Generic.List<string> order, string[] defaults, string idPrefix)
+    {
+        foreach (var item in defaults)
+        {
+            if (!order.Contains(item))
+            {
+                order.Add(item);
+            }
+        }
+
+        for (var i = 0; i < order.Count; i++)
+        {
+            ImGui.PushID($"{idPrefix}-{order[i]}");
+            ImGui.TextUnformatted(order[i]);
+            ImGui.SameLine();
+            using (ImRaiiShim.Disabled(i == 0))
+            {
+                if (ImGuiComponents.IconButton("up", FontAwesomeIcon.ArrowUp))
+                {
+                    (order[i - 1], order[i]) = (order[i], order[i - 1]);
+                    this.plugin.SaveConfiguration();
+                }
+            }
+
+            ImGui.SameLine();
+            using (ImRaiiShim.Disabled(i == order.Count - 1))
+            {
+                if (ImGuiComponents.IconButton("down", FontAwesomeIcon.ArrowDown))
+                {
+                    (order[i + 1], order[i]) = (order[i], order[i + 1]);
+                    this.plugin.SaveConfiguration();
+                }
+            }
+
+            ImGui.PopID();
+        }
+    }
+
+    private void DrawHiddenIconToggle(string iconName)
+    {
+        var hidden = this.plugin.Configuration.HiddenTrackedAchievementIcons.Contains(iconName);
+        if (ImGui.Checkbox(iconName, ref hidden))
+        {
+            if (hidden && !this.plugin.Configuration.HiddenTrackedAchievementIcons.Contains(iconName))
+            {
+                this.plugin.Configuration.HiddenTrackedAchievementIcons.Add(iconName);
+            }
+            else if (!hidden)
+            {
+                this.plugin.Configuration.HiddenTrackedAchievementIcons.RemoveAll(value => value == iconName);
+            }
+
+            this.plugin.SaveConfiguration();
+        }
+    }
+
     private void DrawHelp()
     {
         ImGui.TextUnformatted("Help");
@@ -731,7 +809,7 @@ public sealed class ConfigWindow : Window
         ImGui.Separator();
         ImGui.TextUnformatted("Tracked Achievements notes");
         this.DrawWrappedBullet("The Auto checkbox on each tracked row controls whether timed auto update includes that achievement.");
-        this.DrawWrappedBullet("Saved templates now live in the main Achieve Ex+ pane. Click the eye icon to show or hide the Templates column, then right-click template names for options.");
+        this.DrawWrappedBullet("Lists live in the main Achieve Ex+ pane. Click the disk icon to show or hide the Lists column, then right-click list names for options.");
         this.DrawWrappedBullet("Search adds achievements to the tracked list; Clear resets the search bar.");
         this.DrawWrappedBullet("Cosmic Class achievements show cached score progress in tracked and search rows when scores have been observed in Cosmic content.");
         this.DrawWrappedBullet("Cosmic score cache refreshes passively while WKS/Cosmic data is loaded and remains available outside the zone.");
@@ -780,6 +858,30 @@ public sealed class ConfigWindow : Window
         if (ImGui.IsItemHovered())
         {
             ImGui.SetTooltip(text);
+        }
+    }
+
+    private sealed class ImRaiiShim : IDisposable
+    {
+        private readonly bool disabled;
+
+        private ImRaiiShim(bool disabled)
+        {
+            this.disabled = disabled;
+            if (disabled)
+            {
+                ImGui.BeginDisabled();
+            }
+        }
+
+        public static ImRaiiShim Disabled(bool disabled) => new(disabled);
+
+        public void Dispose()
+        {
+            if (this.disabled)
+            {
+                ImGui.EndDisabled();
+            }
         }
     }
 }

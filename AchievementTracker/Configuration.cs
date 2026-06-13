@@ -63,6 +63,12 @@ public sealed class Configuration : IPluginConfiguration
 
     public bool RestoreNativeAchievementWindowAfterUpdates { get; set; } = true;
 
+    public List<string> MainColumnOrder { get; set; } = ["Lists", "Search Categories", "Search Results", "Tracked Achievements"];
+
+    public List<string> MainNavigationOrder { get; set; } = ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"];
+
+    public List<string> HiddenTrackedAchievementIcons { get; set; } = [];
+
     public List<uint> GetAutoUpdateTrackedAchievementIds()
         => AutoUpdateSelection.SelectIncludedTrackedAchievements(this.TrackedAchievementIds, this.AutoUpdateAchievementIds);
 
@@ -86,7 +92,56 @@ public sealed class Configuration : IPluginConfiguration
         }
 
         this.CosmicClassScoreCache ??= new CosmicClassScoreCache();
+        this.MainColumnOrder = NormalizeStringOrder(this.MainColumnOrder, ["Lists", "Search Categories", "Search Results", "Tracked Achievements"]);
+        this.MainNavigationOrder = NormalizeStringOrder(this.MainNavigationOrder, ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"]);
+        this.HiddenTrackedAchievementIcons = NormalizeStringSet(this.HiddenTrackedAchievementIcons, ["Auto update", "Remove", "Refresh", "Open"]);
         TrackedAchievementPresetStore.Normalize(this.TrackedAchievementPresets);
+    }
+
+    private static List<string> NormalizeStringOrder(List<string>? values, string[] defaults)
+    {
+        var normalized = new List<string>();
+        if (values is not null)
+        {
+            foreach (var value in values)
+            {
+                if (Array.Exists(defaults, item => string.Equals(item, value, StringComparison.Ordinal))
+                    && !normalized.Contains(value))
+                {
+                    normalized.Add(value);
+                }
+            }
+        }
+
+        foreach (var value in defaults)
+        {
+            if (!normalized.Contains(value))
+            {
+                normalized.Add(value);
+            }
+        }
+
+        return normalized;
+    }
+
+    private static List<string> NormalizeStringSet(List<string>? values, string[] allowed)
+    {
+        var normalized = new List<string>();
+        if (values is null)
+        {
+            return normalized;
+        }
+
+        foreach (var value in values)
+        {
+            if (Array.Exists(allowed, item => string.Equals(item, value, StringComparison.Ordinal))
+                && !normalized.Contains(value))
+            {
+                normalized.Add(value);
+            }
+        }
+
+        return normalized;
     }
 
     public void Save()

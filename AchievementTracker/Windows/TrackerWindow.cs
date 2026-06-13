@@ -15,6 +15,7 @@ public sealed class TrackerWindow : Window
 {
     private readonly Plugin plugin;
     private bool templatesOpen;
+    private bool hideTrackedIcons;
     private bool searchPanelOpen = true;
     private SearchSortMode searchSortMode = SearchSortMode.GameOrder;
     private string presetNameInput = string.Empty;
@@ -52,96 +53,139 @@ public sealed class TrackerWindow : Window
 
     private void DrawToolbar()
     {
-        if (ImGui.Button("Update All"))
+        foreach (var item in this.plugin.Configuration.MainNavigationOrder)
         {
-            this.plugin.EnqueueUpdateAllTracked("manual-update-all");
+            this.DrawToolbarItem(item);
+            ImGui.SameLine();
         }
-        AddTooltip("Update tracked achievements.");
 
-        this.SameLineOrWrap(110f);
-        var autoUpdateEnabled = this.plugin.Configuration.ExperimentalAutoUpdateEnabled;
-        if (ImGui.Checkbox("Auto update", ref autoUpdateEnabled))
-        {
-            this.plugin.Configuration.ExperimentalAutoUpdateEnabled = autoUpdateEnabled;
-            this.plugin.SaveConfiguration();
-            this.plugin.ResetAutoUpdateCountdownIfActive();
-        }
-        AddTooltip("Run timed updates.");
-
-        this.SameLineOrWrap(42f);
-        if (ImGuiComponents.IconButton("toggle-templates", this.templatesOpen ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye))
-        {
-            this.templatesOpen = !this.templatesOpen;
-            this.EnsureSelectedPresetIsValid();
-        }
-        AddTooltip(this.templatesOpen ? "Hide saved templates column." : "Show saved templates column.");
-
-        ImGui.SameLine();
-        if (ImGuiComponents.IconButton("toggle-main-search", FontAwesomeIcon.Book))
-        {
-            this.searchPanelOpen = !this.searchPanelOpen;
-        }
-        AddTooltip(this.searchPanelOpen ? "Hide category/search columns." : "Show category/search columns.");
-
-        ImGui.SameLine();
-        if (ImGuiComponents.IconButton("open-config", FontAwesomeIcon.Cog))
-        {
-            this.plugin.OpenConfigUi();
-        }
-        AddTooltip("Open configuration.");
+        ImGui.NewLine();
     }
+
+    private void DrawToolbarItem(string item)
+    {
+        switch (item)
+        {
+            case "Update All":
+                if (ImGui.Button("Update All"))
+                {
+                    this.plugin.EnqueueUpdateAllTracked("manual-update-all");
+                }
+                AddTooltip("Update tracked achievements.");
+                break;
+            case "Auto update":
+                var autoUpdateEnabled = this.plugin.Configuration.ExperimentalAutoUpdateEnabled;
+                if (ImGui.Checkbox("Auto update", ref autoUpdateEnabled))
+                {
+                    this.plugin.Configuration.ExperimentalAutoUpdateEnabled = autoUpdateEnabled;
+                    this.plugin.SaveConfiguration();
+                    this.plugin.ResetAutoUpdateCountdownIfActive();
+                }
+                AddTooltip("Run timed updates.");
+                break;
+            case "Lists":
+                if (ImGuiComponents.IconButton("toggle-lists", FontAwesomeIcon.Save))
+                {
+                    this.templatesOpen = !this.templatesOpen;
+                    this.EnsureSelectedPresetIsValid();
+                }
+                AddTooltip(this.templatesOpen ? "Hide Lists column." : "Show Lists column.");
+                break;
+            case "Search":
+                if (ImGuiComponents.IconButton("toggle-main-search", FontAwesomeIcon.Book))
+                {
+                    this.searchPanelOpen = !this.searchPanelOpen;
+                }
+                AddTooltip(this.searchPanelOpen ? "Hide category/search columns." : "Show category/search columns.");
+                break;
+            case "Config":
+                if (ImGuiComponents.IconButton("toggle-config", FontAwesomeIcon.Cog))
+                {
+                    this.plugin.ToggleConfigUi();
+                }
+                AddTooltip("Toggle configuration.");
+                break;
+            case "Tracked buttons":
+                if (ImGuiComponents.IconButton("toggle-tracked-buttons", this.hideTrackedIcons ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye))
+                {
+                    this.hideTrackedIcons = !this.hideTrackedIcons;
+                }
+                AddTooltip(this.hideTrackedIcons ? "Show tracked achievement icons." : "Hide configured tracked achievement icons.");
+                break;
+        }
+    }
+
+    private bool ShouldDrawColumn(string column)
+        => column switch
+        {
+            "Lists" => this.templatesOpen,
+            "Search Categories" => this.searchPanelOpen,
+            "Search Results" => this.searchPanelOpen,
+            "Tracked Achievements" => true,
+            _ => false,
+        };
 
     private void DrawMainPane()
     {
         var spacing = ImGui.GetStyle().ItemSpacing.X;
         var width = ImGui.GetContentRegionAvail().X;
-        var visibleColumns = 1 + (this.templatesOpen ? 1 : 0) + (this.searchPanelOpen ? 2 : 0);
+        var orderedColumns = this.plugin.Configuration.MainColumnOrder.Where(this.ShouldDrawColumn).ToList();
+        var visibleColumns = Math.Max(1, orderedColumns.Count);
+        var desiredWidth = Math.Clamp(visibleColumns * 300f, 760f, 1500f);
+        if (ImGui.GetWindowSize().X < desiredWidth - 10f || ImGui.GetWindowSize().X > desiredWidth + 360f)
+        {
+            ImGui.SetWindowSize(new Vector2(desiredWidth, ImGui.GetWindowSize().Y));
+        }
+
         var availableForColumns = width - (spacing * Math.Max(0, visibleColumns - 1));
-        var templateWidth = this.templatesOpen ? Math.Clamp(availableForColumns * 0.22f, 190f, 280f) : 0f;
-        var categoryWidth = this.searchPanelOpen ? Math.Clamp(availableForColumns * 0.22f, 190f, 260f) : 0f;
-        var searchWidth = this.searchPanelOpen ? Math.Clamp(availableForColumns * 0.32f, 290f, 440f) : 0f;
-        var trackedWidth = Math.Max(280f, availableForColumns - templateWidth - categoryWidth - searchWidth);
+        var baseColumnWidth = Math.Max(220f, availableForColumns / visibleColumns);
 
-        if (this.templatesOpen)
+        for (var i = 0; i < orderedColumns.Count; i++)
         {
-            ImGui.BeginChild("##MainTemplateColumn", new Vector2(templateWidth, 0), true);
-            this.DrawTemplateColumn();
+            var column = orderedColumns[i];
+            var columnWidth = i == orderedColumns.Count - 1 ? 0f : baseColumnWidth;
+            ImGui.BeginChild($"##MainColumn-{column}", new Vector2(columnWidth, 0), true);
+            this.DrawColumn(column);
             ImGui.EndChild();
-            ImGui.SameLine();
+            if (i < orderedColumns.Count - 1)
+            {
+                ImGui.SameLine();
+            }
         }
+    }
 
-        if (this.searchPanelOpen)
+    private void DrawColumn(string column)
+    {
+        switch (column)
         {
-            ImGui.BeginChild("##MainCategoryColumn", new Vector2(categoryWidth, 0), true);
-            this.DrawAchievementCategoryColumn();
-            ImGui.EndChild();
-
-            ImGui.SameLine();
-            ImGui.BeginChild("##MainSearchColumn", new Vector2(searchWidth, 0), true);
-            this.DrawAchievementSearchColumn();
-            ImGui.EndChild();
-
-            ImGui.SameLine();
+            case "Lists":
+                this.DrawTemplateColumn();
+                break;
+            case "Search Categories":
+                this.DrawAchievementCategoryColumn();
+                break;
+            case "Search Results":
+                this.DrawAchievementSearchColumn();
+                break;
+            case "Tracked Achievements":
+                this.DrawTrackedColumn();
+                break;
         }
-
-        ImGui.BeginChild("##MainTrackedColumn", new Vector2(trackedWidth, 0), true);
-        this.DrawTrackedColumn();
-        ImGui.EndChild();
     }
 
     private void DrawTemplateColumn()
     {
         this.EnsureSelectedPresetIsValid();
-        ImGui.TextUnformatted("Saved templates");
+        ImGui.TextUnformatted("Lists");
         ImGui.Separator();
         this.DrawPresetButtons();
 
         ImGui.SetNextItemWidth(-1);
-        if (ImGui.InputTextWithHint("##PresetName", "Template name", ref this.presetNameInput, TrackedAchievementPresetStore.MaxPresetNameLength))
+        if (ImGui.InputTextWithHint("##PresetName", "List name", ref this.presetNameInput, TrackedAchievementPresetStore.MaxPresetNameLength))
         {
             this.presetNameInput = TrackedAchievementPresetStore.SanitizeName(this.presetNameInput);
         }
-        AddTooltip("Name used by Save and Rename.");
+        AddTooltip("List name used by Save and Rename.");
 
         ImGui.Separator();
         this.DrawPresetList();
@@ -162,6 +206,7 @@ public sealed class TrackerWindow : Window
         var categoryEntries = this.plugin.AchievementCatalog.Search(string.Empty, 5000)
             .Select(info => (Info: info, Parts: SplitCategoryPath(info.CategoryName), Sort: this.GetGameSortKey(info)))
             .Where(entry => !string.IsNullOrWhiteSpace(entry.Parts.Category))
+            .Where(entry => !string.Equals(entry.Parts.Category, "Legacy", StringComparison.OrdinalIgnoreCase))
             .GroupBy(entry => entry.Parts.Category)
             .OrderBy(group => group.Min(entry => entry.Sort.KindOrder))
             .ThenBy(group => group.Key, StringComparer.OrdinalIgnoreCase);
@@ -245,6 +290,7 @@ public sealed class TrackerWindow : Window
         var trackedIds = this.plugin.TrackedAchievements.AchievementIds;
         var results = this.SortSearchResults(this.plugin.AchievementCatalog.Search(this.achievementSearchQuery, 5000)
                 .Where(this.MatchesSelectedCategory)
+                .Where(result => !string.Equals(SplitCategoryPath(result.CategoryName).Category, "Legacy", StringComparison.OrdinalIgnoreCase))
                 .Where(result => !this.plugin.Configuration.HideCompletedInSearch || !this.IsComplete(result.Id)))
             .Take(80)
             .ToList();
@@ -274,15 +320,22 @@ public sealed class TrackerWindow : Window
     {
         ImGui.PushID($"search-{result.Id}");
         var alreadyTracked = trackedIds.Contains(result.Id);
-        var canAdd = !alreadyTracked && trackedIds.Count < TrackedAchievementStore.MaxTrackedAchievements;
-        using (ImRaiiShim.Disabled(!canAdd))
+        var canAdd = trackedIds.Count < TrackedAchievementStore.MaxTrackedAchievements;
+        using (ImRaiiShim.Disabled(!alreadyTracked && !canAdd))
         {
-            if (ImGuiComponents.IconButton("search-add", FontAwesomeIcon.Plus))
+            if (ImGuiComponents.IconButton("search-add-remove", alreadyTracked ? FontAwesomeIcon.Times : FontAwesomeIcon.Plus))
             {
-                this.AddTrackedAchievement(result.Id);
+                if (alreadyTracked)
+                {
+                    _ = this.RemoveTrackedAchievement(result.Id);
+                }
+                else
+                {
+                    this.AddTrackedAchievement(result.Id);
+                }
             }
         }
-        AddTooltip(alreadyTracked ? "Already tracked." : canAdd ? "Add to tracked list." : "Tracked list is full.");
+        AddTooltip(alreadyTracked ? "Remove from tracked list." : canAdd ? "Add to tracked list." : "Tracked list is full.");
 
         ImGui.SameLine();
         if (ImGuiComponents.IconButton("search-open-native", FontAwesomeIcon.Search))
@@ -337,29 +390,59 @@ public sealed class TrackerWindow : Window
         }
 
         ImGui.PushID((int)achievementId);
-        if (ImGuiComponents.IconButton("tracked-remove-main", FontAwesomeIcon.Times))
+        if (this.ShouldShowTrackedIcon("Auto update"))
         {
-            _ = this.RemoveTrackedAchievement(achievementId);
-            ImGui.PopID();
-            return;
-        }
-        AddTooltip("Remove from tracked.");
+            var included = this.plugin.Configuration.AutoUpdateAchievementIds.Contains(achievementId);
+            if (ImGui.Checkbox("Auto", ref included))
+            {
+                if (included && !this.plugin.Configuration.AutoUpdateAchievementIds.Contains(achievementId))
+                {
+                    this.plugin.Configuration.AutoUpdateAchievementIds.Add(achievementId);
+                }
+                else if (!included)
+                {
+                    this.plugin.Configuration.AutoUpdateAchievementIds.RemoveAll(id => id == achievementId);
+                }
 
-        ImGui.SameLine();
-        if (ImGuiComponents.IconButton(FontAwesomeIcon.SyncAlt))
+                this.plugin.SaveConfiguration();
+                this.plugin.ResetAutoUpdateCountdownIfActive();
+            }
+            AddTooltip("Include in timed auto updates.");
+            ImGui.SameLine();
+        }
+
+        if (this.ShouldShowTrackedIcon("Remove"))
         {
-            this.plugin.EnqueueUpdateOne(achievementId, "manual-row-update");
+            if (ImGuiComponents.IconButton("tracked-remove-main", FontAwesomeIcon.Times))
+            {
+                _ = this.RemoveTrackedAchievement(achievementId);
+                ImGui.PopID();
+                return;
+            }
+            AddTooltip("Remove from tracked.");
+            ImGui.SameLine();
         }
-        AddTooltip("Update this achievement.");
 
-        ImGui.SameLine();
-        if (ImGuiComponents.IconButton(FontAwesomeIcon.Search))
+        if (this.ShouldShowTrackedIcon("Refresh"))
         {
-            this.plugin.OpenNativeAchievementForInspection(achievementId);
+            if (ImGuiComponents.IconButton(FontAwesomeIcon.SyncAlt))
+            {
+                this.plugin.EnqueueUpdateOne(achievementId, "manual-row-update");
+            }
+            AddTooltip("Update this achievement.");
+            ImGui.SameLine();
         }
-        AddTooltip("Open in Achievements.");
 
-        ImGui.SameLine();
+        if (this.ShouldShowTrackedIcon("Open"))
+        {
+            if (ImGuiComponents.IconButton(FontAwesomeIcon.Search))
+            {
+                this.plugin.OpenNativeAchievementForInspection(achievementId);
+            }
+            AddTooltip("Open in Achievements.");
+            ImGui.SameLine();
+        }
+
         ImGui.TextWrapped(info.Name);
         ImGui.TextDisabled(progressText);
         ImGui.PopID();
@@ -371,28 +454,28 @@ public sealed class TrackerWindow : Window
         {
             this.SaveCurrentTemplate();
         }
-        AddTooltip("Save current tracked list as this template name.");
+        AddTooltip("Save current tracked list as this list name.");
 
         ImGui.SameLine(0, 4);
         if (ImGuiComponents.IconButton("template-load", FontAwesomeIcon.FolderOpen))
         {
             this.LoadSelectedPreset();
         }
-        AddTooltip("Load selected template.");
+        AddTooltip("Load selected list.");
 
         ImGui.SameLine(0, 4);
         if (ImGuiComponents.IconButton("template-rename", FontAwesomeIcon.Edit))
         {
             this.RenameSelectedPreset();
         }
-        AddTooltip("Rename selected template to the typed name.");
+        AddTooltip("Rename selected list to the typed name.");
 
         ImGui.SameLine(0, 4);
         if (ImGuiComponents.IconButton("template-copy", FontAwesomeIcon.Copy))
         {
             this.CopySelectedPreset();
         }
-        AddTooltip("Make a copy of the selected template.");
+        AddTooltip("Make a copy of the selected list.");
 
         ImGui.SameLine(0, 4);
         using (ImRaiiShim.Disabled(!ImGui.GetIO().KeyShift))
@@ -402,15 +485,15 @@ public sealed class TrackerWindow : Window
                 this.DeleteSelectedPreset();
             }
         }
-        AddTooltip("Hold Shift to delete selected template.");
+        AddTooltip("Hold Shift to delete selected list.");
     }
 
     private void DrawPresetList()
     {
         if (this.plugin.Configuration.TrackedAchievementPresets.Count == 0)
         {
-            ImGui.TextDisabled("No saved templates yet.");
-            ImGui.TextWrapped("Type a name, then press save to capture the current tracked list.");
+            ImGui.TextDisabled("No saved lists yet.");
+            ImGui.TextWrapped("Type a name, then press save to capture the current tracked achievements.");
             return;
         }
 
@@ -441,7 +524,7 @@ public sealed class TrackerWindow : Window
 
         if (ImGui.IsItemHovered())
         {
-            ImGui.SetTooltip("Right-click for template options. Double-click to load.");
+            ImGui.SetTooltip("Right-click for list options. Double-click to load.");
         }
 
         this.DrawPresetContextMenu(preset);
@@ -612,6 +695,9 @@ public sealed class TrackerWindow : Window
 
         return true;
     }
+
+    private bool ShouldShowTrackedIcon(string iconName)
+        => !this.hideTrackedIcons || !this.plugin.Configuration.HiddenTrackedAchievementIcons.Contains(iconName);
 
     private bool MatchesSelectedCategory(AchievementInfo info)
     {

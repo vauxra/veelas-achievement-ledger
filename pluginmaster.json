@@ -19,7 +19,7 @@
     "DownloadLinkInstall": "",
     "DownloadLinkUpdate": "",
     "LastUpdate": "1781233136",
-    "TestingAssemblyVersion": "0.2.0.31",
+    "TestingAssemblyVersion": "0.3.0.0",
     "TestingDalamudApiLevel": 15,
     "TestingChangelog": "Experimental Ex+ local layout build. Toolbar is Update All, Auto update, Eye, Book, Gear. Search has game/A-Z sorting, hide-completed control, native-open icons, completed checkmarks, descriptions-only detail, and game-order categories.",
     "DownloadLinkTesting": "",
