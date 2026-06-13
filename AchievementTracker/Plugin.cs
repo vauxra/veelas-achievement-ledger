@@ -58,7 +58,9 @@ public sealed class Plugin : IDalamudPlugin
     private AchievementActivityUpdateObserver? activityUpdateObserver;
     private DateTimeOffset nextCosmicCacheRefreshAt = DateTimeOffset.MinValue;
     private bool pendingNativeAchievementInspectionRestore;
+    private uint pendingNativeAchievementInspectionId;
     private DateTimeOffset pendingNativeAchievementInspectionRestoreUntil = DateTimeOffset.MinValue;
+    private DateTimeOffset pendingNativeAchievementInspectionNextOpenAt = DateTimeOffset.MinValue;
     private bool pendingNativeAchievementScaleReset;
     private DateTimeOffset pendingNativeAchievementScaleResetUntil = DateTimeOffset.MinValue;
 
@@ -76,7 +78,7 @@ public sealed class Plugin : IDalamudPlugin
         this.AchievementProgressUpdater = new AchievementProgressUpdater(
             this.ClientAchievementProgressSource,
             this.NativeAchievementNavigator,
-            () => this.Configuration.GetAutoUpdateTrackedAchievementIds(),
+            () => this.FilterUpdateEligibleAchievements(this.Configuration.GetAutoUpdateTrackedAchievementIds(), "auto-update-candidate"),
             () => this.Configuration.ExperimentalAutoUpdateEnabled,
             () => this.Configuration.ExperimentalAutoUpdateIntervalSeconds,
             () => this.Configuration.ExperimentalUpdateSpacingSeconds,
@@ -132,13 +134,46 @@ public sealed class Plugin : IDalamudPlugin
     }
 
     public void EnqueueUpdateAllTracked(string reason)
-        => this.AchievementProgressUpdater.EnqueueUpdateAll(this.TrackedAchievements.AchievementIds, reason);
+        => this.AchievementProgressUpdater.EnqueueUpdateAll(this.FilterUpdateEligibleAchievements(this.TrackedAchievements.AchievementIds, reason), reason);
 
     public void EnqueueUpdateAchievements(IEnumerable<uint> achievementIds, string reason)
-        => this.AchievementProgressUpdater.EnqueueUpdateAll(achievementIds, reason);
+        => this.AchievementProgressUpdater.EnqueueUpdateAll(this.FilterUpdateEligibleAchievements(achievementIds, reason), reason);
 
     public void EnqueueUpdateOne(uint achievementId, string reason)
-        => this.AchievementProgressUpdater.EnqueueUpdateAll([achievementId], reason);
+        => this.AchievementProgressUpdater.EnqueueUpdateAll(this.FilterUpdateEligibleAchievements([achievementId], reason), reason);
+
+    private IReadOnlyList<uint> FilterUpdateEligibleAchievements(IEnumerable<uint> achievementIds, string reason)
+    {
+        var eligible = new List<uint>();
+        var removedAutoUpdateCompleted = 0;
+        var skippedCompleted = 0;
+        foreach (var achievementId in achievementIds.Where(id => id != 0).Distinct())
+        {
+            if (this.AchievementCatalog.TryGetRow(achievementId, out var row)
+                && this.AchievementProgressService.IsComplete(row))
+            {
+                skippedCompleted++;
+                removedAutoUpdateCompleted += this.Configuration.AutoUpdateAchievementIds.RemoveAll(id => id == achievementId);
+                this.ClientAchievementProgressSource.RecordObservedProgress(achievementId, 1, 1, "Completion check");
+                continue;
+            }
+
+            eligible.Add(achievementId);
+        }
+
+        if (removedAutoUpdateCompleted > 0)
+        {
+            this.SaveConfiguration();
+            this.ResetAutoUpdateCountdownIfActive();
+        }
+
+        if (skippedCompleted > 0)
+        {
+            this.DebugLog($"AchieveEx DebugTrace UpdateSkipCompleted reason={reason} skipped={skippedCompleted} removedAuto={removedAutoUpdateCompleted}");
+        }
+
+        return eligible;
+    }
 
     public void ResetAutoUpdateCountdownIfActive()
     {
@@ -167,8 +202,10 @@ public sealed class Plugin : IDalamudPlugin
         var normalizedBeforeOpen = this.NativeAchievementNavigator.RestoreParkedAchievementWindowOrResetScale();
         var opened = this.NativeAchievementNavigator.OpenAchievement(achievementId);
         var normalizedAfterOpen = opened && !normalizedBeforeOpen && this.NativeAchievementNavigator.RestoreParkedAchievementWindowOrResetScale();
-        this.pendingNativeAchievementInspectionRestore = opened && !normalizedBeforeOpen && !normalizedAfterOpen;
-        this.pendingNativeAchievementInspectionRestoreUntil = DateTimeOffset.UtcNow.AddSeconds(5);
+        this.pendingNativeAchievementInspectionRestore = opened;
+        this.pendingNativeAchievementInspectionId = achievementId;
+        this.pendingNativeAchievementInspectionRestoreUntil = DateTimeOffset.UtcNow.AddSeconds(6);
+        this.pendingNativeAchievementInspectionNextOpenAt = DateTimeOffset.UtcNow.AddMilliseconds(350);
         this.DebugLog($"AchieveEx DebugTrace NativeInspectionOpen id={achievementId} opened={opened} normalizedBeforeOpen={normalizedBeforeOpen} normalizedAfterOpen={normalizedAfterOpen} pendingRestore={this.pendingNativeAchievementInspectionRestore}");
         return opened;
     }
@@ -239,7 +276,7 @@ public sealed class Plugin : IDalamudPlugin
         this.passiveAchievementProgressObserver ??= new PassiveAchievementProgressObserver(
             GameInteropProvider,
             this.ClientAchievementProgressSource,
-            () => this.Configuration.TriggerOnAchievementCompletion);
+            () => false);
     }
 
     private void InstallActivityUpdateObserver()
@@ -292,6 +329,7 @@ public sealed class Plugin : IDalamudPlugin
         this.AchievementProgressSource.ClearCache();
         this.AchievementProgressUpdater.Clear();
         this.pendingNativeAchievementInspectionRestore = false;
+        this.pendingNativeAchievementInspectionId = 0;
         this.pendingNativeAchievementScaleReset = false;
     }
 
@@ -341,12 +379,21 @@ public sealed class Plugin : IDalamudPlugin
             return;
         }
 
+        var now = DateTimeOffset.UtcNow;
         var shown = this.NativeAchievementNavigator.IsOpen || this.NativeAchievementNavigator.ShowAchievementWindow();
+        var reopened = false;
+        if (shown && now >= this.pendingNativeAchievementInspectionNextOpenAt && this.pendingNativeAchievementInspectionId != 0)
+        {
+            reopened = this.NativeAchievementNavigator.OpenAchievement(this.pendingNativeAchievementInspectionId);
+            this.pendingNativeAchievementInspectionNextOpenAt = now.AddMilliseconds(500);
+        }
+
         var normalized = shown && this.NativeAchievementNavigator.RestoreParkedAchievementWindowOrResetScale();
-        if (normalized || DateTimeOffset.UtcNow >= this.pendingNativeAchievementInspectionRestoreUntil)
+        if ((reopened && normalized) || now >= this.pendingNativeAchievementInspectionRestoreUntil)
         {
             this.pendingNativeAchievementInspectionRestore = false;
-            this.DebugLog($"AchieveEx DebugTrace NativeInspectionRestorePendingComplete shown={shown} normalized={normalized} hasParkedWindow={this.NativeAchievementNavigator.HasParkedWindow}");
+            this.pendingNativeAchievementInspectionId = 0;
+            this.DebugLog($"AchieveEx DebugTrace NativeInspectionRestorePendingComplete shown={shown} reopened={reopened} normalized={normalized} hasParkedWindow={this.NativeAchievementNavigator.HasParkedWindow}");
         }
     }
 

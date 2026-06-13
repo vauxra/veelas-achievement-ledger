@@ -598,14 +598,6 @@ public sealed class ConfigWindow : Window
         }
         this.AddTooltip("Limit triggers to Auto rows.");
 
-        var triggerCompletion = this.plugin.Configuration.TriggerOnAchievementCompletion;
-        if (ImGui.Checkbox("Achievement completion events mark tracked achievements complete", ref triggerCompletion))
-        {
-            this.plugin.Configuration.TriggerOnAchievementCompletion = triggerCompletion;
-            this.plugin.SaveConfiguration();
-        }
-        this.AddTooltip("Mark completions when observed.");
-
         ImGui.Separator();
         this.DrawDisabledWrapped("Choose exactly which event types can trigger updates:");
         var allEventTypesEnabled = this.plugin.Configuration.TriggerOnMinerActivities
@@ -791,6 +783,7 @@ public sealed class ConfigWindow : Window
 
     private void DrawHiddenToggleGroup(string parentLabel, System.Collections.Generic.List<string> hiddenValues, string[] children)
     {
+        ImGui.PushID(parentLabel);
         var allHidden = children.All(hiddenValues.Contains);
         if (ImGui.Checkbox(parentLabel, ref allHidden))
         {
@@ -815,6 +808,7 @@ public sealed class ConfigWindow : Window
         ImGui.Indent(18);
         foreach (var child in children)
         {
+            ImGui.PushID(child);
             var hidden = hiddenValues.Contains(child);
             if (ImGui.Checkbox(child, ref hidden))
             {
@@ -829,9 +823,12 @@ public sealed class ConfigWindow : Window
 
                 this.plugin.SaveConfiguration();
             }
+
+            ImGui.PopID();
         }
 
         ImGui.Unindent(18);
+        ImGui.PopID();
     }
 
     private void DrawColumnWidthEditor(string columnName, float minimum)
@@ -858,6 +855,7 @@ public sealed class ConfigWindow : Window
 
     private void DrawShownToggleGroup(string parentLabel, System.Collections.Generic.List<string> shownValues, string[] children)
     {
+        ImGui.PushID(parentLabel);
         var allShown = children.All(shownValues.Contains);
         if (ImGui.Checkbox(parentLabel, ref allShown))
         {
@@ -882,6 +880,7 @@ public sealed class ConfigWindow : Window
         ImGui.Indent(18);
         foreach (var child in children)
         {
+            ImGui.PushID(child);
             var shown = shownValues.Contains(child);
             if (ImGui.Checkbox(child, ref shown))
             {
@@ -896,9 +895,12 @@ public sealed class ConfigWindow : Window
 
                 this.plugin.SaveConfiguration();
             }
+
+            ImGui.PopID();
         }
 
         ImGui.Unindent(18);
+        ImGui.PopID();
     }
 
     private void DrawHelp()

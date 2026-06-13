@@ -19,9 +19,9 @@
     "DownloadLinkInstall": "",
     "DownloadLinkUpdate": "",
     "LastUpdate": "1781233136",
-    "TestingAssemblyVersion": "0.3.0.8",
+    "TestingAssemblyVersion": "0.3.0.9",
     "TestingDalamudApiLevel": 15,
-    "TestingChangelog": "Experimental Ex+ local layout build. Update actions no longer move/scale an already-open Achievement window; scale reset moved to Help; search category filters use All/Selected radio mode with Ctrl multi-select; UI checkbox groups can deselect all; Tracked Achievements config page removed.",
+    "TestingChangelog": "Experimental Ex+ local layout build. Fixes tracked-button checkbox ID collisions; removes completion-event checkbox; skips completed achievements before update/native requests and removes them from Auto; Open in Achievements now retries selection after initial native window load.",
     "DownloadLinkTesting": "",
     "IconUrl": "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png",
     "ImageUrls": [
