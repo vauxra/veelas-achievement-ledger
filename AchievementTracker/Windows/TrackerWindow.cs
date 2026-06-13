@@ -5,7 +5,6 @@ using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Windowing;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -17,9 +16,6 @@ public sealed class TrackerWindow : Window
     private bool presetPanelOpen;
     private string presetNameInput = string.Empty;
     private string selectedPresetName = string.Empty;
-    private string achievementSearchQuery = string.Empty;
-    private string selectedCategoryFilter = string.Empty;
-    private string selectedSubcategoryFilter = string.Empty;
 
     public TrackerWindow(Plugin plugin)
         : base("Achieve Ex+##AchieveExPlusLive", ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoBringToFrontOnFocus)
@@ -44,15 +40,15 @@ public sealed class TrackerWindow : Window
         {
             var spacing = ImGui.GetStyle().ItemSpacing.X;
             var availableWidth = ImGui.GetContentRegionAvail().X;
-            var presetWidth = Math.Clamp(availableWidth * 0.58f, 620f, 920f);
+            var presetWidth = Math.Clamp(availableWidth * 0.34f, 260f, 360f);
             var listWidth = Math.Max(300f, availableWidth - presetWidth - spacing);
 
-            ImGui.BeginChild("##AchieveExTrackedList", new Vector2(listWidth, 0), false);
+            ImGui.BeginChild("##ValTrackedList", new Vector2(listWidth, 0), false);
             this.DrawTrackedList();
             ImGui.EndChild();
 
             ImGui.SameLine();
-            ImGui.BeginChild("##AchieveExTemplatePopout", new Vector2(presetWidth, 0), true);
+            ImGui.BeginChild("##ValPresetPopout", new Vector2(presetWidth, 0), true);
             this.DrawPresetPopout();
             ImGui.EndChild();
             return;
@@ -124,30 +120,6 @@ public sealed class TrackerWindow : Window
         AddTooltip("Hide templates.");
 
         ImGui.Separator();
-        var spacing = ImGui.GetStyle().ItemSpacing.X;
-        var width = ImGui.GetContentRegionAvail().X;
-        var templateWidth = Math.Clamp(width * 0.30f, 190f, 280f);
-        var categoryWidth = Math.Clamp(width * 0.28f, 180f, 260f);
-        var achievementWidth = Math.Max(260f, width - templateWidth - categoryWidth - (spacing * 2f));
-
-        ImGui.BeginChild("##TemplateColumn", new Vector2(templateWidth, 0), true);
-        this.DrawTemplateColumn();
-        ImGui.EndChild();
-
-        ImGui.SameLine();
-        ImGui.BeginChild("##TemplateSearchCategoryColumn", new Vector2(categoryWidth, 0), true);
-        this.DrawAchievementCategoryColumn();
-        ImGui.EndChild();
-
-        ImGui.SameLine();
-        ImGui.BeginChild("##TemplateSearchAchievementColumn", new Vector2(achievementWidth, 0), true);
-        this.DrawTemplateAchievementSearchColumn();
-        ImGui.EndChild();
-        this.DrawPresetContextPopups();
-    }
-
-    private void DrawTemplateColumn()
-    {
         this.DrawPresetButtons();
 
         ImGui.SetNextItemWidth(-1);
@@ -159,6 +131,7 @@ public sealed class TrackerWindow : Window
 
         ImGui.Separator();
         this.DrawPresetList();
+        this.DrawPresetContextPopups();
     }
 
     private void DrawPresetButtons()
@@ -210,7 +183,7 @@ public sealed class TrackerWindow : Window
             return;
         }
 
-        ImGui.TextDisabled("Click to select. Double-click to load. Right-click for options.");
+        ImGui.TextDisabled("Click to preview/select. Double-click to load. Right-click for options.");
         ImGui.BeginChild("##TemplateList", Vector2.Zero, true);
         foreach (var preset in this.plugin.Configuration.TrackedAchievementPresets.OrderBy(preset => preset.Name, StringComparer.OrdinalIgnoreCase))
         {
@@ -241,154 +214,6 @@ public sealed class TrackerWindow : Window
         }
 
         this.DrawPresetContextMenu(preset);
-        ImGui.PopID();
-    }
-
-    private void DrawAchievementCategoryColumn()
-    {
-        ImGui.TextUnformatted("Categories");
-        if (ImGui.Button("All categories"))
-        {
-            this.selectedCategoryFilter = string.Empty;
-            this.selectedSubcategoryFilter = string.Empty;
-        }
-        AddTooltip("Show all achievement categories.");
-
-        ImGui.Separator();
-        var allAchievements = this.plugin.AchievementCatalog.Search(string.Empty, 5000).ToList();
-        var grouped = allAchievements
-            .GroupBy(info => SplitCategoryPath(info.CategoryName).Category)
-            .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase);
-
-        foreach (var categoryGroup in grouped)
-        {
-            var category = string.IsNullOrWhiteSpace(categoryGroup.Key) ? "Other" : categoryGroup.Key;
-            var selectedCategory = string.Equals(this.selectedCategoryFilter, categoryGroup.Key, StringComparison.OrdinalIgnoreCase)
-                && string.IsNullOrWhiteSpace(this.selectedSubcategoryFilter);
-            if (ImGui.Selectable($"{category} ({categoryGroup.Count()})", selectedCategory))
-            {
-                this.selectedCategoryFilter = categoryGroup.Key;
-                this.selectedSubcategoryFilter = string.Empty;
-            }
-
-            var subcategories = categoryGroup
-                .Select(info => SplitCategoryPath(info.CategoryName).Subcategory)
-                .Where(subcategory => !string.IsNullOrWhiteSpace(subcategory))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderBy(subcategory => subcategory, StringComparer.OrdinalIgnoreCase)
-                .ToList();
-            if (subcategories.Count == 0)
-            {
-                continue;
-            }
-
-            ImGui.Indent(12);
-            foreach (var subcategory in subcategories)
-            {
-                var count = categoryGroup.Count(info => string.Equals(SplitCategoryPath(info.CategoryName).Subcategory, subcategory, StringComparison.OrdinalIgnoreCase));
-                var selected = string.Equals(this.selectedCategoryFilter, categoryGroup.Key, StringComparison.OrdinalIgnoreCase)
-                    && string.Equals(this.selectedSubcategoryFilter, subcategory, StringComparison.OrdinalIgnoreCase);
-                if (ImGui.Selectable($"{subcategory} ({count})", selected))
-                {
-                    this.selectedCategoryFilter = categoryGroup.Key;
-                    this.selectedSubcategoryFilter = subcategory;
-                }
-            }
-
-            ImGui.Unindent(12);
-        }
-    }
-
-    private void DrawTemplateAchievementSearchColumn()
-    {
-        ImGui.TextUnformatted("Achievements");
-        ImGui.SetNextItemWidth(-70);
-        ImGui.InputTextWithHint("##TemplateAchievementSearch", "Search name or category", ref this.achievementSearchQuery, 128);
-        ImGui.SameLine();
-        if (ImGui.Button("Clear"))
-        {
-            this.achievementSearchQuery = string.Empty;
-            this.selectedCategoryFilter = string.Empty;
-            this.selectedSubcategoryFilter = string.Empty;
-        }
-        AddTooltip("Clear search and category filters.");
-
-        var trackedIds = this.plugin.TrackedAchievements.AchievementIds;
-        var results = this.plugin.AchievementCatalog.Search(this.achievementSearchQuery, 5000)
-            .Where(this.MatchesSelectedCategory)
-            .Where(result => !this.plugin.Configuration.HideCompletedInSearch || !this.IsComplete(result.Id))
-            .Take(80)
-            .ToList();
-
-        if (results.Count == 0)
-        {
-            ImGui.TextDisabled("No matching manually viewable achievements found.");
-            return;
-        }
-
-        ImGui.TextDisabled($"Showing {results.Count}. Add, remove, or open in Achievements.");
-        ImGui.Separator();
-        foreach (var result in results)
-        {
-            this.DrawSearchAchievementResult(result, trackedIds);
-        }
-    }
-
-    private void DrawSearchAchievementResult(AchievementInfo result, IReadOnlyList<uint> trackedIds)
-    {
-        ImGui.PushID($"template-search-{result.Id}");
-        var alreadyTracked = trackedIds.Contains(result.Id);
-        var canAdd = !alreadyTracked && trackedIds.Count < TrackedAchievementStore.MaxTrackedAchievements;
-        if (alreadyTracked)
-        {
-            if (ImGuiComponents.IconButton("search-remove", FontAwesomeIcon.Times))
-            {
-                _ = this.RemoveTrackedAchievement(result.Id);
-                ImGui.PopID();
-                return;
-            }
-            AddTooltip("Remove from tracked.");
-        }
-        else if (canAdd)
-        {
-            if (ImGui.Button("Add"))
-            {
-                if (this.plugin.TrackedAchievements.TryAdd(result.Id))
-                {
-                    this.plugin.SaveTrackedAchievements();
-                    if (!this.plugin.Configuration.AutoUpdateAchievementIds.Contains(result.Id))
-                    {
-                        this.plugin.Configuration.AutoUpdateAchievementIds.Add(result.Id);
-                        this.plugin.SaveConfiguration();
-                        this.plugin.ResetAutoUpdateCountdownIfActive();
-                    }
-                }
-            }
-            AddTooltip("Add to tracked.");
-        }
-        else
-        {
-            ImGui.TextDisabled("Full");
-        }
-
-        ImGui.SameLine();
-        if (ImGuiComponents.IconButton(FontAwesomeIcon.Search))
-        {
-            this.plugin.OpenNativeAchievementForInspection(result.Id);
-        }
-        AddTooltip("Open in Achievements.");
-
-        ImGui.SameLine();
-        ImGui.BeginGroup();
-        ImGui.TextWrapped(result.Name);
-        if (!string.IsNullOrWhiteSpace(result.CategoryName))
-        {
-            ImGui.TextDisabled(result.CategoryName);
-        }
-
-        var rewardText = this.GetRewardText(result.Id);
-        ImGui.TextDisabled(string.IsNullOrWhiteSpace(rewardText) ? "Reward: none listed" : rewardText);
-        ImGui.EndGroup();
         ImGui.PopID();
     }
 
@@ -531,18 +356,6 @@ public sealed class TrackerWindow : Window
         }
 
         ImGui.PushID((int)achievementId);
-        if (this.presetPanelOpen)
-        {
-            if (ImGuiComponents.IconButton("tracked-remove-main", FontAwesomeIcon.Times))
-            {
-                _ = this.RemoveTrackedAchievement(achievementId);
-                ImGui.PopID();
-                return;
-            }
-            AddTooltip("Remove from tracked.");
-            ImGui.SameLine();
-        }
-
         if (ImGuiComponents.IconButton(FontAwesomeIcon.SyncAlt))
         {
             this.plugin.EnqueueUpdateOne(achievementId, "manual-row-update");
@@ -585,80 +398,6 @@ public sealed class TrackerWindow : Window
             var seconds = Math.Max(0, (nextAuto.Value - DateTimeOffset.UtcNow).TotalSeconds);
             ImGui.TextDisabled($"Auto update next cycle in {seconds:0}s");
         }
-    }
-
-    private bool RemoveTrackedAchievement(uint achievementId)
-    {
-        if (!this.plugin.TrackedAchievements.Remove(achievementId))
-        {
-            return false;
-        }
-
-        var removedAutoUpdateEntry = this.plugin.Configuration.AutoUpdateAchievementIds.RemoveAll(id => id == achievementId) > 0;
-        this.plugin.SaveTrackedAchievements();
-        this.plugin.SaveConfiguration();
-        if (removedAutoUpdateEntry)
-        {
-            this.plugin.ResetAutoUpdateCountdownIfActive();
-        }
-
-        return true;
-    }
-
-    private bool MatchesSelectedCategory(AchievementInfo info)
-    {
-        if (string.IsNullOrWhiteSpace(this.selectedCategoryFilter))
-        {
-            return true;
-        }
-
-        var parts = SplitCategoryPath(info.CategoryName);
-        if (!string.Equals(parts.Category, this.selectedCategoryFilter, StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        return string.IsNullOrWhiteSpace(this.selectedSubcategoryFilter)
-            || string.Equals(parts.Subcategory, this.selectedSubcategoryFilter, StringComparison.OrdinalIgnoreCase);
-    }
-
-    private bool IsComplete(uint achievementId)
-        => this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row)
-            && this.plugin.AchievementProgressService.IsComplete(row);
-
-    private string GetRewardText(uint achievementId)
-    {
-        if (!this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row))
-        {
-            return string.Empty;
-        }
-
-        if (row.Item.IsValid)
-        {
-            var item = row.Item.Value;
-            var collected = Plugin.UnlockState.IsItemUnlocked(item) ? "collected" : "not collected";
-            return $"Reward: {item.Name} ({collected})";
-        }
-
-        if (row.Title.IsValid)
-        {
-            var title = row.Title.Value;
-            var collected = Plugin.UnlockState.IsTitleUnlocked(title) ? "collected" : "not collected";
-            return $"Reward: {title.Masculine} / {title.Feminine} ({collected})";
-        }
-
-        return string.Empty;
-    }
-
-    private static (string Category, string Subcategory) SplitCategoryPath(string categoryPath)
-    {
-        var parts = categoryPath.Split('>', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-        return parts.Length switch
-        {
-            0 => (string.Empty, string.Empty),
-            1 => (parts[0], string.Empty),
-            _ => (parts[0], parts[^1]),
-        };
     }
 
     private static void AddTooltip(string text)

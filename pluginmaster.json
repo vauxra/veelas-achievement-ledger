@@ -19,9 +19,9 @@
     "DownloadLinkInstall": "",
     "DownloadLinkUpdate": "",
     "LastUpdate": "1781233136",
-    "TestingAssemblyVersion": "0.2.0.28",
+    "TestingAssemblyVersion": "0.2.0.27",
     "TestingDalamudApiLevel": 15,
-    "TestingChangelog": "Experimental Ex+ local template/search build. Main window template popout has removable tracked rows, category/subcategory navigation, achievement search, add/remove/open controls, and reward collection status.",
+    "TestingChangelog": "Experimental Ex+ local rebrand build. Plugin display name is Achieve Ex+ and the slash command is /achex.",
     "DownloadLinkTesting": "",
     "IconUrl": "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png",
     "ImageUrls": [
