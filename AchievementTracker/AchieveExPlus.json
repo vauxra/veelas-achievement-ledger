@@ -1,8 +1,8 @@
 {
   "Author": "Saagi",
-  "Name": "Veela's Achievement Ledger Ex",
-  "Punchline": "EXPERIMENTAL Ex: native Achievement updater.",
-  "Description": "Experimental Ex / not for Dalamud publishing. Use /val to track achievements, open native Achievement entries, and test optional timed auto updates.",
+  "Name": "Achieve Ex+",
+  "Punchline": "EXPERIMENTAL Ex+: native Achievement updater.",
+  "Description": "Experimental Ex+ / not for Dalamud publishing. Use /achex to track achievements, open native Achievement entries, and test optional timed auto updates.",
   "RepoUrl": "https://github.com/vauxra/veelas-achievement-ledger",
   "ApplicableVersion": "any",
   "Tags": [

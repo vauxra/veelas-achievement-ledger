@@ -1,6 +1,6 @@
 # Development due diligence
 
-Veela's Achievement Ledger is developed with human review, AI assistance, and repeatable local checks.
+Achieve Ex+ is developed with human review, AI assistance, and repeatable local checks.
 
 ## Branch stance
 
@@ -35,9 +35,9 @@ The branch must still avoid unrelated high-risk behavior:
 
 Before an experimental build, verify in game:
 
-- `/val` opens the ledger.
-- `/val config`, `/val configure`, and `/val man` open config.
-- `/val help` and `/val ?` open the Help tab.
+- `/achex` opens the ledger.
+- `/achex config`, `/achex configure`, and `/achex man` open config.
+- `/achex help` and `/achex ?` open the Help tab.
 - Configure can search, add, remove, and reorder up to 20 tracked achievements.
 - Presets can save, read, rename, delete, and auto-load on dropdown selection.
 - Tracked achievements and presets persist after logout/login.

@@ -84,7 +84,7 @@ public sealed class AchievementActivityUpdateObserver : IDisposable
 
         if (!this.triggerEnabledProvider(triggerName))
         {
-            this.debugLog($"VAL DebugTrace ActivityUpdateDisabled reason={reason} logId={logMarker} category={categoryName} trigger={triggerName} currentClassJob={currentClassJobId} text='{preview}'");
+            this.debugLog($"AchieveEx DebugTrace ActivityUpdateDisabled reason={reason} logId={logMarker} category={categoryName} trigger={triggerName} currentClassJob={currentClassJobId} text='{preview}'");
             return;
         }
 
@@ -95,7 +95,7 @@ public sealed class AchievementActivityUpdateObserver : IDisposable
 
         if (matchingIds.Count == 0)
         {
-            this.debugLog($"VAL DebugTrace ActivityUpdateSkip reason={reason} logId={logMarker} category={categoryName} trigger={triggerName} currentClassJob={currentClassJobId} no tracked matches text='{preview}'");
+            this.debugLog($"AchieveEx DebugTrace ActivityUpdateSkip reason={reason} logId={logMarker} category={categoryName} trigger={triggerName} currentClassJob={currentClassJobId} no tracked matches text='{preview}'");
             return;
         }
 
@@ -103,12 +103,12 @@ public sealed class AchievementActivityUpdateObserver : IDisposable
         if (this.lastQueuedAtByCategory.TryGetValue(categoryName, out var lastQueuedAt)
             && now - lastQueuedAt < TimeSpan.FromSeconds(2))
         {
-            this.debugLog($"VAL DebugTrace ActivityUpdateDedup reason={reason} logId={logMarker} category={categoryName} trigger={triggerName} currentClassJob={currentClassJobId} count={matchingIds.Count} text='{preview}'");
+            this.debugLog($"AchieveEx DebugTrace ActivityUpdateDedup reason={reason} logId={logMarker} category={categoryName} trigger={triggerName} currentClassJob={currentClassJobId} count={matchingIds.Count} text='{preview}'");
             return;
         }
 
         this.lastQueuedAtByCategory[categoryName] = now;
-        this.debugLog($"VAL DebugTrace ActivityUpdateQueue reason={reason} logId={logMarker} category={categoryName} trigger={triggerName} currentClassJob={currentClassJobId} count={matchingIds.Count} text='{preview}'");
+        this.debugLog($"AchieveEx DebugTrace ActivityUpdateQueue reason={reason} logId={logMarker} category={categoryName} trigger={triggerName} currentClassJob={currentClassJobId} count={matchingIds.Count} text='{preview}'");
         this.enqueueUpdate(matchingIds, $"{reason}-{categoryName}");
     }
 }

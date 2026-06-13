@@ -1,6 +1,6 @@
 # Val-experimental addon big picture and flow
 
-This document maps the current `val-experimental` branch for Veela's Achievement Ledger Ex. It is intentionally implementation-oriented: each tree names the file and method/function chain, then states what the final call reads, writes, returns, queues, or touches.
+This document maps the current `val-experimental` branch for Achieve Ex+. It is intentionally implementation-oriented: each tree names the file and method/function chain, then states what the final call reads, writes, returns, queues, or touches.
 
 ## Top-level architecture
 
@@ -114,7 +114,7 @@ AchievementTracker/Plugin.cs
    │     └─ ChatGui.ChatMessageUnhandled += OnChatMessageUnhandled
    ├─ WindowSystem.AddWindow(TrackerWindow)
    ├─ WindowSystem.AddWindow(ConfigWindow)
-   ├─ CommandManager.AddHandler("/val", OnCommand)
+   ├─ CommandManager.AddHandler("/achex", OnCommand)
    ├─ PluginInterface.UiBuilder.Draw += WindowSystem.Draw
    ├─ PluginInterface.UiBuilder.OpenMainUi += ToggleMainUi
    ├─ PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUi
@@ -153,10 +153,10 @@ AchievementTracker/Plugin.cs
    └─ default
       └─ ToggleMainUi()
          └─ TrackerWindow.Toggle()
-            └─ toggles the `Veela's Achievement Ledger Ex` live window
+            └─ toggles the `Achieve Ex+` live window
 ```
 
-## Main `/val` window flow
+## Main `/achex` window flow
 
 ```text
 AchievementTracker/Windows/TrackerWindow.cs
@@ -165,7 +165,7 @@ AchievementTracker/Windows/TrackerWindow.cs
    │  └─ ClientAchievementProgressSource.UpdateCache()
    │     ├─ Achievement.Instance()
    │     ├─ reads ProgressRequestState, ProgressAchievementId, ProgressCurrent, ProgressMax
-   │     ├─ logs VAL DebugTrace ProgressSlot when changed and debug logging enabled
+   │     ├─ logs AchieveEx DebugTrace ProgressSlot when changed and debug logging enabled
    │     └─ if Loaded and max != 0 -> cachedProgress[achievementId] = ObservedAchievementProgress(...)
    ├─ Configure button
    │  └─ plugin.ToggleConfigUi() -> ConfigWindow.Toggle()
@@ -177,7 +177,7 @@ AchievementTracker/Windows/TrackerWindow.cs
    │     ├─ Configuration.ExperimentalAutoUpdateEnabled = false
    │     ├─ SaveConfiguration()
    │     ├─ AchievementProgressUpdater.Clear()
-   │     └─ logs VAL DebugTrace AutoUpdateStopped
+   │     └─ logs AchieveEx DebugTrace AutoUpdateStopped
    ├─ Auto update checkbox
    │  ├─ writes Configuration.ExperimentalAutoUpdateEnabled
    │  ├─ SaveConfiguration()
@@ -201,7 +201,7 @@ AchievementTracker/Windows/TrackerWindow.cs
 ```text
 AchievementTracker/Windows/ConfigWindow.cs
 └─ ConfigWindow.Draw()
-   ├─ Open VAL button -> plugin.OpenMainUi() -> TrackerWindow.IsOpen = true
+   ├─ Open Achieve Ex+ button -> plugin.OpenMainUi() -> TrackerWindow.IsOpen = true
    ├─ displays flash/UI-motion warning text
    ├─ DrawLeftNavigation()
    │  ├─ Auto update
@@ -418,7 +418,7 @@ AchievementProgressUpdater.FinishBatchIfIdle(force = false)
 ├─ if no batch in progress -> return
 ├─ if not force and active/pending requests remain -> return
 ├─ restoreAfterUpdate = Configuration.RestoreNativeAchievementWindowAfterUpdates
-├─ if VAL opened the native window and it was not open before the batch
+├─ if Achieve Ex+ opened the native window and it was not open before the batch
 │  └─ NativeAchievementNavigator.CloseAchievementWindow(restoreAfterUpdate)
 │     ├─ if restoreAfterUpdate: RestoreParkedAchievementWindow()
 │     │  ├─ IGameGui.GetAddonByName("Achievement", 1)

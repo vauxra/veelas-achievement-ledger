@@ -18,7 +18,7 @@ public sealed class TrackerWindow : Window
     private string selectedPresetName = string.Empty;
 
     public TrackerWindow(Plugin plugin)
-        : base("Veela's Achievement Ledger Ex##AchievementLedgerLive", ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoBringToFrontOnFocus)
+        : base("Achieve Ex+##AchieveExPlusLive", ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoBringToFrontOnFocus)
     {
         this.plugin = plugin;
         this.SizeConstraints = new WindowSizeConstraints
