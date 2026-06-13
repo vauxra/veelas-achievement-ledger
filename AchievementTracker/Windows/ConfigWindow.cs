@@ -716,22 +716,31 @@ public sealed class ConfigWindow : Window
         this.DrawOrderEditor(this.plugin.Configuration.MainColumnOrder, ["Lists", "Search Categories", "Search Results", "Tracked Achievements"], "columns");
 
         ImGui.Separator();
+        ImGui.TextUnformatted("Main panel column widths");
+        ImGui.TextDisabled("Widths are per-column minimums. Search Categories and Search Results enforce larger minimums so labels/options do not truncate.");
+        this.DrawColumnWidthEditor("Lists", 220f);
+        this.DrawColumnWidthEditor("Search Categories", 320f);
+        this.DrawColumnWidthEditor("Search Results", 420f);
+        this.DrawColumnWidthEditor("Tracked Achievements", 320f);
+
+        ImGui.Separator();
         ImGui.TextUnformatted("Main panel navigation order");
         ImGui.TextDisabled("Top to bottom here means left to right in the main panel navigation.");
         this.DrawOrderEditor(this.plugin.Configuration.MainNavigationOrder, ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"], "nav");
 
         ImGui.Separator();
-        ImGui.TextUnformatted("Hide main panel navigation buttons");
-        this.DrawHiddenToggleGroup(
+        ImGui.TextUnformatted("Show main panel navigation buttons");
+        this.DrawShownToggleGroup(
             "All main panel buttons",
-            this.plugin.Configuration.HiddenMainNavigationButtons,
+            this.plugin.Configuration.ShownMainNavigationButtons,
             ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"]);
 
         ImGui.Separator();
-        ImGui.TextUnformatted("Hide tracked achievement icons when eye toggle is active");
-        this.DrawHiddenToggleGroup(
-            "All tracked achievement icons",
-            this.plugin.Configuration.HiddenTrackedAchievementIcons,
+        ImGui.TextUnformatted("Show tracked achievement buttons");
+        ImGui.TextDisabled("The eye button in the main panel still hides/shows this whole tracked-button group.");
+        this.DrawShownToggleGroup(
+            "All tracked achievement buttons",
+            this.plugin.Configuration.ShownTrackedAchievementIcons,
             ["Auto update", "Remove", "Refresh", "Open"]);
     }
 
@@ -797,24 +806,46 @@ public sealed class ConfigWindow : Window
         }
     }
 
-    private void DrawHiddenToggleGroup(string parentLabel, System.Collections.Generic.List<string> hiddenValues, string[] children)
+    private void DrawColumnWidthEditor(string columnName, float minimum)
     {
-        var allHidden = children.All(hiddenValues.Contains);
-        if (ImGui.Checkbox(parentLabel, ref allHidden))
+        var width = this.plugin.Configuration.MainColumnWidths.TryGetValue(columnName, out var configuredWidth)
+            ? configuredWidth
+            : minimum;
+        width = Math.Max(minimum, width);
+        ImGui.PushID($"column-width-{columnName}");
+        ImGui.SetNextItemWidth(120);
+        if (ImGui.InputFloat(columnName, ref width, 10f, 50f, "%.0f"))
         {
-            if (allHidden)
+            this.plugin.Configuration.MainColumnWidths[columnName] = Math.Clamp(width, minimum, 900f);
+            this.plugin.SaveConfiguration();
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip($"Minimum width: {minimum:0}px");
+        }
+
+        ImGui.PopID();
+    }
+
+    private void DrawShownToggleGroup(string parentLabel, System.Collections.Generic.List<string> shownValues, string[] children)
+    {
+        var allShown = children.All(shownValues.Contains);
+        if (ImGui.Checkbox(parentLabel, ref allShown))
+        {
+            if (allShown)
             {
                 foreach (var child in children)
                 {
-                    if (!hiddenValues.Contains(child))
+                    if (!shownValues.Contains(child))
                     {
-                        hiddenValues.Add(child);
+                        shownValues.Add(child);
                     }
                 }
             }
             else
             {
-                hiddenValues.RemoveAll(children.Contains);
+                shownValues.RemoveAll(children.Contains);
             }
 
             this.plugin.SaveConfiguration();
@@ -823,16 +854,16 @@ public sealed class ConfigWindow : Window
         ImGui.Indent(18);
         foreach (var child in children)
         {
-            var hidden = hiddenValues.Contains(child);
-            if (ImGui.Checkbox(child, ref hidden))
+            var shown = shownValues.Contains(child);
+            if (ImGui.Checkbox(child, ref shown))
             {
-                if (hidden && !hiddenValues.Contains(child))
+                if (shown && !shownValues.Contains(child))
                 {
-                    hiddenValues.Add(child);
+                    shownValues.Add(child);
                 }
-                else if (!hidden)
+                else if (!shown)
                 {
-                    hiddenValues.RemoveAll(value => value == child);
+                    shownValues.RemoveAll(value => value == child);
                 }
 
                 this.plugin.SaveConfiguration();

@@ -1,6 +1,7 @@
 ﻿using Dalamud.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AchievementTracker.Models;
 using AchievementTracker.Services;
 
@@ -73,6 +74,18 @@ public sealed class Configuration : IPluginConfiguration
 
     public List<string> HiddenMainNavigationButtons { get; set; } = [];
 
+    public List<string> ShownTrackedAchievementIcons { get; set; } = ["Auto update", "Remove", "Refresh", "Open"];
+
+    public List<string> ShownMainNavigationButtons { get; set; } = ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"];
+
+    public Dictionary<string, float> MainColumnWidths { get; set; } = new()
+    {
+        ["Lists"] = 220f,
+        ["Search Categories"] = 320f,
+        ["Search Results"] = 420f,
+        ["Tracked Achievements"] = 420f,
+    };
+
     public List<uint> GetAutoUpdateTrackedAchievementIds()
         => AutoUpdateSelection.SelectIncludedTrackedAchievements(this.TrackedAchievementIds, this.AutoUpdateAchievementIds);
 
@@ -100,6 +113,15 @@ public sealed class Configuration : IPluginConfiguration
         this.MainNavigationOrder = NormalizeStringOrder(this.MainNavigationOrder, ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"]);
         this.HiddenTrackedAchievementIcons = NormalizeStringSet(this.HiddenTrackedAchievementIcons, ["Auto update", "Remove", "Refresh", "Open"]);
         this.HiddenMainNavigationButtons = NormalizeStringSet(this.HiddenMainNavigationButtons, ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"]);
+        this.ShownTrackedAchievementIcons = NormalizeShownStringSet(this.ShownTrackedAchievementIcons, this.HiddenTrackedAchievementIcons, ["Auto update", "Remove", "Refresh", "Open"]);
+        this.ShownMainNavigationButtons = NormalizeShownStringSet(this.ShownMainNavigationButtons, this.HiddenMainNavigationButtons, ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"]);
+        this.MainColumnWidths = NormalizeColumnWidths(this.MainColumnWidths, new Dictionary<string, float>
+        {
+            ["Lists"] = 220f,
+            ["Search Categories"] = 320f,
+            ["Search Results"] = 420f,
+            ["Tracked Achievements"] = 420f,
+        });
         if (this.SearchCompletionFilter is not ("All" or "Completed" or "Incomplete"))
         {
             this.SearchCompletionFilter = this.HideCompletedInSearch ? "Incomplete" : "All";
@@ -149,6 +171,31 @@ public sealed class Configuration : IPluginConfiguration
             {
                 normalized.Add(value);
             }
+        }
+
+        return normalized;
+    }
+
+    private static List<string> NormalizeShownStringSet(List<string>? shownValues, List<string>? legacyHiddenValues, string[] allowed)
+    {
+        if (shownValues is not null && shownValues.Count > 0)
+        {
+            return NormalizeStringSet(shownValues, allowed);
+        }
+
+        var legacyHidden = NormalizeStringSet(legacyHiddenValues, allowed);
+        return allowed.Where(value => !legacyHidden.Contains(value)).ToList();
+    }
+
+    private static Dictionary<string, float> NormalizeColumnWidths(Dictionary<string, float>? values, Dictionary<string, float> defaults)
+    {
+        var normalized = new Dictionary<string, float>();
+        foreach (var (key, defaultValue) in defaults)
+        {
+            var value = values is not null && values.TryGetValue(key, out var configuredValue)
+                ? configuredValue
+                : defaultValue;
+            normalized[key] = Math.Clamp(value, 160f, 900f);
         }
 
         return normalized;

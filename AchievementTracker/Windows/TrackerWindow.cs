@@ -16,6 +16,7 @@ public sealed class TrackerWindow : Window
     private readonly Plugin plugin;
     private bool templatesOpen;
     private bool hideTrackedIcons;
+    private bool resetMainPanelScrollNextDraw;
     private bool searchPanelOpen = true;
     private SearchSortMode searchSortMode = SearchSortMode.GameOrder;
     private string presetNameInput = string.Empty;
@@ -51,11 +52,14 @@ public sealed class TrackerWindow : Window
         this.DrawMainPane();
     }
 
+    public void ResetPanelScrollOnNextDraw()
+        => this.resetMainPanelScrollNextDraw = true;
+
     private void DrawToolbar()
     {
         foreach (var item in this.plugin.Configuration.MainNavigationOrder)
         {
-            if (this.plugin.Configuration.HiddenMainNavigationButtons.Contains(item))
+            if (!this.plugin.Configuration.ShownMainNavigationButtons.Contains(item))
             {
                 continue;
             }
@@ -89,35 +93,54 @@ public sealed class TrackerWindow : Window
                 AddTooltip("Run timed updates.");
                 break;
             case "Lists":
-                if (ImGuiComponents.IconButton("toggle-lists", FontAwesomeIcon.Save))
+                if (this.DrawActiveIconButton("toggle-lists", FontAwesomeIcon.Save, this.templatesOpen))
                 {
                     this.templatesOpen = !this.templatesOpen;
+                    this.resetMainPanelScrollNextDraw = true;
                     this.EnsureSelectedPresetIsValid();
                 }
                 AddTooltip(this.templatesOpen ? "Hide Lists column." : "Show Lists column.");
                 break;
             case "Search":
-                if (ImGuiComponents.IconButton("toggle-main-search", FontAwesomeIcon.Book))
+                if (this.DrawActiveIconButton("toggle-main-search", FontAwesomeIcon.Book, this.searchPanelOpen))
                 {
                     this.searchPanelOpen = !this.searchPanelOpen;
+                    this.resetMainPanelScrollNextDraw = true;
                 }
                 AddTooltip(this.searchPanelOpen ? "Hide category/search columns." : "Show category/search columns.");
                 break;
             case "Config":
-                if (ImGuiComponents.IconButton("toggle-config", FontAwesomeIcon.Cog))
+                if (this.DrawActiveIconButton("toggle-config", FontAwesomeIcon.Cog, this.plugin.IsConfigUiOpen))
                 {
                     this.plugin.ToggleConfigUi();
                 }
                 AddTooltip("Toggle configuration.");
                 break;
             case "Tracked buttons":
-                if (ImGuiComponents.IconButton("toggle-tracked-buttons", this.hideTrackedIcons ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye))
+                if (this.DrawActiveIconButton("toggle-tracked-buttons", this.hideTrackedIcons ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye, !this.hideTrackedIcons))
                 {
                     this.hideTrackedIcons = !this.hideTrackedIcons;
+                    this.resetMainPanelScrollNextDraw = true;
                 }
-                AddTooltip(this.hideTrackedIcons ? "Show tracked achievement icons." : "Hide configured tracked achievement icons.");
+                AddTooltip(this.hideTrackedIcons ? "Show tracked achievement icons." : "Hide tracked achievement icons.");
                 break;
         }
+    }
+
+    private bool DrawActiveIconButton(string id, FontAwesomeIcon icon, bool active)
+    {
+        if (active)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.ButtonHovered]);
+        }
+
+        var clicked = ImGuiComponents.IconButton(id, icon);
+        if (active)
+        {
+            ImGui.PopStyleColor();
+        }
+
+        return clicked;
     }
 
     private bool ShouldDrawColumn(string column)
@@ -136,14 +159,20 @@ public sealed class TrackerWindow : Window
         var width = ImGui.GetContentRegionAvail().X;
         var orderedColumns = this.plugin.Configuration.MainColumnOrder.Where(this.ShouldDrawColumn).ToList();
         var visibleColumns = Math.Max(1, orderedColumns.Count);
-        var availableForColumns = width - (spacing * Math.Max(0, visibleColumns - 1));
-        var baseColumnWidth = Math.Max(220f, availableForColumns / visibleColumns);
+        _ = width;
+        _ = spacing;
+        _ = visibleColumns;
 
         for (var i = 0; i < orderedColumns.Count; i++)
         {
             var column = orderedColumns[i];
-            var columnWidth = i == orderedColumns.Count - 1 ? 0f : baseColumnWidth;
+            var columnWidth = this.GetConfiguredColumnWidth(column);
             ImGui.BeginChild($"##MainColumn-{column}", new Vector2(columnWidth, 0), true);
+            if (this.resetMainPanelScrollNextDraw)
+            {
+                ImGui.SetScrollY(0);
+            }
+
             this.DrawColumn(column);
             ImGui.EndChild();
             if (i < orderedColumns.Count - 1)
@@ -151,6 +180,23 @@ public sealed class TrackerWindow : Window
                 ImGui.SameLine();
             }
         }
+
+        this.resetMainPanelScrollNextDraw = false;
+    }
+
+    private float GetConfiguredColumnWidth(string column)
+    {
+        var configured = this.plugin.Configuration.MainColumnWidths.TryGetValue(column, out var width) ? width : 260f;
+        var minimum = column switch
+        {
+            "Search Categories" => 320f,
+            "Search Results" => 420f,
+            "Tracked Achievements" => 320f,
+            "Lists" => 220f,
+            _ => 180f,
+        };
+
+        return Math.Max(minimum, configured);
     }
 
     private void DrawColumn(string column)
@@ -723,7 +769,7 @@ public sealed class TrackerWindow : Window
         };
 
     private bool ShouldShowTrackedIcon(string iconName)
-        => !this.hideTrackedIcons || !this.plugin.Configuration.HiddenTrackedAchievementIcons.Contains(iconName);
+        => !this.hideTrackedIcons && this.plugin.Configuration.ShownTrackedAchievementIcons.Contains(iconName);
 
     private bool MatchesSelectedCategory(AchievementInfo info)
     {

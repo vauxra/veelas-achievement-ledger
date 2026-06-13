@@ -19,9 +19,9 @@
     "DownloadLinkInstall": "",
     "DownloadLinkUpdate": "",
     "LastUpdate": "1781233136",
-    "TestingAssemblyVersion": "0.3.0.1",
+    "TestingAssemblyVersion": "0.3.0.2",
     "TestingDalamudApiLevel": 15,
-    "TestingChangelog": "Experimental Ex+ local layout build. Main window minimum size reduced so the window can be resized much smaller; UI customization/search/list behavior from 0.3.0.0 retained.",
+    "TestingChangelog": "Experimental Ex+ local layout build. UI config uses show-button checkboxes, active toolbar icons are tinted, main columns have configurable enforced widths, and main panel scroll resets after open/close changes.",
     "DownloadLinkTesting": "",
     "IconUrl": "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png",
     "ImageUrls": [

@@ -191,13 +191,27 @@ public sealed class Plugin : IDalamudPlugin
         }
     }
 
-    public void ToggleMainUi() => this.TrackerWindow.Toggle();
+    public void ToggleMainUi()
+    {
+        this.TrackerWindow.ResetPanelScrollOnNextDraw();
+        this.TrackerWindow.Toggle();
+    }
 
-    public void OpenMainUi() => this.TrackerWindow.IsOpen = true;
+    public void OpenMainUi()
+    {
+        this.TrackerWindow.ResetPanelScrollOnNextDraw();
+        this.TrackerWindow.IsOpen = true;
+    }
 
-    public void CloseMainUi() => this.TrackerWindow.IsOpen = false;
+    public void CloseMainUi()
+    {
+        this.TrackerWindow.ResetPanelScrollOnNextDraw();
+        this.TrackerWindow.IsOpen = false;
+    }
 
     public void ToggleConfigUi() => this.ConfigWindow.Toggle();
+
+    public bool IsConfigUiOpen => this.ConfigWindow.IsOpen;
 
     public void OpenConfigUi(bool help = false)
     {
