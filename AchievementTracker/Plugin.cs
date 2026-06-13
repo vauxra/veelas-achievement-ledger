@@ -59,6 +59,8 @@ public sealed class Plugin : IDalamudPlugin
     private DateTimeOffset nextCosmicCacheRefreshAt = DateTimeOffset.MinValue;
     private bool pendingNativeAchievementInspectionRestore;
     private DateTimeOffset pendingNativeAchievementInspectionRestoreUntil = DateTimeOffset.MinValue;
+    private bool pendingNativeAchievementScaleReset;
+    private DateTimeOffset pendingNativeAchievementScaleResetUntil = DateTimeOffset.MinValue;
 
     public Plugin()
     {
@@ -171,6 +173,22 @@ public sealed class Plugin : IDalamudPlugin
         return opened;
     }
 
+    public void ResetNativeAchievementWindowScale()
+    {
+        if (this.NativeAchievementNavigator.ResetAchievementWindowScale())
+        {
+            this.pendingNativeAchievementScaleReset = false;
+            this.DebugLog("AchieveEx DebugTrace NativeWindowScaleReset immediate=true");
+            return;
+        }
+
+        var shown = this.NativeAchievementNavigator.IsOpen || this.NativeAchievementNavigator.ShowAchievementWindow();
+        var reset = shown && this.NativeAchievementNavigator.ResetAchievementWindowScale();
+        this.pendingNativeAchievementScaleReset = shown && !reset;
+        this.pendingNativeAchievementScaleResetUntil = DateTimeOffset.UtcNow.AddSeconds(5);
+        this.DebugLog($"AchieveEx DebugTrace NativeWindowScaleReset immediate=false shown={shown} reset={reset} pending={this.pendingNativeAchievementScaleReset}");
+    }
+
     public void DebugLog(string message)
     {
         if (this.Configuration.ExperimentalDebugLoggingEnabled)
@@ -274,12 +292,14 @@ public sealed class Plugin : IDalamudPlugin
         this.AchievementProgressSource.ClearCache();
         this.AchievementProgressUpdater.Clear();
         this.pendingNativeAchievementInspectionRestore = false;
+        this.pendingNativeAchievementScaleReset = false;
     }
 
     private void OnFrameworkUpdate(IFramework framework)
     {
         this.AchievementProgressUpdater.Tick();
         this.RestoreParkedAchievementWindowIfUserOpenedIt();
+        this.TryCompletePendingNativeAchievementScaleReset();
         this.TryCompletePendingNativeAchievementInspectionRestore();
         this.RefreshCosmicCacheFromLiveState();
     }
@@ -295,6 +315,22 @@ public sealed class Plugin : IDalamudPlugin
             {
                 this.DebugLog("AchieveEx DebugTrace NativeAchievementWindowUserOpenRestore restored=true");
             }
+        }
+    }
+
+    private void TryCompletePendingNativeAchievementScaleReset()
+    {
+        if (!this.pendingNativeAchievementScaleReset)
+        {
+            return;
+        }
+
+        var shown = this.NativeAchievementNavigator.IsOpen || this.NativeAchievementNavigator.ShowAchievementWindow();
+        var reset = shown && this.NativeAchievementNavigator.ResetAchievementWindowScale();
+        if (reset || DateTimeOffset.UtcNow >= this.pendingNativeAchievementScaleResetUntil)
+        {
+            this.pendingNativeAchievementScaleReset = false;
+            this.DebugLog($"AchieveEx DebugTrace NativeWindowScaleResetPendingComplete shown={shown} reset={reset}");
         }
     }
 

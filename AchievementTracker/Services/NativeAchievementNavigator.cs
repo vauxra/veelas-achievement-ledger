@@ -135,12 +135,13 @@ public unsafe sealed class NativeAchievementNavigator
         }
 
         unitBase->SetScale(1.0f, false);
+        this.lastUserWindowState = new ParkedAchievementWindowState(addon.X, addon.Y, 1.0f);
         this.parkedState = null;
         return true;
     }
 
     public bool RestoreParkedAchievementWindowOrResetScale()
-        => this.RestoreParkedAchievementWindow();
+        => this.RestoreParkedAchievementWindow() || this.ResetAchievementWindowScale();
 
     public bool CloseAchievementWindow(bool restoreParkedWindow = true)
     {

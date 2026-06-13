@@ -569,6 +569,12 @@ public sealed class ConfigWindow : Window
         }
         this.AddTooltip("Write AchieveEx DebugTrace logs.");
 
+        if (ImGui.Button("Restore default Achievement window scale"))
+        {
+            this.plugin.ResetNativeAchievementWindowScale();
+        }
+        this.AddTooltip("Open/show the native Achievement window if needed, then restore its scale to the default 100% while keeping its current position.");
+
         ImGui.Separator();
     }
 
