@@ -147,7 +147,8 @@ public sealed class AchievementProgressUpdater
             now + maximumWait,
             coldOpen);
 
-        this.debugLog($"AchieveEx DebugTrace NativeOpenSent id={request.AchievementId} reason={request.Reason} cold={coldOpen} parked=false scalePositionTouched=false minWaitSeconds={minimumWait.TotalSeconds:0} maxWaitSeconds={maximumWait.TotalSeconds:0} pending={this.scheduler.PendingCount}");
+        var parked = this.nativeAchievementNavigator.TryParkAchievementWindow();
+        this.debugLog($"AchieveEx DebugTrace NativeOpenSent id={request.AchievementId} reason={request.Reason} cold={coldOpen} parked={parked} scalePositionTouched={parked} minWaitSeconds={minimumWait.TotalSeconds:0} maxWaitSeconds={maximumWait.TotalSeconds:0} pending={this.scheduler.PendingCount}");
     }
 
     private void ProcessActiveNativeRequest(DateTimeOffset now)
@@ -158,6 +159,11 @@ public sealed class AchievementProgressUpdater
         }
 
         var request = this.activeNativeRequest.Value;
+        if (!this.nativeAchievementNavigator.HasParkedWindow && this.nativeAchievementNavigator.TryParkAchievementWindow())
+        {
+            this.debugLog($"AchieveEx DebugTrace NativeWindowParked id={request.AchievementId} scale=0.1375 position=top-right");
+        }
+
         if (now < request.MinimumCompleteAt)
         {
             return;

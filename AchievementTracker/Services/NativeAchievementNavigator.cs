@@ -9,8 +9,9 @@ public unsafe sealed class NativeAchievementNavigator
 {
     private const string AchievementAddonName = "Achievement";
     public const float ParkedScale = 0.1375f;
-    private const short ParkedX = 20;
+    private const short ParkedRightPadding = 20;
     private const short ParkedY = 20;
+    private const short ParkedFallbackX = 1600;
 
     private readonly IGameGui gameGui;
     private ParkedAchievementWindowState? parkedState;
@@ -74,7 +75,7 @@ public unsafe sealed class NativeAchievementNavigator
 
         this.parkedState ??= new ParkedAchievementWindowState(addon.X, addon.Y, addon.Scale);
         unitBase->SetScale(ParkedScale, false);
-        unitBase->SetPosition(ParkedX, ParkedY);
+        unitBase->SetPosition(this.GetParkedTopRightX(), ParkedY);
         return true;
     }
 
@@ -125,6 +126,18 @@ public unsafe sealed class NativeAchievementNavigator
 
     public bool RestoreParkedAchievementWindowOrResetScale()
         => this.RestoreParkedAchievementWindow();
+
+    private short GetParkedTopRightX()
+    {
+        var stage = AtkStage.Instance();
+        if (stage == null || stage->ScreenSize.Width <= 0)
+        {
+            return ParkedFallbackX;
+        }
+
+        var x = stage->ScreenSize.Width - 260 - ParkedRightPadding;
+        return (short)Math.Clamp(x, 0, short.MaxValue);
+    }
 
     public bool CloseAchievementWindow(bool restoreParkedWindow = true)
     {

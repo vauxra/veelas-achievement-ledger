@@ -70,7 +70,7 @@ public sealed class Configuration : IPluginConfiguration
 
     public List<string> MainNavigationOrder { get; set; } = ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"];
 
-    public List<string> HiddenTrackedAchievementIcons { get; set; } = [];
+    public List<string> HiddenTrackedAchievementIcons { get; set; } = ["Auto update", "Remove", "Refresh", "Open"];
 
     public List<string> HiddenMainNavigationButtons { get; set; } = [];
 
@@ -111,7 +111,7 @@ public sealed class Configuration : IPluginConfiguration
         this.CosmicClassScoreCache ??= new CosmicClassScoreCache();
         this.MainColumnOrder = NormalizeStringOrder(this.MainColumnOrder, ["Lists", "Search Categories", "Search Results", "Tracked Achievements"]);
         this.MainNavigationOrder = NormalizeStringOrder(this.MainNavigationOrder, ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"]);
-        this.HiddenTrackedAchievementIcons = NormalizeStringSet(this.HiddenTrackedAchievementIcons, ["Auto update", "Remove", "Refresh", "Open"]);
+        this.HiddenTrackedAchievementIcons = NormalizeHiddenTrackedAchievementIcons(this.HiddenTrackedAchievementIcons, ["Auto update", "Remove", "Refresh", "Open"]);
         this.HiddenMainNavigationButtons = NormalizeStringSet(this.HiddenMainNavigationButtons, ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"]);
         this.ShownTrackedAchievementIcons = NormalizeShownStringSet(this.ShownTrackedAchievementIcons, this.HiddenTrackedAchievementIcons, ["Auto update", "Remove", "Refresh", "Open"]);
         this.ShownMainNavigationButtons = NormalizeShownStringSet(this.ShownMainNavigationButtons, this.HiddenMainNavigationButtons, ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"]);
@@ -174,6 +174,12 @@ public sealed class Configuration : IPluginConfiguration
         }
 
         return normalized;
+    }
+
+    private static List<string> NormalizeHiddenTrackedAchievementIcons(List<string>? values, string[] allowed)
+    {
+        var normalized = NormalizeStringSet(values, allowed);
+        return normalized.Count == 0 ? allowed.ToList() : normalized;
     }
 
     private static List<string> NormalizeShownStringSet(List<string>? shownValues, List<string>? legacyHiddenValues, string[] allowed)

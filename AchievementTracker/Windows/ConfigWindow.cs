@@ -715,11 +715,11 @@ public sealed class ConfigWindow : Window
             ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"]);
 
         ImGui.Separator();
-        ImGui.TextUnformatted("Show tracked achievement buttons");
-        ImGui.TextDisabled("The eye button in the main panel still hides/shows this whole tracked-button group.");
-        this.DrawShownToggleGroup(
+        ImGui.TextUnformatted("Tracked achievement buttons hidden by the eye-slash button");
+        ImGui.TextDisabled("White eye = normal/default and shows all tracked achievement buttons. Red slash-eye = hide only the checked buttons below.");
+        this.DrawHiddenToggleGroup(
             "All tracked achievement buttons",
-            this.plugin.Configuration.ShownTrackedAchievementIcons,
+            this.plugin.Configuration.HiddenTrackedAchievementIcons,
             ["Auto update", "Remove", "Refresh", "Open"]);
 
         ImGui.Separator();
@@ -791,6 +791,51 @@ public sealed class ConfigWindow : Window
 
             ImGui.PopID();
         }
+    }
+
+    private void DrawHiddenToggleGroup(string parentLabel, System.Collections.Generic.List<string> hiddenValues, string[] children)
+    {
+        var allHidden = children.All(hiddenValues.Contains);
+        if (ImGui.Checkbox(parentLabel, ref allHidden))
+        {
+            if (allHidden)
+            {
+                foreach (var child in children)
+                {
+                    if (!hiddenValues.Contains(child))
+                    {
+                        hiddenValues.Add(child);
+                    }
+                }
+            }
+            else
+            {
+                hiddenValues.RemoveAll(children.Contains);
+            }
+
+            this.plugin.SaveConfiguration();
+        }
+
+        ImGui.Indent(18);
+        foreach (var child in children)
+        {
+            var hidden = hiddenValues.Contains(child);
+            if (ImGui.Checkbox(child, ref hidden))
+            {
+                if (hidden && !hiddenValues.Contains(child))
+                {
+                    hiddenValues.Add(child);
+                }
+                else if (!hidden)
+                {
+                    hiddenValues.RemoveAll(value => value == child);
+                }
+
+                this.plugin.SaveConfiguration();
+            }
+        }
+
+        ImGui.Unindent(18);
     }
 
     private void DrawColumnWidthEditor(string columnName, float minimum)

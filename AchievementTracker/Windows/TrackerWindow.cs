@@ -147,7 +147,7 @@ public sealed class TrackerWindow : Window
     {
         if (this.hideTrackedIcons)
         {
-            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 0.25f, 0.25f, 1f));
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.ButtonHovered]);
         }
 
         var clicked = ImGuiComponents.IconButton("toggle-tracked-buttons", this.hideTrackedIcons ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye);
@@ -783,7 +783,7 @@ public sealed class TrackerWindow : Window
         };
 
     private bool ShouldShowTrackedIcon(string iconName)
-        => !this.hideTrackedIcons && this.plugin.Configuration.ShownTrackedAchievementIcons.Contains(iconName);
+        => !this.hideTrackedIcons || !this.plugin.Configuration.HiddenTrackedAchievementIcons.Contains(iconName);
 
     private bool MatchesSelectedCategory(AchievementInfo info)
     {
