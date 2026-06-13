@@ -19,9 +19,9 @@
     "DownloadLinkInstall": "",
     "DownloadLinkUpdate": "",
     "LastUpdate": "1781233136",
-    "TestingAssemblyVersion": "0.2.0.29",
+    "TestingAssemblyVersion": "0.2.0.30",
     "TestingDalamudApiLevel": 15,
-    "TestingChangelog": "Experimental Ex+ local layout build. Main window uses category navigation, filtered achievement search, and tracked-list columns; templates are in an optional modal; toolbar uses gear/search/eye icons.",
+    "TestingChangelog": "Experimental Ex+ local layout build. Main pane can show Templates, Categories, Achievement search, and Tracked achievements as columns. Eye toggles templates; Book toggles category/search columns; toolbar is Update All, Auto update, Eye, Book.",
     "DownloadLinkTesting": "",
     "IconUrl": "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png",
     "ImageUrls": [
