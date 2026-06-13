@@ -55,6 +55,11 @@ public sealed class TrackerWindow : Window
     {
         foreach (var item in this.plugin.Configuration.MainNavigationOrder)
         {
+            if (this.plugin.Configuration.HiddenMainNavigationButtons.Contains(item))
+            {
+                continue;
+            }
+
             this.DrawToolbarItem(item);
             ImGui.SameLine();
         }
@@ -131,12 +136,6 @@ public sealed class TrackerWindow : Window
         var width = ImGui.GetContentRegionAvail().X;
         var orderedColumns = this.plugin.Configuration.MainColumnOrder.Where(this.ShouldDrawColumn).ToList();
         var visibleColumns = Math.Max(1, orderedColumns.Count);
-        var desiredWidth = Math.Clamp(visibleColumns * 300f, 760f, 1500f);
-        if (ImGui.GetWindowSize().X < desiredWidth - 10f || ImGui.GetWindowSize().X > desiredWidth + 360f)
-        {
-            ImGui.SetWindowSize(new Vector2(desiredWidth, ImGui.GetWindowSize().Y));
-        }
-
         var availableForColumns = width - (spacing * Math.Max(0, visibleColumns - 1));
         var baseColumnWidth = Math.Max(220f, availableForColumns / visibleColumns);
 
@@ -257,20 +256,39 @@ public sealed class TrackerWindow : Window
         if (ImGui.Button("Clear"))
         {
             this.achievementSearchQuery = string.Empty;
+        }
+        AddTooltip("Clear search text.");
+
+        if (ImGui.Button("All categories"))
+        {
             this.selectedCategoryFilter = string.Empty;
             this.selectedSubcategoryFilter = string.Empty;
         }
-        AddTooltip("Clear search and category filters.");
+        AddTooltip("Clear category and subcategory filters.");
 
-        var hideCompleted = this.plugin.Configuration.HideCompletedInSearch;
-        if (ImGui.Checkbox("Hide completed", ref hideCompleted))
+        ImGui.TextUnformatted("Completion:");
+        ImGui.SameLine();
+        if (ImGui.RadioButton("All", this.plugin.Configuration.SearchCompletionFilter == "All"))
         {
-            this.plugin.Configuration.HideCompletedInSearch = hideCompleted;
+            this.plugin.Configuration.SearchCompletionFilter = "All";
+            this.plugin.Configuration.HideCompletedInSearch = false;
             this.plugin.SaveConfiguration();
         }
-        AddTooltip("Hide completed achievements from search results.");
-
         ImGui.SameLine();
+        if (ImGui.RadioButton("Completed", this.plugin.Configuration.SearchCompletionFilter == "Completed"))
+        {
+            this.plugin.Configuration.SearchCompletionFilter = "Completed";
+            this.plugin.Configuration.HideCompletedInSearch = false;
+            this.plugin.SaveConfiguration();
+        }
+        ImGui.SameLine();
+        if (ImGui.RadioButton("Incomplete", this.plugin.Configuration.SearchCompletionFilter == "Incomplete"))
+        {
+            this.plugin.Configuration.SearchCompletionFilter = "Incomplete";
+            this.plugin.Configuration.HideCompletedInSearch = true;
+            this.plugin.SaveConfiguration();
+        }
+
         ImGui.TextUnformatted("Sort:");
         ImGui.SameLine();
         var gameSort = this.searchSortMode == SearchSortMode.GameOrder;
@@ -291,7 +309,7 @@ public sealed class TrackerWindow : Window
         var results = this.SortSearchResults(this.plugin.AchievementCatalog.Search(this.achievementSearchQuery, 5000)
                 .Where(this.MatchesSelectedCategory)
                 .Where(result => !string.Equals(SplitCategoryPath(result.CategoryName).Category, "Legacy", StringComparison.OrdinalIgnoreCase))
-                .Where(result => !this.plugin.Configuration.HideCompletedInSearch || !this.IsComplete(result.Id)))
+                .Where(this.MatchesCompletionFilter))
             .Take(80)
             .ToList();
 
@@ -368,7 +386,7 @@ public sealed class TrackerWindow : Window
         var trackedIds = this.plugin.TrackedAchievements.AchievementIds.ToList();
         if (trackedIds.Count == 0)
         {
-            ImGui.TextWrapped("No achievements tracked. Use the search column to add one, or show templates with the eye icon.");
+            ImGui.TextWrapped("No achievements tracked. Use the search column to add one, or show Lists with the disk icon.");
             return;
         }
 
@@ -695,6 +713,14 @@ public sealed class TrackerWindow : Window
 
         return true;
     }
+
+    private bool MatchesCompletionFilter(AchievementInfo info)
+        => this.plugin.Configuration.SearchCompletionFilter switch
+        {
+            "Completed" => this.IsComplete(info.Id),
+            "Incomplete" => !this.IsComplete(info.Id),
+            _ => true,
+        };
 
     private bool ShouldShowTrackedIcon(string iconName)
         => !this.hideTrackedIcons || !this.plugin.Configuration.HiddenTrackedAchievementIcons.Contains(iconName);

@@ -19,6 +19,8 @@ public sealed class Configuration : IPluginConfiguration
 
     public bool HideCompletedInSearch { get; set; } = true;
 
+    public string SearchCompletionFilter { get; set; } = "All";
+
     public bool ExperimentalAutoUpdateEnabled { get; set; }
 
     public int ExperimentalAutoUpdateIntervalMinutes { get; set; }
@@ -69,6 +71,8 @@ public sealed class Configuration : IPluginConfiguration
 
     public List<string> HiddenTrackedAchievementIcons { get; set; } = [];
 
+    public List<string> HiddenMainNavigationButtons { get; set; } = [];
+
     public List<uint> GetAutoUpdateTrackedAchievementIds()
         => AutoUpdateSelection.SelectIncludedTrackedAchievements(this.TrackedAchievementIds, this.AutoUpdateAchievementIds);
 
@@ -95,6 +99,12 @@ public sealed class Configuration : IPluginConfiguration
         this.MainColumnOrder = NormalizeStringOrder(this.MainColumnOrder, ["Lists", "Search Categories", "Search Results", "Tracked Achievements"]);
         this.MainNavigationOrder = NormalizeStringOrder(this.MainNavigationOrder, ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"]);
         this.HiddenTrackedAchievementIcons = NormalizeStringSet(this.HiddenTrackedAchievementIcons, ["Auto update", "Remove", "Refresh", "Open"]);
+        this.HiddenMainNavigationButtons = NormalizeStringSet(this.HiddenMainNavigationButtons, ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"]);
+        if (this.SearchCompletionFilter is not ("All" or "Completed" or "Incomplete"))
+        {
+            this.SearchCompletionFilter = this.HideCompletedInSearch ? "Incomplete" : "All";
+        }
+
         TrackedAchievementPresetStore.Normalize(this.TrackedAchievementPresets);
     }
 

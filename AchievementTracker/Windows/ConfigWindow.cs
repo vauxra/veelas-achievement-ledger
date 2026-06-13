@@ -712,18 +712,27 @@ public sealed class ConfigWindow : Window
     private void DrawUiPage()
     {
         ImGui.TextUnformatted("Main panel column order");
+        ImGui.TextDisabled("Top to bottom here means left to right in the main panel.");
         this.DrawOrderEditor(this.plugin.Configuration.MainColumnOrder, ["Lists", "Search Categories", "Search Results", "Tracked Achievements"], "columns");
 
         ImGui.Separator();
         ImGui.TextUnformatted("Main panel navigation order");
+        ImGui.TextDisabled("Top to bottom here means left to right in the main panel navigation.");
         this.DrawOrderEditor(this.plugin.Configuration.MainNavigationOrder, ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"], "nav");
 
         ImGui.Separator();
+        ImGui.TextUnformatted("Hide main panel navigation buttons");
+        this.DrawHiddenToggleGroup(
+            "All main panel buttons",
+            this.plugin.Configuration.HiddenMainNavigationButtons,
+            ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"]);
+
+        ImGui.Separator();
         ImGui.TextUnformatted("Hide tracked achievement icons when eye toggle is active");
-        this.DrawHiddenIconToggle("Auto update");
-        this.DrawHiddenIconToggle("Remove");
-        this.DrawHiddenIconToggle("Refresh");
-        this.DrawHiddenIconToggle("Open");
+        this.DrawHiddenToggleGroup(
+            "All tracked achievement icons",
+            this.plugin.Configuration.HiddenTrackedAchievementIcons,
+            ["Auto update", "Remove", "Refresh", "Open"]);
     }
 
     private void DrawOrderEditor(System.Collections.Generic.List<string> order, string[] defaults, string idPrefix)
@@ -740,6 +749,18 @@ public sealed class ConfigWindow : Window
         {
             ImGui.PushID($"{idPrefix}-{order[i]}");
             ImGui.TextUnformatted(order[i]);
+            ImGui.SameLine();
+            using (ImRaiiShim.Disabled(i == 0))
+            {
+                if (ImGui.Button("Top"))
+                {
+                    var item = order[i];
+                    order.RemoveAt(i);
+                    order.Insert(0, item);
+                    this.plugin.SaveConfiguration();
+                }
+            }
+
             ImGui.SameLine();
             using (ImRaiiShim.Disabled(i == 0))
             {
@@ -760,26 +781,65 @@ public sealed class ConfigWindow : Window
                 }
             }
 
+            ImGui.SameLine();
+            using (ImRaiiShim.Disabled(i == order.Count - 1))
+            {
+                if (ImGui.Button("Bottom"))
+                {
+                    var item = order[i];
+                    order.RemoveAt(i);
+                    order.Add(item);
+                    this.plugin.SaveConfiguration();
+                }
+            }
+
             ImGui.PopID();
         }
     }
 
-    private void DrawHiddenIconToggle(string iconName)
+    private void DrawHiddenToggleGroup(string parentLabel, System.Collections.Generic.List<string> hiddenValues, string[] children)
     {
-        var hidden = this.plugin.Configuration.HiddenTrackedAchievementIcons.Contains(iconName);
-        if (ImGui.Checkbox(iconName, ref hidden))
+        var allHidden = children.All(hiddenValues.Contains);
+        if (ImGui.Checkbox(parentLabel, ref allHidden))
         {
-            if (hidden && !this.plugin.Configuration.HiddenTrackedAchievementIcons.Contains(iconName))
+            if (allHidden)
             {
-                this.plugin.Configuration.HiddenTrackedAchievementIcons.Add(iconName);
+                foreach (var child in children)
+                {
+                    if (!hiddenValues.Contains(child))
+                    {
+                        hiddenValues.Add(child);
+                    }
+                }
             }
-            else if (!hidden)
+            else
             {
-                this.plugin.Configuration.HiddenTrackedAchievementIcons.RemoveAll(value => value == iconName);
+                hiddenValues.RemoveAll(children.Contains);
             }
 
             this.plugin.SaveConfiguration();
         }
+
+        ImGui.Indent(18);
+        foreach (var child in children)
+        {
+            var hidden = hiddenValues.Contains(child);
+            if (ImGui.Checkbox(child, ref hidden))
+            {
+                if (hidden && !hiddenValues.Contains(child))
+                {
+                    hiddenValues.Add(child);
+                }
+                else if (!hidden)
+                {
+                    hiddenValues.RemoveAll(value => value == child);
+                }
+
+                this.plugin.SaveConfiguration();
+            }
+        }
+
+        ImGui.Unindent(18);
     }
 
     private void DrawHelp()
