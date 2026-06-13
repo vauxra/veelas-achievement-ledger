@@ -52,6 +52,8 @@ public sealed class AchievementProgressUpdater
         ? this.nextAutoUpdateAt
         : null;
 
+    public bool IsUpdateInProgress => this.batchInProgress || this.activeNativeRequest.HasValue || this.scheduler.HasPendingRequests;
+
     public void EnqueueUpdateAll(IEnumerable<uint> achievementIds, string reason)
     {
         var now = DateTimeOffset.UtcNow;
@@ -198,11 +200,12 @@ public sealed class AchievementProgressUpdater
         if (this.nativeWindowOpenedByVal && !this.nativeWindowWasOpenBeforeBatch)
         {
             var closed = this.nativeAchievementNavigator.CloseAchievementWindow(restoreParkedWindow: false);
-            this.debugLog($"AchieveEx DebugTrace NativeBatchAutoClose closed={closed} scalePositionTouched=false");
+            this.debugLog($"AchieveEx DebugTrace NativeBatchAutoClose closed={closed} restoreDeferredUntilUserOpen={this.nativeAchievementNavigator.HasParkedWindow}");
         }
         else
         {
-            this.debugLog("AchieveEx DebugTrace NativeBatchLeaveOpen reason=window-was-open-before-batch scalePositionTouched=false");
+            var restored = this.nativeAchievementNavigator.RestoreParkedAchievementWindow();
+            this.debugLog($"AchieveEx DebugTrace NativeBatchLeaveOpen reason=window-was-open-before-batch restored={restored}");
         }
 
         this.batchInProgress = false;

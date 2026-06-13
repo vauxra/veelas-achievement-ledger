@@ -286,7 +286,9 @@ public sealed class Plugin : IDalamudPlugin
 
     private void RestoreParkedAchievementWindowIfUserOpenedIt()
     {
-        if (this.NativeAchievementNavigator.HasParkedWindow && this.NativeAchievementNavigator.IsOpen)
+        if (!this.AchievementProgressUpdater.IsUpdateInProgress
+            && this.NativeAchievementNavigator.HasParkedWindow
+            && this.NativeAchievementNavigator.IsOpen)
         {
             var restored = this.NativeAchievementNavigator.RestoreParkedAchievementWindow();
             if (restored)

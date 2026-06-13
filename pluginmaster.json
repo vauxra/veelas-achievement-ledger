@@ -19,9 +19,9 @@
     "DownloadLinkInstall": "",
     "DownloadLinkUpdate": "",
     "LastUpdate": "1781233136",
-    "TestingAssemblyVersion": "0.3.0.4",
+    "TestingAssemblyVersion": "0.3.0.5",
     "TestingDalamudApiLevel": 15,
-    "TestingChangelog": "Experimental Ex+ local layout build. Eye button is white/default while showing tracked buttons and active slash-eye while hiding checked buttons; update paths park the native Achievement window top-right and viewing/user opens restore the saved user scale/position.",
+    "TestingChangelog": "Experimental Ex+ local layout build. Fixes update-window scale/position fighting: parked update windows are not restored during an active update batch; restore happens after the batch or when the user opens the window later.",
     "DownloadLinkTesting": "",
     "IconUrl": "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png",
     "ImageUrls": [
