@@ -124,7 +124,7 @@ public sealed class TrackerWindow : Window
                     this.hideTrackedIcons = !this.hideTrackedIcons;
                     this.resetMainPanelScrollNextDraw = true;
                 }
-                AddTooltip(this.hideTrackedIcons ? "Show tracked achievement icons." : "Hide tracked achievement icons.");
+                AddTooltip(this.hideTrackedIcons ? "Show tracked achievement row controls." : "Hide tracked achievement row controls.");
                 break;
         }
     }
@@ -255,7 +255,7 @@ public sealed class TrackerWindow : Window
     private void DrawAchievementCategoryColumn()
     {
         GameGuiTheme.DrawSectionHeader("Achievement categories");
-        ImGui.TextDisabled("Click to select one category. Ctrl-click to add/remove multiple categories or subcategories.");
+        DrawDisabledWrapped("Click to select one category. Ctrl-click to add/remove multiple categories or subcategories.");
         var categoryEntries = this.plugin.AchievementCatalog.Search(string.Empty, 5000)
             .Select(info => (Info: info, Parts: SplitCategoryPath(info.CategoryName), Sort: this.GetGameSortKey(info)))
             .Where(entry => !string.IsNullOrWhiteSpace(entry.Parts.Category))
@@ -445,8 +445,6 @@ public sealed class TrackerWindow : Window
         AddTooltip("Open in Achievements.");
 
         ImGui.SameLine();
-        GameGuiTheme.DrawIconFrame(result.IconId, 30f);
-        ImGui.SameLine();
         ImGui.BeginGroup();
         ImGui.TextWrapped(result.Name);
         if (this.IsComplete(result.Id))
@@ -545,8 +543,6 @@ public sealed class TrackerWindow : Window
             ImGui.SameLine();
         }
 
-        GameGuiTheme.DrawIconFrame(info.IconId, 30f);
-        ImGui.SameLine();
         ImGui.BeginGroup();
         ImGui.TextWrapped(info.Name);
         ImGui.TextDisabled(progressText);
@@ -915,6 +911,13 @@ public sealed class TrackerWindow : Window
             1 => (parts[0], string.Empty),
             _ => (parts[0], parts[^1]),
         };
+    }
+
+    private static void DrawDisabledWrapped(string text)
+    {
+        ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled]);
+        ImGui.TextWrapped(text);
+        ImGui.PopStyleColor();
     }
 
     private static void AddTooltip(string text)

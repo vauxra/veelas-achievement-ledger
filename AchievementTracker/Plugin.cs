@@ -40,9 +40,6 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
     // LocalPlayer class/job scopes activity-triggered updates to the matching Crafting & Gathering category.
     [PluginService] internal static IObjectTable ObjectTable { get; private set; } = null!;
-    // ITextureProvider loads game icon textures for DailyDuty-style in-game visual assets in ImGui rows.
-    // https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/ITextureProvider
-    [PluginService] internal static ITextureProvider TextureProvider { get; private set; } = null!;
 
     public Configuration Configuration { get; }
     public TrackedAchievementStore TrackedAchievements { get; }
