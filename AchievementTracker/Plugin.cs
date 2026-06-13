@@ -211,6 +211,9 @@ public sealed class Plugin : IDalamudPlugin
         }
     }
 
+    public void OpenTrackedAchievementsConfig()
+        => this.ConfigWindow.OpenTrackedAchievements();
+
     private void InstallPassiveAchievementObserver()
     {
         this.passiveAchievementProgressObserver ??= new PassiveAchievementProgressObserver(

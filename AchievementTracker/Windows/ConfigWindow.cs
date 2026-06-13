@@ -43,6 +43,12 @@ public sealed class ConfigWindow : Window
         this.IsOpen = true;
     }
 
+    public void OpenTrackedAchievements()
+    {
+        this.selectedSection = ConfigSection.TrackedAchievements;
+        this.IsOpen = true;
+    }
+
     public void OpenHelp()
     {
         this.selectedSection = ConfigSection.Help;
@@ -725,7 +731,7 @@ public sealed class ConfigWindow : Window
         ImGui.Separator();
         ImGui.TextUnformatted("Tracked Achievements notes");
         this.DrawWrappedBullet("The Auto checkbox on each tracked row controls whether timed auto update includes that achievement.");
-        this.DrawWrappedBullet("Saved templates now live in the main Achieve Ex+ window. Click the eye icon to pop out the template panel, then right-click template names for options.");
+        this.DrawWrappedBullet("Saved templates now live in the main Achieve Ex+ window. Click the eye icon to open the template modal, then right-click template names for options.");
         this.DrawWrappedBullet("Search adds achievements to the tracked list; Clear resets the search bar.");
         this.DrawWrappedBullet("Cosmic Class achievements show cached score progress in tracked and search rows when scores have been observed in Cosmic content.");
         this.DrawWrappedBullet("Cosmic score cache refreshes passively while WKS/Cosmic data is loaded and remains available outside the zone.");
