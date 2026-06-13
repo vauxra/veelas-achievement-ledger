@@ -117,7 +117,7 @@ public sealed class TrackerWindow : Window
                 AddTooltip("Toggle configuration.");
                 break;
             case "Tracked buttons":
-                if (this.DrawActiveIconButton("toggle-tracked-buttons", this.hideTrackedIcons ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye, !this.hideTrackedIcons))
+                if (this.DrawTrackedButtonsToggle())
                 {
                     this.hideTrackedIcons = !this.hideTrackedIcons;
                     this.resetMainPanelScrollNextDraw = true;
@@ -136,6 +136,22 @@ public sealed class TrackerWindow : Window
 
         var clicked = ImGuiComponents.IconButton(id, icon);
         if (active)
+        {
+            ImGui.PopStyleColor();
+        }
+
+        return clicked;
+    }
+
+    private bool DrawTrackedButtonsToggle()
+    {
+        if (this.hideTrackedIcons)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 0.25f, 0.25f, 1f));
+        }
+
+        var clicked = ImGuiComponents.IconButton("toggle-tracked-buttons", this.hideTrackedIcons ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye);
+        if (this.hideTrackedIcons)
         {
             ImGui.PopStyleColor();
         }
@@ -191,9 +207,7 @@ public sealed class TrackerWindow : Window
         {
             "Search Categories" => 320f,
             "Search Results" => 420f,
-            "Tracked Achievements" => 320f,
-            "Lists" => 220f,
-            _ => 180f,
+            _ => 0f,
         };
 
         return Math.Max(minimum, configured);

@@ -18,7 +18,6 @@ public sealed class AchievementProgressUpdater
     private readonly Func<bool> autoUpdateEnabledProvider;
     private readonly Func<int> autoUpdateIntervalSecondsProvider;
     private readonly Func<int> updateSpacingSecondsProvider;
-    private readonly Func<bool> restoreNativeWindowAfterUpdatesProvider;
     private readonly Action<string> debugLog;
     private DateTimeOffset nextAutoUpdateAt = DateTimeOffset.MinValue;
     private ActiveNativeAchievementRequest? activeNativeRequest;
@@ -33,7 +32,6 @@ public sealed class AchievementProgressUpdater
         Func<bool> autoUpdateEnabledProvider,
         Func<int> autoUpdateIntervalSecondsProvider,
         Func<int> updateSpacingSecondsProvider,
-        Func<bool> restoreNativeWindowAfterUpdatesProvider,
         Action<string> debugLog)
     {
         this.scheduler = new AchievementProgressRequestScheduler();
@@ -43,7 +41,6 @@ public sealed class AchievementProgressUpdater
         this.autoUpdateEnabledProvider = autoUpdateEnabledProvider;
         this.autoUpdateIntervalSecondsProvider = autoUpdateIntervalSecondsProvider;
         this.updateSpacingSecondsProvider = updateSpacingSecondsProvider;
-        this.restoreNativeWindowAfterUpdatesProvider = restoreNativeWindowAfterUpdatesProvider;
         this.debugLog = debugLog;
     }
 
@@ -150,8 +147,7 @@ public sealed class AchievementProgressUpdater
             now + maximumWait,
             coldOpen);
 
-        var parked = this.nativeAchievementNavigator.TryParkAchievementWindow();
-        this.debugLog($"AchieveEx DebugTrace NativeOpenSent id={request.AchievementId} reason={request.Reason} cold={coldOpen} parked={parked} minWaitSeconds={minimumWait.TotalSeconds:0} maxWaitSeconds={maximumWait.TotalSeconds:0} pending={this.scheduler.PendingCount}");
+        this.debugLog($"AchieveEx DebugTrace NativeOpenSent id={request.AchievementId} reason={request.Reason} cold={coldOpen} parked=false scalePositionTouched=false minWaitSeconds={minimumWait.TotalSeconds:0} maxWaitSeconds={maximumWait.TotalSeconds:0} pending={this.scheduler.PendingCount}");
     }
 
     private void ProcessActiveNativeRequest(DateTimeOffset now)
@@ -162,11 +158,6 @@ public sealed class AchievementProgressUpdater
         }
 
         var request = this.activeNativeRequest.Value;
-        if (!this.nativeAchievementNavigator.HasParkedWindow && this.nativeAchievementNavigator.TryParkAchievementWindow())
-        {
-            this.debugLog($"AchieveEx DebugTrace NativeWindowParked id={request.AchievementId} scale=0.1375 x=20 y=20");
-        }
-
         if (now < request.MinimumCompleteAt)
         {
             return;
@@ -198,16 +189,14 @@ public sealed class AchievementProgressUpdater
             return;
         }
 
-        var restoreAfterUpdate = this.restoreNativeWindowAfterUpdatesProvider();
         if (this.nativeWindowOpenedByVal && !this.nativeWindowWasOpenBeforeBatch)
         {
-            var closed = this.nativeAchievementNavigator.CloseAchievementWindow(restoreAfterUpdate);
-            this.debugLog($"AchieveEx DebugTrace NativeBatchAutoClose closed={closed} restoreScalePosition={restoreAfterUpdate}");
+            var closed = this.nativeAchievementNavigator.CloseAchievementWindow(restoreParkedWindow: false);
+            this.debugLog($"AchieveEx DebugTrace NativeBatchAutoClose closed={closed} scalePositionTouched=false");
         }
         else
         {
-            var restored = restoreAfterUpdate && this.nativeAchievementNavigator.RestoreParkedAchievementWindow();
-            this.debugLog($"AchieveEx DebugTrace NativeBatchLeaveOpen reason=window-was-open-before-batch restored={restored} restoreScalePosition={restoreAfterUpdate}");
+            this.debugLog("AchieveEx DebugTrace NativeBatchLeaveOpen reason=window-was-open-before-batch scalePositionTouched=false");
         }
 
         this.batchInProgress = false;

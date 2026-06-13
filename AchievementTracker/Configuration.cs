@@ -80,10 +80,10 @@ public sealed class Configuration : IPluginConfiguration
 
     public Dictionary<string, float> MainColumnWidths { get; set; } = new()
     {
-        ["Lists"] = 220f,
+        ["Lists"] = 0f,
         ["Search Categories"] = 320f,
         ["Search Results"] = 420f,
-        ["Tracked Achievements"] = 420f,
+        ["Tracked Achievements"] = 0f,
     };
 
     public List<uint> GetAutoUpdateTrackedAchievementIds()
@@ -117,10 +117,10 @@ public sealed class Configuration : IPluginConfiguration
         this.ShownMainNavigationButtons = NormalizeShownStringSet(this.ShownMainNavigationButtons, this.HiddenMainNavigationButtons, ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"]);
         this.MainColumnWidths = NormalizeColumnWidths(this.MainColumnWidths, new Dictionary<string, float>
         {
-            ["Lists"] = 220f,
+            ["Lists"] = 0f,
             ["Search Categories"] = 320f,
             ["Search Results"] = 420f,
-            ["Tracked Achievements"] = 420f,
+            ["Tracked Achievements"] = 0f,
         });
         if (this.SearchCompletionFilter is not ("All" or "Completed" or "Incomplete"))
         {
@@ -195,7 +195,7 @@ public sealed class Configuration : IPluginConfiguration
             var value = values is not null && values.TryGetValue(key, out var configuredValue)
                 ? configuredValue
                 : defaultValue;
-            normalized[key] = Math.Clamp(value, 160f, 900f);
+            normalized[key] = Math.Clamp(value, 0f, 900f);
         }
 
         return normalized;

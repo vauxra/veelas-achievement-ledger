@@ -124,14 +124,7 @@ public unsafe sealed class NativeAchievementNavigator
     }
 
     public bool RestoreParkedAchievementWindowOrResetScale()
-    {
-        if (this.RestoreParkedAchievementWindow())
-        {
-            return true;
-        }
-
-        return !this.HasParkedWindow && this.ResetAchievementWindowScale();
-    }
+        => this.RestoreParkedAchievementWindow();
 
     public bool CloseAchievementWindow(bool restoreParkedWindow = true)
     {

@@ -19,9 +19,9 @@
     "DownloadLinkInstall": "",
     "DownloadLinkUpdate": "",
     "LastUpdate": "1781233136",
-    "TestingAssemblyVersion": "0.3.0.2",
+    "TestingAssemblyVersion": "0.3.0.3",
     "TestingDalamudApiLevel": 15,
-    "TestingChangelog": "Experimental Ex+ local layout build. UI config uses show-button checkboxes, active toolbar icons are tinted, main columns have configurable enforced widths, and main panel scroll resets after open/close changes.",
+    "TestingChangelog": "Experimental Ex+ local layout build. Tracked-button eye toggle is red only while hiding buttons, column width config moved to the bottom and allows 0, and queued updates no longer change/restore native Achievement window scale or position.",
     "DownloadLinkTesting": "",
     "IconUrl": "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png",
     "ImageUrls": [

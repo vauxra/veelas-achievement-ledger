@@ -570,20 +570,6 @@ public sealed class ConfigWindow : Window
         this.AddTooltip("Write AchieveEx DebugTrace logs.");
 
         ImGui.Separator();
-        var restoreWindowAfterUpdates = this.plugin.Configuration.RestoreNativeAchievementWindowAfterUpdates;
-        if (ImGui.Checkbox("Restore Achievement window scale/position after updates", ref restoreWindowAfterUpdates))
-        {
-            this.plugin.Configuration.RestoreNativeAchievementWindowAfterUpdates = restoreWindowAfterUpdates;
-            this.plugin.SaveConfiguration();
-        }
-        this.AddTooltip("Restore the native Achievement window's original scale and position after queued update tasks. Magnifying-glass opens always restore before showing the entry.");
-
-        if (ImGui.Button("Reset native Achievement window scale"))
-        {
-            this.plugin.ResetNativeAchievementWindowScale();
-        }
-        this.AddTooltip("Set the currently open native Achievement window back to 100% scale if a parking test leaves it shrunk.");
-
     }
 
 
@@ -715,13 +701,6 @@ public sealed class ConfigWindow : Window
         ImGui.TextDisabled("Top to bottom here means left to right in the main panel.");
         this.DrawOrderEditor(this.plugin.Configuration.MainColumnOrder, ["Lists", "Search Categories", "Search Results", "Tracked Achievements"], "columns");
 
-        ImGui.Separator();
-        ImGui.TextUnformatted("Main panel column widths");
-        ImGui.TextDisabled("Widths are per-column minimums. Search Categories and Search Results enforce larger minimums so labels/options do not truncate.");
-        this.DrawColumnWidthEditor("Lists", 220f);
-        this.DrawColumnWidthEditor("Search Categories", 320f);
-        this.DrawColumnWidthEditor("Search Results", 420f);
-        this.DrawColumnWidthEditor("Tracked Achievements", 320f);
 
         ImGui.Separator();
         ImGui.TextUnformatted("Main panel navigation order");
@@ -742,6 +721,14 @@ public sealed class ConfigWindow : Window
             "All tracked achievement buttons",
             this.plugin.Configuration.ShownTrackedAchievementIcons,
             ["Auto update", "Remove", "Refresh", "Open"]);
+
+        ImGui.Separator();
+        ImGui.TextUnformatted("Main panel column widths");
+        ImGui.TextDisabled("Set 0 for automatic/remaining width. Search Categories and Search Results still enforce minimums so labels/options do not truncate.");
+        this.DrawColumnWidthEditor("Lists", 0f);
+        this.DrawColumnWidthEditor("Search Categories", 320f);
+        this.DrawColumnWidthEditor("Search Results", 420f);
+        this.DrawColumnWidthEditor("Tracked Achievements", 0f);
     }
 
     private void DrawOrderEditor(System.Collections.Generic.List<string> order, string[] defaults, string idPrefix)
@@ -816,13 +803,13 @@ public sealed class ConfigWindow : Window
         ImGui.SetNextItemWidth(120);
         if (ImGui.InputFloat(columnName, ref width, 10f, 50f, "%.0f"))
         {
-            this.plugin.Configuration.MainColumnWidths[columnName] = Math.Clamp(width, minimum, 900f);
+            this.plugin.Configuration.MainColumnWidths[columnName] = Math.Clamp(width, 0f, 900f);
             this.plugin.SaveConfiguration();
         }
 
         if (ImGui.IsItemHovered())
         {
-            ImGui.SetTooltip($"Minimum width: {minimum:0}px");
+            ImGui.SetTooltip(minimum > 0 ? $"Minimum effective width: {minimum:0}px" : "0 uses automatic/remaining width.");
         }
 
         ImGui.PopID();
@@ -885,9 +872,9 @@ public sealed class ConfigWindow : Window
         this.DrawWrappedBullet("Reload buttons and Update All open native Achievement entries, then Achieve Ex+ reads the already-populated progress slot.");
         this.DrawWrappedBullet("Update All queues native Achievement UI assisted progress updates for tracked achievements. Items updated in the last 30 seconds are skipped by Update All.");
         this.DrawWrappedBullet("Timed auto update and event-triggered updates cannot both be enabled at the same time.");
-        this.DrawWrappedBullet("During queued updates, Achieve Ex+ temporarily parks the native Achievement window at a very small scale; restoring original scale/position after updates is configurable under Auto update.");
+        this.DrawWrappedBullet("Queued update tasks no longer change the native Achievement window scale or position.");
         this.DrawWrappedBullet("Magnifying-glass Open in Achievements buttons restore the parked Achievement window scale/position before showing the selected entry.");
-        this.DrawWrappedBullet("Reset native Achievement window scale opens the native window first, then restores it to 100% scale if a parking test leaves it shrunk.");
+        this.DrawWrappedBullet("Magnifying-glass inspection opens restore any parked Achievement window state before showing the entry.");
         this.DrawWrappedBullet("Stop Update Tasks disables auto update and clears queued update tasks.");
         this.DrawWrappedBullet("Use the magnifying glass to open that achievement in the native Achievements window.");
 

@@ -57,8 +57,6 @@ public sealed class Plugin : IDalamudPlugin
     private PassiveAchievementProgressObserver? passiveAchievementProgressObserver;
     private AchievementActivityUpdateObserver? activityUpdateObserver;
     private DateTimeOffset nextCosmicCacheRefreshAt = DateTimeOffset.MinValue;
-    private bool pendingNativeAchievementScaleReset;
-    private DateTimeOffset pendingNativeAchievementScaleResetUntil = DateTimeOffset.MinValue;
     private bool pendingNativeAchievementInspectionRestore;
     private DateTimeOffset pendingNativeAchievementInspectionRestoreUntil = DateTimeOffset.MinValue;
 
@@ -80,7 +78,6 @@ public sealed class Plugin : IDalamudPlugin
             () => this.Configuration.ExperimentalAutoUpdateEnabled,
             () => this.Configuration.ExperimentalAutoUpdateIntervalSeconds,
             () => this.Configuration.ExperimentalUpdateSpacingSeconds,
-            () => this.Configuration.RestoreNativeAchievementWindowAfterUpdates,
             this.DebugLog);
         this.AchievementProgressService = new AchievementProgressService(UnlockState, this.AchievementProgressSource, this.CosmicClassProgressProvider);
         this.TrackerWindow = new TrackerWindow(this);
@@ -172,15 +169,6 @@ public sealed class Plugin : IDalamudPlugin
         this.pendingNativeAchievementInspectionRestoreUntil = DateTimeOffset.UtcNow.AddSeconds(5);
         this.DebugLog($"AchieveEx DebugTrace NativeInspectionOpen id={achievementId} opened={opened} normalizedBeforeOpen={normalizedBeforeOpen} normalizedAfterOpen={normalizedAfterOpen} pendingRestore={this.pendingNativeAchievementInspectionRestore}");
         return opened;
-    }
-
-    public void ResetNativeAchievementWindowScale()
-    {
-        var shown = this.NativeAchievementNavigator.IsOpen || this.NativeAchievementNavigator.ShowAchievementWindow();
-        var reset = shown && this.NativeAchievementNavigator.ResetAchievementWindowScale();
-        this.pendingNativeAchievementScaleReset = shown && !reset;
-        this.pendingNativeAchievementScaleResetUntil = DateTimeOffset.UtcNow.AddSeconds(5);
-        this.DebugLog($"AchieveEx DebugTrace NativeWindowScaleReset shown={shown} reset={reset} pending={this.pendingNativeAchievementScaleReset}");
     }
 
     public void DebugLog(string message)
@@ -286,15 +274,26 @@ public sealed class Plugin : IDalamudPlugin
         this.AchievementProgressSource.ClearCache();
         this.AchievementProgressUpdater.Clear();
         this.pendingNativeAchievementInspectionRestore = false;
-        this.pendingNativeAchievementScaleReset = false;
     }
 
     private void OnFrameworkUpdate(IFramework framework)
     {
         this.AchievementProgressUpdater.Tick();
-        this.TryCompletePendingNativeAchievementScaleReset();
+        this.RestoreParkedAchievementWindowIfUserOpenedIt();
         this.TryCompletePendingNativeAchievementInspectionRestore();
         this.RefreshCosmicCacheFromLiveState();
+    }
+
+    private void RestoreParkedAchievementWindowIfUserOpenedIt()
+    {
+        if (this.NativeAchievementNavigator.HasParkedWindow && this.NativeAchievementNavigator.IsOpen)
+        {
+            var restored = this.NativeAchievementNavigator.RestoreParkedAchievementWindow();
+            if (restored)
+            {
+                this.DebugLog("AchieveEx DebugTrace NativeAchievementWindowUserOpenRestore restored=true");
+            }
+        }
     }
 
     private void TryCompletePendingNativeAchievementInspectionRestore()
@@ -310,22 +309,6 @@ public sealed class Plugin : IDalamudPlugin
         {
             this.pendingNativeAchievementInspectionRestore = false;
             this.DebugLog($"AchieveEx DebugTrace NativeInspectionRestorePendingComplete shown={shown} normalized={normalized} hasParkedWindow={this.NativeAchievementNavigator.HasParkedWindow}");
-        }
-    }
-
-    private void TryCompletePendingNativeAchievementScaleReset()
-    {
-        if (!this.pendingNativeAchievementScaleReset)
-        {
-            return;
-        }
-
-        var shown = this.NativeAchievementNavigator.IsOpen || this.NativeAchievementNavigator.ShowAchievementWindow();
-        var reset = shown && this.NativeAchievementNavigator.ResetAchievementWindowScale();
-        if (reset || DateTimeOffset.UtcNow >= this.pendingNativeAchievementScaleResetUntil)
-        {
-            this.pendingNativeAchievementScaleReset = false;
-            this.DebugLog($"AchieveEx DebugTrace NativeWindowScaleResetPendingComplete shown={shown} reset={reset}");
         }
     }
 
