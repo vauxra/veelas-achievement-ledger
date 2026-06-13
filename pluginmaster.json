@@ -19,9 +19,9 @@
     "DownloadLinkInstall": "",
     "DownloadLinkUpdate": "",
     "LastUpdate": "1781233136",
-    "TestingAssemblyVersion": "0.3.0.5",
+    "TestingAssemblyVersion": "0.3.0.6",
     "TestingDalamudApiLevel": 15,
-    "TestingChangelog": "Experimental Ex+ local layout build. Fixes update-window scale/position fighting: parked update windows are not restored during an active update batch; restore happens after the batch or when the user opens the window later.",
+    "TestingChangelog": "Experimental Ex+ local layout build. Normalizes parked update Achievement window to top-left and keeps a last user scale/position fallback so inspection/manual opens can restore even after the parked addon was closed.",
     "DownloadLinkTesting": "",
     "IconUrl": "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png",
     "ImageUrls": [

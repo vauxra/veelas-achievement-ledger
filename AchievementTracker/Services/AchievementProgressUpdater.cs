@@ -163,7 +163,7 @@ public sealed class AchievementProgressUpdater
         var request = this.activeNativeRequest.Value;
         if (!this.nativeAchievementNavigator.HasParkedWindow && this.nativeAchievementNavigator.TryParkAchievementWindow())
         {
-            this.debugLog($"AchieveEx DebugTrace NativeWindowParked id={request.AchievementId} scale=0.1375 position=top-right");
+            this.debugLog($"AchieveEx DebugTrace NativeWindowParked id={request.AchievementId} scale=0.1375 position=top-left");
         }
 
         if (now < request.MinimumCompleteAt)

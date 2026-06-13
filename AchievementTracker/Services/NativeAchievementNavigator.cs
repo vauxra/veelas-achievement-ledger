@@ -9,12 +9,12 @@ public unsafe sealed class NativeAchievementNavigator
 {
     private const string AchievementAddonName = "Achievement";
     public const float ParkedScale = 0.1375f;
-    private const short ParkedRightPadding = 20;
+    private const short ParkedX = 20;
     private const short ParkedY = 20;
-    private const short ParkedFallbackX = 1600;
 
     private readonly IGameGui gameGui;
     private ParkedAchievementWindowState? parkedState;
+    private ParkedAchievementWindowState? lastUserWindowState;
 
     public NativeAchievementNavigator(IGameGui gameGui)
     {
@@ -73,20 +73,31 @@ public unsafe sealed class NativeAchievementNavigator
             return false;
         }
 
-        this.parkedState ??= new ParkedAchievementWindowState(addon.X, addon.Y, addon.Scale);
+        var currentState = new ParkedAchievementWindowState(addon.X, addon.Y, addon.Scale);
+        if (!IsParkedState(currentState))
+        {
+            this.lastUserWindowState = currentState;
+            this.parkedState ??= currentState;
+        }
+        else
+        {
+            this.parkedState ??= this.lastUserWindowState;
+        }
+
         unitBase->SetScale(ParkedScale, false);
-        unitBase->SetPosition(this.GetParkedTopRightX(), ParkedY);
+        unitBase->SetPosition(ParkedX, ParkedY);
         return true;
     }
 
     public bool RestoreParkedAchievementWindow()
     {
-        if (!this.parkedState.HasValue)
+        var stateToRestore = this.parkedState ?? this.lastUserWindowState;
+        if (!stateToRestore.HasValue)
         {
             return false;
         }
 
-        var state = this.parkedState.Value;
+        var state = stateToRestore.Value;
         var addon = this.gameGui.GetAddonByName(AchievementAddonName, 1);
         if (addon.IsNull || !addon.IsReady || !addon.IsVisible || addon.Address == IntPtr.Zero)
         {
@@ -101,9 +112,13 @@ public unsafe sealed class NativeAchievementNavigator
 
         unitBase->SetScale(state.Scale, false);
         unitBase->SetPosition(state.X, state.Y);
+        this.lastUserWindowState = state;
         this.parkedState = null;
         return true;
     }
+
+    private static bool IsParkedState(ParkedAchievementWindowState state)
+        => Math.Abs(state.Scale - ParkedScale) < 0.001f && state.X == ParkedX && state.Y == ParkedY;
 
     public bool ResetAchievementWindowScale()
     {
@@ -126,18 +141,6 @@ public unsafe sealed class NativeAchievementNavigator
 
     public bool RestoreParkedAchievementWindowOrResetScale()
         => this.RestoreParkedAchievementWindow();
-
-    private short GetParkedTopRightX()
-    {
-        var stage = AtkStage.Instance();
-        if (stage == null || stage->ScreenSize.Width <= 0)
-        {
-            return ParkedFallbackX;
-        }
-
-        var x = stage->ScreenSize.Width - 260 - ParkedRightPadding;
-        return (short)Math.Clamp(x, 0, short.MaxValue);
-    }
 
     public bool CloseAchievementWindow(bool restoreParkedWindow = true)
     {
