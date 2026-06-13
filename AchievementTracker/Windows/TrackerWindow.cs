@@ -30,7 +30,7 @@ public sealed class TrackerWindow : Window
         this.plugin = plugin;
         this.SizeConstraints = new WindowSizeConstraints
         {
-            MinimumSize = new Vector2(760, 360),
+            MinimumSize = new Vector2(320, 260),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue),
         };
     }
