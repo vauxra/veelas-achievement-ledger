@@ -5,4 +5,5 @@ public sealed record AchievementInfo(
     string Name,
     string Description,
     byte Points,
-    string CategoryName);
+    string CategoryName,
+    uint IconId);

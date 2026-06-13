@@ -57,6 +57,7 @@ public sealed class ConfigWindow : Window
 
     public override void Draw()
     {
+        using var _ = GameGuiTheme.PushStyle();
         if (ImGui.Button("Open Achieve Ex+"))
         {
             this.plugin.OpenMainUi();
@@ -106,7 +107,7 @@ public sealed class ConfigWindow : Window
     private void DrawPresetControls()
     {
         this.EnsureSelectedPresetIsValid();
-        ImGui.TextUnformatted("Presets");
+        GameGuiTheme.DrawSectionHeader("Presets");
         ImGui.SameLine();
         ImGui.SetNextItemWidth(190);
         if (ImGui.InputTextWithHint("##PresetName", "Preset name", ref this.presetNameInput, TrackedAchievementPresetStore.MaxPresetNameLength))
@@ -358,7 +359,7 @@ public sealed class ConfigWindow : Window
 
     private void DrawSearchAndAdd()
     {
-        ImGui.TextUnformatted("Search achievements to track");
+        GameGuiTheme.DrawSectionHeader("Search achievements to track");
         var hideCompleted = this.plugin.Configuration.HideCompletedInSearch;
         if (ImGui.Checkbox("Hide completed", ref hideCompleted))
         {
@@ -509,7 +510,7 @@ public sealed class ConfigWindow : Window
 
     private void DrawExperimentalAutoUpdateSettings()
     {
-        ImGui.TextUnformatted("Experimental auto update");
+        GameGuiTheme.DrawSectionHeader("Experimental auto update");
         this.DrawDisabledWrapped("Native Achievement opens. Countdown runs before the first cycle.");
         this.DrawDisabledWrapped("Timed auto update and event-triggered updates cannot both be enabled.");
 
@@ -572,7 +573,7 @@ public sealed class ConfigWindow : Window
 
     private void DrawTriggerAutoUpdateSettings()
     {
-        ImGui.TextUnformatted("Trigger auto updates");
+        GameGuiTheme.DrawSectionHeader("Trigger auto updates");
         this.DrawDisabledWrapped("When enabled, matching game events queue updates for tracked achievements in that category.");
         this.DrawDisabledWrapped("Event-triggered updates and timed auto update cannot both be enabled.");
 
@@ -685,25 +686,25 @@ public sealed class ConfigWindow : Window
 
     private void DrawUiPage()
     {
-        ImGui.TextUnformatted("Main panel column order");
+        GameGuiTheme.DrawSectionHeader("Main panel column order");
         ImGui.TextDisabled("Top to bottom here means left to right in the main panel.");
         this.DrawOrderEditor(this.plugin.Configuration.MainColumnOrder, ["Lists", "Search Categories", "Search Results", "Tracked Achievements"], "columns");
 
 
         ImGui.Separator();
-        ImGui.TextUnformatted("Main panel navigation order");
+        GameGuiTheme.DrawSectionHeader("Main panel navigation order");
         ImGui.TextDisabled("Top to bottom here means left to right in the main panel navigation.");
         this.DrawOrderEditor(this.plugin.Configuration.MainNavigationOrder, ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"], "nav");
 
         ImGui.Separator();
-        ImGui.TextUnformatted("Show main panel navigation buttons");
+        GameGuiTheme.DrawSectionHeader("Show main panel navigation buttons");
         this.DrawShownToggleGroup(
             "All main panel buttons",
             this.plugin.Configuration.ShownMainNavigationButtons,
             ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"]);
 
         ImGui.Separator();
-        ImGui.TextUnformatted("Tracked achievement buttons hidden by the eye-slash button");
+        GameGuiTheme.DrawSectionHeader("Tracked achievement buttons hidden by the eye-slash button");
         ImGui.TextDisabled("White eye = normal/default and shows all tracked achievement buttons. Red slash-eye = hide only the checked buttons below.");
         this.DrawHiddenToggleGroup(
             "All tracked achievement buttons",
@@ -711,7 +712,7 @@ public sealed class ConfigWindow : Window
             ["Auto update", "Remove", "Refresh", "Open"]);
 
         ImGui.Separator();
-        ImGui.TextUnformatted("Main panel column widths");
+        GameGuiTheme.DrawSectionHeader("Main panel column widths");
         ImGui.TextDisabled("Set 0 for automatic/remaining width. Search Categories and Search Results still enforce minimums so labels/options do not truncate.");
         this.DrawColumnWidthEditor("Lists", 0f);
         this.DrawColumnWidthEditor("Search Categories", 320f);
@@ -905,7 +906,7 @@ public sealed class ConfigWindow : Window
 
     private void DrawHelp()
     {
-        ImGui.TextUnformatted("Help");
+        GameGuiTheme.DrawSectionHeader("Help");
         if (ImGui.Button("Restore default Achievement window scale"))
         {
             this.plugin.ResetNativeAchievementWindowScale();
@@ -916,7 +917,7 @@ public sealed class ConfigWindow : Window
         ImGui.TextWrapped("Disclaimer: This experimental addon uses native Achievement UI opens, timers, window parking/rescaling, and local ClientStructs reads that are discouraged for normal Dalamud submissions when automated. Use may have consequences for your account, including a ban.");
         ImGui.Separator();
 
-        ImGui.TextUnformatted("Main Achieve Ex+ window");
+        GameGuiTheme.DrawSectionHeader("Main Achieve Ex+ window");
         this.DrawWrappedBullet("Shows your tracked achievements, progress, last update time, and row actions.");
         this.DrawWrappedBullet("Reload buttons and Update All open native Achievement entries, then Achieve Ex+ reads the already-populated progress slot.");
         this.DrawWrappedBullet("Update All queues native Achievement UI assisted progress updates for tracked achievements. Items updated in the last 30 seconds are skipped by Update All.");
@@ -928,12 +929,12 @@ public sealed class ConfigWindow : Window
         this.DrawWrappedBullet("Use the magnifying glass to open that achievement in the native Achievements window.");
 
         ImGui.Separator();
-        ImGui.TextUnformatted("Config sections");
+        GameGuiTheme.DrawSectionHeader("Config sections");
         this.DrawWrappedBullet("Auto update: controls timed update cycles, request spacing, debug logs, included tracked rows, and event-triggered updates.");
         this.DrawWrappedBullet("Help: explains the windows, controls, and risk notes.");
 
         ImGui.Separator();
-        ImGui.TextUnformatted("Tracked Achievements notes");
+        GameGuiTheme.DrawSectionHeader("Tracked Achievements notes");
         this.DrawWrappedBullet("The Auto checkbox on each tracked row controls whether timed auto update includes that achievement.");
         this.DrawWrappedBullet("Lists live in the main Achieve Ex+ pane. Click the disk icon to show or hide the Lists column, then right-click list names for options.");
         this.DrawWrappedBullet("Search adds achievements to the tracked list; Clear resets the search bar.");

@@ -52,7 +52,7 @@ public sealed class AchievementCatalog
             return true;
         }
 
-        achievementInfo = new AchievementInfo(achievementId, $"Unknown achievement #{achievementId}", string.Empty, 0, string.Empty);
+        achievementInfo = new AchievementInfo(achievementId, $"Unknown achievement #{achievementId}", string.Empty, 0, string.Empty, 0);
         return false;
     }
 
@@ -116,6 +116,7 @@ public sealed class AchievementCatalog
             achievement.Name.ToString(),
             achievement.Description.ToString(),
             achievement.Points,
-            categoryPath);
+            categoryPath,
+            achievement.Icon);
     }
 }

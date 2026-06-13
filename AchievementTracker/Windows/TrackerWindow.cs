@@ -47,6 +47,7 @@ public sealed class TrackerWindow : Window
     {
         this.plugin.AchievementProgressSource.UpdateCache();
 
+        using var _ = GameGuiTheme.PushStyle();
         this.DrawToolbar();
         this.DrawQueueStatus();
         ImGui.Separator();
@@ -236,8 +237,7 @@ public sealed class TrackerWindow : Window
     private void DrawTemplateColumn()
     {
         this.EnsureSelectedPresetIsValid();
-        ImGui.TextUnformatted("Lists");
-        ImGui.Separator();
+        GameGuiTheme.DrawSectionHeader("Lists");
         this.DrawPresetButtons();
 
         ImGui.SetNextItemWidth(-1);
@@ -254,9 +254,8 @@ public sealed class TrackerWindow : Window
 
     private void DrawAchievementCategoryColumn()
     {
-        ImGui.TextUnformatted("Achievement categories");
+        GameGuiTheme.DrawSectionHeader("Achievement categories");
         ImGui.TextDisabled("Click to select one category. Ctrl-click to add/remove multiple categories or subcategories.");
-        ImGui.Separator();
         var categoryEntries = this.plugin.AchievementCatalog.Search(string.Empty, 5000)
             .Select(info => (Info: info, Parts: SplitCategoryPath(info.CategoryName), Sort: this.GetGameSortKey(info)))
             .Where(entry => !string.IsNullOrWhiteSpace(entry.Parts.Category))
@@ -304,7 +303,7 @@ public sealed class TrackerWindow : Window
 
     private void DrawAchievementSearchColumn()
     {
-        ImGui.TextUnformatted("Achievement search");
+        GameGuiTheme.DrawSectionHeader("Achievement search");
         ImGui.SetNextItemWidth(-70);
         ImGui.InputTextWithHint("##MainAchievementSearch", "Search name or category", ref this.achievementSearchQuery, 128);
         ImGui.SameLine();
@@ -446,6 +445,8 @@ public sealed class TrackerWindow : Window
         AddTooltip("Open in Achievements.");
 
         ImGui.SameLine();
+        GameGuiTheme.DrawIconFrame(result.IconId, 30f);
+        ImGui.SameLine();
         ImGui.BeginGroup();
         ImGui.TextWrapped(result.Name);
         if (this.IsComplete(result.Id))
@@ -459,13 +460,13 @@ public sealed class TrackerWindow : Window
             ImGui.TextDisabled(result.Description);
         }
         ImGui.EndGroup();
+        ImGui.Separator();
         ImGui.PopID();
     }
 
     private void DrawTrackedColumn()
     {
-        ImGui.TextUnformatted("Tracked achievements");
-        ImGui.Separator();
+        GameGuiTheme.DrawSectionHeader("Tracked achievements");
         var trackedIds = this.plugin.TrackedAchievements.AchievementIds.ToList();
         if (trackedIds.Count == 0)
         {
@@ -544,8 +545,13 @@ public sealed class TrackerWindow : Window
             ImGui.SameLine();
         }
 
+        GameGuiTheme.DrawIconFrame(info.IconId, 30f);
+        ImGui.SameLine();
+        ImGui.BeginGroup();
         ImGui.TextWrapped(info.Name);
         ImGui.TextDisabled(progressText);
+        ImGui.EndGroup();
+        ImGui.Separator();
         ImGui.PopID();
     }
 
