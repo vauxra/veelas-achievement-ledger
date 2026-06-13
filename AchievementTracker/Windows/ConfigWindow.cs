@@ -18,7 +18,7 @@ public sealed class ConfigWindow : Window
     private string selectedPresetName = string.Empty;
 
     public ConfigWindow(Plugin plugin)
-        : base("Veela's Achievement Ledger Ex Config##AchievementLedgerConfig")
+        : base("Veela's Achievement Ledger Ex Config##AchievementLedgerConfig", ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoBringToFrontOnFocus)
     {
         this.plugin = plugin;
         this.SizeConstraints = new WindowSizeConstraints
@@ -233,7 +233,6 @@ public sealed class ConfigWindow : Window
 
     private void DrawTrackedAchievementsPage()
     {
-        this.DrawPresetControls();
         this.DrawAutoUpdateBulkControls();
         ImGui.Separator();
 
@@ -720,13 +719,13 @@ public sealed class ConfigWindow : Window
         ImGui.Separator();
         ImGui.TextUnformatted("Config sections");
         this.DrawWrappedBullet("Auto update: controls timed update cycles, request spacing, debug logs, included tracked rows, and event-triggered updates.");
-        this.DrawWrappedBullet("Tracked Achievements: manages tracked rows, presets, ordering, search, add/remove, Cosmic score planning, and native Achievement opens.");
+        this.DrawWrappedBullet("Tracked Achievements: manages tracked rows, ordering, search, add/remove, Cosmic score planning, and native Achievement opens.");
         this.DrawWrappedBullet("Help: explains the windows, controls, and risk notes.");
 
         ImGui.Separator();
         ImGui.TextUnformatted("Tracked Achievements notes");
         this.DrawWrappedBullet("The Auto checkbox on each tracked row controls whether timed auto update includes that achievement.");
-        this.DrawWrappedBullet("Presets save, read, rename, and delete reusable tracked-achievement lists. Selecting a preset loads it immediately; Read reloads the selected preset on demand.");
+        this.DrawWrappedBullet("Saved templates now live in the main VAL window. Click the eye icon to pop out the template panel, then right-click template names for options.");
         this.DrawWrappedBullet("Search adds achievements to the tracked list; Clear resets the search bar.");
         this.DrawWrappedBullet("Cosmic Class achievements show cached score progress in tracked and search rows when scores have been observed in Cosmic content.");
         this.DrawWrappedBullet("Cosmic score cache refreshes passively while WKS/Cosmic data is loaded and remains available outside the zone.");

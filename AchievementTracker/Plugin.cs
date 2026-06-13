@@ -92,7 +92,7 @@ public sealed class Plugin : IDalamudPlugin
 
         CommandManager.AddHandler(CommandName, new CommandInfo(this.OnCommand)
         {
-            HelpMessage = "Open Veela's Achievement Ledger Ex.",
+            HelpMessage = "Open Veela's Achievement Ledger Ex. Args: config/configure/man, help/?, open/main/show, close, toggle.",
         });
 
         PluginInterface.UiBuilder.Draw += this.WindowSystem.Draw;
@@ -194,6 +194,8 @@ public sealed class Plugin : IDalamudPlugin
     public void ToggleMainUi() => this.TrackerWindow.Toggle();
 
     public void OpenMainUi() => this.TrackerWindow.IsOpen = true;
+
+    public void CloseMainUi() => this.TrackerWindow.IsOpen = false;
 
     public void ToggleConfigUi() => this.ConfigWindow.Toggle();
 
@@ -329,15 +331,29 @@ public sealed class Plugin : IDalamudPlugin
         var normalized = args.Trim().ToLowerInvariant();
         switch (normalized)
         {
+            case "":
+            case "open":
+            case "main":
+            case "show":
+                this.OpenMainUi();
+                break;
             case "config":
             case "configure":
+            case "settings":
+            case "c":
             case "man":
                 this.OpenConfigUi();
                 break;
             case "?":
             case "help":
+            case "h":
                 this.OpenConfigUi(help: true);
                 break;
+            case "close":
+            case "hide":
+                this.CloseMainUi();
+                break;
+            case "toggle":
             default:
                 this.ToggleMainUi();
                 break;
