@@ -16,6 +16,7 @@ public sealed class TrackerWindow : Window
     private readonly Plugin plugin;
     private bool templatesOpen;
     private bool searchPanelOpen = true;
+    private SearchSortMode searchSortMode = SearchSortMode.GameOrder;
     private string presetNameInput = string.Empty;
     private string selectedPresetName = string.Empty;
     private string achievementSearchQuery = string.Empty;
@@ -31,6 +32,12 @@ public sealed class TrackerWindow : Window
             MinimumSize = new Vector2(760, 360),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue),
         };
+    }
+
+    private enum SearchSortMode
+    {
+        GameOrder,
+        Alphabetical,
     }
 
     public override void Draw()
@@ -75,6 +82,13 @@ public sealed class TrackerWindow : Window
             this.searchPanelOpen = !this.searchPanelOpen;
         }
         AddTooltip(this.searchPanelOpen ? "Hide category/search columns." : "Show category/search columns.");
+
+        ImGui.SameLine();
+        if (ImGuiComponents.IconButton("open-config", FontAwesomeIcon.Cog))
+        {
+            this.plugin.OpenConfigUi();
+        }
+        AddTooltip("Open configuration.");
     }
 
     private void DrawMainPane()
@@ -136,7 +150,7 @@ public sealed class TrackerWindow : Window
 
     private void DrawAchievementCategoryColumn()
     {
-        ImGui.TextUnformatted("Categories");
+        ImGui.TextUnformatted("Achievement Categories");
         if (ImGui.Button("All categories"))
         {
             this.selectedCategoryFilter = string.Empty;
@@ -145,27 +159,28 @@ public sealed class TrackerWindow : Window
         AddTooltip("Show all categories.");
 
         ImGui.Separator();
-        var allAchievements = this.plugin.AchievementCatalog.Search(string.Empty, 5000).ToList();
-        var grouped = allAchievements
-            .GroupBy(info => SplitCategoryPath(info.CategoryName).Category)
-            .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase);
+        var categoryEntries = this.plugin.AchievementCatalog.Search(string.Empty, 5000)
+            .Select(info => (Info: info, Parts: SplitCategoryPath(info.CategoryName), Sort: this.GetGameSortKey(info)))
+            .Where(entry => !string.IsNullOrWhiteSpace(entry.Parts.Category))
+            .GroupBy(entry => entry.Parts.Category)
+            .OrderBy(group => group.Min(entry => entry.Sort.KindOrder))
+            .ThenBy(group => group.Key, StringComparer.OrdinalIgnoreCase);
 
-        foreach (var categoryGroup in grouped)
+        foreach (var categoryGroup in categoryEntries)
         {
-            var category = string.IsNullOrWhiteSpace(categoryGroup.Key) ? "Other" : categoryGroup.Key;
             var selectedCategory = string.Equals(this.selectedCategoryFilter, categoryGroup.Key, StringComparison.OrdinalIgnoreCase)
                 && string.IsNullOrWhiteSpace(this.selectedSubcategoryFilter);
-            if (ImGui.Selectable($"{category} ({categoryGroup.Count()})", selectedCategory))
+            if (ImGui.Selectable(categoryGroup.Key, selectedCategory))
             {
                 this.selectedCategoryFilter = categoryGroup.Key;
                 this.selectedSubcategoryFilter = string.Empty;
             }
 
             var subcategories = categoryGroup
-                .Select(info => SplitCategoryPath(info.CategoryName).Subcategory)
-                .Where(subcategory => !string.IsNullOrWhiteSpace(subcategory))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderBy(subcategory => subcategory, StringComparer.OrdinalIgnoreCase)
+                .Where(entry => !string.IsNullOrWhiteSpace(entry.Parts.Subcategory))
+                .GroupBy(entry => entry.Parts.Subcategory)
+                .OrderBy(group => group.Min(entry => entry.Sort.CategoryOrder))
+                .ThenBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
                 .ToList();
             if (subcategories.Count == 0)
             {
@@ -173,15 +188,14 @@ public sealed class TrackerWindow : Window
             }
 
             ImGui.Indent(12);
-            foreach (var subcategory in subcategories)
+            foreach (var subcategoryGroup in subcategories)
             {
-                var count = categoryGroup.Count(info => string.Equals(SplitCategoryPath(info.CategoryName).Subcategory, subcategory, StringComparison.OrdinalIgnoreCase));
                 var selected = string.Equals(this.selectedCategoryFilter, categoryGroup.Key, StringComparison.OrdinalIgnoreCase)
-                    && string.Equals(this.selectedSubcategoryFilter, subcategory, StringComparison.OrdinalIgnoreCase);
-                if (ImGui.Selectable($"{subcategory} ({count})", selected))
+                    && string.Equals(this.selectedSubcategoryFilter, subcategoryGroup.Key, StringComparison.OrdinalIgnoreCase);
+                if (ImGui.Selectable(subcategoryGroup.Key, selected))
                 {
                     this.selectedCategoryFilter = categoryGroup.Key;
-                    this.selectedSubcategoryFilter = subcategory;
+                    this.selectedSubcategoryFilter = subcategoryGroup.Key;
                 }
             }
 
@@ -203,10 +217,35 @@ public sealed class TrackerWindow : Window
         }
         AddTooltip("Clear search and category filters.");
 
+        var hideCompleted = this.plugin.Configuration.HideCompletedInSearch;
+        if (ImGui.Checkbox("Hide completed", ref hideCompleted))
+        {
+            this.plugin.Configuration.HideCompletedInSearch = hideCompleted;
+            this.plugin.SaveConfiguration();
+        }
+        AddTooltip("Hide completed achievements from search results.");
+
+        ImGui.SameLine();
+        ImGui.TextUnformatted("Sort:");
+        ImGui.SameLine();
+        var gameSort = this.searchSortMode == SearchSortMode.GameOrder;
+        if (ImGui.RadioButton("Game", gameSort))
+        {
+            this.searchSortMode = SearchSortMode.GameOrder;
+        }
+        AddTooltip("Use the in-game achievement category/subcategory/order.");
+        ImGui.SameLine();
+        var alphabeticalSort = this.searchSortMode == SearchSortMode.Alphabetical;
+        if (ImGui.RadioButton("A-Z", alphabeticalSort))
+        {
+            this.searchSortMode = SearchSortMode.Alphabetical;
+        }
+        AddTooltip("Sort achievement names alphabetically.");
+
         var trackedIds = this.plugin.TrackedAchievements.AchievementIds;
-        var results = this.plugin.AchievementCatalog.Search(this.achievementSearchQuery, 5000)
-            .Where(this.MatchesSelectedCategory)
-            .Where(result => !this.plugin.Configuration.HideCompletedInSearch || !this.IsComplete(result.Id))
+        var results = this.SortSearchResults(this.plugin.AchievementCatalog.Search(this.achievementSearchQuery, 5000)
+                .Where(this.MatchesSelectedCategory)
+                .Where(result => !this.plugin.Configuration.HideCompletedInSearch || !this.IsComplete(result.Id)))
             .Take(80)
             .ToList();
 
@@ -216,13 +255,20 @@ public sealed class TrackerWindow : Window
             return;
         }
 
-        ImGui.TextDisabled($"Showing {results.Count} results.");
         ImGui.Separator();
         foreach (var result in results)
         {
             this.DrawSearchAchievementResult(result, trackedIds);
         }
     }
+
+    private IEnumerable<AchievementInfo> SortSearchResults(IEnumerable<AchievementInfo> results)
+        => this.searchSortMode == SearchSortMode.Alphabetical
+            ? results.OrderBy(result => result.Name, StringComparer.OrdinalIgnoreCase).ThenBy(result => result.Id)
+            : results.OrderBy(result => this.GetGameSortKey(result).KindOrder)
+                .ThenBy(result => this.GetGameSortKey(result).CategoryOrder)
+                .ThenBy(result => this.GetGameSortKey(result).AchievementOrder)
+                .ThenBy(result => this.GetGameSortKey(result).RowId);
 
     private void DrawSearchAchievementResult(AchievementInfo result, IReadOnlyList<uint> trackedIds)
     {
@@ -231,7 +277,7 @@ public sealed class TrackerWindow : Window
         var canAdd = !alreadyTracked && trackedIds.Count < TrackedAchievementStore.MaxTrackedAchievements;
         using (ImRaiiShim.Disabled(!canAdd))
         {
-            if (ImGui.Button(alreadyTracked ? "Added" : "Add"))
+            if (ImGuiComponents.IconButton("search-add", FontAwesomeIcon.Plus))
             {
                 this.AddTrackedAchievement(result.Id);
             }
@@ -239,11 +285,24 @@ public sealed class TrackerWindow : Window
         AddTooltip(alreadyTracked ? "Already tracked." : canAdd ? "Add to tracked list." : "Tracked list is full.");
 
         ImGui.SameLine();
+        if (ImGuiComponents.IconButton("search-open-native", FontAwesomeIcon.Search))
+        {
+            this.plugin.OpenNativeAchievementForInspection(result.Id);
+        }
+        AddTooltip("Open in Achievements.");
+
+        ImGui.SameLine();
         ImGui.BeginGroup();
         ImGui.TextWrapped(result.Name);
-        if (!string.IsNullOrWhiteSpace(result.CategoryName))
+        if (this.IsComplete(result.Id))
         {
-            ImGui.TextDisabled(result.CategoryName);
+            ImGui.SameLine();
+            ImGui.TextColored(new Vector4(0.2f, 0.9f, 0.2f, 1f), "✓");
+        }
+
+        if (!string.IsNullOrWhiteSpace(result.Description))
+        {
+            ImGui.TextDisabled(result.Description);
         }
         ImGui.EndGroup();
         ImGui.PopID();
@@ -269,8 +328,10 @@ public sealed class TrackerWindow : Window
     private void DrawTrackedAchievement(uint achievementId)
     {
         _ = this.plugin.AchievementCatalog.TryGet(achievementId, out var info);
-        var progressText = "Progress unavailable";
-        if (this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row))
+        var progressText = "not updated yet";
+        if (this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row)
+            && (this.plugin.ClientAchievementProgressSource.TryGetObservation(achievementId, out _)
+                || this.plugin.AchievementProgressService.IsComplete(row)))
         {
             progressText = this.plugin.AchievementProgressService.GetProgress(row).ToDisplayText();
         }
@@ -301,13 +362,6 @@ public sealed class TrackerWindow : Window
         ImGui.SameLine();
         ImGui.TextWrapped(info.Name);
         ImGui.TextDisabled(progressText);
-
-        var updatedText = this.plugin.ClientAchievementProgressSource.TryGetObservation(achievementId, out var observation)
-            ? $"updated {FormatAge(observation.ObservedAt)}"
-            : "not updated yet";
-
-        ImGui.SameLine();
-        ImGui.TextDisabled(updatedText);
         ImGui.PopID();
     }
 
@@ -580,6 +634,20 @@ public sealed class TrackerWindow : Window
         => this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row)
             && this.plugin.AchievementProgressService.IsComplete(row);
 
+    private (byte KindOrder, byte CategoryOrder, ushort AchievementOrder, uint RowId) GetGameSortKey(AchievementInfo info)
+    {
+        if (!this.plugin.AchievementCatalog.TryGetRow(info.Id, out var row))
+        {
+            return (byte.MaxValue, byte.MaxValue, ushort.MaxValue, info.Id);
+        }
+
+        var categoryOrder = row.AchievementCategory.IsValid ? row.AchievementCategory.Value.Order : byte.MaxValue;
+        var kindOrder = row.AchievementCategory.IsValid && row.AchievementCategory.Value.AchievementKind.IsValid
+            ? row.AchievementCategory.Value.AchievementKind.Value.Order
+            : byte.MaxValue;
+        return (kindOrder, categoryOrder, row.Order, row.RowId);
+    }
+
     private void DrawQueueStatus()
     {
         var pending = this.plugin.AchievementProgressUpdater.PendingCount;
@@ -623,22 +691,6 @@ public sealed class TrackerWindow : Window
         {
             ImGui.SameLine();
         }
-    }
-
-    private static string FormatAge(DateTimeOffset observedAt)
-    {
-        var age = DateTimeOffset.UtcNow - observedAt;
-        if (age.TotalSeconds < 60)
-        {
-            return "just now";
-        }
-
-        if (age.TotalMinutes < 60)
-        {
-            return $"{(int)age.TotalMinutes}m ago";
-        }
-
-        return $"{(int)age.TotalHours}h ago";
     }
 
     private sealed class ImRaiiShim : IDisposable
