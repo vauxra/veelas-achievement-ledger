@@ -134,7 +134,18 @@ public sealed class AchievementCatalog
         }
 
         var kind = achievement.AchievementCategory.Value.AchievementKind;
-        if (!kind.IsValid || string.IsNullOrWhiteSpace(kind.Value.Name.ToString()))
+        if (!kind.IsValid)
+        {
+            return false;
+        }
+
+        var kindName = kind.Value.Name.ToString();
+        if (string.IsNullOrWhiteSpace(kindName))
+        {
+            return false;
+        }
+
+        if (string.Equals(kindName, "Legacy", StringComparison.OrdinalIgnoreCase))
         {
             return false;
         }
