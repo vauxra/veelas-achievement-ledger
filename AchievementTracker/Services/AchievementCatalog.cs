@@ -145,13 +145,23 @@ public sealed class AchievementCatalog
             return false;
         }
 
-        if (string.Equals(kindName, "Legacy", StringComparison.OrdinalIgnoreCase))
+        if (!IsKnownPlayerVisibleKind(kindName))
         {
             return false;
         }
 
         return achievement.Icon != 0;
     }
+
+    private static bool IsKnownPlayerVisibleKind(string kindName)
+        => kindName is "Battle"
+            or "PvP"
+            or "Character"
+            or "Items"
+            or "Crafting & Gathering"
+            or "Quests"
+            or "Exploration"
+            or "Grand Company";
 
     private AchievementInfo ToInfo(Achievement achievement)
     {
