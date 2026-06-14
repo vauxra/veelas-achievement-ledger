@@ -149,7 +149,7 @@ public sealed class AchievementProgressUpdater
             now + maximumWait,
             coldOpen);
 
-        var shouldParkWindow = !this.nativeWindowWasOpenBeforeBatch;
+        var shouldParkWindow = NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(this.nativeWindowWasOpenBeforeBatch);
         var parked = shouldParkWindow && this.nativeAchievementNavigator.TryParkAchievementWindow();
         this.debugLog($"AchieveEx DebugTrace NativeOpenSent id={request.AchievementId} reason={request.Reason} cold={coldOpen} parked={parked} scalePositionTouched={parked} skipParkAlreadyOpen={!shouldParkWindow} minWaitSeconds={minimumWait.TotalSeconds:0} maxWaitSeconds={maximumWait.TotalSeconds:0} pending={this.scheduler.PendingCount}");
     }
@@ -162,7 +162,7 @@ public sealed class AchievementProgressUpdater
         }
 
         var request = this.activeNativeRequest.Value;
-        if (!this.nativeWindowWasOpenBeforeBatch
+        if (NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(this.nativeWindowWasOpenBeforeBatch)
             && !this.nativeAchievementNavigator.HasParkedWindow
             && this.nativeAchievementNavigator.TryParkAchievementWindow())
         {

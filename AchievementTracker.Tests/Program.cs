@@ -21,6 +21,7 @@ var tests = new List<(string Name, Action Body)>
     ("Completion filters wait for loaded achievement state", CompletionFiltersWaitForLoadedAchievementState),
     ("Completion filters can use cached state when live state is missing", CompletionFiltersCanUseCachedStateWhenLiveStateIsMissing),
     ("Character completion cache stores per-character completed ids", CharacterCompletionCacheStoresPerCharacterCompletedIds),
+    ("Native update batches avoid parking while opening rows", NativeUpdateBatchesAvoidParkingWhileOpeningRows),
     ("Activity classifier matches finish mining to miner category", ActivityClassifierMatchesFinishMiningToMinerCategory),
     ("Activity classifier selects tracked achievements by category path", ActivityClassifierSelectsTrackedAchievementsByCategoryPath),
 };
@@ -250,6 +251,12 @@ static void CharacterCompletionCacheStoresPerCharacterCompletedIds()
     AssertTrue(CharacterAchievementCompletionCacheStore.IsComplete(caches, "A@World", 2), "cached complete id should match for same character");
     AssertFalse(CharacterAchievementCompletionCacheStore.IsComplete(caches, "A@World", 9), "missing id should be incomplete for same character");
     AssertTrue(CharacterAchievementCompletionCacheStore.IsComplete(caches, "B@World", 9), "other character keeps separate cache");
+}
+
+static void NativeUpdateBatchesAvoidParkingWhileOpeningRows()
+{
+    AssertFalse(NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(batchWindowWasOpenBeforeStart: false), "VAL-opened update batches should not shrink/move the native Achievement window during repeated OpenById refreshes");
+    AssertFalse(NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(batchWindowWasOpenBeforeStart: true), "player-opened Achievement windows should never be parked by update batches");
 }
 
 static void ActivityClassifierMatchesFinishMiningToMinerCategory()
