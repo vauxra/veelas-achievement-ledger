@@ -81,7 +81,7 @@ public sealed class TrackerWindow : Window
                 {
                     this.plugin.EnqueueUpdateAllTracked("manual-update-all");
                 }
-                AddTooltip("Queue tracked achievements through the hook-gated native refresh coordinator with post-load settle.");
+                AddTooltip("Queue tracked achievements through the hook-gated direct progress coordinator.");
                 break;
             case "Auto update":
                 var autoUpdateEnabled = this.plugin.Configuration.ExperimentalAutoUpdateEnabled;
@@ -91,7 +91,7 @@ public sealed class TrackerWindow : Window
                     this.plugin.SaveConfiguration();
                     this.plugin.ResetAutoUpdateCountdownIfActive();
                 }
-                AddTooltip("Run timed refreshes through the same hook-gated native refresh coordinator.");
+                AddTooltip("Run timed refreshes through the same hook-gated direct progress coordinator.");
                 break;
             case "Lists":
                 if (this.DrawActiveIconButton("toggle-lists", FontAwesomeIcon.Save, this.templatesOpen))
@@ -892,25 +892,20 @@ public sealed class TrackerWindow : Window
 
     private void DrawQueueStatus()
     {
-        var statusText = this.plugin.AchievementProgressUpdater.StatusText;
-        if (!string.IsNullOrWhiteSpace(statusText))
-        {
-            ImGui.TextDisabled(statusText);
-        }
-
         var pending = this.plugin.AchievementProgressUpdater.PendingCount;
         var nextDue = this.plugin.AchievementProgressUpdater.NextDueAt;
         if (pending > 0 && nextDue.HasValue)
         {
             var seconds = Math.Max(0, (nextDue.Value - DateTimeOffset.UtcNow).TotalSeconds);
-            ImGui.TextDisabled($"Progress queue: {pending} pending, next native action in {seconds:0}s");
+            ImGui.TextDisabled($"{pending} pending ({seconds:0}s)");
+            return;
         }
 
         var nextAuto = this.plugin.AchievementProgressUpdater.NextAutoUpdateAt;
         if (nextAuto.HasValue)
         {
             var seconds = Math.Max(0, (nextAuto.Value - DateTimeOffset.UtcNow).TotalSeconds);
-            ImGui.TextDisabled($"Auto update next cycle in {seconds:0}s");
+            ImGui.TextDisabled($"Auto update ({seconds:0}s)");
         }
     }
 

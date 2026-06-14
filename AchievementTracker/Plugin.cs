@@ -46,6 +46,7 @@ public sealed class Plugin : IDalamudPlugin
     public AchievementProgressService AchievementProgressService { get; }
     public IAchievementProgressSource AchievementProgressSource { get; }
     public ClientAchievementProgressSource ClientAchievementProgressSource { get; }
+    public AchievementProgressRequester AchievementProgressRequester { get; }
     public CosmicClassProgressProvider CosmicClassProgressProvider { get; }
     public AchievementProgressUpdater AchievementProgressUpdater { get; }
     public NativeAchievementNavigator NativeAchievementNavigator { get; }
@@ -68,11 +69,13 @@ public sealed class Plugin : IDalamudPlugin
         this.TrackedAchievements.LoadFrom(this.Configuration.TrackedAchievementIds.Where(this.AchievementCatalog.IsManuallyViewable));
         this.ClientAchievementProgressSource = new ClientAchievementProgressSource(this.DebugLog);
         this.AchievementProgressSource = this.ClientAchievementProgressSource;
+        this.AchievementProgressRequester = new AchievementProgressRequester(this.DebugLog);
         this.CosmicClassProgressProvider = new CosmicClassProgressProvider(this.Configuration.CosmicClassScoreCache, this.SaveConfiguration);
         this.NativeAchievementNavigator = new NativeAchievementNavigator(GameGui);
         this.passiveProgressObserver = new PassiveAchievementProgressObserver(GameInteropProvider, this.ClientAchievementProgressSource, this.DebugLog);
         this.AchievementProgressUpdater = new AchievementProgressUpdater(
             this.ClientAchievementProgressSource,
+            this.AchievementProgressRequester,
             this.NativeAchievementNavigator,
             () => this.FilterUpdateEligibleAchievements(this.Configuration.GetAutoUpdateTrackedAchievementIds(), "auto-update-candidate"),
             () => this.Configuration.ExperimentalAutoUpdateEnabled,
