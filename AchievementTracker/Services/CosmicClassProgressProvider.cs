@@ -123,8 +123,7 @@ public sealed partial class CosmicClassProgressProvider
     private static bool TryCreateRuleFromDetails(string categoryName, string description, out CosmicAchievementRule rule)
     {
         rule = default!;
-        if (string.IsNullOrWhiteSpace(description)
-            || description.IndexOf("cosmic class score", StringComparison.OrdinalIgnoreCase) < 0)
+        if (string.IsNullOrWhiteSpace(description) || !IsCosmicScoreDescription(description))
         {
             return false;
         }
@@ -163,6 +162,10 @@ public sealed partial class CosmicClassProgressProvider
                     ? DiscipleOfLand
                     : [];
 
+    private static bool IsCosmicScoreDescription(string description)
+        => description.Contains("cosmic class score", StringComparison.OrdinalIgnoreCase)
+            || description.Contains("tool mastery points", StringComparison.OrdinalIgnoreCase);
+
     private static int[] GetScoreIndexesForCategory(string categoryName)
         => JobNameToIndex.TryGetValue(categoryName, out var index)
             ? [index]
@@ -172,7 +175,7 @@ public sealed partial class CosmicClassProgressProvider
                     ? DiscipleOfLand
                     : [];
 
-    [GeneratedRegex(@"([0-9][0-9,]*)\s+points", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"([0-9][0-9,]*).*points", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex CosmicTargetRegex();
 
     public static bool IsCosmicClassAchievement(uint achievementId) => GetRule(achievementId) is not null;

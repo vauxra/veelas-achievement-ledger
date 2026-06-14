@@ -344,6 +344,8 @@ static void CosmicProgressOverrideParsesAchievementDetails()
     AssertEqual("123,456 / 500,000", carpenter.ToDisplayText());
     AssertTrue(CosmicClassProgressProvider.TryCreateProgressOverride("Miner", "Earn a cosmic class score of 150,000 points as a miner.", scores, out var miner), "miner cosmic description should parse");
     AssertEqual("222,222 / 150,000", miner.ToDisplayText());
+    AssertTrue(CosmicClassProgressProvider.TryCreateProgressOverride("Carpenter", "Earn 500,000 tool mastery points as a carpenter.", scores, out var mastery), "tool mastery descriptions should use cosmic class scores");
+    AssertEqual("123,456 / 500,000", mastery.ToDisplayText());
     AssertFalse(CosmicClassProgressProvider.TryCreateProgressOverride("Carpenter", "Synthesize 1,000 items.", scores, out _), "non-cosmic descriptions should not override");
 }
 
