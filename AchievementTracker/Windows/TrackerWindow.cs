@@ -26,6 +26,8 @@ public sealed class TrackerWindow : Window
     private DateTime searchQueryChangedAt = DateTime.MinValue;
     private SearchResultsCache? cachedSearchResults;
     private bool searchResultsDirty = true;
+    private IReadOnlyList<AchievementInfo>? cachedSearchableAchievements;
+    private IReadOnlyList<SearchCategoryGroup>? cachedSearchCategoryGroups;
     private int visibleSearchResultCount = 20;
     private bool categoryFilterAll = true;
     private readonly HashSet<string> selectedCategoryFilters = new(StringComparer.OrdinalIgnoreCase);
@@ -58,10 +60,12 @@ public sealed class TrackerWindow : Window
         int CompletionFilteredCount,
         DateTime BuiltAtUtc);
 
+    private sealed record SearchCategoryEntry(AchievementInfo Info, string Category, string Subcategory, byte KindOrder);
+
+    private sealed record SearchCategoryGroup(string Category, IReadOnlyList<SearchCategoryEntry> Entries);
+
     public override void Draw()
     {
-        this.plugin.AchievementProgressSource.UpdateCache();
-
         this.DrawToolbar();
         this.DrawQueueStatus();
         ImGui.Separator();
@@ -304,23 +308,16 @@ public sealed class TrackerWindow : Window
 
     private void DrawAchievementCategoryColumn()
     {
-        var searchableAchievements = this.GetSearchableAchievements().ToList();
+        var searchableAchievements = this.GetSearchableAchievements();
         ImGui.TextUnformatted($"Achievement categories ({searchableAchievements.Count})");
         this.DrawDisabledWrapped("Ctrl-click to select multiple categories or subcategories.");
         ImGui.Separator();
-        var categoryEntries = searchableAchievements
-            .Select(info => (Info: info, Parts: SplitCategoryPath(info.CategoryName), Sort: this.GetGameSortKey(info)))
-            .Where(entry => !string.IsNullOrWhiteSpace(entry.Parts.Category))
-            .GroupBy(entry => entry.Parts.Category)
-            .OrderBy(group => group.Min(entry => entry.Sort.KindOrder))
-            .ThenBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
-            .ToList();
 
-        foreach (var categoryGroup in categoryEntries)
+        foreach (var categoryGroup in this.GetSearchCategoryGroups())
         {
-            var categoryKey = categoryGroup.Key;
+            var categoryKey = categoryGroup.Category;
             var selectedCategory = this.selectedCategoryFilters.Contains(categoryKey);
-            var categoryLabel = $"{categoryKey} ({categoryGroup.Count()})";
+            var categoryLabel = $"{categoryKey} ({categoryGroup.Entries.Count})";
             var collapsed = this.collapsedSearchCategories.Contains(categoryKey);
 
             ImGui.PushID($"category-{categoryKey}");
@@ -339,11 +336,10 @@ public sealed class TrackerWindow : Window
             }
             ImGui.PopID();
 
-            var subcategories = categoryGroup
-                .Where(entry => !string.IsNullOrWhiteSpace(entry.Parts.Subcategory))
-                .GroupBy(entry => entry.Parts.Subcategory)
-                .OrderBy(group => group.Min(entry => entry.Sort.CategoryOrder))
-                .ThenBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
+            var subcategories = categoryGroup.Entries
+                .Where(entry => !string.IsNullOrWhiteSpace(entry.Subcategory))
+                .GroupBy(entry => entry.Subcategory)
+                .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
                 .ToList();
             if (collapsed || subcategories.Count == 0)
             {
@@ -517,7 +513,7 @@ public sealed class TrackerWindow : Window
             return this.cachedSearchResults;
         }
 
-        var searchableResults = this.GetSearchableAchievements().ToList();
+        var searchableResults = this.GetSearchableAchievements();
         var categoryFilteredResults = searchableResults.Where(this.MatchesSelectedCategory).ToList();
         var queryFilteredResults = categoryFilteredResults.Where(this.MatchesSearchQuery).ToList();
         var matchingResults = this.SortSearchResults(queryFilteredResults.Where(this.MatchesCompletionFilter)).ToList();
@@ -541,9 +537,41 @@ public sealed class TrackerWindow : Window
         }
     }
 
-    private IEnumerable<AchievementInfo> GetSearchableAchievements()
-        => this.plugin.AchievementCatalog.GetManuallyViewableAchievements()
-            .Where(result => !string.Equals(SplitCategoryPath(result.CategoryName).Category, "Legacy", StringComparison.OrdinalIgnoreCase));
+    private IReadOnlyList<AchievementInfo> GetSearchableAchievements()
+    {
+        if (this.cachedSearchableAchievements is not null)
+        {
+            return this.cachedSearchableAchievements;
+        }
+
+        this.cachedSearchableAchievements = this.plugin.AchievementCatalog.GetManuallyViewableAchievements()
+            .Where(result => !string.Equals(SplitCategoryPath(result.CategoryName).Category, "Legacy", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        return this.cachedSearchableAchievements;
+    }
+
+    private IReadOnlyList<SearchCategoryGroup> GetSearchCategoryGroups()
+    {
+        if (this.cachedSearchCategoryGroups is not null)
+        {
+            return this.cachedSearchCategoryGroups;
+        }
+
+        this.cachedSearchCategoryGroups = this.GetSearchableAchievements()
+            .Select(info =>
+            {
+                var parts = SplitCategoryPath(info.CategoryName);
+                var sort = this.GetGameSortKey(info);
+                return new SearchCategoryEntry(info, parts.Category, parts.Subcategory, sort.KindOrder);
+            })
+            .Where(entry => !string.IsNullOrWhiteSpace(entry.Category))
+            .GroupBy(entry => entry.Category)
+            .OrderBy(group => group.Min(entry => entry.KindOrder))
+            .ThenBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
+            .Select(group => new SearchCategoryGroup(group.Key, group.ToList()))
+            .ToList();
+        return this.cachedSearchCategoryGroups;
+    }
 
     private bool MatchesSearchQuery(AchievementInfo info)
     {

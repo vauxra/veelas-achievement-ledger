@@ -12,6 +12,7 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
     private readonly HashSet<uint> observedCompletions = [];
     private readonly Action<string> debugLog;
     private string lastSlotDebugLine = string.Empty;
+    private DateTimeOffset nextPassiveCacheReadAt = DateTimeOffset.MinValue;
 
     public ClientAchievementProgressSource(Action<string>? debugLog = null)
     {
@@ -20,6 +21,14 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
 
     public void UpdateCache()
     {
+        var now = DateTimeOffset.UtcNow;
+        if (now < this.nextPassiveCacheReadAt)
+        {
+            return;
+        }
+
+        this.nextPassiveCacheReadAt = now.AddMilliseconds(250);
+
         // ClientStructs stage-2 interaction is documented as a Dalamud-supported fallback:
         // https://dalamud.dev/plugin-development/interaction/
         var achievement = Achievement.Instance();
