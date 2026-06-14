@@ -1097,11 +1097,9 @@ public sealed class TrackerWindow : Window
     private void DrawQueueStatus()
     {
         var pending = this.plugin.AchievementProgressUpdater.PendingCount;
-        var nextDue = this.plugin.AchievementProgressUpdater.NextDueAt;
-        if (pending > 0 && nextDue.HasValue)
+        if (pending > 0)
         {
-            var seconds = Math.Max(0, (nextDue.Value - DateTimeOffset.UtcNow).TotalSeconds);
-            ImGui.TextDisabled($"{pending} pending ({seconds:0}s)");
+            ImGui.TextDisabled($"{pending} pending");
             return;
         }
 
