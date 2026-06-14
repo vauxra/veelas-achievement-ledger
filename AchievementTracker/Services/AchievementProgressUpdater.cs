@@ -7,13 +7,13 @@ namespace AchievementTracker.Services;
 public sealed class AchievementProgressUpdater
 {
     private static readonly TimeSpan NativeOpenInputBuffer = TimeSpan.FromMilliseconds(250);
-    private static readonly TimeSpan NativeOpenCooldown = TimeSpan.FromSeconds(30);
-    private static readonly TimeSpan SameAchievementBackoff = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan NativeOpenCooldown = TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan SameAchievementBackoff = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan RefreshMinimumWait = TimeSpan.FromSeconds(1.5);
     private static readonly TimeSpan RefreshMaximumWait = TimeSpan.FromSeconds(15);
-    private static readonly TimeSpan PostProgressSettleMinimum = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan PostProgressSettleMinimum = TimeSpan.Zero;
     private const int MaxConsecutiveNativeFailures = 3;
-    private const int MaximumNativeRefreshesPerEnqueue = 1;
+    private const int MaximumNativeRefreshesPerEnqueue = AchievementProgressRequestScheduler.MaxPendingRequests;
 
     private readonly AchievementProgressRequestScheduler scheduler;
     private readonly ClientAchievementProgressSource progressSource;
@@ -88,7 +88,7 @@ public sealed class AchievementProgressUpdater
             var skippedCount = beforeCount - ids.Count;
             if (skippedCount > 0)
             {
-                this.debugLog($"AchieveEx DebugTrace QueueSkipRecentlyObserved reason={reason} skipped={skippedCount} observedThresholdSeconds={ClientAchievementProgressSource.RecentlyObservedUpdateAllSkipThreshold.TotalSeconds:0} nativeBackoffSeconds={SameAchievementBackoff.TotalSeconds:0}");
+                    this.debugLog($"AchieveEx DebugTrace QueueSkipRecentlyObserved reason={reason} skipped={skippedCount} observedThresholdSeconds={ClientAchievementProgressSource.RecentlyObservedUpdateAllSkipThreshold.TotalSeconds:0} sameIdBackoffSeconds={SameAchievementBackoff.TotalSeconds:0}");
             }
         }
 
@@ -102,13 +102,13 @@ public sealed class AchievementProgressUpdater
         ids = LimitNativeRefreshBatch(ids).ToList();
         if (candidateCount > ids.Count)
         {
-            this.debugLog($"AchieveEx DebugTrace QueueBatchLimited reason={reason} candidates={candidateCount} queued={ids.Count} limit={MaximumNativeRefreshesPerEnqueue} note=successive-native-refresh-crash-guard-no-direct-server-call");
+            this.debugLog($"AchieveEx DebugTrace QueueBatchLimited reason={reason} candidates={candidateCount} queued={ids.Count} limit={MaximumNativeRefreshesPerEnqueue} note=queue-cap-no-direct-server-call");
         }
 
-        var baseSpacingSeconds = Math.Max(30, Math.Clamp(this.updateSpacingSecondsProvider(), 0, 3600));
+        var baseSpacingSeconds = Math.Clamp(this.updateSpacingSecondsProvider(), 0, 3600);
         this.scheduler.EnqueueUpdateAll(ids, reason, TimeSpan.FromSeconds(baseSpacingSeconds));
         this.statusText = $"Progress queue: {this.PendingCount} pending.";
-        this.debugLog($"AchieveEx DebugTrace QueueProgressRefresh reason={reason} count={ids.Count} candidates={candidateCount} pending={this.PendingCount} spacingSeconds={baseSpacingSeconds} sameIdBackoffSeconds={SameAchievementBackoff.TotalSeconds:0} postProgressSettleSeconds={PostProgressSettleMinimum.TotalSeconds:0} executor=native-open-crash-guard-no-direct-server-call");
+        this.debugLog($"AchieveEx DebugTrace QueueProgressRefresh reason={reason} count={ids.Count} candidates={candidateCount} pending={this.PendingCount} userSpacingSeconds={baseSpacingSeconds} immutableSpacingSeconds={AchievementProgressRequestScheduler.ImmutableActionSpacing.TotalSeconds:0} sameIdBackoffSeconds={SameAchievementBackoff.TotalSeconds:0} jitterSeconds=1-2 executor=unified-native-queue-no-direct-server-call");
     }
 
     public void QueueInspection(uint achievementId, string reason)
@@ -273,11 +273,10 @@ public sealed class AchievementProgressUpdater
 
     private void MarkNativeRequestSettled(DateTimeOffset now, string reason)
     {
-        var configuredSpacing = TimeSpan.FromSeconds(Math.Max(30, Math.Clamp(this.updateSpacingSecondsProvider(), 0, 3600)));
-        var cooldown = MaxTimeSpan(NativeOpenCooldown, configuredSpacing, PostProgressSettleMinimum);
+        var cooldown = MaxTimeSpan(NativeOpenCooldown, PostProgressSettleMinimum);
         this.nextNativeOpenAllowedAt = now + cooldown;
         this.statusText = this.scheduler.HasPendingRequests ? $"Progress queue: {this.scheduler.PendingCount} pending." : string.Empty;
-        this.debugLog($"AchieveEx DebugTrace NativeOpenCooldown reason={reason} nextOpenAt={this.nextNativeOpenAllowedAt:O} cooldownSeconds={cooldown.TotalSeconds:0} phase=post-progress-settle");
+        this.debugLog($"AchieveEx DebugTrace NativeOpenCooldown reason={reason} nextOpenAt={this.nextNativeOpenAllowedAt:O} cooldownSeconds={cooldown.TotalSeconds:0} phase=queue-owned-spacing");
     }
 
     private void RegisterNativeSuccess()

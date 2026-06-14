@@ -19,6 +19,7 @@ public readonly record struct ScheduledAchievementProgressRequest(
 public sealed class AchievementProgressRequestScheduler
 {
     public const int MaxPendingRequests = 100;
+    public static readonly TimeSpan ImmutableActionSpacing = TimeSpan.FromSeconds(1);
     public static readonly TimeSpan PerAchievementBackoff = TimeSpan.FromSeconds(5);
     public static readonly TimeSpan DefaultUpdateAllSpacing = TimeSpan.FromSeconds(15);
 
@@ -87,7 +88,7 @@ public sealed class AchievementProgressRequestScheduler
 
             this.pendingRequests.Add(new ScheduledAchievementProgressRequest(achievementId, dueAt, reason, kind));
             added++;
-            cursor = dueAt + normalizedBaseSpacing + NormalizeJitter(this.jitterProvider());
+            cursor = dueAt + ImmutableActionSpacing + normalizedBaseSpacing + NormalizeJitter(this.jitterProvider());
         }
 
         this.nextBatchCursor = cursor;

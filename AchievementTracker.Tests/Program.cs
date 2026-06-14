@@ -16,7 +16,7 @@ var tests = new List<(string Name, Action Body)>
     ("Progress display formats all safe states", ProgressDisplayFormatsAllSafeStates),
     ("Update all spaces queued requests by base seconds plus jitter", UpdateAllSpacesQueuedRequestsByBaseSecondsPlusJitter),
     ("Update all keeps jitter when base spacing is zero", UpdateAllKeepsJitterWhenBaseSpacingIsZero),
-    ("Native refresh batch limiter keeps one achievement per enqueue", NativeRefreshBatchLimiterKeepsOneAchievementPerEnqueue),
+    ("Native refresh batch limiter caps at queue capacity", NativeRefreshBatchLimiterCapsAtQueueCapacity),
     ("Request scheduler applies five second per-achievement backoff", RequestSchedulerAppliesFiveSecondPerAchievementBackoff),
     ("Request scheduler caps pending actions at one hundred", RequestSchedulerCapsPendingActionsAtOneHundred),
     ("Request scheduler serializes refreshes and inspections in one queue", RequestSchedulerSerializesRefreshesAndInspectionsInOneQueue),
@@ -175,12 +175,12 @@ static void UpdateAllSpacesQueuedRequestsByBaseSecondsPlusJitter()
     AssertTrue(scheduler.TryTakeDueRequest(now, out var first), "first request should be due immediately");
     AssertEqualUInt(101u, first.AchievementId);
 
-    AssertFalse(scheduler.TryTakeDueRequest(now.AddSeconds(7), out _), "second request should include jitter beyond base spacing");
-    AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(7).AddMilliseconds(750), out var second), "second request should be due after spacing plus jitter");
+    AssertFalse(scheduler.TryTakeDueRequest(now.AddSeconds(8), out _), "second request should include immutable spacing and jitter beyond base spacing");
+    AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(8).AddMilliseconds(750), out var second), "second request should be due after immutable spacing, base spacing, and jitter");
     AssertEqualUInt(102u, second.AchievementId);
 
-    AssertFalse(scheduler.TryTakeDueRequest(now.AddSeconds(15), out _), "third request should include cumulative jitter");
-    AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(15).AddMilliseconds(500), out var third), "third request should be due after cumulative spacing plus jitter");
+    AssertFalse(scheduler.TryTakeDueRequest(now.AddSeconds(17), out _), "third request should include cumulative immutable spacing and jitter");
+    AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(17).AddMilliseconds(500), out var third), "third request should be due after cumulative immutable spacing, base spacing, and jitter");
     AssertEqualUInt(103u, third.AchievementId);
 }
 
@@ -195,16 +195,19 @@ static void UpdateAllKeepsJitterWhenBaseSpacingIsZero()
 
     AssertTrue(scheduler.TryTakeDueRequest(now, out var first), "first request should be due immediately");
     AssertEqualUInt(201u, first.AchievementId);
-    AssertFalse(scheduler.TryTakeDueRequest(now.AddSeconds(1), out _), "second request should still wait for jitter");
-    AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(1.5), out var second), "second request should be due after jitter");
+    AssertFalse(scheduler.TryTakeDueRequest(now.AddSeconds(2), out _), "second request should still wait for immutable spacing plus jitter");
+    AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(2.5), out var second), "second request should be due after immutable spacing plus jitter");
     AssertEqualUInt(202u, second.AchievementId);
 }
 
-static void NativeRefreshBatchLimiterKeepsOneAchievementPerEnqueue()
+static void NativeRefreshBatchLimiterCapsAtQueueCapacity()
 {
-    var limited = AchievementProgressUpdater.LimitNativeRefreshBatch([101, 102, 103]);
+    var ids = Enumerable.Range(1, 150).Select(id => (uint)id).ToList();
+    var limited = AchievementProgressUpdater.LimitNativeRefreshBatch(ids);
 
-    AssertSequence(limited, [101]);
+    AssertEqualInt(AchievementProgressRequestScheduler.MaxPendingRequests, limited.Count);
+    AssertEqualUInt(1u, limited[0]);
+    AssertEqualUInt(100u, limited[^1]);
 }
 
 static void RequestSchedulerAppliesFiveSecondPerAchievementBackoff()
@@ -251,12 +254,12 @@ static void RequestSchedulerSerializesRefreshesAndInspectionsInOneQueue()
     AssertEqualUInt(101u, first.AchievementId);
     AssertEqual(NativeAchievementActionKind.Refresh.ToString(), first.Kind.ToString());
 
-    AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(3), out var second), "second refresh should follow spacing plus jitter");
+    AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(4), out var second), "second refresh should follow immutable spacing, configured spacing, and jitter");
     AssertEqualUInt(102u, second.AchievementId);
     AssertEqual(NativeAchievementActionKind.Refresh.ToString(), second.Kind.ToString());
 
-    AssertFalse(scheduler.TryTakeDueRequest(now.AddSeconds(5), out _), "inspection should also respect queue spacing and jitter");
-    AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(6), out var third), "inspection should be serialized after refreshes");
+    AssertFalse(scheduler.TryTakeDueRequest(now.AddSeconds(7), out _), "inspection should also respect immutable queue spacing and jitter");
+    AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(8), out var third), "inspection should be serialized after refreshes");
     AssertEqualUInt(201u, third.AchievementId);
     AssertEqual(NativeAchievementActionKind.Inspection.ToString(), third.Kind.ToString());
 }
