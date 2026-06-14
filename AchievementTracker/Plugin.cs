@@ -57,7 +57,7 @@ public sealed class Plugin : IDalamudPlugin
     private PassiveAchievementProgressObserver? passiveAchievementProgressObserver;
     private AchievementActivityUpdateObserver? activityUpdateObserver;
     private DateTimeOffset nextCosmicCacheRefreshAt = DateTimeOffset.MinValue;
-    private DateTimeOffset nextCompletionCacheRefreshAt = DateTimeOffset.MinValue;
+    private readonly CompletionCacheRefreshPolicy completionCacheRefreshPolicy = new();
     private uint pendingNativeAchievementInspectionOpenId;
     private DateTimeOffset pendingNativeAchievementInspectionOpenAt = DateTimeOffset.MinValue;
     private bool pendingNativeAchievementScaleReset;
@@ -391,6 +391,7 @@ public sealed class Plugin : IDalamudPlugin
         this.pendingNativeAchievementInspectionOpenId = 0;
         this.pendingNativeAchievementInspectionOpenAt = DateTimeOffset.MinValue;
         this.pendingNativeAchievementScaleReset = false;
+        this.completionCacheRefreshPolicy.Reset();
     }
 
     private void OnFrameworkUpdate(IFramework framework)
@@ -400,18 +401,18 @@ public sealed class Plugin : IDalamudPlugin
         this.TryOpenPendingNativeAchievementInspection();
         this.TryCompletePendingNativeAchievementScaleReset();
         this.RefreshCosmicCacheFromLiveState();
-        this.RefreshCompletionCacheFromLiveStateIfDue();
+        this.RefreshCompletionCacheIfTriggered();
     }
 
-    private void RefreshCompletionCacheFromLiveStateIfDue()
+    private void RefreshCompletionCacheIfTriggered()
     {
-        var now = DateTimeOffset.UtcNow;
-        if (now < this.nextCompletionCacheRefreshAt)
+        if (!this.completionCacheRefreshPolicy.ShouldRefresh(
+                this.AchievementProgressService.AreCompletionStatesLoaded,
+                this.AchievementProgressUpdater.IsUpdateInProgress))
         {
             return;
         }
 
-        this.nextCompletionCacheRefreshAt = now.AddSeconds(5);
         this.RefreshCompletionCacheFromLiveState();
     }
 

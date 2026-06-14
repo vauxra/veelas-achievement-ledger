@@ -21,6 +21,8 @@ var tests = new List<(string Name, Action Body)>
     ("Completion filters wait for loaded achievement state", CompletionFiltersWaitForLoadedAchievementState),
     ("Completion filters can use cached state when live state is missing", CompletionFiltersCanUseCachedStateWhenLiveStateIsMissing),
     ("Character completion cache stores per-character completed ids", CharacterCompletionCacheStoresPerCharacterCompletedIds),
+    ("Completion cache refreshes once when live state first loads", CompletionCacheRefreshesOnceWhenLiveStateFirstLoads),
+    ("Completion cache refreshes after update queue drains", CompletionCacheRefreshesAfterUpdateQueueDrains),
     ("Native update batches avoid parking before first row settles", NativeUpdateBatchesAvoidParkingBeforeFirstRowSettles),
     ("Native update batches may park after first row settles", NativeUpdateBatchesMayParkAfterFirstRowSettles),
     ("Activity classifier matches finish mining to miner category", ActivityClassifierMatchesFinishMiningToMinerCategory),
@@ -252,6 +254,23 @@ static void CharacterCompletionCacheStoresPerCharacterCompletedIds()
     AssertTrue(CharacterAchievementCompletionCacheStore.IsComplete(caches, "A@World", 2), "cached complete id should match for same character");
     AssertFalse(CharacterAchievementCompletionCacheStore.IsComplete(caches, "A@World", 9), "missing id should be incomplete for same character");
     AssertTrue(CharacterAchievementCompletionCacheStore.IsComplete(caches, "B@World", 9), "other character keeps separate cache");
+}
+
+static void CompletionCacheRefreshesOnceWhenLiveStateFirstLoads()
+{
+    var policy = new CompletionCacheRefreshPolicy();
+    AssertFalse(policy.ShouldRefresh(liveCompletionStateLoaded: false, updateInProgress: false), "cache should wait until live completion state is loaded");
+    AssertTrue(policy.ShouldRefresh(liveCompletionStateLoaded: true, updateInProgress: false), "cache should refresh once when live state first loads");
+    AssertFalse(policy.ShouldRefresh(liveCompletionStateLoaded: true, updateInProgress: false), "cache should not poll every tick after the first snapshot");
+}
+
+static void CompletionCacheRefreshesAfterUpdateQueueDrains()
+{
+    var policy = new CompletionCacheRefreshPolicy();
+    AssertTrue(policy.ShouldRefresh(liveCompletionStateLoaded: true, updateInProgress: false), "initial live snapshot should happen first");
+    AssertFalse(policy.ShouldRefresh(liveCompletionStateLoaded: true, updateInProgress: true), "cache should not refresh while an update queue is active");
+    AssertTrue(policy.ShouldRefresh(liveCompletionStateLoaded: true, updateInProgress: false), "cache should refresh once after the update queue drains");
+    AssertFalse(policy.ShouldRefresh(liveCompletionStateLoaded: true, updateInProgress: false), "cache should not refresh again without another update queue drain");
 }
 
 static void NativeUpdateBatchesAvoidParkingBeforeFirstRowSettles()
