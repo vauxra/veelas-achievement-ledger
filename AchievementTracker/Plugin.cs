@@ -63,6 +63,7 @@ public sealed class Plugin : IDalamudPlugin
     public Plugin()
     {
         this.Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+        this.Configuration.ExperimentalAutoUpdateEnabled = false;
         this.Configuration.NormalizeAutoUpdateSettings();
         this.AchievementCatalog = new AchievementCatalog(DataManager);
         this.TrackedAchievements = new TrackedAchievementStore();
@@ -75,7 +76,7 @@ public sealed class Plugin : IDalamudPlugin
             this.ClientAchievementProgressSource,
             this.NativeAchievementNavigator,
             () => this.FilterUpdateEligibleAchievements(this.Configuration.GetAutoUpdateTrackedAchievementIds(), "auto-update-candidate"),
-            () => this.Configuration.ExperimentalAutoUpdateEnabled,
+            () => false,
             () => this.Configuration.ExperimentalAutoUpdateIntervalSeconds,
             () => this.Configuration.ExperimentalUpdateSpacingSeconds,
             this.DebugLog);
@@ -127,10 +128,22 @@ public sealed class Plugin : IDalamudPlugin
     }
 
     public void EnqueueUpdateAllTracked(string reason)
-        => this.AchievementProgressUpdater.EnqueueUpdateAll(this.FilterUpdateEligibleAchievements(this.TrackedAchievements.AchievementIds, reason), reason);
+    {
+        this.DebugLog($"AchieveEx DebugTrace BulkUpdateDisabled reason={reason}");
+        this.ClearUpdateQueue("bulk-update-disabled");
+    }
 
     public void EnqueueUpdateAchievements(IEnumerable<uint> achievementIds, string reason)
-        => this.AchievementProgressUpdater.EnqueueUpdateAll(this.FilterUpdateEligibleAchievements(achievementIds, reason), reason);
+    {
+        if (string.Equals(reason, "auto-update", StringComparison.Ordinal))
+        {
+            this.DebugLog($"AchieveEx DebugTrace BulkUpdateDisabled reason={reason}");
+            this.ClearUpdateQueue("bulk-update-disabled");
+            return;
+        }
+
+        this.AchievementProgressUpdater.EnqueueUpdateAll(this.FilterUpdateEligibleAchievements(achievementIds, reason), reason);
+    }
 
     public void EnqueueUpdateOne(uint achievementId, string reason)
         => this.AchievementProgressUpdater.EnqueueUpdateAll(this.FilterUpdateEligibleAchievements([achievementId], reason), reason);
