@@ -27,6 +27,7 @@ var tests = new List<(string Name, Action Body)>
     ("Scale policy restores inspection actions", ScalePolicyRestoresInspectionActions),
     ("Scale policy restores when idle only for parked windows", ScalePolicyRestoresWhenIdleOnlyForParkedWindows),
     ("Tracked display evaluates cosmic progress overrides", TrackedDisplayEvaluatesCosmicProgressOverrides),
+    ("Cosmic progress override parses achievement details", CosmicProgressOverrideParsesAchievementDetails),
     ("Auto updater selects only explicitly included tracked achievements", AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements),
     ("Completion filters wait for loaded achievement state", CompletionFiltersWaitForLoadedAchievementState),
     ("Lumina search all does not wait for loaded achievement state", LuminaSearchAllDoesNotWaitForLoadedAchievementState),
@@ -334,6 +335,16 @@ static void TrackedDisplayEvaluatesCosmicProgressOverrides()
 {
     AssertTrue(TrackedProgressDisplayPolicy.ShouldEvaluateProgress(hasObservedProgress: false, isComplete: false, hasCosmicProgressOverride: true), "cosmic override should display without a normal observation");
     AssertFalse(TrackedProgressDisplayPolicy.ShouldEvaluateProgress(hasObservedProgress: false, isComplete: false, hasCosmicProgressOverride: false), "ordinary rows remain not updated until observed/complete");
+}
+
+static void CosmicProgressOverrideParsesAchievementDetails()
+{
+    var scores = new[] { 123456, 0, 0, 0, 0, 0, 0, 0, 222222, 0, 0 };
+    AssertTrue(CosmicClassProgressProvider.TryCreateProgressOverride("Carpenter", "Earn a cosmic class score of 500,000 points as a carpenter.", scores, out var carpenter), "carpenter cosmic description should parse");
+    AssertEqual("123,456 / 500,000", carpenter.ToDisplayText());
+    AssertTrue(CosmicClassProgressProvider.TryCreateProgressOverride("Miner", "Earn a cosmic class score of 150,000 points as a miner.", scores, out var miner), "miner cosmic description should parse");
+    AssertEqual("222,222 / 150,000", miner.ToDisplayText());
+    AssertFalse(CosmicClassProgressProvider.TryCreateProgressOverride("Carpenter", "Synthesize 1,000 items.", scores, out _), "non-cosmic descriptions should not override");
 }
 
 static void AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements()

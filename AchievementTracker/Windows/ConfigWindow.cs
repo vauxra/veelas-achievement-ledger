@@ -347,8 +347,8 @@ public sealed class ConfigWindow : Window
 
     private void DrawCosmicProgressIfAvailable(uint achievementId)
     {
-        if (!this.plugin.CosmicClassProgressProvider.Handles(achievementId)
-            || !this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row))
+        if (!this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row)
+            || !this.plugin.CosmicClassProgressProvider.Handles(row))
         {
             return;
         }

@@ -20,9 +20,9 @@ public sealed class AchievementProgressService
 
     public AchievementProgress GetProgress(Achievement achievement)
     {
-        if (this.cosmicClassProgressProvider?.Handles(achievement.RowId) == true)
+        if (this.cosmicClassProgressProvider?.Handles(achievement) == true)
         {
-            return this.cosmicClassProgressProvider.GetProgress(achievement.RowId);
+            return this.cosmicClassProgressProvider.GetProgress(achievement);
         }
 
         var requiredTarget = GetRequiredTarget(achievement);

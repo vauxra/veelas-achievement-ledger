@@ -545,7 +545,7 @@ public sealed class TrackerWindow : Window
         {
             var hasObservedProgress = this.plugin.ClientAchievementProgressSource.TryGetObservation(achievementId, out _);
             var isComplete = this.plugin.AchievementProgressService.IsComplete(row);
-            var hasCosmicProgressOverride = this.plugin.CosmicClassProgressProvider.Handles(achievementId);
+            var hasCosmicProgressOverride = this.plugin.CosmicClassProgressProvider.Handles(row);
             if (TrackedProgressDisplayPolicy.ShouldEvaluateProgress(hasObservedProgress, isComplete, hasCosmicProgressOverride))
             {
                 progressText = this.plugin.AchievementProgressService.GetProgress(row).ToDisplayText();
