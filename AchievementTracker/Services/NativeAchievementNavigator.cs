@@ -32,6 +32,15 @@ public unsafe sealed class NativeAchievementNavigator
 
     public bool HasParkedWindow => this.parkedState.HasValue;
 
+    public bool IsVisible
+    {
+        get
+        {
+            var addon = this.gameGui.GetAddonByName(AchievementAddonName, 1);
+            return !addon.IsNull && addon.IsReady && addon.IsVisible && addon.Address != IntPtr.Zero;
+        }
+    }
+
     public bool IsAchievementWindowParked()
     {
         var addon = this.gameGui.GetAddonByName(AchievementAddonName, 1);
@@ -158,7 +167,7 @@ public unsafe sealed class NativeAchievementNavigator
     {
         var restored = restoreParkedWindow && this.RestoreParkedAchievementWindow();
         var agent = AgentAchievement.Instance();
-        if (agent == null || !this.IsOpen)
+        if (agent == null)
         {
             return restored;
         }

@@ -325,7 +325,7 @@ public sealed class AchievementProgressUpdater
             return existing;
         }
 
-        var nativeWindowWasAlreadyOpen = this.nativeAchievementNavigator.IsOpen;
+        var nativeWindowWasAlreadyOpen = this.nativeAchievementNavigator.IsVisible;
         var job = new NativeUpdateJobState(
             request.JobId,
             request.JobKind,
@@ -362,7 +362,7 @@ public sealed class AchievementProgressUpdater
         var hasActiveOrPendingWork = this.activeNativeRequest.HasValue || this.scheduler.HasPendingRequests;
         if (!NativeAchievementWindowScalePolicy.ShouldRestoreWhenPlayerOpenedPanel(
                 this.nativeAchievementNavigator.HasParkedWindow,
-                this.nativeAchievementNavigator.IsOpen,
+                this.nativeAchievementNavigator.IsVisible,
                 this.nativeAchievementNavigator.IsAchievementWindowParked(),
                 hasActiveOrPendingWork))
         {
