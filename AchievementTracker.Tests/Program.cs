@@ -19,9 +19,8 @@ var tests = new List<(string Name, Action Body)>
     ("Request scheduler applies five second per-achievement backoff", RequestSchedulerAppliesFiveSecondPerAchievementBackoff),
     ("Auto updater selects only explicitly included tracked achievements", AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements),
     ("Completion filters wait for loaded achievement state", CompletionFiltersWaitForLoadedAchievementState),
-    ("Search waits for loaded achievement state", SearchWaitsForLoadedAchievementState),
-    ("Native update batches avoid parking before first row settles", NativeUpdateBatchesAvoidParkingBeforeFirstRowSettles),
-    ("Native update batches may park after first row settles", NativeUpdateBatchesMayParkAfterFirstRowSettles),
+    ("Lumina search all does not wait for loaded achievement state", LuminaSearchAllDoesNotWaitForLoadedAchievementState),
+    ("Native update batches do not park achievement windows", NativeUpdateBatchesDoNotParkAchievementWindows),
     ("Activity classifier matches finish mining to miner category", ActivityClassifierMatchesFinishMiningToMinerCategory),
     ("Activity classifier selects tracked achievements by category path", ActivityClassifierSelectsTrackedAchievementsByCategoryPath),
 };
@@ -231,22 +230,18 @@ static void CompletionFiltersWaitForLoadedAchievementState()
     AssertFalse(SearchCompletionFilterPolicy.Matches("Incomplete", isComplete: true), "incomplete filter should reject completed rows");
 }
 
-static void SearchWaitsForLoadedAchievementState()
+static void LuminaSearchAllDoesNotWaitForLoadedAchievementState()
 {
-    AssertFalse(SearchCompletionFilterPolicy.CanEvaluate("All", completionStateLoaded: false, updateInProgress: false), "Search should wait for the session's initial achievement load");
-    AssertTrue(SearchCompletionFilterPolicy.CanEvaluate("All", completionStateLoaded: true, updateInProgress: false), "Search should run after the session's initial achievement load");
-    AssertFalse(SearchCompletionFilterPolicy.CanEvaluate("All", completionStateLoaded: true, updateInProgress: true), "Search should wait while update tasks are running");
+    AssertTrue(SearchCompletionFilterPolicy.CanEvaluate("All", completionStateLoaded: false, updateInProgress: false), "Lumina-only All search should not wait for the session's initial achievement load");
+    AssertTrue(SearchCompletionFilterPolicy.CanEvaluate("All", completionStateLoaded: true, updateInProgress: true), "Lumina-only All search should not pause while update tasks are running");
+    AssertFalse(SearchCompletionFilterPolicy.CanEvaluate("Completed", completionStateLoaded: false, updateInProgress: false), "Completed search still needs loaded completion state");
 }
 
-static void NativeUpdateBatchesAvoidParkingBeforeFirstRowSettles()
+static void NativeUpdateBatchesDoNotParkAchievementWindows()
 {
-    AssertFalse(NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(batchWindowWasOpenBeforeStart: false, completedAtLeastOneRequest: false), "VAL-opened update batches should not shrink/move the native Achievement window before the first row has loaded or timed out");
+    AssertFalse(NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(batchWindowWasOpenBeforeStart: false, completedAtLeastOneRequest: false), "queued native refreshes should not shrink/move the native Achievement window before first row settles");
+    AssertFalse(NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(batchWindowWasOpenBeforeStart: false, completedAtLeastOneRequest: true), "queued native refreshes should remain geometry-neutral even after one row settles");
     AssertFalse(NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(batchWindowWasOpenBeforeStart: true, completedAtLeastOneRequest: true), "player-opened Achievement windows should never be parked by update batches");
-}
-
-static void NativeUpdateBatchesMayParkAfterFirstRowSettles()
-{
-    AssertTrue(NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(batchWindowWasOpenBeforeStart: false, completedAtLeastOneRequest: true), "VAL-opened update batches may park only after the first native refresh has settled");
 }
 
 static void ActivityClassifierMatchesFinishMiningToMinerCategory()

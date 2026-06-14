@@ -77,19 +77,21 @@ public sealed class TrackerWindow : Window
         switch (item)
         {
             case "Update All":
-                using (ImRaiiShim.Disabled(true))
+                if (ImGui.Button("Update All"))
                 {
-                    _ = ImGui.Button("Update All");
+                    this.plugin.EnqueueUpdateAllTracked("manual-update-all");
                 }
-                AddTooltip("Disabled in this review build: the latest crash happened during bulk native Achievement opens. Use row refresh for one achievement at a time.");
+                AddTooltip("Queue tracked achievements through the native refresh coordinator with spacing, backoff, and a circuit breaker.");
                 break;
             case "Auto update":
-                var autoUpdateEnabled = false;
-                using (ImRaiiShim.Disabled(true))
+                var autoUpdateEnabled = this.plugin.Configuration.ExperimentalAutoUpdateEnabled;
+                if (ImGui.Checkbox("Auto update", ref autoUpdateEnabled))
                 {
-                    _ = ImGui.Checkbox("Auto update", ref autoUpdateEnabled);
+                    this.plugin.Configuration.ExperimentalAutoUpdateEnabled = autoUpdateEnabled;
+                    this.plugin.SaveConfiguration();
+                    this.plugin.ResetAutoUpdateCountdownIfActive();
                 }
-                AddTooltip("Disabled in this review build because bulk native Achievement update batches are crash-prone. Use row refresh for one achievement at a time.");
+                AddTooltip("Run conservative timed refreshes through the same native refresh coordinator.");
                 break;
             case "Lists":
                 if (this.DrawActiveIconButton("toggle-lists", FontAwesomeIcon.Save, this.templatesOpen))
@@ -376,18 +378,8 @@ public sealed class TrackerWindow : Window
                 this.plugin.AchievementProgressUpdater.IsUpdateInProgress))
         {
             ImGui.Separator();
-            var message = this.plugin.AchievementProgressUpdater.IsUpdateInProgress
-                ? "Search is paused while achievement updates are running."
-                : "Open the in-game Achievements window first so completion states can load.";
-            ImGui.TextDisabled(message);
-            if (!this.plugin.AchievementProgressService.AreCompletionStatesLoaded)
-            {
-                if (ImGui.Button("Open Achievements to load completion state"))
-                {
-                    this.plugin.OpenNativeAchievementsForInitialLoad();
-                }
-                AddTooltip("Opens the native Achievements window so the game can load this session's completion state. This button disappears after the initial load is complete.");
-            }
+            ImGui.TextDisabled("Completed/Incomplete search needs the in-game achievement completion list loaded first.");
+            ImGui.TextDisabled("Search text and categories remain Lumina-only; no native Achievement window is opened automatically.");
             return;
         }
 
@@ -900,12 +892,18 @@ public sealed class TrackerWindow : Window
 
     private void DrawQueueStatus()
     {
+        var statusText = this.plugin.AchievementProgressUpdater.StatusText;
+        if (!string.IsNullOrWhiteSpace(statusText))
+        {
+            ImGui.TextDisabled(statusText);
+        }
+
         var pending = this.plugin.AchievementProgressUpdater.PendingCount;
         var nextDue = this.plugin.AchievementProgressUpdater.NextDueAt;
         if (pending > 0 && nextDue.HasValue)
         {
             var seconds = Math.Max(0, (nextDue.Value - DateTimeOffset.UtcNow).TotalSeconds);
-            ImGui.TextDisabled($"Progress queue: {pending} pending, next request in {seconds:0}s");
+            ImGui.TextDisabled($"Progress queue: {pending} pending, next native action in {seconds:0}s");
         }
 
         var nextAuto = this.plugin.AchievementProgressUpdater.NextAutoUpdateAt;

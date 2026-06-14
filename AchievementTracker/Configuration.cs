@@ -101,8 +101,8 @@ public sealed class Configuration : IPluginConfiguration
             this.ExperimentalAutoUpdateIntervalSeconds = 900;
         }
 
-        this.ExperimentalAutoUpdateIntervalSeconds = Math.Clamp(this.ExperimentalAutoUpdateIntervalSeconds, 1, 86_400);
-        this.ExperimentalUpdateSpacingSeconds = Math.Clamp(this.ExperimentalUpdateSpacingSeconds, 0, 3_600);
+        this.ExperimentalAutoUpdateIntervalSeconds = Math.Clamp(this.ExperimentalAutoUpdateIntervalSeconds, 60, 86_400);
+        this.ExperimentalUpdateSpacingSeconds = Math.Clamp(this.ExperimentalUpdateSpacingSeconds <= 0 ? 15 : this.ExperimentalUpdateSpacingSeconds, 6, 3_600);
         if (this.ExperimentalAutoUpdateEnabled && this.TriggerAutoUpdatesEnabled)
         {
             this.TriggerAutoUpdatesEnabled = false;

@@ -8,14 +8,13 @@ using Dalamud.Plugin.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace AchievementTracker;
 
 public sealed class Plugin : IDalamudPlugin
 {
     private const string CommandName = "/achex";
-    private static readonly TimeSpan NativeInspectionOpenCooldown = TimeSpan.FromSeconds(6);
-
     // Dalamud service injection pattern:
     // https://dalamud.dev/plugin-development/project-layout
     [PluginService] internal static IDalamudPluginInterface PluginInterface { get; private set; } = null!;
@@ -54,16 +53,12 @@ public sealed class Plugin : IDalamudPlugin
     private ConfigWindow ConfigWindow { get; }
     private AchievementActivityUpdateObserver? activityUpdateObserver;
     private DateTimeOffset nextCosmicCacheRefreshAt = DateTimeOffset.MinValue;
-    private uint pendingNativeAchievementInspectionOpenId;
-    private DateTimeOffset pendingNativeAchievementInspectionOpenAt = DateTimeOffset.MinValue;
-    private DateTimeOffset lastNativeAchievementInspectionOpenedAt = DateTimeOffset.MinValue;
     private bool pendingNativeAchievementScaleReset;
     private DateTimeOffset pendingNativeAchievementScaleResetUntil = DateTimeOffset.MinValue;
 
     public Plugin()
     {
         this.Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-        this.Configuration.ExperimentalAutoUpdateEnabled = false;
         this.Configuration.NormalizeAutoUpdateSettings();
         this.AchievementCatalog = new AchievementCatalog(DataManager);
         this.TrackedAchievements = new TrackedAchievementStore();
@@ -76,7 +71,7 @@ public sealed class Plugin : IDalamudPlugin
             this.ClientAchievementProgressSource,
             this.NativeAchievementNavigator,
             () => this.FilterUpdateEligibleAchievements(this.Configuration.GetAutoUpdateTrackedAchievementIds(), "auto-update-candidate"),
-            () => false,
+            () => this.Configuration.ExperimentalAutoUpdateEnabled,
             () => this.Configuration.ExperimentalAutoUpdateIntervalSeconds,
             () => this.Configuration.ExperimentalUpdateSpacingSeconds,
             this.DebugLog);
@@ -98,6 +93,8 @@ public sealed class Plugin : IDalamudPlugin
         Framework.Update += this.OnFrameworkUpdate;
         ClientState.Login += this.ResetProgressState;
         ClientState.Logout += this.ResetProgressStateOnLogout;
+
+        this.DebugLog($"AchieveEx BuildInfo version={GetBuildVersion()} commit={GetInformationalVersion()} command={CommandName}");
     }
 
     public void Dispose()
@@ -128,22 +125,10 @@ public sealed class Plugin : IDalamudPlugin
     }
 
     public void EnqueueUpdateAllTracked(string reason)
-    {
-        this.DebugLog($"AchieveEx DebugTrace BulkUpdateDisabled reason={reason}");
-        this.ClearUpdateQueue("bulk-update-disabled");
-    }
+        => this.AchievementProgressUpdater.EnqueueUpdateAll(this.FilterUpdateEligibleAchievements(this.TrackedAchievements.AchievementIds, reason), reason);
 
     public void EnqueueUpdateAchievements(IEnumerable<uint> achievementIds, string reason)
-    {
-        if (string.Equals(reason, "auto-update", StringComparison.Ordinal))
-        {
-            this.DebugLog($"AchieveEx DebugTrace BulkUpdateDisabled reason={reason}");
-            this.ClearUpdateQueue("bulk-update-disabled");
-            return;
-        }
-
-        this.AchievementProgressUpdater.EnqueueUpdateAll(this.FilterUpdateEligibleAchievements(achievementIds, reason), reason);
-    }
+        => this.AchievementProgressUpdater.EnqueueUpdateAll(this.FilterUpdateEligibleAchievements(achievementIds, reason), reason);
 
     public void EnqueueUpdateOne(uint achievementId, string reason)
         => this.AchievementProgressUpdater.EnqueueUpdateAll(this.FilterUpdateEligibleAchievements([achievementId], reason), reason);
@@ -216,14 +201,7 @@ public sealed class Plugin : IDalamudPlugin
 
     public bool OpenNativeAchievementForInspection(uint achievementId)
     {
-        var now = DateTimeOffset.UtcNow;
-        var nextAllowedAt = this.lastNativeAchievementInspectionOpenedAt == DateTimeOffset.MinValue
-            ? now
-            : this.lastNativeAchievementInspectionOpenedAt + NativeInspectionOpenCooldown;
-
-        this.pendingNativeAchievementInspectionOpenId = achievementId;
-        this.pendingNativeAchievementInspectionOpenAt = now > nextAllowedAt ? now.AddMilliseconds(50) : nextAllowedAt;
-        this.DebugLog($"AchieveEx DebugTrace NativeInspectionQueued id={achievementId} openAt={this.pendingNativeAchievementInspectionOpenAt:O} cooldownSeconds={NativeInspectionOpenCooldown.TotalSeconds:0}");
+        this.AchievementProgressUpdater.QueueInspection(achievementId, "manual-inspect");
         return true;
     }
 
@@ -250,6 +228,12 @@ public sealed class Plugin : IDalamudPlugin
             PluginLog.Information(message);
         }
     }
+
+    private static string GetBuildVersion()
+        => typeof(Plugin).Assembly.GetName().Version?.ToString() ?? "unknown";
+
+    private static string GetInformationalVersion()
+        => typeof(Plugin).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown";
 
     public void ToggleMainUi()
     {
@@ -337,54 +321,14 @@ public sealed class Plugin : IDalamudPlugin
         // Login/logout only clear local progress cache. Tracked achievement IDs stay saved in config.
         this.AchievementProgressSource.ClearCache();
         this.AchievementProgressUpdater.Clear();
-        this.pendingNativeAchievementInspectionOpenId = 0;
-        this.pendingNativeAchievementInspectionOpenAt = DateTimeOffset.MinValue;
-        this.lastNativeAchievementInspectionOpenedAt = DateTimeOffset.MinValue;
         this.pendingNativeAchievementScaleReset = false;
     }
 
     private void OnFrameworkUpdate(IFramework framework)
     {
         this.AchievementProgressUpdater.Tick();
-        this.RestoreParkedAchievementWindowIfUserOpenedIt();
-        this.TryOpenPendingNativeAchievementInspection();
         this.TryCompletePendingNativeAchievementScaleReset();
         this.RefreshCosmicCacheFromLiveState();
-    }
-
-    private void RestoreParkedAchievementWindowIfUserOpenedIt()
-    {
-        if (!this.AchievementProgressUpdater.IsUpdateInProgress
-            && this.NativeAchievementNavigator.HasParkedWindow
-            && this.NativeAchievementNavigator.IsOpen)
-        {
-            var restored = this.NativeAchievementNavigator.RestoreParkedAchievementWindow();
-            if (restored)
-            {
-                this.DebugLog("AchieveEx DebugTrace NativeAchievementWindowUserOpenRestore restored=true");
-            }
-        }
-    }
-
-    private void TryOpenPendingNativeAchievementInspection()
-    {
-        if (this.pendingNativeAchievementInspectionOpenId == 0
-            || DateTimeOffset.UtcNow < this.pendingNativeAchievementInspectionOpenAt)
-        {
-            return;
-        }
-
-        var achievementId = this.pendingNativeAchievementInspectionOpenId;
-        this.pendingNativeAchievementInspectionOpenId = 0;
-        this.pendingNativeAchievementInspectionOpenAt = DateTimeOffset.MinValue;
-
-        var opened = this.NativeAchievementNavigator.OpenAchievement(achievementId);
-        if (opened)
-        {
-            this.lastNativeAchievementInspectionOpenedAt = DateTimeOffset.UtcNow;
-        }
-
-        this.DebugLog($"AchieveEx DebugTrace NativeInspectionOpen id={achievementId} opened={opened} deferred=true cooldownSeconds={NativeInspectionOpenCooldown.TotalSeconds:0}");
     }
 
     private void TryCompletePendingNativeAchievementScaleReset()
