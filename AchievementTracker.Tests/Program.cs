@@ -21,7 +21,8 @@ var tests = new List<(string Name, Action Body)>
     ("Completion filters wait for loaded achievement state", CompletionFiltersWaitForLoadedAchievementState),
     ("Completion filters can use cached state when live state is missing", CompletionFiltersCanUseCachedStateWhenLiveStateIsMissing),
     ("Character completion cache stores per-character completed ids", CharacterCompletionCacheStoresPerCharacterCompletedIds),
-    ("Native update batches avoid parking while opening rows", NativeUpdateBatchesAvoidParkingWhileOpeningRows),
+    ("Native update batches avoid parking before first row settles", NativeUpdateBatchesAvoidParkingBeforeFirstRowSettles),
+    ("Native update batches may park after first row settles", NativeUpdateBatchesMayParkAfterFirstRowSettles),
     ("Activity classifier matches finish mining to miner category", ActivityClassifierMatchesFinishMiningToMinerCategory),
     ("Activity classifier selects tracked achievements by category path", ActivityClassifierSelectsTrackedAchievementsByCategoryPath),
 };
@@ -253,10 +254,15 @@ static void CharacterCompletionCacheStoresPerCharacterCompletedIds()
     AssertTrue(CharacterAchievementCompletionCacheStore.IsComplete(caches, "B@World", 9), "other character keeps separate cache");
 }
 
-static void NativeUpdateBatchesAvoidParkingWhileOpeningRows()
+static void NativeUpdateBatchesAvoidParkingBeforeFirstRowSettles()
 {
-    AssertFalse(NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(batchWindowWasOpenBeforeStart: false), "VAL-opened update batches should not shrink/move the native Achievement window during repeated OpenById refreshes");
-    AssertFalse(NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(batchWindowWasOpenBeforeStart: true), "player-opened Achievement windows should never be parked by update batches");
+    AssertFalse(NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(batchWindowWasOpenBeforeStart: false, completedAtLeastOneRequest: false), "VAL-opened update batches should not shrink/move the native Achievement window before the first row has loaded or timed out");
+    AssertFalse(NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(batchWindowWasOpenBeforeStart: true, completedAtLeastOneRequest: true), "player-opened Achievement windows should never be parked by update batches");
+}
+
+static void NativeUpdateBatchesMayParkAfterFirstRowSettles()
+{
+    AssertTrue(NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(batchWindowWasOpenBeforeStart: false, completedAtLeastOneRequest: true), "VAL-opened update batches may park only after the first native refresh has settled");
 }
 
 static void ActivityClassifierMatchesFinishMiningToMinerCategory()

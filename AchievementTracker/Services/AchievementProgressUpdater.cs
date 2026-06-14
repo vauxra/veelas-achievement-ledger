@@ -24,6 +24,8 @@ public sealed class AchievementProgressUpdater
     private bool batchInProgress;
     private bool nativeWindowWasOpenBeforeBatch;
     private bool nativeWindowOpenedByVal;
+    private bool nativeBatchCompletedAtLeastOneRequest;
+    private DateTimeOffset nextNativeOpenAllowedAt = DateTimeOffset.MinValue;
 
     public AchievementProgressUpdater(
         ClientAchievementProgressSource progressSource,
@@ -89,8 +91,11 @@ public sealed class AchievementProgressUpdater
         var now = DateTimeOffset.UtcNow;
         this.MaybeEnqueueAutoUpdate(now);
         this.ProcessActiveNativeRequest(now);
+        this.TryParkNativeWindowBetweenBatchOpens();
 
-        if (!this.activeNativeRequest.HasValue && this.scheduler.TryTakeDueRequest(now, out var request))
+        if (!this.activeNativeRequest.HasValue
+            && now >= this.nextNativeOpenAllowedAt
+            && this.scheduler.TryTakeDueRequest(now, out var request))
         {
             this.StartNativeRequest(request, now);
         }
@@ -103,6 +108,8 @@ public sealed class AchievementProgressUpdater
         this.scheduler.Clear();
         this.activeNativeRequest = null;
         this.nextAutoUpdateAt = DateTimeOffset.MinValue;
+        this.nextNativeOpenAllowedAt = DateTimeOffset.MinValue;
+        this.nativeBatchCompletedAtLeastOneRequest = false;
         this.FinishBatchIfIdle(force: true);
     }
 
@@ -122,6 +129,7 @@ public sealed class AchievementProgressUpdater
         {
             this.nativeWindowWasOpenBeforeBatch = this.nativeAchievementNavigator.IsOpen;
             this.nativeWindowOpenedByVal = !this.nativeWindowWasOpenBeforeBatch;
+            this.nativeBatchCompletedAtLeastOneRequest = false;
             this.batchInProgress = true;
             this.debugLog($"AchieveEx DebugTrace NativeBatchStart wasOpen={this.nativeWindowWasOpenBeforeBatch}");
         }
@@ -149,7 +157,7 @@ public sealed class AchievementProgressUpdater
             now + maximumWait,
             coldOpen);
 
-        var shouldParkWindow = NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(this.nativeWindowWasOpenBeforeBatch);
+        var shouldParkWindow = NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(this.nativeWindowWasOpenBeforeBatch, this.nativeBatchCompletedAtLeastOneRequest);
         var parked = shouldParkWindow && this.nativeAchievementNavigator.TryParkAchievementWindow();
         this.debugLog($"AchieveEx DebugTrace NativeOpenSent id={request.AchievementId} reason={request.Reason} cold={coldOpen} parked={parked} scalePositionTouched={parked} skipParkAlreadyOpen={!shouldParkWindow} minWaitSeconds={minimumWait.TotalSeconds:0} maxWaitSeconds={maximumWait.TotalSeconds:0} pending={this.scheduler.PendingCount}");
     }
@@ -162,13 +170,6 @@ public sealed class AchievementProgressUpdater
         }
 
         var request = this.activeNativeRequest.Value;
-        if (NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(this.nativeWindowWasOpenBeforeBatch)
-            && !this.nativeAchievementNavigator.HasParkedWindow
-            && this.nativeAchievementNavigator.TryParkAchievementWindow())
-        {
-            this.debugLog($"AchieveEx DebugTrace NativeWindowParked id={request.AchievementId} scale=0.1375 position=top-left");
-        }
-
         if (now < request.MinimumCompleteAt)
         {
             return;
@@ -178,6 +179,7 @@ public sealed class AchievementProgressUpdater
         {
             this.debugLog($"AchieveEx DebugTrace NativeOpenLoaded id={request.AchievementId} reason={request.Reason} current={progress.Current} max={progress.Max} source={progress.Source} elapsedMs={(now - request.StartedAt).TotalMilliseconds:0}");
             this.activeNativeRequest = null;
+            this.MarkNativeRequestSettled(now, request.Reason);
             return;
         }
 
@@ -185,6 +187,32 @@ public sealed class AchievementProgressUpdater
         {
             this.debugLog($"AchieveEx DebugTrace NativeOpenTimeout id={request.AchievementId} reason={request.Reason} cold={request.ColdOpen} elapsedMs={(now - request.StartedAt).TotalMilliseconds:0}");
             this.activeNativeRequest = null;
+            this.MarkNativeRequestSettled(now, request.Reason);
+        }
+    }
+
+    private void MarkNativeRequestSettled(DateTimeOffset now, string reason)
+    {
+        this.nativeBatchCompletedAtLeastOneRequest = true;
+        var cooldownSeconds = Math.Max(1, Math.Clamp(this.updateSpacingSecondsProvider(), 0, 3600));
+        this.nextNativeOpenAllowedAt = now + TimeSpan.FromSeconds(cooldownSeconds);
+        this.debugLog($"AchieveEx DebugTrace NativeOpenCooldown reason={reason} nextOpenAt={this.nextNativeOpenAllowedAt:O} cooldownSeconds={cooldownSeconds}");
+    }
+
+    private void TryParkNativeWindowBetweenBatchOpens()
+    {
+        if (!this.batchInProgress
+            || this.activeNativeRequest.HasValue
+            || !this.scheduler.HasPendingRequests
+            || this.nativeAchievementNavigator.HasParkedWindow
+            || !NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(this.nativeWindowWasOpenBeforeBatch, this.nativeBatchCompletedAtLeastOneRequest))
+        {
+            return;
+        }
+
+        if (this.nativeAchievementNavigator.TryParkAchievementWindow())
+        {
+            this.debugLog("AchieveEx DebugTrace NativeWindowParked phase=between-opens scale=0.1375 position=top-left");
         }
     }
 
@@ -213,6 +241,8 @@ public sealed class AchievementProgressUpdater
         this.batchInProgress = false;
         this.nativeWindowWasOpenBeforeBatch = false;
         this.nativeWindowOpenedByVal = false;
+        this.nativeBatchCompletedAtLeastOneRequest = false;
+        this.nextNativeOpenAllowedAt = DateTimeOffset.MinValue;
     }
 
     private void MaybeEnqueueAutoUpdate(DateTimeOffset now)
