@@ -390,6 +390,8 @@ public sealed class TrackerWindow : Window
         if (ImGui.RadioButton("All##CategoryFilter", this.categoryFilterAll))
         {
             this.categoryFilterAll = true;
+            this.selectedCategoryFilters.Clear();
+            this.selectedSubcategoryFilters.Clear();
             this.MarkSearchResultsDirty(resetVisibleResults: true);
         }
         AddTooltip("Ignore selected categories.");
@@ -1027,6 +1029,7 @@ public sealed class TrackerWindow : Window
     private void ToggleCategoryFilter(string category)
     {
         var ctrl = ImGui.GetIO().KeyCtrl;
+        this.categoryFilterAll = false;
         if (!ctrl)
         {
             this.selectedCategoryFilters.Clear();
@@ -1047,6 +1050,7 @@ public sealed class TrackerWindow : Window
     private void ToggleSubcategoryFilter(string category, string subcategory)
     {
         var ctrl = ImGui.GetIO().KeyCtrl;
+        this.categoryFilterAll = false;
         var key = BuildSubcategoryFilterKey(category, subcategory);
         if (!ctrl)
         {
