@@ -19,8 +19,13 @@ def patch_manifest(path: Path, icon_url: str) -> bool:
     data = json.loads(path.read_text(encoding="utf-8"))
     changed = data.get("IconUrl") != icon_url
     data["IconUrl"] = icon_url
-    if not data.get("ImageUrls"):
-        data["ImageUrls"] = [icon_url]
+    # IconUrl may be a square 512x512 plugin icon. Dalamud's ImageUrls are
+    # queued as screenshots and have a much wider/smaller max bounds check
+    # (observed: 730x380), so reusing the square icon here logs:
+    # "Plugin image1 ... was larger than the maximum allowed resolution".
+    # Keep the icon as IconUrl only unless a real screenshot URL is supplied.
+    if data.get("ImageUrls") == [icon_url]:
+        data.pop("ImageUrls")
         changed = True
 
     if changed:

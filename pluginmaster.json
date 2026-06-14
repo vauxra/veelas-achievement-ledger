@@ -24,8 +24,6 @@
     "TestingChangelog": "Testing build 0.3.0.15: remove persisted completion caching; gate search until this session's achievement state loads; add a Search-panel button to open native Achievements for initial load; keep safer native Update All cooldown/parking behavior from 0.3.0.13.",
     "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.3.0.15-rc/AchieveExPlus_0_3_0_15_rc.zip",
     "IconUrl": "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png",
-    "ImageUrls": [
-      "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png"
-    ]
+    "ImageUrls": []
   }
 ]
