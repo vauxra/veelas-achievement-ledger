@@ -10,11 +10,20 @@ public enum NativeAchievementActionKind
     Inspection,
 }
 
+public enum NativeAchievementJobKind
+{
+    Single,
+    Batch,
+    Inspection,
+}
+
 public readonly record struct ScheduledAchievementProgressRequest(
     uint AchievementId,
     DateTimeOffset DueAt,
     string Reason,
-    NativeAchievementActionKind Kind = NativeAchievementActionKind.Refresh);
+    NativeAchievementActionKind Kind = NativeAchievementActionKind.Refresh,
+    Guid JobId = default,
+    NativeAchievementJobKind JobKind = NativeAchievementJobKind.Single);
 
 public sealed class AchievementProgressRequestScheduler
 {
@@ -39,6 +48,12 @@ public sealed class AchievementProgressRequestScheduler
 
     public bool HasPendingRequests => this.pendingRequests.Count > 0;
 
+    public bool HasPendingRequestsForJob(Guid jobId)
+        => jobId != Guid.Empty && this.pendingRequests.Any(request => request.JobId == jobId);
+
+    public int PendingCountForJob(Guid jobId)
+        => jobId == Guid.Empty ? 0 : this.pendingRequests.Count(request => request.JobId == jobId);
+
     public DateTimeOffset? NextDueAt => this.pendingRequests.Count == 0
         ? null
         : this.pendingRequests.Min(request => request.DueAt);
@@ -61,10 +76,15 @@ public sealed class AchievementProgressRequestScheduler
         var now = this.nowProvider();
         var normalizedBaseSpacing = NormalizeBaseSpacing(baseSpacing);
         var cursor = this.pendingRequests.Count > 0 && this.nextBatchCursor > now ? this.nextBatchCursor : now;
+        var normalizedIds = achievementIds.Where(id => id != 0).ToList();
+        var jobId = Guid.NewGuid();
+        var jobKind = kind == NativeAchievementActionKind.Inspection
+            ? NativeAchievementJobKind.Inspection
+            : DetermineRefreshJobKind(normalizedIds.Count, reason);
         var seen = new HashSet<uint>();
         var added = 0;
 
-        foreach (var achievementId in achievementIds.Where(id => id != 0))
+        foreach (var achievementId in normalizedIds)
         {
             if (this.pendingRequests.Count >= MaxPendingRequests)
             {
@@ -86,7 +106,8 @@ public sealed class AchievementProgressRequestScheduler
                 }
             }
 
-            this.pendingRequests.Add(new ScheduledAchievementProgressRequest(achievementId, dueAt, reason, kind));
+            var itemJobId = kind == NativeAchievementActionKind.Inspection ? Guid.NewGuid() : jobId;
+            this.pendingRequests.Add(new ScheduledAchievementProgressRequest(achievementId, dueAt, reason, kind, itemJobId, jobKind));
             added++;
             cursor = dueAt + ImmutableActionSpacing + normalizedBaseSpacing + NormalizeJitter(this.jitterProvider());
         }
@@ -94,6 +115,17 @@ public sealed class AchievementProgressRequestScheduler
         this.nextBatchCursor = cursor;
         this.pendingRequests.Sort(static (left, right) => left.DueAt.CompareTo(right.DueAt));
         return added;
+    }
+
+    public void Requeue(ScheduledAchievementProgressRequest request, DateTimeOffset dueAt)
+    {
+        if (this.pendingRequests.Count >= MaxPendingRequests)
+        {
+            return;
+        }
+
+        this.pendingRequests.Add(request with { DueAt = dueAt });
+        this.pendingRequests.Sort(static (left, right) => left.DueAt.CompareTo(right.DueAt));
     }
 
     public bool TryTakeDueRequest(DateTimeOffset now, out ScheduledAchievementProgressRequest request)
@@ -117,6 +149,14 @@ public sealed class AchievementProgressRequestScheduler
         this.lastRequestedAt.Clear();
         this.nextBatchCursor = DateTimeOffset.MinValue;
     }
+
+    private static NativeAchievementJobKind DetermineRefreshJobKind(int normalizedIdCount, string reason)
+        => normalizedIdCount > 1
+            || string.Equals(reason, "manual-update-all", StringComparison.Ordinal)
+            || string.Equals(reason, "auto-update", StringComparison.Ordinal)
+            || string.Equals(reason, "activity-trigger", StringComparison.Ordinal)
+                ? NativeAchievementJobKind.Batch
+                : NativeAchievementJobKind.Single;
 
     private static TimeSpan CreateDefaultJitter()
     {

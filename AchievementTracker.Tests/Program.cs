@@ -20,6 +20,9 @@ var tests = new List<(string Name, Action Body)>
     ("Request scheduler applies five second per-achievement backoff", RequestSchedulerAppliesFiveSecondPerAchievementBackoff),
     ("Request scheduler caps pending actions at one hundred", RequestSchedulerCapsPendingActionsAtOneHundred),
     ("Request scheduler serializes refreshes and inspections in one queue", RequestSchedulerSerializesRefreshesAndInspectionsInOneQueue),
+    ("Request scheduler assigns one job to update all batch", RequestSchedulerAssignsOneJobToUpdateAllBatch),
+    ("Request scheduler gives inspections separate jobs", RequestSchedulerGivesInspectionsSeparateJobs),
+    ("Scale policy closes only at refresh job end", ScalePolicyClosesOnlyAtRefreshJobEnd),
     ("Scale policy parks refresh only when native window was closed", ScalePolicyParksRefreshOnlyWhenNativeWindowWasClosed),
     ("Scale policy restores inspection actions", ScalePolicyRestoresInspectionActions),
     ("Scale policy restores when idle only for parked windows", ScalePolicyRestoresWhenIdleOnlyForParkedWindows),
@@ -267,6 +270,43 @@ static void RequestSchedulerSerializesRefreshesAndInspectionsInOneQueue()
     AssertEqual(NativeAchievementActionKind.Inspection.ToString(), third.Kind.ToString());
 }
 
+
+
+static void RequestSchedulerAssignsOneJobToUpdateAllBatch()
+{
+    var now = new DateTimeOffset(2026, 6, 10, 12, 0, 0, TimeSpan.Zero);
+    var scheduler = new AchievementProgressRequestScheduler(() => now, () => TimeSpan.Zero);
+
+    scheduler.EnqueueUpdateAll([301, 302, 303], "manual-update-all", TimeSpan.Zero);
+
+    AssertTrue(scheduler.TryTakeDueRequest(now, out var first), "first batch request should be due");
+    AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(1), out var second), "second batch request should be due after immutable spacing");
+    AssertEqual(first.JobId.ToString(), second.JobId.ToString());
+    AssertEqual(NativeAchievementJobKind.Batch.ToString(), first.JobKind.ToString());
+    AssertTrue(scheduler.HasPendingRequestsForJob(first.JobId), "third batch item should remain in the same job");
+}
+
+static void RequestSchedulerGivesInspectionsSeparateJobs()
+{
+    var now = new DateTimeOffset(2026, 6, 10, 12, 0, 0, TimeSpan.Zero);
+    var scheduler = new AchievementProgressRequestScheduler(() => now, () => TimeSpan.Zero);
+
+    AssertTrue(scheduler.EnqueueInspection(401, "inspect-a"), "first inspection should queue");
+    AssertTrue(scheduler.EnqueueInspection(402, "inspect-b"), "second inspection should queue");
+
+    AssertTrue(scheduler.TryTakeDueRequest(now, out var first), "first inspection should be due");
+    AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(1), out var second), "second inspection should be due after immutable spacing");
+    AssertFalse(first.JobId == second.JobId, "inspection clicks should not share jobs");
+    AssertEqual(NativeAchievementJobKind.Inspection.ToString(), first.JobKind.ToString());
+}
+
+static void ScalePolicyClosesOnlyAtRefreshJobEnd()
+{
+    AssertFalse(NativeAchievementWindowScalePolicy.ShouldCloseAfterRefreshJobItem(NativeAchievementJobKind.Batch, nativeWindowWasAlreadyOpen: false, hasPendingSameJob: true), "batch should stay open between items");
+    AssertTrue(NativeAchievementWindowScalePolicy.ShouldCloseAfterRefreshJobItem(NativeAchievementJobKind.Batch, nativeWindowWasAlreadyOpen: false, hasPendingSameJob: false), "batch should close after final item if plugin opened it");
+    AssertTrue(NativeAchievementWindowScalePolicy.ShouldCloseAfterRefreshJobItem(NativeAchievementJobKind.Single, nativeWindowWasAlreadyOpen: false, hasPendingSameJob: false), "single closed-window update should close after its item");
+    AssertFalse(NativeAchievementWindowScalePolicy.ShouldCloseAfterRefreshJobItem(NativeAchievementJobKind.Batch, nativeWindowWasAlreadyOpen: true, hasPendingSameJob: false), "already-open batch should not auto-close");
+}
 
 static void ScalePolicyParksRefreshOnlyWhenNativeWindowWasClosed()
 {
