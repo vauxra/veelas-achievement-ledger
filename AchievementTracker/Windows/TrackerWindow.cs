@@ -81,7 +81,7 @@ public sealed class TrackerWindow : Window
                 {
                     this.plugin.EnqueueUpdateAllTracked("manual-update-all");
                 }
-                AddTooltip("Queue tracked achievements through the hook-gated direct progress coordinator.");
+                AddTooltip("Crash-guarded: queues one eligible tracked achievement per click/cycle through the native Achievement UI. No direct progress request.");
                 break;
             case "Auto update":
                 var autoUpdateEnabled = this.plugin.Configuration.ExperimentalAutoUpdateEnabled;
@@ -91,7 +91,7 @@ public sealed class TrackerWindow : Window
                     this.plugin.SaveConfiguration();
                     this.plugin.ResetAutoUpdateCountdownIfActive();
                 }
-                AddTooltip("Run timed refreshes through the same hook-gated direct progress coordinator.");
+                AddTooltip("Crash-guarded: refreshes one eligible tracked achievement per timed cycle through the native Achievement UI. No direct progress request.");
                 break;
             case "Lists":
                 if (this.DrawActiveIconButton("toggle-lists", FontAwesomeIcon.Save, this.templatesOpen))

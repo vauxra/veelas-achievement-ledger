@@ -7,16 +7,16 @@ namespace AchievementTracker.Services;
 public sealed class AchievementProgressUpdater
 {
     private static readonly TimeSpan NativeOpenInputBuffer = TimeSpan.FromMilliseconds(250);
-    private static readonly TimeSpan NativeOpenCooldown = TimeSpan.FromSeconds(6);
+    private static readonly TimeSpan NativeOpenCooldown = TimeSpan.FromSeconds(30);
     private static readonly TimeSpan SameAchievementBackoff = TimeSpan.FromSeconds(10);
     private static readonly TimeSpan RefreshMinimumWait = TimeSpan.FromSeconds(1.5);
     private static readonly TimeSpan RefreshMaximumWait = TimeSpan.FromSeconds(15);
-    private static readonly TimeSpan PostProgressSettleMinimum = TimeSpan.FromSeconds(15);
+    private static readonly TimeSpan PostProgressSettleMinimum = TimeSpan.FromSeconds(30);
     private const int MaxConsecutiveNativeFailures = 3;
+    private const int MaximumNativeRefreshesPerEnqueue = 1;
 
     private readonly AchievementProgressRequestScheduler scheduler;
     private readonly ClientAchievementProgressSource progressSource;
-    private readonly AchievementProgressRequester progressRequester;
     private readonly NativeAchievementNavigator nativeAchievementNavigator;
     private readonly Func<IReadOnlyList<uint>> autoUpdateIdsProvider;
     private readonly Func<bool> autoUpdateEnabledProvider;
@@ -35,7 +35,6 @@ public sealed class AchievementProgressUpdater
 
     public AchievementProgressUpdater(
         ClientAchievementProgressSource progressSource,
-        AchievementProgressRequester progressRequester,
         NativeAchievementNavigator nativeAchievementNavigator,
         Func<IReadOnlyList<uint>> autoUpdateIdsProvider,
         Func<bool> autoUpdateEnabledProvider,
@@ -45,7 +44,6 @@ public sealed class AchievementProgressUpdater
     {
         this.scheduler = new AchievementProgressRequestScheduler();
         this.progressSource = progressSource;
-        this.progressRequester = progressRequester;
         this.nativeAchievementNavigator = nativeAchievementNavigator;
         this.autoUpdateIdsProvider = autoUpdateIdsProvider;
         this.autoUpdateEnabledProvider = autoUpdateEnabledProvider;
@@ -88,7 +86,7 @@ public sealed class AchievementProgressUpdater
     public bool IsNativeCircuitBroken => this.nativeCircuitBroken;
 
     public string StatusText => this.nativeCircuitBroken
-        ? "Achievement progress refresh paused for this session after repeated failures."
+        ? "Native Achievement actions paused for this session after repeated failures."
         : this.statusText;
 
     public void EnqueueUpdateAll(IEnumerable<uint> achievementIds, string reason)
@@ -121,10 +119,17 @@ public sealed class AchievementProgressUpdater
             return;
         }
 
-        var baseSpacingSeconds = Math.Max(6, Math.Clamp(this.updateSpacingSecondsProvider(), 0, 3600));
+        var candidateCount = ids.Count;
+        ids = LimitNativeRefreshBatch(ids).ToList();
+        if (candidateCount > ids.Count)
+        {
+            this.debugLog($"AchieveEx DebugTrace QueueBatchLimited reason={reason} candidates={candidateCount} queued={ids.Count} limit={MaximumNativeRefreshesPerEnqueue} note=successive-native-refresh-crash-guard-no-direct-server-call");
+        }
+
+        var baseSpacingSeconds = Math.Max(30, Math.Clamp(this.updateSpacingSecondsProvider(), 0, 3600));
         this.scheduler.EnqueueUpdateAll(ids, reason, TimeSpan.FromSeconds(baseSpacingSeconds));
         this.statusText = $"Progress queue: {this.PendingCount} pending.";
-        this.debugLog($"AchieveEx DebugTrace QueueProgressRefresh reason={reason} count={ids.Count} pending={this.PendingCount} spacingSeconds={baseSpacingSeconds} sameIdBackoffSeconds={SameAchievementBackoff.TotalSeconds:0} postProgressSettleSeconds={PostProgressSettleMinimum.TotalSeconds:0} executor=direct-progress-hook-gated");
+        this.debugLog($"AchieveEx DebugTrace QueueProgressRefresh reason={reason} count={ids.Count} candidates={candidateCount} pending={this.PendingCount} spacingSeconds={baseSpacingSeconds} sameIdBackoffSeconds={SameAchievementBackoff.TotalSeconds:0} postProgressSettleSeconds={PostProgressSettleMinimum.TotalSeconds:0} executor=native-open-crash-guard-no-direct-server-call");
     }
 
     public void QueueInspection(uint achievementId, string reason)
@@ -195,6 +200,9 @@ public sealed class AchievementProgressUpdater
         => string.Equals(reason, "manual-update-all", StringComparison.Ordinal)
             || string.Equals(reason, "auto-update", StringComparison.Ordinal);
 
+    public static IReadOnlyList<uint> LimitNativeRefreshBatch(IReadOnlyList<uint> achievementIds)
+        => achievementIds.Take(MaximumNativeRefreshesPerEnqueue).ToList();
+
     private bool WasNativeOpenedRecently(uint achievementId, DateTimeOffset now)
         => this.lastNativeOpenByAchievementId.TryGetValue(achievementId, out var lastOpen)
             && now - lastOpen >= TimeSpan.Zero
@@ -215,10 +223,10 @@ public sealed class AchievementProgressUpdater
             return;
         }
 
-        if (!this.progressRequester.RequestProgress(request.AchievementId))
+        if (!this.nativeAchievementNavigator.OpenAchievement(request.AchievementId))
         {
-            this.RegisterNativeFailure($"request-failed-refresh-{request.AchievementId}");
-            this.debugLog($"AchieveEx DebugTrace ProgressRefreshRequestFailed id={request.AchievementId} reason={request.Reason} pending={this.scheduler.PendingCount}");
+            this.RegisterNativeFailure($"open-failed-refresh-{request.AchievementId}");
+            this.debugLog($"AchieveEx DebugTrace NativeRefreshOpenFailed id={request.AchievementId} reason={request.Reason} pending={this.scheduler.PendingCount}");
             return;
         }
 
@@ -230,7 +238,7 @@ public sealed class AchievementProgressUpdater
             now + RefreshMinimumWait,
             now + RefreshMaximumWait);
         this.statusText = "Waiting for data.";
-        this.debugLog($"AchieveEx DebugTrace ProgressRefreshRequestSent id={request.AchievementId} reason={request.Reason} minWaitSeconds={RefreshMinimumWait.TotalSeconds:0.0} maxWaitSeconds={RefreshMaximumWait.TotalSeconds:0} pending={this.scheduler.PendingCount}");
+        this.debugLog($"AchieveEx DebugTrace NativeRefreshOpenSent id={request.AchievementId} reason={request.Reason} minWaitSeconds={RefreshMinimumWait.TotalSeconds:0.0} maxWaitSeconds={RefreshMaximumWait.TotalSeconds:0} pending={this.scheduler.PendingCount}");
     }
 
     private void StartInspection(DateTimeOffset now)
@@ -291,7 +299,7 @@ public sealed class AchievementProgressUpdater
 
     private void MarkNativeRequestSettled(DateTimeOffset now, string reason)
     {
-        var configuredSpacing = TimeSpan.FromSeconds(Math.Max(6, Math.Clamp(this.updateSpacingSecondsProvider(), 0, 3600)));
+        var configuredSpacing = TimeSpan.FromSeconds(Math.Max(30, Math.Clamp(this.updateSpacingSecondsProvider(), 0, 3600)));
         var cooldown = MaxTimeSpan(NativeOpenCooldown, configuredSpacing, PostProgressSettleMinimum);
         this.nextNativeOpenAllowedAt = now + cooldown;
         this.statusText = this.scheduler.HasPendingRequests ? $"Progress queue: {this.scheduler.PendingCount} pending." : string.Empty;
@@ -312,7 +320,7 @@ public sealed class AchievementProgressUpdater
             this.scheduler.Clear();
             this.activeNativeRequest = null;
             this.pendingInspectionAchievementId = 0;
-            this.statusText = "Achievement progress refresh paused for this session after repeated failures.";
+            this.statusText = "Native Achievement actions paused for this session after repeated failures.";
             this.debugLog("AchieveEx DebugTrace NativeCircuitBreakerTripped queueCleared=true");
         }
     }

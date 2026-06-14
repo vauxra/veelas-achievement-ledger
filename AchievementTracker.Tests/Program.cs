@@ -16,6 +16,7 @@ var tests = new List<(string Name, Action Body)>
     ("Progress display formats all safe states", ProgressDisplayFormatsAllSafeStates),
     ("Update all spaces queued requests by base seconds plus jitter", UpdateAllSpacesQueuedRequestsByBaseSecondsPlusJitter),
     ("Update all keeps jitter when base spacing is zero", UpdateAllKeepsJitterWhenBaseSpacingIsZero),
+    ("Native refresh batch limiter keeps one achievement per enqueue", NativeRefreshBatchLimiterKeepsOneAchievementPerEnqueue),
     ("Request scheduler applies five second per-achievement backoff", RequestSchedulerAppliesFiveSecondPerAchievementBackoff),
     ("Auto updater selects only explicitly included tracked achievements", AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements),
     ("Completion filters wait for loaded achievement state", CompletionFiltersWaitForLoadedAchievementState),
@@ -195,6 +196,13 @@ static void UpdateAllKeepsJitterWhenBaseSpacingIsZero()
     AssertFalse(scheduler.TryTakeDueRequest(now.AddSeconds(1), out _), "second request should still wait for jitter");
     AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(1.5), out var second), "second request should be due after jitter");
     AssertEqualUInt(202u, second.AchievementId);
+}
+
+static void NativeRefreshBatchLimiterKeepsOneAchievementPerEnqueue()
+{
+    var limited = AchievementProgressUpdater.LimitNativeRefreshBatch([101, 102, 103]);
+
+    AssertSequence(limited, [101]);
 }
 
 static void RequestSchedulerAppliesFiveSecondPerAchievementBackoff()
