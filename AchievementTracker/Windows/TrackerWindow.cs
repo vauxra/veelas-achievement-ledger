@@ -176,18 +176,14 @@ public sealed class TrackerWindow : Window
     private void DrawMainPane()
     {
         var spacing = ImGui.GetStyle().ItemSpacing.X;
-        var width = ImGui.GetContentRegionAvail().X;
+        var availableWidth = ImGui.GetContentRegionAvail().X;
         var orderedColumns = this.plugin.Configuration.MainColumnOrder.Where(this.ShouldDrawColumn).ToList();
-        var visibleColumns = Math.Max(1, orderedColumns.Count);
-        _ = width;
-        _ = spacing;
-        _ = visibleColumns;
+        var widths = this.GetFittedColumnWidths(orderedColumns, availableWidth, spacing);
 
         for (var i = 0; i < orderedColumns.Count; i++)
         {
             var column = orderedColumns[i];
-            var columnWidth = this.GetConfiguredColumnWidth(column);
-            ImGui.BeginChild($"##MainColumn-{column}", new Vector2(columnWidth, 0), true);
+            ImGui.BeginChild($"##MainColumn-{column}", new Vector2(widths[i], 0), true, ImGuiWindowFlags.NoScrollbar);
             if (this.resetMainPanelScrollNextDraw)
             {
                 ImGui.SetScrollY(0);
@@ -204,17 +200,47 @@ public sealed class TrackerWindow : Window
         this.resetMainPanelScrollNextDraw = false;
     }
 
+    private List<float> GetFittedColumnWidths(IReadOnlyList<string> orderedColumns, float availableWidth, float spacing)
+    {
+        var widths = orderedColumns.Select(this.GetConfiguredColumnWidth).ToList();
+        if (widths.Count == 0)
+        {
+            return widths;
+        }
+
+        var spacingTotal = spacing * Math.Max(0, widths.Count - 1);
+        var targetWidth = Math.Max(120f * widths.Count, availableWidth - spacingTotal);
+        var totalWidth = widths.Sum();
+        if (totalWidth <= targetWidth)
+        {
+            return widths;
+        }
+
+        var scale = targetWidth / totalWidth;
+        for (var i = 0; i < widths.Count; i++)
+        {
+            widths[i] = Math.Max(this.GetMinimumColumnWidth(orderedColumns[i]), widths[i] * scale);
+        }
+
+        return widths;
+    }
+
     private float GetConfiguredColumnWidth(string column)
     {
         var configured = this.plugin.Configuration.MainColumnWidths.TryGetValue(column, out var width) ? width : 260f;
-        var minimum = column switch
-        {
-            "Search Categories" => 320f,
-            "Search Results" => 420f,
-            _ => 0f,
-        };
+        return Math.Max(this.GetMinimumColumnWidth(column), configured);
+    }
 
-        return Math.Max(minimum, configured);
+    private float GetMinimumColumnWidth(string column)
+    {
+        return column switch
+        {
+            "Lists" => 220f,
+            "Search Categories" => 240f,
+            "Search Results" => 360f,
+            "Tracked Achievements" => 240f,
+            _ => 180f,
+        };
     }
 
     private void DrawColumn(string column)
@@ -335,7 +361,7 @@ public sealed class TrackerWindow : Window
     private void DrawAchievementSearchColumn()
     {
         ImGui.TextUnformatted("Achievement search");
-        ImGui.SetNextItemWidth(-70);
+        ImGui.SetNextItemWidth(Math.Max(120f, ImGui.GetContentRegionAvail().X - 58f));
         var previousSearchQuery = this.achievementSearchQuery;
         if (ImGui.InputTextWithHint("##MainAchievementSearch", "Search name or category", ref this.achievementSearchQuery, 128)
             && !string.Equals(previousSearchQuery, this.achievementSearchQuery, StringComparison.Ordinal))
@@ -417,8 +443,8 @@ public sealed class TrackerWindow : Window
                 this.plugin.AchievementProgressUpdater.IsUpdateInProgress))
         {
             ImGui.Separator();
-            ImGui.TextDisabled("Completed/Incomplete search needs the in-game achievement completion list loaded first.");
-            ImGui.TextDisabled("Search text and categories remain Lumina-only; no native Achievement window is opened automatically.");
+            this.DrawDisabledWrapped("Completed/Incomplete search needs the in-game achievement completion list loaded first.");
+            this.DrawDisabledWrapped("Search text and categories remain Lumina-only; no native Achievement window is opened automatically.");
             return;
         }
 
@@ -436,11 +462,11 @@ public sealed class TrackerWindow : Window
 
         ImGui.Separator();
         var shownCount = Math.Min(this.visibleSearchResultCount, matchingResults.Count);
-        ImGui.TextDisabled($"Results: {shownCount} shown / {matchingResults.Count} after completion / {queryFilteredResults.Count} matching text / {categoryFilteredResults.Count} in category filter / {searchableResults.Count} searchable");
+        this.DrawDisabledWrapped($"Results: {shownCount} shown / {matchingResults.Count} after completion / {queryFilteredResults.Count} matching text / {categoryFilteredResults.Count} in category filter / {searchableResults.Count} searchable");
 
         if (matchingResults.Count == 0)
         {
-            ImGui.TextDisabled("No matching manually viewable achievements found.");
+            this.DrawDisabledWrapped("No matching manually viewable achievements found.");
             return;
         }
 
@@ -478,6 +504,7 @@ public sealed class TrackerWindow : Window
     private void DrawSearchAchievementResult(AchievementInfo result, IReadOnlyList<uint> trackedIds)
     {
         ImGui.PushID($"search-{result.Id}");
+        ImGui.SetCursorPosX(ImGui.GetStyle().WindowPadding.X);
         var alreadyTracked = trackedIds.Contains(result.Id);
         var canAdd = trackedIds.Count < TrackedAchievementStore.MaxTrackedAchievements;
         using (ImRaiiShim.Disabled(!alreadyTracked && !canAdd))
@@ -505,6 +532,7 @@ public sealed class TrackerWindow : Window
 
         ImGui.SameLine();
         ImGui.BeginGroup();
+        ImGui.PushTextWrapPos(ImGui.GetCursorPosX() + Math.Max(80f, ImGui.GetContentRegionAvail().X));
         ImGui.TextWrapped(result.Name);
         if (this.IsComplete(result.Id))
         {
@@ -514,8 +542,9 @@ public sealed class TrackerWindow : Window
 
         if (!string.IsNullOrWhiteSpace(result.Description))
         {
-            ImGui.TextDisabled(result.Description);
+            this.DrawDisabledWrapped(result.Description);
         }
+        ImGui.PopTextWrapPos();
         ImGui.EndGroup();
         ImGui.PopID();
     }
