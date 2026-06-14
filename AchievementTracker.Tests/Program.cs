@@ -26,6 +26,7 @@ var tests = new List<(string Name, Action Body)>
     ("Scale policy parks refresh only when native window was closed", ScalePolicyParksRefreshOnlyWhenNativeWindowWasClosed),
     ("Scale policy restores inspection actions", ScalePolicyRestoresInspectionActions),
     ("Scale policy restores when idle only for parked windows", ScalePolicyRestoresWhenIdleOnlyForParkedWindows),
+    ("Tracked display evaluates cosmic progress overrides", TrackedDisplayEvaluatesCosmicProgressOverrides),
     ("Auto updater selects only explicitly included tracked achievements", AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements),
     ("Completion filters wait for loaded achievement state", CompletionFiltersWaitForLoadedAchievementState),
     ("Lumina search all does not wait for loaded achievement state", LuminaSearchAllDoesNotWaitForLoadedAchievementState),
@@ -327,6 +328,12 @@ static void ScalePolicyRestoresWhenIdleOnlyForParkedWindows()
     AssertFalse(NativeAchievementWindowScalePolicy.ShouldRestoreWhenIdle(hasActiveRequest: true, hasPendingRequests: false, hasParkedWindow: true), "active request should not restore");
     AssertFalse(NativeAchievementWindowScalePolicy.ShouldRestoreWhenIdle(hasActiveRequest: false, hasPendingRequests: true, hasParkedWindow: true), "pending queue should not restore");
     AssertFalse(NativeAchievementWindowScalePolicy.ShouldRestoreWhenIdle(hasActiveRequest: false, hasPendingRequests: false, hasParkedWindow: false), "unparked idle state should not restore");
+}
+
+static void TrackedDisplayEvaluatesCosmicProgressOverrides()
+{
+    AssertTrue(TrackedProgressDisplayPolicy.ShouldEvaluateProgress(hasObservedProgress: false, isComplete: false, hasCosmicProgressOverride: true), "cosmic override should display without a normal observation");
+    AssertFalse(TrackedProgressDisplayPolicy.ShouldEvaluateProgress(hasObservedProgress: false, isComplete: false, hasCosmicProgressOverride: false), "ordinary rows remain not updated until observed/complete");
 }
 
 static void AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements()

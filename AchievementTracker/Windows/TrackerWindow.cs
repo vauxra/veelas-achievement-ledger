@@ -541,11 +541,15 @@ public sealed class TrackerWindow : Window
     {
         _ = this.plugin.AchievementCatalog.TryGet(achievementId, out var info);
         var progressText = "not updated yet";
-        if (this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row)
-            && (this.plugin.ClientAchievementProgressSource.TryGetObservation(achievementId, out _)
-                || this.plugin.AchievementProgressService.IsComplete(row)))
+        if (this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row))
         {
-            progressText = this.plugin.AchievementProgressService.GetProgress(row).ToDisplayText();
+            var hasObservedProgress = this.plugin.ClientAchievementProgressSource.TryGetObservation(achievementId, out _);
+            var isComplete = this.plugin.AchievementProgressService.IsComplete(row);
+            var hasCosmicProgressOverride = this.plugin.CosmicClassProgressProvider.Handles(achievementId);
+            if (TrackedProgressDisplayPolicy.ShouldEvaluateProgress(hasObservedProgress, isComplete, hasCosmicProgressOverride))
+            {
+                progressText = this.plugin.AchievementProgressService.GetProgress(row).ToDisplayText();
+            }
         }
 
         ImGui.PushID((int)achievementId);
