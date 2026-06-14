@@ -26,6 +26,7 @@ public sealed class TrackerWindow : Window
     private bool categoryFilterAll = true;
     private readonly HashSet<string> selectedCategoryFilters = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> selectedSubcategoryFilters = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> collapsedSearchCategories = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<uint, (byte KindOrder, byte CategoryOrder, ushort AchievementOrder, uint RowId)> gameSortKeyCache = new();
 
     public TrackerWindow(Plugin plugin)
@@ -254,12 +255,21 @@ public sealed class TrackerWindow : Window
         this.DrawPresetContextPopups();
     }
 
+
+    private void DrawDisabledWrapped(string text)
+    {
+        var disabledColor = ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled];
+        ImGui.PushStyleColor(ImGuiCol.Text, disabledColor);
+        ImGui.TextWrapped(text);
+        ImGui.PopStyleColor();
+    }
+
     private void DrawAchievementCategoryColumn()
     {
         var searchableAchievements = this.GetSearchableAchievements().ToList();
         ImGui.TextUnformatted($"Achievement categories ({searchableAchievements.Count})");
-        ImGui.TextDisabled("Counts include searchable, manually viewable achievements only.");
-        ImGui.TextDisabled("Click to select one category. Ctrl-click to add/remove multiple categories or subcategories.");
+        this.DrawDisabledWrapped("Counts include searchable, manually viewable achievements only.");
+        this.DrawDisabledWrapped("Click a category or subcategory to select it. Ctrl-click to add/remove multiple categories or subcategories. Use the arrow button to collapse or expand a top-level category.");
         ImGui.Separator();
         var categoryEntries = searchableAchievements
             .Select(info => (Info: info, Parts: SplitCategoryPath(info.CategoryName), Sort: this.GetGameSortKey(info)))
@@ -271,12 +281,26 @@ public sealed class TrackerWindow : Window
 
         foreach (var categoryGroup in categoryEntries)
         {
-            var selectedCategory = this.selectedCategoryFilters.Contains(categoryGroup.Key);
-            var categoryLabel = $"{categoryGroup.Key} ({categoryGroup.Count()})";
+            var categoryKey = categoryGroup.Key;
+            var selectedCategory = this.selectedCategoryFilters.Contains(categoryKey);
+            var categoryLabel = $"{categoryKey} ({categoryGroup.Count()})";
+            var collapsed = this.collapsedSearchCategories.Contains(categoryKey);
+
+            ImGui.PushID($"category-{categoryKey}");
+            if (ImGui.SmallButton(collapsed ? "▶" : "▼"))
+            {
+                if (!this.collapsedSearchCategories.Add(categoryKey))
+                {
+                    this.collapsedSearchCategories.Remove(categoryKey);
+                }
+            }
+            AddTooltip(collapsed ? "Expand category." : "Collapse category.");
+            ImGui.SameLine();
             if (ImGui.Selectable(categoryLabel, selectedCategory))
             {
-                this.ToggleCategoryFilter(categoryGroup.Key);
+                this.ToggleCategoryFilter(categoryKey);
             }
+            ImGui.PopID();
 
             var subcategories = categoryGroup
                 .Where(entry => !string.IsNullOrWhiteSpace(entry.Parts.Subcategory))
@@ -284,27 +308,27 @@ public sealed class TrackerWindow : Window
                 .OrderBy(group => group.Min(entry => entry.Sort.CategoryOrder))
                 .ThenBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
                 .ToList();
-            if (subcategories.Count == 0)
+            if (collapsed || subcategories.Count == 0)
             {
                 continue;
             }
 
-            ImGui.Indent(12);
+            ImGui.Indent(24);
             foreach (var subcategoryGroup in subcategories)
             {
-                var subcategoryKey = BuildSubcategoryFilterKey(categoryGroup.Key, subcategoryGroup.Key);
+                var subcategoryKey = BuildSubcategoryFilterKey(categoryKey, subcategoryGroup.Key);
                 var selected = this.selectedSubcategoryFilters.Contains(subcategoryKey);
                 var subcategoryLabel = $"{subcategoryGroup.Key} ({subcategoryGroup.Count()})";
                 ImGui.PushID(subcategoryKey);
                 if (ImGui.Selectable(subcategoryLabel, selected))
                 {
-                    this.ToggleSubcategoryFilter(categoryGroup.Key, subcategoryGroup.Key);
+                    this.ToggleSubcategoryFilter(categoryKey, subcategoryGroup.Key);
                 }
 
                 ImGui.PopID();
             }
 
-            ImGui.Unindent(12);
+            ImGui.Unindent(24);
         }
     }
 

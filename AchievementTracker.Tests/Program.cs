@@ -20,6 +20,9 @@ var tests = new List<(string Name, Action Body)>
     ("Request scheduler applies five second per-achievement backoff", RequestSchedulerAppliesFiveSecondPerAchievementBackoff),
     ("Request scheduler caps pending actions at one hundred", RequestSchedulerCapsPendingActionsAtOneHundred),
     ("Request scheduler serializes refreshes and inspections in one queue", RequestSchedulerSerializesRefreshesAndInspectionsInOneQueue),
+    ("Scale policy parks refresh only when native window was closed", ScalePolicyParksRefreshOnlyWhenNativeWindowWasClosed),
+    ("Scale policy restores inspection actions", ScalePolicyRestoresInspectionActions),
+    ("Scale policy restores when idle only for parked windows", ScalePolicyRestoresWhenIdleOnlyForParkedWindows),
     ("Auto updater selects only explicitly included tracked achievements", AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements),
     ("Completion filters wait for loaded achievement state", CompletionFiltersWaitForLoadedAchievementState),
     ("Lumina search all does not wait for loaded achievement state", LuminaSearchAllDoesNotWaitForLoadedAchievementState),
@@ -262,6 +265,28 @@ static void RequestSchedulerSerializesRefreshesAndInspectionsInOneQueue()
     AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(8), out var third), "inspection should be serialized after refreshes");
     AssertEqualUInt(201u, third.AchievementId);
     AssertEqual(NativeAchievementActionKind.Inspection.ToString(), third.Kind.ToString());
+}
+
+
+static void ScalePolicyParksRefreshOnlyWhenNativeWindowWasClosed()
+{
+    AssertTrue(NativeAchievementWindowScalePolicy.ShouldParkForAction(NativeAchievementActionKind.Refresh, nativeWindowWasAlreadyOpen: false), "closed-window refresh should park");
+    AssertFalse(NativeAchievementWindowScalePolicy.ShouldParkForAction(NativeAchievementActionKind.Refresh, nativeWindowWasAlreadyOpen: true), "already-open refresh should not park");
+    AssertFalse(NativeAchievementWindowScalePolicy.ShouldParkForAction(NativeAchievementActionKind.Inspection, nativeWindowWasAlreadyOpen: false), "inspection should not park");
+}
+
+static void ScalePolicyRestoresInspectionActions()
+{
+    AssertTrue(NativeAchievementWindowScalePolicy.ShouldRestoreForAction(NativeAchievementActionKind.Inspection), "inspection should restore");
+    AssertFalse(NativeAchievementWindowScalePolicy.ShouldRestoreForAction(NativeAchievementActionKind.Refresh), "refresh should not restore at start");
+}
+
+static void ScalePolicyRestoresWhenIdleOnlyForParkedWindows()
+{
+    AssertTrue(NativeAchievementWindowScalePolicy.ShouldRestoreWhenIdle(hasActiveRequest: false, hasPendingRequests: false, hasParkedWindow: true), "idle parked window should restore");
+    AssertFalse(NativeAchievementWindowScalePolicy.ShouldRestoreWhenIdle(hasActiveRequest: true, hasPendingRequests: false, hasParkedWindow: true), "active request should not restore");
+    AssertFalse(NativeAchievementWindowScalePolicy.ShouldRestoreWhenIdle(hasActiveRequest: false, hasPendingRequests: true, hasParkedWindow: true), "pending queue should not restore");
+    AssertFalse(NativeAchievementWindowScalePolicy.ShouldRestoreWhenIdle(hasActiveRequest: false, hasPendingRequests: false, hasParkedWindow: false), "unparked idle state should not restore");
 }
 
 static void AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements()

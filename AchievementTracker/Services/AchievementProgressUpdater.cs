@@ -27,6 +27,10 @@ public sealed class AchievementProgressUpdater
     private DateTimeOffset nextAutoUpdateAt = DateTimeOffset.MinValue;
     private ActiveNativeAchievementRequest? activeNativeRequest;
     private DateTimeOffset nextNativeOpenAllowedAt = DateTimeOffset.MinValue;
+    private bool pendingParkForActiveRefresh;
+    private bool pendingRestoreForInspection;
+    private bool pendingRestoreWhenIdle;
+    private DateTimeOffset pendingScaleOperationUntil = DateTimeOffset.MinValue;
     private int consecutiveNativeFailures;
     private bool nativeCircuitBroken;
     private string statusText = string.Empty;
@@ -137,8 +141,11 @@ public sealed class AchievementProgressUpdater
         }
 
         var now = DateTimeOffset.UtcNow;
+        this.TryApplyPendingNativeWindowScale(now);
+        this.RestoreParkedWindowIfPlayerOpenedPanel(now);
         this.MaybeEnqueueAutoUpdate(now);
         this.ProcessActiveNativeRequest(now);
+        this.TryApplyPendingNativeWindowScale(now);
 
         if (this.activeNativeRequest.HasValue || now < this.nextNativeOpenAllowedAt)
         {
@@ -156,6 +163,7 @@ public sealed class AchievementProgressUpdater
         this.scheduler.Clear();
         this.activeNativeRequest = null;
         this.nextAutoUpdateAt = DateTimeOffset.MinValue;
+        this.ClearPendingScaleOperations();
         this.statusText = string.Empty;
     }
 
@@ -204,6 +212,7 @@ public sealed class AchievementProgressUpdater
             return;
         }
 
+        var nativeWindowWasAlreadyOpen = this.nativeAchievementNavigator.IsOpen;
         if (!this.nativeAchievementNavigator.OpenAchievement(request.AchievementId))
         {
             this.RegisterNativeFailure($"open-failed-refresh-{request.AchievementId}");
@@ -212,14 +221,27 @@ public sealed class AchievementProgressUpdater
         }
 
         this.lastNativeOpenByAchievementId[request.AchievementId] = now;
+        var shouldPark = NativeAchievementWindowScalePolicy.ShouldParkForAction(request.Kind, nativeWindowWasAlreadyOpen);
+        var shouldCloseAfterRefresh = NativeAchievementWindowScalePolicy.ShouldCloseAfterRefresh(nativeWindowWasAlreadyOpen);
+        if (shouldPark)
+        {
+            this.RequestScaleOperation(now, parkForRefresh: true);
+        }
+        else if (nativeWindowWasAlreadyOpen && this.nativeAchievementNavigator.HasParkedWindow)
+        {
+            this.RequestScaleOperation(now, restoreForInspection: true);
+        }
+
         this.activeNativeRequest = new ActiveNativeAchievementRequest(
             request.AchievementId,
             request.Reason,
             now,
             now + RefreshMinimumWait,
-            now + RefreshMaximumWait);
+            now + RefreshMaximumWait,
+            nativeWindowWasAlreadyOpen,
+            shouldCloseAfterRefresh);
         this.statusText = "Waiting for data.";
-        this.debugLog($"AchieveEx DebugTrace NativeRefreshOpenSent id={request.AchievementId} reason={request.Reason} minWaitSeconds={RefreshMinimumWait.TotalSeconds:0.0} maxWaitSeconds={RefreshMaximumWait.TotalSeconds:0} pending={this.scheduler.PendingCount}");
+        this.debugLog($"AchieveEx DebugTrace NativeRefreshOpenSent id={request.AchievementId} reason={request.Reason} minWaitSeconds={RefreshMinimumWait.TotalSeconds:0.0} maxWaitSeconds={RefreshMaximumWait.TotalSeconds:0} pending={this.scheduler.PendingCount} nativeWindowWasOpen={nativeWindowWasAlreadyOpen} scaleIntent={(shouldPark ? "park" : "none")} closeAfter={shouldCloseAfterRefresh}");
     }
 
     private void StartInspection(ScheduledAchievementProgressRequest request, DateTimeOffset now)
@@ -235,9 +257,14 @@ public sealed class AchievementProgressUpdater
 
         this.RegisterNativeSuccess();
         this.lastNativeOpenByAchievementId[achievementId] = now;
+        if (NativeAchievementWindowScalePolicy.ShouldRestoreForAction(request.Kind))
+        {
+            this.RequestScaleOperation(now, restoreForInspection: true);
+        }
+
         this.nextNativeOpenAllowedAt = now + NativeOpenCooldown;
         this.statusText = "Native Achievement opened.";
-        this.debugLog($"AchieveEx DebugTrace NativeInspectionOpen id={achievementId} opened=true cooldownSeconds={NativeOpenCooldown.TotalSeconds:0}");
+        this.debugLog($"AchieveEx DebugTrace NativeInspectionOpen id={achievementId} opened=true cooldownSeconds={NativeOpenCooldown.TotalSeconds:0} scaleIntent=restore");
     }
 
     private void ProcessActiveNativeRequest(DateTimeOffset now)
@@ -258,6 +285,7 @@ public sealed class AchievementProgressUpdater
             this.debugLog($"AchieveEx DebugTrace NativeRefreshLoaded id={request.AchievementId} reason={request.Reason} current={progress.Current} max={progress.Max} source={progress.Source} elapsedMs={(now - request.StartedAt).TotalMilliseconds:0}");
             this.activeNativeRequest = null;
             this.RegisterNativeSuccess();
+            this.CompleteRefreshWindowLifecycle(now, request);
             this.MarkNativeRequestSettled(now, request.Reason);
             return;
         }
@@ -267,6 +295,7 @@ public sealed class AchievementProgressUpdater
             this.debugLog($"AchieveEx DebugTrace NativeRefreshTimeout id={request.AchievementId} reason={request.Reason} elapsedMs={(now - request.StartedAt).TotalMilliseconds:0}");
             this.activeNativeRequest = null;
             this.RegisterNativeFailure($"timeout-{request.AchievementId}");
+            this.CompleteRefreshWindowLifecycle(now, request);
             this.MarkNativeRequestSettled(now, request.Reason);
         }
     }
@@ -276,7 +305,107 @@ public sealed class AchievementProgressUpdater
         var cooldown = MaxTimeSpan(NativeOpenCooldown, PostProgressSettleMinimum);
         this.nextNativeOpenAllowedAt = now + cooldown;
         this.statusText = this.scheduler.HasPendingRequests ? $"Progress queue: {this.scheduler.PendingCount} pending." : string.Empty;
+        if (!this.scheduler.HasPendingRequests && this.nativeAchievementNavigator.HasParkedWindow)
+        {
+            this.RequestScaleOperation(now, restoreWhenIdle: true);
+        }
+
         this.debugLog($"AchieveEx DebugTrace NativeOpenCooldown reason={reason} nextOpenAt={this.nextNativeOpenAllowedAt:O} cooldownSeconds={cooldown.TotalSeconds:0} phase=queue-owned-spacing");
+    }
+
+
+
+    private void RestoreParkedWindowIfPlayerOpenedPanel(DateTimeOffset now)
+    {
+        if (!this.activeNativeRequest.HasValue
+            && !this.scheduler.HasPendingRequests
+            && this.nativeAchievementNavigator.HasParkedWindow
+            && this.nativeAchievementNavigator.IsOpen)
+        {
+            this.RequestScaleOperation(now, restoreWhenIdle: true);
+        }
+    }
+
+    private void CompleteRefreshWindowLifecycle(DateTimeOffset now, ActiveNativeAchievementRequest request)
+    {
+        if (request.ShouldCloseAfterRefresh)
+        {
+            var closed = this.nativeAchievementNavigator.CloseAchievementWindow(restoreParkedWindow: true);
+            this.ClearPendingScaleOperations();
+            this.debugLog($"AchieveEx DebugTrace NativeWindowClosedAfterRefresh id={request.AchievementId} closed={closed} nativeWindowWasOpen={request.NativeWindowWasAlreadyOpen}");
+            return;
+        }
+
+        if (NativeAchievementWindowScalePolicy.ShouldRestoreWhenIdle(
+                this.activeNativeRequest.HasValue,
+                this.scheduler.HasPendingRequests,
+                this.nativeAchievementNavigator.HasParkedWindow))
+        {
+            this.RequestScaleOperation(now, restoreWhenIdle: true);
+        }
+    }
+
+    private void RequestScaleOperation(DateTimeOffset now, bool parkForRefresh = false, bool restoreForInspection = false, bool restoreWhenIdle = false)
+    {
+        this.pendingParkForActiveRefresh |= parkForRefresh;
+        this.pendingRestoreForInspection |= restoreForInspection;
+        this.pendingRestoreWhenIdle |= restoreWhenIdle;
+        this.pendingScaleOperationUntil = now.AddSeconds(3);
+        this.TryApplyPendingNativeWindowScale(now);
+    }
+
+    private void TryApplyPendingNativeWindowScale(DateTimeOffset now)
+    {
+        if (this.pendingScaleOperationUntil != DateTimeOffset.MinValue && now > this.pendingScaleOperationUntil)
+        {
+            this.ClearPendingScaleOperations();
+            return;
+        }
+
+        if (this.pendingRestoreForInspection)
+        {
+            if (this.nativeAchievementNavigator.RestoreParkedAchievementWindowOrResetScale())
+            {
+                this.pendingRestoreForInspection = false;
+                this.pendingRestoreWhenIdle = false;
+                this.debugLog("AchieveEx DebugTrace NativeWindowRestored reason=inspection");
+            }
+        }
+
+        if (this.pendingParkForActiveRefresh)
+        {
+            if (this.nativeAchievementNavigator.TryParkAchievementWindow())
+            {
+                this.pendingParkForActiveRefresh = false;
+                this.debugLog("AchieveEx DebugTrace NativeWindowParked reason=refresh");
+            }
+        }
+
+        if (this.pendingRestoreWhenIdle
+            && NativeAchievementWindowScalePolicy.ShouldRestoreWhenIdle(
+                this.activeNativeRequest.HasValue,
+                this.scheduler.HasPendingRequests,
+                this.nativeAchievementNavigator.HasParkedWindow))
+        {
+            if (this.nativeAchievementNavigator.RestoreParkedAchievementWindow())
+            {
+                this.pendingRestoreWhenIdle = false;
+                this.debugLog("AchieveEx DebugTrace NativeWindowRestored reason=idle");
+            }
+        }
+
+        if (!this.pendingParkForActiveRefresh && !this.pendingRestoreForInspection && !this.pendingRestoreWhenIdle)
+        {
+            this.pendingScaleOperationUntil = DateTimeOffset.MinValue;
+        }
+    }
+
+    private void ClearPendingScaleOperations()
+    {
+        this.pendingParkForActiveRefresh = false;
+        this.pendingRestoreForInspection = false;
+        this.pendingRestoreWhenIdle = false;
+        this.pendingScaleOperationUntil = DateTimeOffset.MinValue;
     }
 
     private void RegisterNativeSuccess()
@@ -292,6 +421,8 @@ public sealed class AchievementProgressUpdater
             this.nativeCircuitBroken = true;
             this.scheduler.Clear();
             this.activeNativeRequest = null;
+            _ = this.nativeAchievementNavigator.RestoreParkedAchievementWindow();
+            this.ClearPendingScaleOperations();
             this.statusText = "Native Achievement actions paused for this session after repeated failures.";
             this.debugLog("AchieveEx DebugTrace NativeCircuitBreakerTripped queueCleared=true");
         }
@@ -335,5 +466,7 @@ public sealed class AchievementProgressUpdater
         string Reason,
         DateTimeOffset StartedAt,
         DateTimeOffset MinimumCompleteAt,
-        DateTimeOffset TimeoutAt);
+        DateTimeOffset TimeoutAt,
+        bool NativeWindowWasAlreadyOpen,
+        bool ShouldCloseAfterRefresh);
 }
