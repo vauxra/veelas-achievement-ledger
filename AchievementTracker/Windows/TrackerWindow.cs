@@ -13,6 +13,9 @@ namespace AchievementTracker.Windows;
 
 public sealed class TrackerWindow : Window
 {
+    private const int InitialSearchResultLimit = 20;
+    private const int SearchResultPageSize = 20;
+
     private readonly Plugin plugin;
     private bool templatesOpen;
     private bool hideTrackedIcons;
@@ -23,6 +26,7 @@ public sealed class TrackerWindow : Window
     private string selectedPresetName = string.Empty;
     private string achievementSearchQuery = string.Empty;
     private bool categoryFilterAll = true;
+    private int searchResultLimit = InitialSearchResultLimit;
     private readonly HashSet<string> selectedCategoryFilters = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> selectedSubcategoryFilters = new(StringComparer.OrdinalIgnoreCase);
 
@@ -306,11 +310,18 @@ public sealed class TrackerWindow : Window
     {
         ImGui.TextUnformatted("Achievement search");
         ImGui.SetNextItemWidth(-70);
-        ImGui.InputTextWithHint("##MainAchievementSearch", "Search name or category", ref this.achievementSearchQuery, 128);
+        var previousSearchQuery = this.achievementSearchQuery;
+        if (ImGui.InputTextWithHint("##MainAchievementSearch", "Search name or category", ref this.achievementSearchQuery, 128)
+            && !string.Equals(previousSearchQuery, this.achievementSearchQuery, StringComparison.Ordinal))
+        {
+            this.ResetSearchPagination();
+        }
+
         ImGui.SameLine();
         if (ImGui.Button("Clear"))
         {
             this.achievementSearchQuery = string.Empty;
+            this.ResetSearchPagination();
         }
         AddTooltip("Clear search text.");
 
@@ -319,12 +330,14 @@ public sealed class TrackerWindow : Window
         if (ImGui.RadioButton("All", this.categoryFilterAll))
         {
             this.categoryFilterAll = true;
+            this.ResetSearchPagination();
         }
         AddTooltip("Ignore selected categories.");
         ImGui.SameLine();
         if (ImGui.RadioButton("Selected", !this.categoryFilterAll))
         {
             this.categoryFilterAll = false;
+            this.ResetSearchPagination();
         }
         AddTooltip("Filter by selected categories/subcategories from the Achievement categories column. Ctrl-click there to select multiple.");
 
@@ -335,6 +348,7 @@ public sealed class TrackerWindow : Window
             this.plugin.Configuration.SearchCompletionFilter = "All";
             this.plugin.Configuration.HideCompletedInSearch = false;
             this.plugin.SaveConfiguration();
+            this.ResetSearchPagination();
         }
         ImGui.SameLine();
         if (ImGui.RadioButton("Completed", this.plugin.Configuration.SearchCompletionFilter == "Completed"))
@@ -342,6 +356,7 @@ public sealed class TrackerWindow : Window
             this.plugin.Configuration.SearchCompletionFilter = "Completed";
             this.plugin.Configuration.HideCompletedInSearch = false;
             this.plugin.SaveConfiguration();
+            this.ResetSearchPagination();
         }
         ImGui.SameLine();
         if (ImGui.RadioButton("Incomplete", this.plugin.Configuration.SearchCompletionFilter == "Incomplete"))
@@ -349,6 +364,7 @@ public sealed class TrackerWindow : Window
             this.plugin.Configuration.SearchCompletionFilter = "Incomplete";
             this.plugin.Configuration.HideCompletedInSearch = true;
             this.plugin.SaveConfiguration();
+            this.ResetSearchPagination();
         }
 
         ImGui.TextUnformatted("Sort:");
@@ -357,6 +373,7 @@ public sealed class TrackerWindow : Window
         if (ImGui.RadioButton("Game", gameSort))
         {
             this.searchSortMode = SearchSortMode.GameOrder;
+            this.ResetSearchPagination();
         }
         AddTooltip("Use the in-game achievement category/subcategory/order.");
         ImGui.SameLine();
@@ -364,6 +381,7 @@ public sealed class TrackerWindow : Window
         if (ImGui.RadioButton("A-Z", alphabeticalSort))
         {
             this.searchSortMode = SearchSortMode.Alphabetical;
+            this.ResetSearchPagination();
         }
         AddTooltip("Sort achievement names alphabetically.");
 
@@ -389,11 +407,13 @@ public sealed class TrackerWindow : Window
         }
 
         var trackedIds = this.plugin.TrackedAchievements.AchievementIds;
-        var results = this.SortSearchResults(this.plugin.AchievementCatalog.Search(this.achievementSearchQuery, 5000)
+        var matchingResults = this.SortSearchResults(this.plugin.AchievementCatalog.Search(this.achievementSearchQuery, 5000)
                 .Where(this.MatchesSelectedCategory)
                 .Where(result => !string.Equals(SplitCategoryPath(result.CategoryName).Category, "Legacy", StringComparison.OrdinalIgnoreCase))
                 .Where(this.MatchesCompletionFilter))
-            .Take(80)
+            .ToList();
+        var results = matchingResults
+            .Take(this.searchResultLimit)
             .ToList();
 
         if (results.Count == 0)
@@ -403,6 +423,18 @@ public sealed class TrackerWindow : Window
         }
 
         ImGui.Separator();
+        ImGui.TextDisabled($"Showing {results.Count} of {matchingResults.Count} results.");
+        if (matchingResults.Count > results.Count)
+        {
+            ImGui.SameLine();
+            if (ImGui.Button($"Load {SearchResultPageSize} more"))
+            {
+                this.searchResultLimit += SearchResultPageSize;
+            }
+
+            AddTooltip("Search starts with 20 results to keep the main panel responsive.");
+        }
+
         foreach (var result in results)
         {
             this.DrawSearchAchievementResult(result, trackedIds);
@@ -828,7 +860,7 @@ public sealed class TrackerWindow : Window
     private void ToggleCategoryFilter(string category)
     {
         var ctrl = ImGui.GetIO().KeyCtrl;
-        this.categoryFilterAll = false;
+        this.ResetSearchPagination();
         if (!ctrl)
         {
             this.selectedCategoryFilters.Clear();
@@ -847,7 +879,7 @@ public sealed class TrackerWindow : Window
     {
         var ctrl = ImGui.GetIO().KeyCtrl;
         var key = BuildSubcategoryFilterKey(category, subcategory);
-        this.categoryFilterAll = false;
+        this.ResetSearchPagination();
         if (!ctrl)
         {
             this.selectedCategoryFilters.Clear();
@@ -867,6 +899,9 @@ public sealed class TrackerWindow : Window
 
     private bool IsComplete(uint achievementId)
         => this.plugin.IsAchievementCompleteForSearch(achievementId);
+
+    private void ResetSearchPagination()
+        => this.searchResultLimit = InitialSearchResultLimit;
 
     private (byte KindOrder, byte CategoryOrder, ushort AchievementOrder, uint RowId) GetGameSortKey(AchievementInfo info)
     {

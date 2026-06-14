@@ -14,6 +14,7 @@ namespace AchievementTracker;
 public sealed class Plugin : IDalamudPlugin
 {
     private const string CommandName = "/achex";
+    private static readonly TimeSpan NativeInspectionOpenCooldown = TimeSpan.FromSeconds(6);
 
     // Dalamud service injection pattern:
     // https://dalamud.dev/plugin-development/project-layout
@@ -26,9 +27,6 @@ public sealed class Plugin : IDalamudPlugin
     // IClientState login/logout events are used to scope cached progress to the current character.
     // https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IClientState
     [PluginService] internal static IClientState ClientState { get; private set; } = null!;
-    // Passive hooks observe native achievement UI progress flow; they do not issue requests.
-    // https://dalamud.dev/plugin-development/interaction/
-    [PluginService] internal static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
     // Dalamud service injection pattern: https://dalamud.dev/plugin-development/project-layout
     [PluginService] internal static IFramework Framework { get; private set; } = null!;
     // Dalamud service injection pattern: https://dalamud.dev/plugin-development/project-layout
@@ -54,11 +52,11 @@ public sealed class Plugin : IDalamudPlugin
 
     private TrackerWindow TrackerWindow { get; }
     private ConfigWindow ConfigWindow { get; }
-    private PassiveAchievementProgressObserver? passiveAchievementProgressObserver;
     private AchievementActivityUpdateObserver? activityUpdateObserver;
     private DateTimeOffset nextCosmicCacheRefreshAt = DateTimeOffset.MinValue;
     private uint pendingNativeAchievementInspectionOpenId;
     private DateTimeOffset pendingNativeAchievementInspectionOpenAt = DateTimeOffset.MinValue;
+    private DateTimeOffset lastNativeAchievementInspectionOpenedAt = DateTimeOffset.MinValue;
     private bool pendingNativeAchievementScaleReset;
     private DateTimeOffset pendingNativeAchievementScaleResetUntil = DateTimeOffset.MinValue;
 
@@ -84,7 +82,6 @@ public sealed class Plugin : IDalamudPlugin
         this.AchievementProgressService = new AchievementProgressService(UnlockState, this.AchievementProgressSource, this.CosmicClassProgressProvider);
         this.TrackerWindow = new TrackerWindow(this);
         this.ConfigWindow = new ConfigWindow(this);
-        this.InstallPassiveAchievementObserver();
         this.InstallActivityUpdateObserver();
         this.WindowSystem.AddWindow(this.TrackerWindow);
         this.WindowSystem.AddWindow(this.ConfigWindow);
@@ -111,8 +108,6 @@ public sealed class Plugin : IDalamudPlugin
         ClientState.Login -= this.ResetProgressState;
         ClientState.Logout -= this.ResetProgressStateOnLogout;
         CommandManager.RemoveHandler(CommandName);
-        this.passiveAchievementProgressObserver?.Dispose();
-        this.passiveAchievementProgressObserver = null;
         this.activityUpdateObserver?.Dispose();
         this.activityUpdateObserver = null;
         this.WindowSystem.RemoveAllWindows();
@@ -208,9 +203,14 @@ public sealed class Plugin : IDalamudPlugin
 
     public bool OpenNativeAchievementForInspection(uint achievementId)
     {
+        var now = DateTimeOffset.UtcNow;
+        var nextAllowedAt = this.lastNativeAchievementInspectionOpenedAt == DateTimeOffset.MinValue
+            ? now
+            : this.lastNativeAchievementInspectionOpenedAt + NativeInspectionOpenCooldown;
+
         this.pendingNativeAchievementInspectionOpenId = achievementId;
-        this.pendingNativeAchievementInspectionOpenAt = DateTimeOffset.UtcNow.AddMilliseconds(50);
-        this.DebugLog($"AchieveEx DebugTrace NativeInspectionQueued id={achievementId}");
+        this.pendingNativeAchievementInspectionOpenAt = now > nextAllowedAt ? now.AddMilliseconds(50) : nextAllowedAt;
+        this.DebugLog($"AchieveEx DebugTrace NativeInspectionQueued id={achievementId} openAt={this.pendingNativeAchievementInspectionOpenAt:O} cooldownSeconds={NativeInspectionOpenCooldown.TotalSeconds:0}");
         return true;
     }
 
@@ -275,14 +275,6 @@ public sealed class Plugin : IDalamudPlugin
     public void OpenTrackedAchievementsConfig()
         => this.ConfigWindow.OpenTrackedAchievements();
 
-    private void InstallPassiveAchievementObserver()
-    {
-        this.passiveAchievementProgressObserver ??= new PassiveAchievementProgressObserver(
-            GameInteropProvider,
-            this.ClientAchievementProgressSource,
-            () => false);
-    }
-
     private void InstallActivityUpdateObserver()
     {
         this.activityUpdateObserver ??= new AchievementActivityUpdateObserver(
@@ -334,6 +326,7 @@ public sealed class Plugin : IDalamudPlugin
         this.AchievementProgressUpdater.Clear();
         this.pendingNativeAchievementInspectionOpenId = 0;
         this.pendingNativeAchievementInspectionOpenAt = DateTimeOffset.MinValue;
+        this.lastNativeAchievementInspectionOpenedAt = DateTimeOffset.MinValue;
         this.pendingNativeAchievementScaleReset = false;
     }
 
@@ -373,7 +366,12 @@ public sealed class Plugin : IDalamudPlugin
         this.pendingNativeAchievementInspectionOpenAt = DateTimeOffset.MinValue;
 
         var opened = this.NativeAchievementNavigator.OpenAchievement(achievementId);
-        this.DebugLog($"AchieveEx DebugTrace NativeInspectionOpen id={achievementId} opened={opened} deferred=true");
+        if (opened)
+        {
+            this.lastNativeAchievementInspectionOpenedAt = DateTimeOffset.UtcNow;
+        }
+
+        this.DebugLog($"AchieveEx DebugTrace NativeInspectionOpen id={achievementId} opened={opened} deferred=true cooldownSeconds={NativeInspectionOpenCooldown.TotalSeconds:0}");
     }
 
     private void TryCompletePendingNativeAchievementScaleReset()
