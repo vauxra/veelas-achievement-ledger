@@ -18,6 +18,8 @@ public sealed class Configuration : IPluginConfiguration
 
     public CosmicClassScoreCache CosmicClassScoreCache { get; set; } = new();
 
+    public List<CharacterAchievementCompletionCache> CharacterCompletionCaches { get; set; } = [];
+
     public bool HideCompletedInSearch { get; set; } = true;
 
     public string SearchCompletionFilter { get; set; } = "All";
@@ -109,6 +111,7 @@ public sealed class Configuration : IPluginConfiguration
         }
 
         this.CosmicClassScoreCache ??= new CosmicClassScoreCache();
+        this.CharacterCompletionCaches = CharacterAchievementCompletionCacheStore.Normalize(this.CharacterCompletionCaches);
         this.MainColumnOrder = NormalizeStringOrder(this.MainColumnOrder, ["Lists", "Search Categories", "Search Results", "Tracked Achievements"]);
         this.MainNavigationOrder = NormalizeStringOrder(this.MainNavigationOrder, ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"]);
         this.HiddenTrackedAchievementIcons = NormalizeHiddenTrackedAchievementIcons(this.HiddenTrackedAchievementIcons, ["Auto update", "Remove", "Refresh", "Open"]);

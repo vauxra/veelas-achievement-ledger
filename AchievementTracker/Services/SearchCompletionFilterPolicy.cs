@@ -9,8 +9,8 @@ public static class SearchCompletionFilterPolicy
     public static bool RequiresCompletionState(string filter)
         => filter is Completed or Incomplete;
 
-    public static bool CanEvaluate(string filter, bool completionStateLoaded)
-        => !RequiresCompletionState(filter) || completionStateLoaded;
+    public static bool CanEvaluate(string filter, bool completionStateLoaded, bool cachedCompletionStateAvailable, bool updateInProgress)
+        => !updateInProgress && (!RequiresCompletionState(filter) || completionStateLoaded || cachedCompletionStateAvailable);
 
     public static bool Matches(string filter, bool isComplete)
         => filter switch

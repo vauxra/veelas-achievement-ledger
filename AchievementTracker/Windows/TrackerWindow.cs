@@ -367,10 +367,17 @@ public sealed class TrackerWindow : Window
         }
         AddTooltip("Sort achievement names alphabetically.");
 
-        if (!SearchCompletionFilterPolicy.CanEvaluate(this.plugin.Configuration.SearchCompletionFilter, this.plugin.AchievementProgressService.AreCompletionStatesLoaded))
+        if (!SearchCompletionFilterPolicy.CanEvaluate(
+                this.plugin.Configuration.SearchCompletionFilter,
+                this.plugin.AchievementProgressService.AreCompletionStatesLoaded,
+                this.plugin.HasCachedCompletionState,
+                this.plugin.AchievementProgressUpdater.IsUpdateInProgress))
         {
             ImGui.Separator();
-            ImGui.TextDisabled("Open the in-game Achievements window first so completion states can load.");
+            var message = this.plugin.AchievementProgressUpdater.IsUpdateInProgress
+                ? "Search is paused while achievement updates are running."
+                : "Open the in-game Achievements window first so completion states can load.";
+            ImGui.TextDisabled(message);
             return;
         }
 
@@ -852,8 +859,7 @@ public sealed class TrackerWindow : Window
         => $"{category}>{subcategory}";
 
     private bool IsComplete(uint achievementId)
-        => this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row)
-            && this.plugin.AchievementProgressService.IsComplete(row);
+        => this.plugin.IsAchievementCompleteForSearch(achievementId);
 
     private (byte KindOrder, byte CategoryOrder, ushort AchievementOrder, uint RowId) GetGameSortKey(AchievementInfo info)
     {
