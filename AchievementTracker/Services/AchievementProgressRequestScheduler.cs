@@ -4,10 +4,21 @@ using System.Linq;
 
 namespace AchievementTracker.Services;
 
-public readonly record struct ScheduledAchievementProgressRequest(uint AchievementId, DateTimeOffset DueAt, string Reason);
+public enum NativeAchievementActionKind
+{
+    Refresh,
+    Inspection,
+}
+
+public readonly record struct ScheduledAchievementProgressRequest(
+    uint AchievementId,
+    DateTimeOffset DueAt,
+    string Reason,
+    NativeAchievementActionKind Kind = NativeAchievementActionKind.Refresh);
 
 public sealed class AchievementProgressRequestScheduler
 {
+    public const int MaxPendingRequests = 100;
     public static readonly TimeSpan PerAchievementBackoff = TimeSpan.FromSeconds(5);
     public static readonly TimeSpan DefaultUpdateAllSpacing = TimeSpan.FromSeconds(15);
 
@@ -35,15 +46,31 @@ public sealed class AchievementProgressRequestScheduler
         => this.EnqueueUpdateAll(achievementIds, reason, DefaultUpdateAllSpacing);
 
     public void EnqueueUpdateAll(IEnumerable<uint> achievementIds, string reason, TimeSpan baseSpacing)
+        => this.EnqueueActions(achievementIds, reason, baseSpacing, NativeAchievementActionKind.Refresh);
+
+    public bool EnqueueInspection(uint achievementId, string reason)
+        => this.EnqueueActions([achievementId], reason, TimeSpan.Zero, NativeAchievementActionKind.Inspection) > 0;
+
+    private int EnqueueActions(
+        IEnumerable<uint> achievementIds,
+        string reason,
+        TimeSpan baseSpacing,
+        NativeAchievementActionKind kind)
     {
         var now = this.nowProvider();
         var normalizedBaseSpacing = NormalizeBaseSpacing(baseSpacing);
         var cursor = this.pendingRequests.Count > 0 && this.nextBatchCursor > now ? this.nextBatchCursor : now;
         var seen = new HashSet<uint>();
+        var added = 0;
 
         foreach (var achievementId in achievementIds.Where(id => id != 0))
         {
-            if (!seen.Add(achievementId) || this.pendingRequests.Any(request => request.AchievementId == achievementId))
+            if (this.pendingRequests.Count >= MaxPendingRequests)
+            {
+                break;
+            }
+
+            if (!seen.Add(achievementId) || this.pendingRequests.Any(request => request.AchievementId == achievementId && request.Kind == kind))
             {
                 continue;
             }
@@ -58,12 +85,14 @@ public sealed class AchievementProgressRequestScheduler
                 }
             }
 
-            this.pendingRequests.Add(new ScheduledAchievementProgressRequest(achievementId, dueAt, reason));
+            this.pendingRequests.Add(new ScheduledAchievementProgressRequest(achievementId, dueAt, reason, kind));
+            added++;
             cursor = dueAt + normalizedBaseSpacing + NormalizeJitter(this.jitterProvider());
         }
 
         this.nextBatchCursor = cursor;
         this.pendingRequests.Sort(static (left, right) => left.DueAt.CompareTo(right.DueAt));
+        return added;
     }
 
     public bool TryTakeDueRequest(DateTimeOffset now, out ScheduledAchievementProgressRequest request)

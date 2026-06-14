@@ -18,6 +18,8 @@ var tests = new List<(string Name, Action Body)>
     ("Update all keeps jitter when base spacing is zero", UpdateAllKeepsJitterWhenBaseSpacingIsZero),
     ("Native refresh batch limiter keeps one achievement per enqueue", NativeRefreshBatchLimiterKeepsOneAchievementPerEnqueue),
     ("Request scheduler applies five second per-achievement backoff", RequestSchedulerAppliesFiveSecondPerAchievementBackoff),
+    ("Request scheduler caps pending actions at one hundred", RequestSchedulerCapsPendingActionsAtOneHundred),
+    ("Request scheduler serializes refreshes and inspections in one queue", RequestSchedulerSerializesRefreshesAndInspectionsInOneQueue),
     ("Auto updater selects only explicitly included tracked achievements", AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements),
     ("Completion filters wait for loaded achievement state", CompletionFiltersWaitForLoadedAchievementState),
     ("Lumina search all does not wait for loaded achievement state", LuminaSearchAllDoesNotWaitForLoadedAchievementState),
@@ -220,6 +222,43 @@ static void RequestSchedulerAppliesFiveSecondPerAchievementBackoff()
     AssertFalse(scheduler.TryTakeDueRequest(now.AddSeconds(4), out _), "same achievement should respect five second backoff");
     AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(5), out var second), "same achievement should be available after backoff");
     AssertEqualUInt(777u, second.AchievementId);
+}
+
+
+static void RequestSchedulerCapsPendingActionsAtOneHundred()
+{
+    var now = new DateTimeOffset(2026, 6, 10, 12, 0, 0, TimeSpan.Zero);
+    var scheduler = new AchievementProgressRequestScheduler(
+        () => now,
+        () => TimeSpan.Zero);
+
+    scheduler.EnqueueUpdateAll(Enumerable.Range(1, 150).Select(id => (uint)id), "spam", TimeSpan.Zero);
+
+    AssertEqualInt(AchievementProgressRequestScheduler.MaxPendingRequests, scheduler.PendingCount);
+}
+
+static void RequestSchedulerSerializesRefreshesAndInspectionsInOneQueue()
+{
+    var now = new DateTimeOffset(2026, 6, 10, 12, 0, 0, TimeSpan.Zero);
+    var scheduler = new AchievementProgressRequestScheduler(
+        () => now,
+        () => TimeSpan.FromSeconds(1));
+
+    scheduler.EnqueueUpdateAll([101, 102], "refresh", TimeSpan.FromSeconds(2));
+    AssertTrue(scheduler.EnqueueInspection(201, "inspect"), "inspection should enter the same queue");
+
+    AssertTrue(scheduler.TryTakeDueRequest(now, out var first), "first refresh should be due immediately");
+    AssertEqualUInt(101u, first.AchievementId);
+    AssertEqual(NativeAchievementActionKind.Refresh.ToString(), first.Kind.ToString());
+
+    AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(3), out var second), "second refresh should follow spacing plus jitter");
+    AssertEqualUInt(102u, second.AchievementId);
+    AssertEqual(NativeAchievementActionKind.Refresh.ToString(), second.Kind.ToString());
+
+    AssertFalse(scheduler.TryTakeDueRequest(now.AddSeconds(5), out _), "inspection should also respect queue spacing and jitter");
+    AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(6), out var third), "inspection should be serialized after refreshes");
+    AssertEqualUInt(201u, third.AchievementId);
+    AssertEqual(NativeAchievementActionKind.Inspection.ToString(), third.Kind.ToString());
 }
 
 static void AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements()

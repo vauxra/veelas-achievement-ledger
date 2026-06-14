@@ -26,8 +26,6 @@ public sealed class AchievementProgressUpdater
     private readonly Dictionary<uint, DateTimeOffset> lastNativeOpenByAchievementId = new();
     private DateTimeOffset nextAutoUpdateAt = DateTimeOffset.MinValue;
     private ActiveNativeAchievementRequest? activeNativeRequest;
-    private uint pendingInspectionAchievementId;
-    private DateTimeOffset pendingInspectionDueAt = DateTimeOffset.MinValue;
     private DateTimeOffset nextNativeOpenAllowedAt = DateTimeOffset.MinValue;
     private int consecutiveNativeFailures;
     private bool nativeCircuitBroken;
@@ -53,35 +51,16 @@ public sealed class AchievementProgressUpdater
     }
 
     public int PendingCount => this.scheduler.PendingCount
-        + (this.activeNativeRequest.HasValue ? 1 : 0)
-        + (this.pendingInspectionAchievementId != 0 ? 1 : 0);
+        + (this.activeNativeRequest.HasValue ? 1 : 0);
 
-    public DateTimeOffset? NextDueAt
-    {
-        get
-        {
-            var dueValues = new List<DateTimeOffset>();
-            if (this.scheduler.NextDueAt.HasValue)
-            {
-                dueValues.Add(this.scheduler.NextDueAt.Value);
-            }
-
-            if (this.pendingInspectionAchievementId != 0 && this.pendingInspectionDueAt != DateTimeOffset.MinValue)
-            {
-                dueValues.Add(this.pendingInspectionDueAt);
-            }
-
-            return dueValues.Count == 0 ? null : dueValues.Min();
-        }
-    }
+    public DateTimeOffset? NextDueAt => this.scheduler.NextDueAt;
 
     public DateTimeOffset? NextAutoUpdateAt => this.autoUpdateEnabledProvider() && this.nextAutoUpdateAt != DateTimeOffset.MinValue
         ? this.nextAutoUpdateAt
         : null;
 
     public bool IsUpdateInProgress => this.activeNativeRequest.HasValue
-        || this.scheduler.HasPendingRequests
-        || this.pendingInspectionAchievementId != 0;
+        || this.scheduler.HasPendingRequests;
 
     public bool IsNativeCircuitBroken => this.nativeCircuitBroken;
 
@@ -145,11 +124,9 @@ public sealed class AchievementProgressUpdater
             return;
         }
 
-        var now = DateTimeOffset.UtcNow;
-        this.pendingInspectionAchievementId = achievementId;
-        this.pendingInspectionDueAt = Max(now + NativeOpenInputBuffer, this.nextNativeOpenAllowedAt, this.GetSameAchievementBackoffUntil(achievementId));
-        this.statusText = "Native Achievement open queued.";
-        this.debugLog($"AchieveEx DebugTrace NativeInspectionQueued id={achievementId} reason={reason} openAt={this.pendingInspectionDueAt:O} cooldownSeconds={NativeOpenCooldown.TotalSeconds:0} coalescedLastWins=true");
+        var queued = this.scheduler.EnqueueInspection(achievementId, reason);
+        this.statusText = queued ? "Native Achievement open queued." : "Native Achievement open already queued or queue is full.";
+        this.debugLog($"AchieveEx DebugTrace NativeInspectionQueued id={achievementId} reason={reason} queued={queued} pending={this.PendingCount} maxPending={AchievementProgressRequestScheduler.MaxPendingRequests} inputBufferMs={NativeOpenInputBuffer.TotalMilliseconds:0}");
     }
 
     public void Tick()
@@ -170,13 +147,7 @@ public sealed class AchievementProgressUpdater
 
         if (this.scheduler.TryTakeDueRequest(now, out var request))
         {
-            this.StartNativeRefresh(request, now);
-            return;
-        }
-
-        if (this.pendingInspectionAchievementId != 0 && now >= this.pendingInspectionDueAt)
-        {
-            this.StartInspection(now);
+            this.StartNativeAction(request, now);
         }
     }
 
@@ -184,8 +155,6 @@ public sealed class AchievementProgressUpdater
     {
         this.scheduler.Clear();
         this.activeNativeRequest = null;
-        this.pendingInspectionAchievementId = 0;
-        this.pendingInspectionDueAt = DateTimeOffset.MinValue;
         this.nextAutoUpdateAt = DateTimeOffset.MinValue;
         this.statusText = string.Empty;
     }
@@ -212,6 +181,18 @@ public sealed class AchievementProgressUpdater
         => this.lastNativeOpenByAchievementId.TryGetValue(achievementId, out var lastOpen)
             ? lastOpen + SameAchievementBackoff
             : DateTimeOffset.MinValue;
+
+
+    private void StartNativeAction(ScheduledAchievementProgressRequest request, DateTimeOffset now)
+    {
+        if (request.Kind == NativeAchievementActionKind.Inspection)
+        {
+            this.StartInspection(request, now);
+            return;
+        }
+
+        this.StartNativeRefresh(request, now);
+    }
 
     private void StartNativeRefresh(ScheduledAchievementProgressRequest request, DateTimeOffset now)
     {
@@ -241,16 +222,9 @@ public sealed class AchievementProgressUpdater
         this.debugLog($"AchieveEx DebugTrace NativeRefreshOpenSent id={request.AchievementId} reason={request.Reason} minWaitSeconds={RefreshMinimumWait.TotalSeconds:0.0} maxWaitSeconds={RefreshMaximumWait.TotalSeconds:0} pending={this.scheduler.PendingCount}");
     }
 
-    private void StartInspection(DateTimeOffset now)
+    private void StartInspection(ScheduledAchievementProgressRequest request, DateTimeOffset now)
     {
-        var achievementId = this.pendingInspectionAchievementId;
-        this.pendingInspectionAchievementId = 0;
-        this.pendingInspectionDueAt = DateTimeOffset.MinValue;
-
-        if (achievementId == 0)
-        {
-            return;
-        }
+        var achievementId = request.AchievementId;
 
         if (!this.nativeAchievementNavigator.OpenAchievement(achievementId))
         {
@@ -319,7 +293,6 @@ public sealed class AchievementProgressUpdater
             this.nativeCircuitBroken = true;
             this.scheduler.Clear();
             this.activeNativeRequest = null;
-            this.pendingInspectionAchievementId = 0;
             this.statusText = "Native Achievement actions paused for this session after repeated failures.";
             this.debugLog("AchieveEx DebugTrace NativeCircuitBreakerTripped queueCleared=true");
         }
@@ -341,7 +314,7 @@ public sealed class AchievementProgressUpdater
             return;
         }
 
-        if (now < this.nextAutoUpdateAt || this.scheduler.HasPendingRequests || this.activeNativeRequest.HasValue || this.pendingInspectionAchievementId != 0)
+        if (now < this.nextAutoUpdateAt || this.scheduler.HasPendingRequests || this.activeNativeRequest.HasValue)
         {
             return;
         }
