@@ -12,6 +12,7 @@ public sealed class AchievementProgressUpdater
     private static readonly TimeSpan RefreshMinimumWait = TimeSpan.FromSeconds(1.5);
     private static readonly TimeSpan RefreshMaximumWait = TimeSpan.FromSeconds(15);
     private const int MaxConsecutiveNativeFailures = 3;
+    private const int MaximumNativeRefreshesPerEnqueue = 1;
 
     private readonly AchievementProgressRequestScheduler scheduler;
     private readonly ClientAchievementProgressSource progressSource;
@@ -117,10 +118,19 @@ public sealed class AchievementProgressUpdater
             return;
         }
 
-        var baseSpacingSeconds = Math.Max(6, Math.Clamp(this.updateSpacingSecondsProvider(), 0, 3600));
+        var candidateCount = ids.Count;
+        ids = LimitNativeRefreshBatch(ids).ToList();
+        if (candidateCount > ids.Count)
+        {
+            this.debugLog($"AchieveEx DebugTrace QueueBatchLimited reason={reason} candidates={candidateCount} queued={ids.Count} limit={MaximumNativeRefreshesPerEnqueue} note=successive-native-refresh-crash-guard");
+        }
+
+        var baseSpacingSeconds = Math.Max(30, Math.Clamp(this.updateSpacingSecondsProvider(), 0, 3600));
         this.scheduler.EnqueueUpdateAll(ids, reason, TimeSpan.FromSeconds(baseSpacingSeconds));
-        this.statusText = $"Progress queue: {this.PendingCount} pending.";
-        this.debugLog($"AchieveEx DebugTrace QueueProgressRefresh reason={reason} count={ids.Count} pending={this.PendingCount} spacingSeconds={baseSpacingSeconds} sameIdBackoffSeconds={SameAchievementBackoff.TotalSeconds:0} executor=native-coordinator");
+        this.statusText = candidateCount > ids.Count
+            ? $"Progress refresh queued: {ids.Count} of {candidateCount} this cycle."
+            : $"Progress queue: {this.PendingCount} pending.";
+        this.debugLog($"AchieveEx DebugTrace QueueProgressRefresh reason={reason} count={ids.Count} candidates={candidateCount} pending={this.PendingCount} spacingSeconds={baseSpacingSeconds} sameIdBackoffSeconds={SameAchievementBackoff.TotalSeconds:0} executor=native-coordinator");
     }
 
     public void QueueInspection(uint achievementId, string reason)
@@ -188,6 +198,9 @@ public sealed class AchievementProgressUpdater
         this.nextAutoUpdateAt = DateTimeOffset.MinValue;
         this.debugLog("AchieveEx DebugTrace AutoUpdateReset");
     }
+
+    public static IReadOnlyList<uint> LimitNativeRefreshBatch(IReadOnlyList<uint> achievementIds)
+        => achievementIds.Take(MaximumNativeRefreshesPerEnqueue).ToList();
 
     private static bool IsUpdateAllReason(string reason)
         => string.Equals(reason, "manual-update-all", StringComparison.Ordinal)
