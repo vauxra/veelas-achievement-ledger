@@ -10,6 +10,7 @@ namespace AchievementTracker.Services;
 public sealed class AchievementCatalog
 {
     private readonly IDataManager dataManager;
+    private IReadOnlyList<AchievementInfo>? manuallyViewableAchievements;
 
     public AchievementCatalog(IDataManager dataManager)
     {
@@ -19,14 +20,7 @@ public sealed class AchievementCatalog
     public IEnumerable<AchievementInfo> Search(string query, int limit = 50)
     {
         var normalizedQuery = query.Trim();
-        // IDataManager.GetExcelSheet<T>() docs:
-        // https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IDataManager
-        var sheet = this.dataManager.GetExcelSheet<Achievement>();
-
-        var results = sheet
-            .Select(this.ToInfo)
-            .Where(info => !string.IsNullOrWhiteSpace(info.Name))
-            .Where(info => this.IsManuallyViewable(info.Id));
+        var results = this.GetManuallyViewableAchievements().AsEnumerable();
 
         if (!string.IsNullOrWhiteSpace(normalizedQuery))
         {
@@ -39,6 +33,25 @@ public sealed class AchievementCatalog
             .OrderBy(info => info.Name)
             .Take(limit)
             .ToList();
+    }
+
+    public IReadOnlyList<AchievementInfo> GetManuallyViewableAchievements()
+    {
+        if (this.manuallyViewableAchievements is not null)
+        {
+            return this.manuallyViewableAchievements;
+        }
+
+        // IDataManager.GetExcelSheet<T>() docs:
+        // https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IDataManager
+        var sheet = this.dataManager.GetExcelSheet<Achievement>();
+        this.manuallyViewableAchievements = sheet
+            .Where(this.IsManuallyViewable)
+            .Select(this.ToInfo)
+            .Where(info => !string.IsNullOrWhiteSpace(info.Name))
+            .OrderBy(info => info.Name)
+            .ToList();
+        return this.manuallyViewableAchievements;
     }
 
     public bool TryGet(uint achievementId, out AchievementInfo achievementInfo)
@@ -71,6 +84,11 @@ public sealed class AchievementCatalog
             return false;
         }
 
+        return this.IsManuallyViewable(achievement);
+    }
+
+    private bool IsManuallyViewable(Achievement achievement)
+    {
         if (!achievement.AchievementCategory.IsValid
             || achievement.AchievementCategory.Value.HideCategory)
         {
