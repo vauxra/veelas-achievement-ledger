@@ -57,7 +57,6 @@ public sealed class Plugin : IDalamudPlugin
     private PassiveAchievementProgressObserver? passiveAchievementProgressObserver;
     private AchievementActivityUpdateObserver? activityUpdateObserver;
     private DateTimeOffset nextCosmicCacheRefreshAt = DateTimeOffset.MinValue;
-    private readonly CompletionCacheRefreshPolicy completionCacheRefreshPolicy = new();
     private uint pendingNativeAchievementInspectionOpenId;
     private DateTimeOffset pendingNativeAchievementInspectionOpenAt = DateTimeOffset.MinValue;
     private bool pendingNativeAchievementScaleReset;
@@ -196,70 +195,15 @@ public sealed class Plugin : IDalamudPlugin
         this.DebugLog($"AchieveEx DebugTrace UpdateQueueCleared reason={reason}");
     }
 
-    public string CurrentCharacterCompletionCacheKey
-    {
-        get
-        {
-            var player = ObjectTable.LocalPlayer;
-            if (player is null)
-            {
-                return string.Empty;
-            }
-
-            var name = player.Name.ToString();
-            var homeWorldId = player.HomeWorld.RowId;
-            return string.IsNullOrWhiteSpace(name) || homeWorldId == 0
-                ? string.Empty
-                : $"{name}@{homeWorldId}";
-        }
-    }
-
-    public bool HasCachedCompletionState
-        => CharacterAchievementCompletionCacheStore.HasCache(this.Configuration.CharacterCompletionCaches, this.CurrentCharacterCompletionCacheKey);
-
     public bool IsAchievementCompleteForSearch(uint achievementId)
+        => this.AchievementCatalog.TryGetRow(achievementId, out var row)
+            && this.AchievementProgressService.AreCompletionStatesLoaded
+            && this.AchievementProgressService.IsComplete(row);
+
+    public void OpenNativeAchievementsForInitialLoad()
     {
-        if (this.AchievementCatalog.TryGetRow(achievementId, out var row)
-            && this.AchievementProgressService.AreCompletionStatesLoaded)
-        {
-            return this.AchievementProgressService.IsComplete(row);
-        }
-
-        return CharacterAchievementCompletionCacheStore.IsComplete(
-            this.Configuration.CharacterCompletionCaches,
-            this.CurrentCharacterCompletionCacheKey,
-            achievementId);
-    }
-
-    private void RefreshCompletionCacheFromLiveState()
-    {
-        if (!this.AchievementProgressService.AreCompletionStatesLoaded)
-        {
-            return;
-        }
-
-        var characterKey = this.CurrentCharacterCompletionCacheKey;
-        if (string.IsNullOrWhiteSpace(characterKey))
-        {
-            return;
-        }
-
-        var completedIds = this.AchievementCatalog.Search(string.Empty, 5000)
-            .Where(info => this.AchievementCatalog.TryGetRow(info.Id, out var row) && this.AchievementProgressService.IsComplete(row))
-            .Select(info => info.Id)
-            .OrderBy(id => id)
-            .ToList();
-
-        var unchanged = CharacterAchievementCompletionCacheStore.TryGet(this.Configuration.CharacterCompletionCaches, characterKey, out var existing)
-            && existing.CompletedAchievementIds.SequenceEqual(completedIds);
-        if (unchanged)
-        {
-            return;
-        }
-
-        CharacterAchievementCompletionCacheStore.ReplaceSnapshot(this.Configuration.CharacterCompletionCaches, characterKey, completedIds);
-        this.SaveConfiguration();
-        this.DebugLog($"AchieveEx DebugTrace CompletionCacheUpdated character={characterKey} completed={completedIds.Count}");
+        var shown = this.NativeAchievementNavigator.IsOpen || this.NativeAchievementNavigator.ShowAchievementWindow();
+        this.DebugLog($"AchieveEx DebugTrace NativeInitialAchievementLoadPrompt shown={shown}");
     }
 
     public bool OpenNativeAchievementForInspection(uint achievementId)
@@ -391,7 +335,6 @@ public sealed class Plugin : IDalamudPlugin
         this.pendingNativeAchievementInspectionOpenId = 0;
         this.pendingNativeAchievementInspectionOpenAt = DateTimeOffset.MinValue;
         this.pendingNativeAchievementScaleReset = false;
-        this.completionCacheRefreshPolicy.Reset();
     }
 
     private void OnFrameworkUpdate(IFramework framework)
@@ -401,19 +344,6 @@ public sealed class Plugin : IDalamudPlugin
         this.TryOpenPendingNativeAchievementInspection();
         this.TryCompletePendingNativeAchievementScaleReset();
         this.RefreshCosmicCacheFromLiveState();
-        this.RefreshCompletionCacheIfTriggered();
-    }
-
-    private void RefreshCompletionCacheIfTriggered()
-    {
-        if (!this.completionCacheRefreshPolicy.ShouldRefresh(
-                this.AchievementProgressService.AreCompletionStatesLoaded,
-                this.AchievementProgressUpdater.IsUpdateInProgress))
-        {
-            return;
-        }
-
-        this.RefreshCompletionCacheFromLiveState();
     }
 
     private void RestoreParkedAchievementWindowIfUserOpenedIt()

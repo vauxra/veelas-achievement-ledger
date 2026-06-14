@@ -19,10 +19,7 @@ var tests = new List<(string Name, Action Body)>
     ("Request scheduler applies five second per-achievement backoff", RequestSchedulerAppliesFiveSecondPerAchievementBackoff),
     ("Auto updater selects only explicitly included tracked achievements", AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements),
     ("Completion filters wait for loaded achievement state", CompletionFiltersWaitForLoadedAchievementState),
-    ("Completion filters can use cached state when live state is missing", CompletionFiltersCanUseCachedStateWhenLiveStateIsMissing),
-    ("Character completion cache stores per-character completed ids", CharacterCompletionCacheStoresPerCharacterCompletedIds),
-    ("Completion cache refreshes once when live state first loads", CompletionCacheRefreshesOnceWhenLiveStateFirstLoads),
-    ("Completion cache refreshes after update queue drains", CompletionCacheRefreshesAfterUpdateQueueDrains),
+    ("Search waits for loaded achievement state", SearchWaitsForLoadedAchievementState),
     ("Native update batches avoid parking before first row settles", NativeUpdateBatchesAvoidParkingBeforeFirstRowSettles),
     ("Native update batches may park after first row settles", NativeUpdateBatchesMayParkAfterFirstRowSettles),
     ("Activity classifier matches finish mining to miner category", ActivityClassifierMatchesFinishMiningToMinerCategory),
@@ -225,52 +222,20 @@ static void AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements()
 
 static void CompletionFiltersWaitForLoadedAchievementState()
 {
-    AssertTrue(SearchCompletionFilterPolicy.CanEvaluate("All", completionStateLoaded: false, cachedCompletionStateAvailable: false, updateInProgress: false), "All search should not depend on completion state");
-    AssertFalse(SearchCompletionFilterPolicy.CanEvaluate("Completed", completionStateLoaded: false, cachedCompletionStateAvailable: false, updateInProgress: false), "Completed search should wait for loaded or cached completion state");
-    AssertFalse(SearchCompletionFilterPolicy.CanEvaluate("Incomplete", completionStateLoaded: false, cachedCompletionStateAvailable: false, updateInProgress: false), "Incomplete search should wait for loaded or cached completion state");
-    AssertTrue(SearchCompletionFilterPolicy.CanEvaluate("Completed", completionStateLoaded: true, cachedCompletionStateAvailable: false, updateInProgress: false), "Completed search can run after completion state loads");
+    AssertFalse(SearchCompletionFilterPolicy.CanEvaluate("Completed", completionStateLoaded: false, updateInProgress: false), "Completed search should wait for loaded completion state");
+    AssertFalse(SearchCompletionFilterPolicy.CanEvaluate("Incomplete", completionStateLoaded: false, updateInProgress: false), "Incomplete search should wait for loaded completion state");
+    AssertTrue(SearchCompletionFilterPolicy.CanEvaluate("Completed", completionStateLoaded: true, updateInProgress: false), "Completed search can run after completion state loads");
     AssertTrue(SearchCompletionFilterPolicy.Matches("Completed", isComplete: true), "completed filter should match completed rows");
     AssertFalse(SearchCompletionFilterPolicy.Matches("Completed", isComplete: false), "completed filter should reject incomplete rows");
     AssertTrue(SearchCompletionFilterPolicy.Matches("Incomplete", isComplete: false), "incomplete filter should match incomplete rows");
     AssertFalse(SearchCompletionFilterPolicy.Matches("Incomplete", isComplete: true), "incomplete filter should reject completed rows");
 }
 
-static void CompletionFiltersCanUseCachedStateWhenLiveStateIsMissing()
+static void SearchWaitsForLoadedAchievementState()
 {
-    AssertTrue(SearchCompletionFilterPolicy.CanEvaluate("Completed", completionStateLoaded: false, cachedCompletionStateAvailable: true, updateInProgress: false), "Completed search should use cached completion state before live state loads");
-    AssertTrue(SearchCompletionFilterPolicy.CanEvaluate("Incomplete", completionStateLoaded: false, cachedCompletionStateAvailable: true, updateInProgress: false), "Incomplete search should use cached completion state before live state loads");
-    AssertFalse(SearchCompletionFilterPolicy.CanEvaluate("All", completionStateLoaded: true, cachedCompletionStateAvailable: true, updateInProgress: true), "All search should wait while update tasks are running");
-    AssertFalse(SearchCompletionFilterPolicy.CanEvaluate("Completed", completionStateLoaded: true, cachedCompletionStateAvailable: true, updateInProgress: true), "Completed search should wait while update tasks are running");
-}
-
-static void CharacterCompletionCacheStoresPerCharacterCompletedIds()
-{
-    var caches = new List<CharacterAchievementCompletionCache>();
-    CharacterAchievementCompletionCacheStore.ReplaceSnapshot(caches, "A@World", [3, 1, 3, 0, 2]);
-    CharacterAchievementCompletionCacheStore.ReplaceSnapshot(caches, "B@World", [9]);
-
-    AssertTrue(CharacterAchievementCompletionCacheStore.TryGet(caches, "A@World", out var cache), "first character cache should exist");
-    AssertSequence(cache.CompletedAchievementIds, [1, 2, 3]);
-    AssertTrue(CharacterAchievementCompletionCacheStore.IsComplete(caches, "A@World", 2), "cached complete id should match for same character");
-    AssertFalse(CharacterAchievementCompletionCacheStore.IsComplete(caches, "A@World", 9), "missing id should be incomplete for same character");
-    AssertTrue(CharacterAchievementCompletionCacheStore.IsComplete(caches, "B@World", 9), "other character keeps separate cache");
-}
-
-static void CompletionCacheRefreshesOnceWhenLiveStateFirstLoads()
-{
-    var policy = new CompletionCacheRefreshPolicy();
-    AssertFalse(policy.ShouldRefresh(liveCompletionStateLoaded: false, updateInProgress: false), "cache should wait until live completion state is loaded");
-    AssertTrue(policy.ShouldRefresh(liveCompletionStateLoaded: true, updateInProgress: false), "cache should refresh once when live state first loads");
-    AssertFalse(policy.ShouldRefresh(liveCompletionStateLoaded: true, updateInProgress: false), "cache should not poll every tick after the first snapshot");
-}
-
-static void CompletionCacheRefreshesAfterUpdateQueueDrains()
-{
-    var policy = new CompletionCacheRefreshPolicy();
-    AssertTrue(policy.ShouldRefresh(liveCompletionStateLoaded: true, updateInProgress: false), "initial live snapshot should happen first");
-    AssertFalse(policy.ShouldRefresh(liveCompletionStateLoaded: true, updateInProgress: true), "cache should not refresh while an update queue is active");
-    AssertTrue(policy.ShouldRefresh(liveCompletionStateLoaded: true, updateInProgress: false), "cache should refresh once after the update queue drains");
-    AssertFalse(policy.ShouldRefresh(liveCompletionStateLoaded: true, updateInProgress: false), "cache should not refresh again without another update queue drain");
+    AssertFalse(SearchCompletionFilterPolicy.CanEvaluate("All", completionStateLoaded: false, updateInProgress: false), "Search should wait for the session's initial achievement load");
+    AssertTrue(SearchCompletionFilterPolicy.CanEvaluate("All", completionStateLoaded: true, updateInProgress: false), "Search should run after the session's initial achievement load");
+    AssertFalse(SearchCompletionFilterPolicy.CanEvaluate("All", completionStateLoaded: true, updateInProgress: true), "Search should wait while update tasks are running");
 }
 
 static void NativeUpdateBatchesAvoidParkingBeforeFirstRowSettles()

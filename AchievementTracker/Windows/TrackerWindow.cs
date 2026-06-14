@@ -370,7 +370,6 @@ public sealed class TrackerWindow : Window
         if (!SearchCompletionFilterPolicy.CanEvaluate(
                 this.plugin.Configuration.SearchCompletionFilter,
                 this.plugin.AchievementProgressService.AreCompletionStatesLoaded,
-                this.plugin.HasCachedCompletionState,
                 this.plugin.AchievementProgressUpdater.IsUpdateInProgress))
         {
             ImGui.Separator();
@@ -378,6 +377,14 @@ public sealed class TrackerWindow : Window
                 ? "Search is paused while achievement updates are running."
                 : "Open the in-game Achievements window first so completion states can load.";
             ImGui.TextDisabled(message);
+            if (!this.plugin.AchievementProgressService.AreCompletionStatesLoaded)
+            {
+                if (ImGui.Button("Open Achievements to load completion state"))
+                {
+                    this.plugin.OpenNativeAchievementsForInitialLoad();
+                }
+                AddTooltip("Opens the native Achievements window so the game can load this session's completion state. This button disappears after the initial load is complete.");
+            }
             return;
         }
 
