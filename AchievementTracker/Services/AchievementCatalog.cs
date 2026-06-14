@@ -87,6 +87,24 @@ public sealed class AchievementCatalog
         return this.IsManuallyViewable(achievement);
     }
 
+    public bool CanOpenInNativeAchievementUi(uint achievementId, out string reason)
+    {
+        if (!this.TryGetRow(achievementId, out var achievement))
+        {
+            reason = "Achievement row is missing.";
+            return false;
+        }
+
+        if (!this.IsManuallyViewable(achievement))
+        {
+            reason = "Achievement is not listed in the in-game Achievement UI.";
+            return false;
+        }
+
+        reason = string.Empty;
+        return true;
+    }
+
     private bool IsManuallyViewable(Achievement achievement)
     {
         if (!achievement.AchievementCategory.IsValid
@@ -104,7 +122,24 @@ public sealed class AchievementCatalog
             }
         }
 
-        return !string.IsNullOrWhiteSpace(achievement.Name.ToString());
+        if (string.IsNullOrWhiteSpace(achievement.Name.ToString()))
+        {
+            return false;
+        }
+
+        var categoryName = achievement.AchievementCategory.Value.Name.ToString();
+        if (string.IsNullOrWhiteSpace(categoryName))
+        {
+            return false;
+        }
+
+        var kind = achievement.AchievementCategory.Value.AchievementKind;
+        if (!kind.IsValid || string.IsNullOrWhiteSpace(kind.Value.Name.ToString()))
+        {
+            return false;
+        }
+
+        return achievement.Icon != 0;
     }
 
     private AchievementInfo ToInfo(Achievement achievement)

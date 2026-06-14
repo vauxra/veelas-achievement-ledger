@@ -329,14 +329,14 @@ public sealed class TrackerWindow : Window
 
         ImGui.TextUnformatted("Category:");
         ImGui.SameLine();
-        if (ImGui.RadioButton("All", this.categoryFilterAll))
+        if (ImGui.RadioButton("All##CategoryFilter", this.categoryFilterAll))
         {
             this.categoryFilterAll = true;
             this.ResetVisibleSearchResults();
         }
         AddTooltip("Ignore selected categories.");
         ImGui.SameLine();
-        if (ImGui.RadioButton("Selected", !this.categoryFilterAll))
+        if (ImGui.RadioButton("Selected##CategoryFilter", !this.categoryFilterAll))
         {
             this.categoryFilterAll = false;
             this.ResetVisibleSearchResults();
@@ -345,7 +345,7 @@ public sealed class TrackerWindow : Window
 
         ImGui.TextUnformatted("Completion:");
         ImGui.SameLine();
-        if (ImGui.RadioButton("All", this.plugin.Configuration.SearchCompletionFilter == "All"))
+        if (ImGui.RadioButton("All##CompletionFilter", this.plugin.Configuration.SearchCompletionFilter == "All"))
         {
             this.plugin.Configuration.SearchCompletionFilter = "All";
             this.plugin.Configuration.HideCompletedInSearch = false;
@@ -353,7 +353,7 @@ public sealed class TrackerWindow : Window
             this.ResetVisibleSearchResults();
         }
         ImGui.SameLine();
-        if (ImGui.RadioButton("Completed", this.plugin.Configuration.SearchCompletionFilter == "Completed"))
+        if (ImGui.RadioButton("Completed##CompletionFilter", this.plugin.Configuration.SearchCompletionFilter == "Completed"))
         {
             this.plugin.Configuration.SearchCompletionFilter = "Completed";
             this.plugin.Configuration.HideCompletedInSearch = false;
@@ -361,7 +361,7 @@ public sealed class TrackerWindow : Window
             this.ResetVisibleSearchResults();
         }
         ImGui.SameLine();
-        if (ImGui.RadioButton("Incomplete", this.plugin.Configuration.SearchCompletionFilter == "Incomplete"))
+        if (ImGui.RadioButton("Incomplete##CompletionFilter", this.plugin.Configuration.SearchCompletionFilter == "Incomplete"))
         {
             this.plugin.Configuration.SearchCompletionFilter = "Incomplete";
             this.plugin.Configuration.HideCompletedInSearch = true;
@@ -558,23 +558,33 @@ public sealed class TrackerWindow : Window
             ImGui.SameLine();
         }
 
+        var nativeSafe = this.plugin.AchievementCatalog.CanOpenInNativeAchievementUi(achievementId, out var nativeUnsafeReason);
+
         if (this.ShouldShowTrackedIcon("Refresh"))
         {
-            if (ImGuiComponents.IconButton(FontAwesomeIcon.SyncAlt))
+            using (ImRaiiShim.Disabled(!nativeSafe))
             {
-                this.plugin.EnqueueUpdateOne(achievementId, "manual-row-update");
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.SyncAlt))
+                {
+                    this.plugin.EnqueueUpdateOne(achievementId, "manual-row-update");
+                }
             }
-            AddTooltip("Update this achievement.");
+
+            AddTooltip(nativeSafe ? "Update this achievement." : nativeUnsafeReason);
             ImGui.SameLine();
         }
 
         if (this.ShouldShowTrackedIcon("Open"))
         {
-            if (ImGuiComponents.IconButton(FontAwesomeIcon.Search))
+            using (ImRaiiShim.Disabled(!nativeSafe))
             {
-                this.plugin.OpenNativeAchievementForInspection(achievementId);
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.Search))
+                {
+                    this.plugin.OpenNativeAchievementForInspection(achievementId);
+                }
             }
-            AddTooltip("Open in Achievements.");
+
+            AddTooltip(nativeSafe ? "Open in Achievements." : nativeUnsafeReason);
             ImGui.SameLine();
         }
 

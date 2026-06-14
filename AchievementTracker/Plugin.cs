@@ -144,8 +144,17 @@ public sealed class Plugin : IDalamudPlugin
         var eligible = new List<uint>();
         var removedAutoUpdateCompleted = 0;
         var skippedCompleted = 0;
+        var skippedNativeUnsafe = 0;
         foreach (var achievementId in achievementIds.Where(id => id != 0).Distinct())
         {
+            if (!this.AchievementCatalog.CanOpenInNativeAchievementUi(achievementId, out var nativeSafetyReason))
+            {
+                skippedNativeUnsafe++;
+                removedAutoUpdateCompleted += this.Configuration.AutoUpdateAchievementIds.RemoveAll(id => id == achievementId);
+                this.DebugLog($"AchieveEx DebugTrace UpdateSkipNativeUnsafe reason={reason} id={achievementId} detail={nativeSafetyReason}");
+                continue;
+            }
+
             if (this.AchievementCatalog.TryGetRow(achievementId, out var row)
                 && this.AchievementProgressService.IsComplete(row))
             {
@@ -167,6 +176,11 @@ public sealed class Plugin : IDalamudPlugin
         if (skippedCompleted > 0)
         {
             this.DebugLog($"AchieveEx DebugTrace UpdateSkipCompleted reason={reason} skipped={skippedCompleted} removedAuto={removedAutoUpdateCompleted}");
+        }
+
+        if (skippedNativeUnsafe > 0)
+        {
+            this.DebugLog($"AchieveEx DebugTrace UpdateSkipNativeUnsafeSummary reason={reason} skipped={skippedNativeUnsafe}");
         }
 
         return eligible;
@@ -207,6 +221,12 @@ public sealed class Plugin : IDalamudPlugin
 
     public bool OpenNativeAchievementForInspection(uint achievementId)
     {
+        if (!this.AchievementCatalog.CanOpenInNativeAchievementUi(achievementId, out var reason))
+        {
+            this.DebugLog($"AchieveEx DebugTrace NativeInspectionSkipped id={achievementId} reason=native-ui-unsafe detail={reason}");
+            return false;
+        }
+
         this.AchievementProgressUpdater.QueueInspection(achievementId, "manual-inspect");
         return true;
     }
