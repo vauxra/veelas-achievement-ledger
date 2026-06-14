@@ -37,6 +37,8 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
     // LocalPlayer class/job scopes activity-triggered updates to the matching Crafting & Gathering category.
     [PluginService] internal static IObjectTable ObjectTable { get; private set; } = null!;
+    // Experimental branch only: passive progress hooks give the native refresh coordinator an event-like completion signal.
+    [PluginService] internal static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
 
     public Configuration Configuration { get; }
     public TrackedAchievementStore TrackedAchievements { get; }
@@ -51,6 +53,7 @@ public sealed class Plugin : IDalamudPlugin
 
     private TrackerWindow TrackerWindow { get; }
     private ConfigWindow ConfigWindow { get; }
+    private PassiveAchievementProgressObserver? passiveProgressObserver;
     private AchievementActivityUpdateObserver? activityUpdateObserver;
     private DateTimeOffset nextCosmicCacheRefreshAt = DateTimeOffset.MinValue;
     private bool pendingNativeAchievementScaleReset;
@@ -67,6 +70,7 @@ public sealed class Plugin : IDalamudPlugin
         this.AchievementProgressSource = this.ClientAchievementProgressSource;
         this.CosmicClassProgressProvider = new CosmicClassProgressProvider(this.Configuration.CosmicClassScoreCache, this.SaveConfiguration);
         this.NativeAchievementNavigator = new NativeAchievementNavigator(GameGui);
+        this.passiveProgressObserver = new PassiveAchievementProgressObserver(GameInteropProvider, this.ClientAchievementProgressSource, this.DebugLog);
         this.AchievementProgressUpdater = new AchievementProgressUpdater(
             this.ClientAchievementProgressSource,
             this.NativeAchievementNavigator,
@@ -108,6 +112,8 @@ public sealed class Plugin : IDalamudPlugin
         CommandManager.RemoveHandler(CommandName);
         this.activityUpdateObserver?.Dispose();
         this.activityUpdateObserver = null;
+        this.passiveProgressObserver?.Dispose();
+        this.passiveProgressObserver = null;
         this.WindowSystem.RemoveAllWindows();
     }
 

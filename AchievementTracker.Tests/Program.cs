@@ -17,7 +17,6 @@ var tests = new List<(string Name, Action Body)>
     ("Update all spaces queued requests by base seconds plus jitter", UpdateAllSpacesQueuedRequestsByBaseSecondsPlusJitter),
     ("Update all keeps jitter when base spacing is zero", UpdateAllKeepsJitterWhenBaseSpacingIsZero),
     ("Request scheduler applies five second per-achievement backoff", RequestSchedulerAppliesFiveSecondPerAchievementBackoff),
-    ("Native refresh batch limiter keeps one achievement per enqueue", NativeRefreshBatchLimiterKeepsOneAchievementPerEnqueue),
     ("Auto updater selects only explicitly included tracked achievements", AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements),
     ("Completion filters wait for loaded achievement state", CompletionFiltersWaitForLoadedAchievementState),
     ("Lumina search all does not wait for loaded achievement state", LuminaSearchAllDoesNotWaitForLoadedAchievementState),
@@ -213,12 +212,6 @@ static void RequestSchedulerAppliesFiveSecondPerAchievementBackoff()
     AssertFalse(scheduler.TryTakeDueRequest(now.AddSeconds(4), out _), "same achievement should respect five second backoff");
     AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(5), out var second), "same achievement should be available after backoff");
     AssertEqualUInt(777u, second.AchievementId);
-}
-
-static void NativeRefreshBatchLimiterKeepsOneAchievementPerEnqueue()
-{
-    AssertSequence(AchievementProgressUpdater.LimitNativeRefreshBatch([101, 102, 103]), [101]);
-    AssertSequence(AchievementProgressUpdater.LimitNativeRefreshBatch([404]), [404]);
 }
 
 static void AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements()

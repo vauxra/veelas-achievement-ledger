@@ -54,6 +54,11 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
     public bool TryGetFreshObservation(uint achievementId, DateTimeOffset notBefore, out ObservedAchievementProgress progress)
     {
         this.UpdateCache();
+        return this.TryGetFreshCachedObservation(achievementId, notBefore, out progress);
+    }
+
+    public bool TryGetFreshCachedObservation(uint achievementId, DateTimeOffset notBefore, out ObservedAchievementProgress progress)
+    {
         return this.cachedProgress.TryGetValue(achievementId, out progress)
             && progress.ObservedAt >= notBefore;
     }
