@@ -78,13 +78,7 @@ public sealed class Configuration : IPluginConfiguration
 
     public List<string> ShownMainNavigationButtons { get; set; } = ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"];
 
-    public Dictionary<string, float> MainColumnWidths { get; set; } = new()
-    {
-        ["Lists"] = 0f,
-        ["Search Categories"] = 320f,
-        ["Search Results"] = 420f,
-        ["Tracked Achievements"] = 0f,
-    };
+    public Dictionary<string, float> MainColumnWidths { get; set; } = MainPanelColumnWidthDefaults.Create();
 
     public List<uint> GetAutoUpdateTrackedAchievementIds()
         => AutoUpdateSelection.SelectIncludedTrackedAchievements(this.TrackedAchievementIds, this.AutoUpdateAchievementIds);
@@ -115,13 +109,7 @@ public sealed class Configuration : IPluginConfiguration
         this.HiddenMainNavigationButtons = NormalizeStringSet(this.HiddenMainNavigationButtons, ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"]);
         this.ShownTrackedAchievementIcons = NormalizeShownStringSet(this.ShownTrackedAchievementIcons, this.HiddenTrackedAchievementIcons, ["Auto update", "Remove", "Refresh", "Open"]);
         this.ShownMainNavigationButtons = NormalizeShownStringSet(this.ShownMainNavigationButtons, this.HiddenMainNavigationButtons, ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"]);
-        this.MainColumnWidths = NormalizeColumnWidths(this.MainColumnWidths, new Dictionary<string, float>
-        {
-            ["Lists"] = 0f,
-            ["Search Categories"] = 320f,
-            ["Search Results"] = 420f,
-            ["Tracked Achievements"] = 0f,
-        });
+        this.MainColumnWidths = NormalizeColumnWidths(this.MainColumnWidths, MainPanelColumnWidthDefaults.Create());
         if (this.SearchCompletionFilter is not ("All" or "Completed" or "Incomplete"))
         {
             this.SearchCompletionFilter = this.HideCompletedInSearch ? "Incomplete" : "All";

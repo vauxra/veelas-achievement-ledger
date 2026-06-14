@@ -712,11 +712,11 @@ public sealed class ConfigWindow : Window
 
         ImGui.Separator();
         ImGui.TextUnformatted("Main panel column widths");
-        ImGui.TextDisabled("Set 0 for automatic/remaining width. Search Categories and Search Results still enforce minimums so labels/options do not truncate.");
-        this.DrawColumnWidthEditor("Lists", 0f);
-        this.DrawColumnWidthEditor("Search Categories", 320f);
-        this.DrawColumnWidthEditor("Search Results", 420f);
-        this.DrawColumnWidthEditor("Tracked Achievements", 0f);
+        ImGui.TextDisabled("Effective minimums: Lists 270, Search Categories 320, Search Results 550, Tracked Achievements 320.");
+        this.DrawColumnWidthEditor("Lists", MainPanelColumnWidthDefaults.Lists);
+        this.DrawColumnWidthEditor("Search Categories", MainPanelColumnWidthDefaults.SearchCategories);
+        this.DrawColumnWidthEditor("Search Results", MainPanelColumnWidthDefaults.SearchResults);
+        this.DrawColumnWidthEditor("Tracked Achievements", MainPanelColumnWidthDefaults.TrackedAchievements);
     }
 
     private void DrawOrderEditor(System.Collections.Generic.List<string> order, string[] defaults, string idPrefix)

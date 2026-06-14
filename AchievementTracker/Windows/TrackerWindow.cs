@@ -28,7 +28,6 @@ public sealed class TrackerWindow : Window
     private bool searchResultsDirty = true;
     private IReadOnlyList<AchievementInfo>? cachedSearchableAchievements;
     private IReadOnlyList<SearchCategoryGroup>? cachedSearchCategoryGroups;
-    private int visibleSearchResultCount = 20;
     private bool categoryFilterAll = true;
     private readonly HashSet<string> selectedCategoryFilters = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> selectedSubcategoryFilters = new(StringComparer.OrdinalIgnoreCase);
@@ -251,10 +250,10 @@ public sealed class TrackerWindow : Window
     {
         return column switch
         {
-            "Lists" => 220f,
-            "Search Categories" => 240f,
-            "Search Results" => 360f,
-            "Tracked Achievements" => 240f,
+            "Lists" => MainPanelColumnWidthDefaults.Lists,
+            "Search Categories" => MainPanelColumnWidthDefaults.SearchCategories,
+            "Search Results" => MainPanelColumnWidthDefaults.SearchResults,
+            "Tracked Achievements" => MainPanelColumnWidthDefaults.TrackedAchievements,
             _ => 180f,
         };
     }
@@ -465,7 +464,7 @@ public sealed class TrackerWindow : Window
         var matchingResults = searchResults.Results;
 
         ImGui.Separator();
-        var shownCount = Math.Min(this.visibleSearchResultCount, matchingResults.Count);
+        var shownCount = matchingResults.Count;
         this.DrawDisabledWrapped($"Results: {shownCount}");
 
         if (matchingResults.Count == 0)
@@ -474,18 +473,11 @@ public sealed class TrackerWindow : Window
             return;
         }
 
-        foreach (var result in matchingResults.Take(shownCount))
+        foreach (var result in matchingResults)
         {
             this.DrawSearchAchievementResult(result, trackedIds);
         }
 
-        if (shownCount < matchingResults.Count)
-        {
-            if (ImGui.Button("Load 20 more"))
-            {
-                this.visibleSearchResultCount = Math.Min(this.visibleSearchResultCount + 20, matchingResults.Count);
-            }
-        }
     }
 
 
@@ -533,10 +525,7 @@ public sealed class TrackerWindow : Window
     private void MarkSearchResultsDirty(bool resetVisibleResults)
     {
         this.searchResultsDirty = true;
-        if (resetVisibleResults)
-        {
-            this.visibleSearchResultCount = 20;
-        }
+        _ = resetVisibleResults;
     }
 
     private IReadOnlyList<AchievementInfo> GetSearchableAchievements()
@@ -1022,9 +1011,6 @@ public sealed class TrackerWindow : Window
         return !string.IsNullOrWhiteSpace(parts.Subcategory)
             && this.selectedSubcategoryFilters.Contains(BuildSubcategoryFilterKey(parts.Category, parts.Subcategory));
     }
-
-    private void ResetVisibleSearchResults()
-        => this.visibleSearchResultCount = 20;
 
     private void ToggleCategoryFilter(string category)
     {

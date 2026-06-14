@@ -1,3 +1,4 @@
+using AchievementTracker;
 using AchievementTracker.Models;
 using AchievementTracker.Services;
 
@@ -26,6 +27,8 @@ var tests = new List<(string Name, Action Body)>
     ("Scale policy parks refresh only when native window was closed", ScalePolicyParksRefreshOnlyWhenNativeWindowWasClosed),
     ("Scale policy restores inspection actions", ScalePolicyRestoresInspectionActions),
     ("Scale policy restores when idle only for parked windows", ScalePolicyRestoresWhenIdleOnlyForParkedWindows),
+    ("Scale policy restores only on user-visible reopen", ScalePolicyRestoresOnlyOnUserVisibleReopen),
+    ("Configuration defaults use requested main column widths", ConfigurationDefaultsUseRequestedMainColumnWidths),
     ("Tracked display evaluates cosmic progress overrides", TrackedDisplayEvaluatesCosmicProgressOverrides),
     ("Cosmic progress override parses achievement details", CosmicProgressOverrideParsesAchievementDetails),
     ("Auto updater selects only explicitly included tracked achievements", AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements),
@@ -329,6 +332,22 @@ static void ScalePolicyRestoresWhenIdleOnlyForParkedWindows()
     AssertFalse(NativeAchievementWindowScalePolicy.ShouldRestoreWhenIdle(hasActiveRequest: true, hasPendingRequests: false, hasParkedWindow: true), "active request should not restore");
     AssertFalse(NativeAchievementWindowScalePolicy.ShouldRestoreWhenIdle(hasActiveRequest: false, hasPendingRequests: true, hasParkedWindow: true), "pending queue should not restore");
     AssertFalse(NativeAchievementWindowScalePolicy.ShouldRestoreWhenIdle(hasActiveRequest: false, hasPendingRequests: false, hasParkedWindow: false), "unparked idle state should not restore");
+}
+
+static void ScalePolicyRestoresOnlyOnUserVisibleReopen()
+{
+    AssertTrue(NativeAchievementWindowScalePolicy.ShouldRestoreWhenPlayerOpenedPanel(hasParkedWindow: true, nativeWindowIsOpen: true, nativeWindowIsStillParked: false, hasActiveOrPendingWork: true), "manual/open-in-achievements visible reopen during queue should restore");
+    AssertFalse(NativeAchievementWindowScalePolicy.ShouldRestoreWhenPlayerOpenedPanel(hasParkedWindow: true, nativeWindowIsOpen: true, nativeWindowIsStillParked: true, hasActiveOrPendingWork: true), "parked background queue window should stay parked");
+    AssertTrue(NativeAchievementWindowScalePolicy.ShouldRestoreWhenPlayerOpenedPanel(hasParkedWindow: true, nativeWindowIsOpen: true, nativeWindowIsStillParked: true, hasActiveOrPendingWork: false), "manual reopen after queue should restore even if addon kept parked scale");
+}
+
+static void ConfigurationDefaultsUseRequestedMainColumnWidths()
+{
+    var defaults = MainPanelColumnWidthDefaults.Create();
+    AssertTrue(Math.Abs(defaults["Lists"] - 270f) < 0.001f, "Lists width should default to 270");
+    AssertTrue(Math.Abs(defaults["Search Categories"] - 320f) < 0.001f, "Search Categories width should default to 320");
+    AssertTrue(Math.Abs(defaults["Search Results"] - 550f) < 0.001f, "Search Results width should default to 550");
+    AssertTrue(Math.Abs(defaults["Tracked Achievements"] - 320f) < 0.001f, "Tracked Achievements width should default to 320");
 }
 
 static void TrackedDisplayEvaluatesCosmicProgressOverrides()

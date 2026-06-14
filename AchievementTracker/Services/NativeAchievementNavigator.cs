@@ -32,6 +32,17 @@ public unsafe sealed class NativeAchievementNavigator
 
     public bool HasParkedWindow => this.parkedState.HasValue;
 
+    public bool IsAchievementWindowParked()
+    {
+        var addon = this.gameGui.GetAddonByName(AchievementAddonName, 1);
+        if (addon.IsNull || !addon.IsReady || !addon.IsVisible || addon.Address == IntPtr.Zero)
+        {
+            return false;
+        }
+
+        return IsParkedState(new ParkedAchievementWindowState(addon.X, addon.Y, addon.Scale));
+    }
+
     public bool OpenAchievement(uint achievementId)
     {
         // This asks the native Achievement agent to open the same game UI a player would inspect

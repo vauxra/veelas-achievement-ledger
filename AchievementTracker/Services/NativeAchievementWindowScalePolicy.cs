@@ -16,4 +16,9 @@ public static class NativeAchievementWindowScalePolicy
 
     public static bool ShouldRestoreWhenIdle(bool hasActiveRequest, bool hasPendingRequests, bool hasParkedWindow)
         => hasParkedWindow && !hasActiveRequest && !hasPendingRequests;
+
+    public static bool ShouldRestoreWhenPlayerOpenedPanel(bool hasParkedWindow, bool nativeWindowIsOpen, bool nativeWindowIsStillParked, bool hasActiveOrPendingWork)
+        => hasParkedWindow
+            && nativeWindowIsOpen
+            && (!hasActiveOrPendingWork || !nativeWindowIsStillParked);
 }
