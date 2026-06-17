@@ -18,7 +18,7 @@ public sealed class ConfigWindow : Window
     private string selectedPresetName = string.Empty;
 
     public ConfigWindow(Plugin plugin)
-        : base("Veela's Achievement Ledger Ex Config##AchievementLedgerConfig")
+        : base("Achieve Ex+ Config##AchievementLedgerConfig")
     {
         this.plugin = plugin;
         this.SizeConstraints = new WindowSizeConstraints
@@ -51,14 +51,14 @@ public sealed class ConfigWindow : Window
 
     public override void Draw()
     {
-        if (ImGui.Button("Open VAL"))
+        if (ImGui.Button("Open Achieve Ex+"))
         {
             this.plugin.OpenMainUi();
         }
         this.AddTooltip("Open tracker window.");
         this.DrawDisabledWrapped("Tracked items are saved between logouts.");
         this.DrawDisabledWrapped("⚠ FLASH / UI motion warning: queued updates can briefly open, shrink, move, restore, and close the native Achievement window.");
-        this.DrawDisabledWrapped("Experimental branch: reload buttons open native Achievement entries, shrink/park the Achievement window, read the progress slot, then auto-close if VAL opened it.");
+        this.DrawDisabledWrapped("Experimental branch: reload buttons open native Achievement entries, shrink/park the Achievement window, read the progress slot, then auto-close if Achieve Ex+ opened it.");
         ImGui.Separator();
 
         this.DrawLeftNavigation();
@@ -530,12 +530,12 @@ public sealed class ConfigWindow : Window
 
         ImGui.Separator();
         var debug = this.plugin.Configuration.ExperimentalDebugLoggingEnabled;
-        if (ImGui.Checkbox("Debug prints (VAL DebugTrace)", ref debug))
+        if (ImGui.Checkbox("Debug prints (AchieveEx DebugTrace)", ref debug))
         {
             this.plugin.Configuration.ExperimentalDebugLoggingEnabled = debug;
             this.plugin.SaveConfiguration();
         }
-        this.AddTooltip("Write VAL DebugTrace logs.");
+        this.AddTooltip("Write AchieveEx DebugTrace logs.");
 
         if (ImGui.Button("Reset native Achievement window scale"))
         {
@@ -692,12 +692,12 @@ public sealed class ConfigWindow : Window
         ImGui.TextWrapped("Disclaimer: This experimental addon uses native Achievement UI opens, timers, window parking/rescaling, and local ClientStructs reads that are discouraged for normal Dalamud submissions when automated. Use may have consequences for your account, including a ban.");
         ImGui.Separator();
 
-        ImGui.TextUnformatted("Main VAL window");
+        ImGui.TextUnformatted("Main Achieve Ex+ window");
         this.DrawWrappedBullet("Shows your tracked achievements, progress, last update time, and row actions.");
-        this.DrawWrappedBullet("Reload buttons and Update All open native Achievement entries, then VAL reads the already-populated progress slot.");
+        this.DrawWrappedBullet("Reload buttons and Update All open native Achievement entries, then Achieve Ex+ reads the already-populated progress slot.");
         this.DrawWrappedBullet("Update All queues native Achievement UI assisted progress updates for tracked achievements. Items updated in the last 30 seconds are skipped by Update All.");
         this.DrawWrappedBullet("Timed auto update and event-triggered updates cannot both be enabled at the same time.");
-        this.DrawWrappedBullet("During queued updates, VAL temporarily parks the native Achievement window at a very small scale, then restores scale and position before closing it.");
+        this.DrawWrappedBullet("During queued updates, Achieve Ex+ temporarily parks the native Achievement window at a very small scale, then restores scale and position before closing it.");
         this.DrawWrappedBullet("Reset native Achievement window scale opens the native window first, then restores it to 100% scale if a parking test leaves it shrunk.");
         this.DrawWrappedBullet("Stop Update Tasks disables auto update and clears queued update tasks.");
         this.DrawWrappedBullet("Use the magnifying glass to open that achievement in the native Achievements window.");

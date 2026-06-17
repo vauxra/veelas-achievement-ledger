@@ -1,0 +1,19 @@
+{
+  "Author": "Saagi",
+  "Name": "Achieve Ex+",
+  "Punchline": "EXPERIMENTAL Ex: native Achievement updater.",
+  "Description": "Experimental Achieve Ex+ testing build. Use /achex to track achievements and test native Achievement update flows.",
+  "RepoUrl": "https://github.com/vauxra/achieve-ex",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "achievement",
+    "ledger",
+    "tracker",
+    "utility"
+  ],
+  "IconUrl": "https://raw.githubusercontent.com/vauxra/achieve-ex/achieve-ex-mid/AchievementTracker/images/icon.png",
+  "ImageUrls": [
+    "https://raw.githubusercontent.com/vauxra/achieve-ex/achieve-ex-mid/AchievementTracker/images/icon.png"
+  ],
+  "InternalName": "AchieveExPlus"
+}

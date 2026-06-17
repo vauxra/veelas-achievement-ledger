@@ -1,6 +1,6 @@
 # Adversarial Dalamud/C# Code Review Agent
 
-Use this prompt for a fresh-context reviewer before committing or shipping changes to the Veela's Achievement Ledger plugin. The reviewer should be intentionally skeptical. For public/beta/mainline branches, fail closed. For `val-experimental`, treat Dalamud publishing restrictions as advisory risk notes rather than blockers, while still failing closed on security, lifecycle, crash, privacy, and accidental-public-positioning issues.
+Use this prompt for a fresh-context reviewer before committing or shipping changes to the Achieve Ex+ plugin. The reviewer should be intentionally skeptical. For public/beta/mainline branches, fail closed. For `achieve-ex-experimental`, treat Dalamud publishing restrictions as advisory risk notes rather than blockers, while still failing closed on security, lifecycle, crash, privacy, and accidental-public-positioning issues.
 
 ## Reviewer role
 
@@ -53,7 +53,7 @@ Also apply C#/.NET secure-coding checks inspired by Microsoft .NET code-analysis
 
 ## Dalamud-specific fail conditions
 
-On public/beta/mainline branches, fail the review if the diff introduces any of these without a clear, documented, user-triggered design justification. On `val-experimental`, report these as `dalamud_policy_violations` / suggestions for risk visibility, but do **not** set `passed=false` solely because the branch intentionally accepts them. Still fail if the implementation is unlabeled, hard to remove from public branches, leaks resources, can crash, or creates unrelated privacy/security risk:
+On public/beta/mainline branches, fail the review if the diff introduces any of these without a clear, documented, user-triggered design justification. On `achieve-ex-experimental`, report these as `dalamud_policy_violations` / suggestions for risk visibility, but do **not** set `passed=false` solely because the branch intentionally accepts them. Still fail if the implementation is unlabeled, hard to remove from public branches, leaks resources, can crash, or creates unrelated privacy/security risk:
 
 1. **Automatic game-server interaction**
    - timers, `IFramework.Update`, addon lifecycle events, login/zone/job events, or background tasks that call game request methods such as `RequestAchievementProgress`
@@ -105,9 +105,9 @@ Warn/suggest on:
 - nullable reference hazards
 - broad catch blocks that should log context
 
-## Expected stance for Veela's Achievement Ledger public/beta line
+## Expected stance for Achieve Ex+ public/beta line
 
-The safe default outside `val-experimental` is:
+The safe default outside `achieve-ex-experimental` is:
 
 - passive local reads are okay
 - `IUnlockState` completion state is authoritative when loaded
@@ -118,4 +118,4 @@ The safe default outside `val-experimental` is:
 - plugin-originated progress requests, queues, throttlers, and polling are out of scope
 - no backend, telemetry, analytics, or self-updaters
 
-If the diff moves away from that stance on public/beta/mainline branches, request changes. On `val-experimental`, verify the risk is explicit and the experimental code remains isolated.
+If the diff moves away from that stance on public/beta/mainline branches, request changes. On `achieve-ex-experimental`, verify the risk is explicit and the experimental code remains isolated.

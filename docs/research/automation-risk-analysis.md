@@ -3,7 +3,7 @@
 Date: 2026-06-10
 Branch: `research/automation-risk-analysis`
 
-This document compares the automation approaches used by two established Dalamud plugins and frames what they imply for a possible automation branch of Veela's Achievement Ledger.
+This document compares the automation approaches used by two established Dalamud plugins and frames what they imply for a possible automation branch of Achieve Ex+.
 
 Sources reviewed:
 
@@ -26,15 +26,15 @@ Both reviewed plugins implement real automation, not just UI convenience:
 - **GatherBuddyReborn** automates gathering, fishing, pathing, teleports, NPC/dialog interactions, vendor purchases, collectable turn-ins, and also includes crafting automation through its Vulcan components.
 - **Artisan** is centered on automated crafting: solver-selected craft actions, endurance loops, quick synthesis, consumable use, recipe selection, gearset changes, repairs, materia extraction, retainer restocking, and IPC-triggered automation.
 
-Against current Dalamud publishing guidance, both sit well beyond the low-risk pattern we have been using for Veela's Achievement Ledger. They use documented Dalamud APIs, but they also routinely use `FFXIVClientStructs`, addon callbacks, framework-update task queues, raw signatures/hooks, and direct `ActionManager.UseAction` or object-interaction calls.
+Against current Dalamud publishing guidance, both sit well beyond the low-risk pattern we have been using for Achieve Ex+. They use documented Dalamud APIs, but they also routinely use `FFXIVClientStructs`, addon callbacks, framework-update task queues, raw signatures/hooks, and direct `ActionManager.UseAction` or object-interaction calls.
 
-For an Achievement Ledger automation branch, the most important takeaway is that there are at least three distinct risk bands:
+For an Achieve Ex+ automation branch, the most important takeaway is that there are at least three distinct risk bands:
 
 1. **Low-risk assisted tracking**: documented Dalamud APIs, Lumina/local data, user-clicked native Achievement UI opening, passive observation/cache updates. This is the current safe direction.
 2. **Medium-risk user-initiated helpers**: a direct user click causes one bounded native UI action, with no repeated queue, no automatic server request loop, and no synthetic confirmations. This may be defensible but should be reviewed before implementation.
 3. **High-risk automation**: framework-loop queues, repeated server-affecting actions, addon callback firing for confirmations/submissions, direct action use, pathing, retainer/vendor/repair automation, raw hooks/signatures, IPC-triggerable automation. This is the pattern used by the reviewed automation plugins and should be treated as experimental/private-risk territory for our app.
 
-Recommended stance for the achievement tracker: keep the public/beta line at **native Achievement UI open + passive observation**, with **no plugin-originated progress request queues, no automatic refresh loops, no packet/network capture, and no synthetic menu/callback submission**. If we intentionally build a research automation branch, gate it behind explicit naming and docs that it is not the official-submission-safe path.
+Recommended stance for the Achieve Ex+: keep the public/beta line at **native Achievement UI open + passive observation**, with **no plugin-originated progress request queues, no automatic refresh loops, no packet/network capture, and no synthetic menu/callback submission**. If we intentionally build a research automation branch, gate it behind explicit naming and docs that it is not the official-submission-safe path.
 
 ## Dalamud policy and API baseline
 
@@ -193,7 +193,7 @@ It also has raw movement override hooks:
 - `OverrideMovement.cs:74-80` initializes hooks from attributes.
 - `OverrideMovement.cs:90-113` detours movement input toward a desired position.
 
-Policy implication: autonomous movement/pathing is a high-risk pattern for a public achievement tracker and should not be copied.
+Policy implication: autonomous movement/pathing is a high-risk pattern for a public Achieve Ex+ and should not be copied.
 
 ### Synthetic UI/addon interaction
 
@@ -225,7 +225,7 @@ GatherBuddyReborn includes crafting queue and Vulcan components. This is especia
 - `CraftingGameInterop.cs:895-931` confirms quick synthesis quantity/HQ/NQ by callback.
 - `GatherBuddy/Crafting/CraftingActionExecutor.cs:26-64` maps Vulcan skills to action IDs and calls `ActionManager.Instance()->UseAction(...)`.
 
-Policy implication: do not use this as a model for official-compatible Achievement Ledger behavior.
+Policy implication: do not use this as a model for official-compatible Achieve Ex+ behavior.
 
 ### Vendor purchases and collectable turn-ins
 
@@ -264,7 +264,7 @@ GatherBuddyReborn has non-game-server HTTP use:
   - `FishRecorder.Remote.cs:23-31` batches records.
   - `FishRecorder.Remote.cs:87-125` serializes local fish records and posts JSON.
 
-Policy implication: external HTTP is not inherently banned, but it must meet the backend guidance. For Achievement Ledger, external backend calls should be avoided unless the feature absolutely needs them; static game data should come from Lumina/local sheets.
+Policy implication: external HTTP is not inherently banned, but it must meet the backend guidance. For Achieve Ex+, external backend calls should be avoided unless the feature absolutely needs them; static game data should come from Lumina/local sheets.
 
 ## Artisan analysis
 
@@ -356,7 +356,7 @@ Crafting lists batch-process recipes:
 - `CraftingList.cs:507-508` clicks cosmic HQ/NQ buttons.
 - `CraftingList.cs:540-547` clicks recipe material/context-menu callbacks.
 
-Policy implication: this is unattended batch crafting automation and should not inform a public Achievement Ledger branch except as a boundary example.
+Policy implication: this is unattended batch crafting automation and should not inform a public Achieve Ex+ branch except as a boundary example.
 
 ### Synthetic addon/interface interaction
 
@@ -436,7 +436,7 @@ Policy implication: this is not the core risk compared to automated crafting. If
 
 ## Comparison table
 
-| Category | GatherBuddyReborn | Artisan | Achievement Ledger implication |
+| Category | GatherBuddyReborn | Artisan | Achieve Ex+ implication |
 | --- | --- | --- | --- |
 | Primary automation | Gathering, fishing, pathing, turn-ins, vendors, crafting | Crafting, quick synth, lists, repair, materia, retainer restock | Do not copy unattended loops into public/beta tracker |
 | Dalamud APIs | Heavy use | Heavy use | Good baseline, but not sufficient by itself |
@@ -460,14 +460,14 @@ Neither plugin primarily constructs raw FFXIV network packets in the reviewed co
 
 This matters because avoiding raw packet code does **not** make the automation low risk. Dalamud restrictions focus on automatic interaction with game servers and outside-spec behavior, not only on packet injection. Synthetic UI callbacks and ClientStructs action calls can still cause automated server-affecting behavior.
 
-For our achievement tracker, a safer distinction is:
+For our Achieve Ex+, a safer distinction is:
 
 - **Safer**: open the native Achievement UI because the user clicked `Update Next`; passively record what the native UI/player action causes to load.
 - **Riskier**: plugin calls an achievement progress request on a timer or queue.
 - **Riskier still**: plugin fires native addon callbacks to navigate categories/entries or submit/confirm actions repeatedly.
 - **Out of scope for public branch**: packet/network capture or packet-originated action automation.
 
-## Recommended automation branch options for Veela's Achievement Ledger
+## Recommended automation branch options for Achieve Ex+
 
 ### Option A: Public-safe assisted branch
 
@@ -475,7 +475,7 @@ Risk: 1-2 / 5
 
 Features:
 
-- Keep `/val` tracker UI.
+- Keep `/achex` tracker UI.
 - Keep `Update Next` and row reload icon.
 - User click opens the native Achievement entry.
 - Plugin passively records progress already returned to the native Achievement UI.
@@ -555,9 +555,9 @@ This is comparable in architecture to the automation parts of GatherBuddyReborn/
 
 ## Bottom line
 
-GatherBuddyReborn and Artisan show how far Dalamud plugins can technically go: framework-loop task managers, direct action calls, addon callback firing, object interaction, pathing, crafting/gathering automation, and raw hooks/signatures. They are useful references for implementation mechanics, but they are not good templates for an official-submission-safe achievement tracker.
+GatherBuddyReborn and Artisan show how far Dalamud plugins can technically go: framework-loop task managers, direct action calls, addon callback firing, object interaction, pathing, crafting/gathering automation, and raw hooks/signatures. They are useful references for implementation mechanics, but they are not good templates for an official-submission-safe Achieve Ex+.
 
-For Veela's Achievement Ledger, the safest and most defensible plan remains:
+For Achieve Ex+, the safest and most defensible plan remains:
 
 - user chooses what to track,
 - user clicks `Update Next` or the row reload icon,

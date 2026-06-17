@@ -1,14 +1,14 @@
 [
   {
     "Author": "Saagi",
-    "Name": "Veela's Achievement Ledger Ex",
-    "InternalName": "VeelasAchievementLedger",
+    "Name": "Achieve Ex+",
+    "InternalName": "AchieveExPlus",
     "AssemblyVersion": "0.0.0.0",
-    "Description": "Experimental Ex branch build. Branch is based on val-experimental and uses native Achievement UI opens instead of direct progress requests for local agent/dev-plugin testing before any published release.",
+    "Description": "Experimental Achieve Ex+ testing build. Use /achex to track achievements and test native Achievement update flows.",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 15,
-    "Punchline": "Experimental Ex native Achievement testing build for /val.",
-    "RepoUrl": "https://github.com/vauxra/veelas-achievement-ledger",
+    "Punchline": "Experimental Ex native Achievement testing build for /achex.",
+    "RepoUrl": "https://github.com/vauxra/achieve-ex",
     "Tags": [
       "achievement",
       "tracker",
@@ -19,13 +19,13 @@
     "DownloadLinkInstall": "",
     "DownloadLinkUpdate": "",
     "LastUpdate": "1781226764",
-    "TestingAssemblyVersion": "0.2.0.22",
+    "TestingAssemblyVersion": "0.2.0.23",
     "TestingDalamudApiLevel": 15,
     "TestingChangelog": "Experimental Ex prerelease. Uses native Achievement UI opens plus passive progress-slot reads; no plugin-originated direct progress-request call or remote-service call. Includes flash/UI motion warning, quarter-size window parking with restore-before-close, reset-scale recovery, mutually exclusive timed auto/event-trigger update modes, and an all-event-types trigger toggle.",
-    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.2.0.22/VeelasAchievementLedger_0_2_0_22.zip",
-    "IconUrl": "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png",
+    "DownloadLinkTesting": "https://github.com/vauxra/achieve-ex/releases/download/v0.2.0.23/AchieveExPlus_0_2_0_23.zip",
+    "IconUrl": "https://raw.githubusercontent.com/vauxra/achieve-ex/achieve-ex-mid/AchievementTracker/images/icon.png",
     "ImageUrls": [
-      "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png"
+      "https://raw.githubusercontent.com/vauxra/achieve-ex/achieve-ex-mid/AchievementTracker/images/icon.png"
     ]
   }
 ]

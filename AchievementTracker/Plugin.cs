@@ -13,7 +13,7 @@ namespace AchievementTracker;
 
 public sealed class Plugin : IDalamudPlugin
 {
-    private const string CommandName = "/val";
+    private const string CommandName = "/achex";
 
     // Dalamud service injection pattern:
     // https://dalamud.dev/plugin-development/project-layout
@@ -50,7 +50,7 @@ public sealed class Plugin : IDalamudPlugin
     public CosmicClassProgressProvider CosmicClassProgressProvider { get; }
     public AchievementProgressUpdater AchievementProgressUpdater { get; }
     public NativeAchievementNavigator NativeAchievementNavigator { get; }
-    public WindowSystem WindowSystem { get; } = new("VeelasAchievementLedger");
+    public WindowSystem WindowSystem { get; } = new("AchieveExPlus");
 
     private TrackerWindow TrackerWindow { get; }
     private ConfigWindow ConfigWindow { get; }
@@ -89,7 +89,7 @@ public sealed class Plugin : IDalamudPlugin
 
         CommandManager.AddHandler(CommandName, new CommandInfo(this.OnCommand)
         {
-            HelpMessage = "Open Veela's Achievement Ledger Ex.",
+            HelpMessage = "Open Achieve Ex+.",
         });
 
         PluginInterface.UiBuilder.Draw += this.WindowSystem.Draw;
@@ -151,13 +151,13 @@ public sealed class Plugin : IDalamudPlugin
         this.Configuration.ExperimentalAutoUpdateEnabled = false;
         this.SaveConfiguration();
         this.AchievementProgressUpdater.Clear();
-        this.DebugLog("VAL DebugTrace AutoUpdateStopped queueCleared=true");
+        this.DebugLog("AchieveEx DebugTrace AutoUpdateStopped queueCleared=true");
     }
 
     public void ClearUpdateQueue(string reason)
     {
         this.AchievementProgressUpdater.Clear();
-        this.DebugLog($"VAL DebugTrace UpdateQueueCleared reason={reason}");
+        this.DebugLog($"AchieveEx DebugTrace UpdateQueueCleared reason={reason}");
     }
 
     public void ResetNativeAchievementWindowScale()
@@ -166,7 +166,7 @@ public sealed class Plugin : IDalamudPlugin
         var reset = shown && this.NativeAchievementNavigator.ResetAchievementWindowScale();
         this.pendingNativeAchievementScaleReset = shown && !reset;
         this.pendingNativeAchievementScaleResetUntil = DateTimeOffset.UtcNow.AddSeconds(5);
-        this.DebugLog($"VAL DebugTrace NativeWindowScaleReset shown={shown} reset={reset} pending={this.pendingNativeAchievementScaleReset}");
+        this.DebugLog($"AchieveEx DebugTrace NativeWindowScaleReset shown={shown} reset={reset} pending={this.pendingNativeAchievementScaleReset}");
     }
 
     public void DebugLog(string message)
@@ -272,7 +272,7 @@ public sealed class Plugin : IDalamudPlugin
         if (reset || DateTimeOffset.UtcNow >= this.pendingNativeAchievementScaleResetUntil)
         {
             this.pendingNativeAchievementScaleReset = false;
-            this.DebugLog($"VAL DebugTrace NativeWindowScaleResetPendingComplete reset={reset}");
+            this.DebugLog($"AchieveEx DebugTrace NativeWindowScaleResetPendingComplete reset={reset}");
         }
     }
 

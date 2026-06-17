@@ -1,10 +1,10 @@
 # Development due diligence
 
-Veela's Achievement Ledger is developed with human review, AI assistance, and repeatable local checks.
+Achieve Ex+ is developed with human review, AI assistance, and repeatable local checks.
 
 ## Branch stance
 
-`val-experimental` is a private/testing branch, not a normal Dalamud submission candidate. It intentionally explores achievement-progress behavior that the safer public/beta design avoids.
+`achieve-ex-experimental` is a private/testing branch, not a normal Dalamud submission candidate. It intentionally explores achievement-progress behavior that the safer public/beta design avoids.
 
 The branch must stay clear about its risks:
 
@@ -35,9 +35,9 @@ The branch must still avoid unrelated high-risk behavior:
 
 Before an experimental build, verify in game:
 
-- `/val` opens the ledger.
-- `/val config`, `/val configure`, and `/val man` open config.
-- `/val help` and `/val ?` open the Help tab.
+- `/achex` opens the ledger.
+- `/achex config`, `/achex configure`, and `/achex man` open config.
+- `/achex help` and `/achex ?` open the Help tab.
 - Configure can search, add, remove, and reorder up to 20 tracked achievements.
 - Presets can save, read, rename, delete, and auto-load on dropdown selection.
 - Tracked achievements and presets persist after logout/login.
@@ -84,6 +84,6 @@ For merge/submission, run a fresh-context review using:
 
 - `docs/ai-policy-audits/adversarial-code-review-agent.md`
 
-For `val-experimental`, policy findings about direct progress requests or timers may be warnings if the README/Help clearly label the branch as experimental. Security, lifecycle, crash, privacy, and secret-handling findings remain blockers.
+For `achieve-ex-experimental`, policy findings about direct progress requests or timers may be warnings if the README/Help clearly label the branch as experimental. Security, lifecycle, crash, privacy, and secret-handling findings remain blockers.
 
 Provide the diff plus verification output.

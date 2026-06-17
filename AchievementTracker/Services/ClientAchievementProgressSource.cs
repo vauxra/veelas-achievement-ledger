@@ -32,7 +32,7 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
         var achievementId = achievement->ProgressAchievementId;
         var current = achievement->ProgressCurrent;
         var max = achievement->ProgressMax;
-        var slotDebugLine = $"VAL DebugTrace ProgressSlot state={state} id={achievementId} current={current} max={max}";
+        var slotDebugLine = $"AchieveEx DebugTrace ProgressSlot state={state} id={achievementId} current={current} max={max}";
         if (!string.Equals(slotDebugLine, this.lastSlotDebugLine, StringComparison.Ordinal))
         {
             this.lastSlotDebugLine = slotDebugLine;
@@ -71,14 +71,14 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
             this.observedCompletions.Add(achievementId);
         }
 
-        this.debugLog($"VAL DebugTrace RecordObservedProgress id={achievementId} current={current} max={max} source={source}");
+        this.debugLog($"AchieveEx DebugTrace RecordObservedProgress id={achievementId} current={current} max={max} source={source}");
     }
 
     public void RecordObservedCompletion(uint achievementId, string source)
     {
         this.cachedProgress.Remove(achievementId);
         this.observedCompletions.Add(achievementId);
-        this.debugLog($"VAL DebugTrace RecordObservedCompletion id={achievementId} source={source}");
+        this.debugLog($"AchieveEx DebugTrace RecordObservedCompletion id={achievementId} source={source}");
     }
 
     public static readonly TimeSpan RecentlyObservedUpdateAllSkipThreshold = TimeSpan.FromSeconds(30);

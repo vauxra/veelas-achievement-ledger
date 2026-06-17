@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Adversarial local review tripwire for Veela's Achievement Ledger.
+"""Adversarial local review tripwire for Achieve Ex+.
 
 This script is intentionally conservative. It does not replace human/agent review;
 it catches obvious Dalamud-policy and C# security bad-practice patterns before a
@@ -115,11 +115,11 @@ def run(args: list[str]) -> subprocess.CompletedProcess[str]:
 
 def is_experimental_branch() -> bool:
     branch = run(["git", "branch", "--show-current"])
-    return branch.returncode == 0 and branch.stdout.strip() == "val-experimental"
+    return branch.returncode == 0 and branch.stdout.strip() == "achieve-ex-experimental"
 
 
 def apply_experimental_mode(findings: list[Finding]) -> list[Finding]:
-    """On val-experimental, Dalamud publishing guidance is advisory, not blocking.
+    """On achieve-ex-experimental, Dalamud publishing guidance is advisory, not blocking.
 
     Security/lifecycle findings remain blocking. Only explicit Dalamud-publishing
     policy blockers and auto-game-request blockers are downgraded so agents can

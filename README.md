@@ -1,4 +1,4 @@
-# Veela's Achievement Ledger Ex
+# Achieve Ex+
 [![AI-DECLARATION: copilot](https://img.shields.io/badge/䷼%20AI--DECLARATION-copilot-fee2e2?labelColor=fee2e2)](https://ai-declaration.md)
 
 > [!CAUTION]
@@ -16,11 +16,11 @@ A lightweight experimental achievement organizer and tracker for FFXIV.
 
 ## Status
 
-Experimental build on `val-experimental`. Current features:
+Experimental build on `achieve-ex-experimental`. Current features:
 
-- `/val` opens the ledger.
-- `/val config`, `/val configure`, and `/val man` open configuration.
-- `/val help` and `/val ?` open configuration directly to Help.
+- `/achex` opens the ledger.
+- `/achex config`, `/achex configure`, and `/achex man` open configuration.
+- `/achex help` and `/achex ?` open configuration directly to Help.
 - Track up to 20 achievements.
 - Search by name or category.
 - Hide completed achievements from search.
@@ -40,7 +40,7 @@ The plugin has no direct backend/network integration, remote analytics, cloud sy
 
 ## Basic use
 
-1. Run `/val`.
+1. Run `/achex`.
 2. Click **Configure** and add achievements from **Tracked Achievements**.
 3. Optional: save your current tracked list as a preset.
 4. Use the row reload icon or **Update All** to open native Achievement entries and cache observed progress.
@@ -54,7 +54,7 @@ Tracked achievements, presets, auto-update settings, and cached Cosmic Class sco
 
 Cosmic Class achievements are handled as a special local-progress case. The game exposes Cosmic score values through the local WKS/Cosmic state rather than the ordinary achievement progress slot.
 
-When Cosmic state is loaded, VAL reads the local score array, caches the full 11-class set, and displays matching achievement progress as `current / target`. Outside the zone, VAL reuses the last cached scores so the config/search view can still help plan play time.
+When Cosmic state is loaded, Achieve Ex+ reads the local score array, caches the full 11-class set, and displays matching achievement progress as `current / target`. Outside the zone, Achieve Ex+ reuses the last cached scores so the config/search view can still help plan play time.
 
 The current class-index mapping is based on the observed 11-value WKS score array and the local achievement row order. It still needs in-game validation against non-zero scores:
 
@@ -75,7 +75,7 @@ The current class-index mapping is based on the observed 11-value WKS score arra
 This branch deliberately differs from the safer public/beta design:
 
 - Update tasks can be queued from **Update All**, timed auto update, or event triggers.
-- Update tasks open the native Achievement UI for matching tracked achievements, then VAL passively reads the local progress slot populated by that native UI.
+- Update tasks open the native Achievement UI for matching tracked achievements, then Achieve Ex+ passively reads the local progress slot populated by that native UI.
 - Timed auto update and event-triggered updates cannot both be enabled at the same time.
 - The native Achievement window may briefly shrink, move, restore, and close during queued updates.
 - Auto-update timing uses seconds and waits for the first countdown before the first cycle.
@@ -103,8 +103,8 @@ export DOTNET_ROOT="$HOME/.dotnet"
 
 Outputs:
 
-- `AchievementTracker/bin/Debug/VeelasAchievementLedger.dll`
-- `AchievementTracker/bin/Release/VeelasAchievementLedger.dll`
+- `AchievementTracker/bin/Debug/AchieveExPlus.dll`
+- `AchievementTracker/bin/Release/AchieveExPlus.dll`
 
 ## References
 

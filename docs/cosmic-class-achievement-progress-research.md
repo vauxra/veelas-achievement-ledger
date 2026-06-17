@@ -1,7 +1,7 @@
 # Cosmic Class achievement progress research
 
 Research date: 2026-06-10
-Branch context: `val-experimental`
+Branch context: `achieve-ex-experimental`
 
 ## Goal
 
