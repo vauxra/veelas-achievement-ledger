@@ -14,7 +14,7 @@ public sealed class Plugin : IDalamudPlugin
 {
     // Component: command routing and safety timing.
     // Risk: low. These constants do not touch game memory or the network.
-    private const string CommandName = "/val";
+    private const string CommandName = "/achex";
     private const ushort SinusArdorumTerritoryTypeId = 1237;
     private static readonly TimeSpan AchievementUpdateOpenWindowMinimumLockout = TimeSpan.FromSeconds(1);
     private static readonly TimeSpan AchievementUpdateClosedWindowMinimumLockout = TimeSpan.FromSeconds(6);
@@ -46,7 +46,7 @@ public sealed class Plugin : IDalamudPlugin
     public ClientAchievementProgressSource ClientAchievementProgressSource { get; }
     public CosmicClassProgressProvider CosmicClassProgressProvider { get; }
     public NativeAchievementNavigator NativeAchievementNavigator { get; }
-    public WindowSystem WindowSystem { get; } = new("VeelasAchievementLedger");
+    public WindowSystem WindowSystem { get; } = new("AchieveExPlus");
 
     // Component: private app objects and timers.
     // Risk: low. These only control UI windows and local throttling.
@@ -258,7 +258,7 @@ public sealed class Plugin : IDalamudPlugin
     {
         CommandManager.AddHandler(CommandName, new CommandInfo(this.OnCommand)
         {
-            HelpMessage = "Open Veela's Achievement Ledger.",
+            HelpMessage = "Open Achieve Ex+.",
         });
     }
 

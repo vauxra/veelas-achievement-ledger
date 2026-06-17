@@ -1,6 +1,6 @@
 # Main-branch addon big picture and flow
 
-This document maps the current `origin/main` addon shape for Veela's Achievement Ledger. It is intentionally implementation-oriented: each tree names the file and method/function chain, then states what the final call reads, writes, returns, or touches.
+This document maps the current `origin/main` addon shape for Achieve Ex+. It is intentionally implementation-oriented: each tree names the file and method/function chain, then states what the final call reads, writes, returns, or touches.
 
 ## Top-level architecture
 
@@ -81,7 +81,7 @@ AchievementTracker/Plugin.cs
    │  ├─ WindowSystem.AddWindow(TrackerWindow)
    │  └─ WindowSystem.AddWindow(ConfigWindow)
    ├─ RegisterCommand()
-   │  └─ CommandManager.AddHandler("/val", OnCommand)
+   │  └─ CommandManager.AddHandler("/achex", OnCommand)
    └─ RegisterDalamudCallbacks()
       ├─ PluginInterface.UiBuilder.Draw += WindowSystem.Draw
       ├─ PluginInterface.UiBuilder.OpenMainUi += ToggleMainUi
@@ -101,7 +101,7 @@ AchievementTracker/Plugin.cs
    │  ├─ removes Framework.Update handler
    │  ├─ removes ClientState.Login handler
    │  └─ removes ClientState.Logout handler
-   ├─ CommandManager.RemoveHandler("/val")
+   ├─ CommandManager.RemoveHandler("/achex")
    └─ WindowSystem.RemoveAllWindows()
 ```
 
@@ -125,7 +125,7 @@ AchievementTracker/Plugin.cs
    └─ default
       └─ ToggleMainUi()
          └─ TrackerWindow.Toggle()
-            └─ toggles the `/val` live tracker window
+            └─ toggles the `/achex` live tracker window
 ```
 
 Dalamud UI callbacks follow the same helpers:
@@ -140,7 +140,7 @@ PluginInterface.UiBuilder.OpenConfigUi
    └─ ConfigWindow.Toggle()
 ```
 
-## Main `/val` window draw flow
+## Main `/achex` window draw flow
 
 ```text
 AchievementTracker/Windows/TrackerWindow.cs
@@ -381,7 +381,7 @@ AchievementTracker/Models/AchievementProgress.cs
 AchievementTracker/Windows/ConfigWindow.cs
 └─ ConfigWindow.Draw()
    ├─ DrawHeader()
-   │  └─ ImGui.Button("Open VAL") -> plugin.OpenMainUi() -> TrackerWindow.IsOpen = true
+   │  └─ ImGui.Button("Open Achieve Ex+") -> plugin.OpenMainUi() -> TrackerWindow.IsOpen = true
    ├─ DrawLeftNavigation()
    │  ├─ DrawNavItem("Tracked Achievements") -> selectedSection = TrackedAchievements
    │  └─ DrawNavItem("Help") -> selectedSection = Help
@@ -629,7 +629,7 @@ AchievementTracker/Plugin.cs
 └─ Entrypoint, service construction, command routing, window registration, update-open lockout, Framework/ClientState callbacks, Cosmic cache refresh scheduling.
 
 AchievementTracker/Windows/TrackerWindow.cs
-└─ Main `/val` live tracker UI: top buttons, tracked rows, Update Next choice, per-row update/inspect buttons, progress/last-observed display.
+└─ Main `/achex` live tracker UI: top buttons, tracked rows, Update Next choice, per-row update/inspect buttons, progress/last-observed display.
 
 AchievementTracker/Windows/ConfigWindow.cs
 └─ Config UI: navigation, tracked list management, presets, search/add/remove, Help page, config-window update/inspect buttons.

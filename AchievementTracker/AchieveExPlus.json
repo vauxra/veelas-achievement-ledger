@@ -1,0 +1,19 @@
+{
+  "Author": "Saagi",
+  "Name": "Achieve Ex+",
+  "Punchline": "Track achievements with native Achievement-window assisted refreshes.",
+  "Description": "Use /achex to track achievements, open native Achievement entries, and passively cache observed progress.",
+  "IconUrl": "https://raw.githubusercontent.com/vauxra/achieve-ex/main/AchievementTracker/images/icon.png",
+  "ImageUrls": [
+    "https://raw.githubusercontent.com/vauxra/achieve-ex/main/AchievementTracker/images/icon.png"
+  ],
+  "RepoUrl": "https://github.com/vauxra/achieve-ex",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "achievement",
+    "ledger",
+    "tracker",
+    "utility"
+  ],
+  "InternalName": "AchieveExPlus"
+}

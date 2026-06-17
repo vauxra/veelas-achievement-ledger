@@ -1,4 +1,4 @@
-# Veela's Achievement Ledger Agent Guide
+# Achieve Ex+ Agent Guide
 
 This repo is a Final Fantasy XIV Dalamud plugin. Treat the official Dalamud documentation and API reference as authoritative for coding, review, and release decisions:
 
@@ -29,9 +29,9 @@ This repo is a Final Fantasy XIV Dalamud plugin. Treat the official Dalamud docu
 
 ## Current product shape
 
-Veela's Achievement Ledger is intentionally small:
+Achieve Ex+ is intentionally small:
 
-- `/val` opens the ledger.
+- `/achex` opens the ledger.
 - Users track up to 20 achievements.
 - the row reload icon and **Update Next** open the native Achievement entry.
 - Numeric progress is cached only when the native Achievement UI returns progress data.

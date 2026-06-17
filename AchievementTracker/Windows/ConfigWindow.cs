@@ -18,7 +18,7 @@ public sealed class ConfigWindow : Window
     private string selectedPresetName = string.Empty;
 
     public ConfigWindow(Plugin plugin)
-        : base("Veela's Ledger Config##AchievementLedgerConfig")
+        : base("Achieve Ex+ Config##AchievementLedgerConfig")
     {
         this.plugin = plugin;
         this.SizeConstraints = new WindowSizeConstraints
@@ -62,7 +62,7 @@ public sealed class ConfigWindow : Window
 
     private void DrawHeader()
     {
-        if (ImGui.Button("Open VAL"))
+        if (ImGui.Button("Open Achieve Ex+"))
         {
             this.plugin.OpenMainUi();
         }
@@ -569,10 +569,10 @@ public sealed class ConfigWindow : Window
     private void DrawHelp()
     {
         ImGui.TextUnformatted("Help");
-        ImGui.TextWrapped("Veela's Achievement Ledger uses a user-guided native Achievement UI flow. Reload buttons open the game's Achievement entry; the plugin watches briefly for matching local progress data.");
+        ImGui.TextWrapped("Achieve Ex+ uses a user-guided native Achievement UI flow. Reload buttons open the game's Achievement entry; the plugin watches briefly for matching local progress data.");
         ImGui.Separator();
 
-        ImGui.TextUnformatted("Main VAL window");
+        ImGui.TextUnformatted("Main Achieve Ex+ window");
         this.DrawWrappedBullet("Shows tracked achievements, progress, last observed update time, and row actions.");
         this.DrawWrappedBullet("Update Next opens the native Achievement entry for the next tracked item needing a refresh.");
         this.DrawWrappedBullet("Use the row reload icon to open that achievement entry directly.");

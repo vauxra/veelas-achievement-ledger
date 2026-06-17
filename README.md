@@ -1,4 +1,4 @@
-# Veela's Achievement Ledger 
+# Achieve Ex+ 
 [![AI-DECLARATION: copilot](https://img.shields.io/badge/䷼%20AI--DECLARATION-copilot-fee2e2?labelColor=fee2e2)](https://ai-declaration.md)
 
 A lightweight assistive achievement organizer and tracker for FFXIV.
@@ -17,15 +17,15 @@ A lightweight assistive achievement organizer and tracker for FFXIV.
 
 For a tree-style map of the addon architecture and current `origin/main` runtime flow, see [`docs/main-branch-addon-flow.md`](docs/main-branch-addon-flow.md). It traces filenames and method/function calls down to the state, services, native UI surfaces, and return values each flow touches.
 
-An experimental branch, [`val-experimental`](https://github.com/vauxra/veelas-achievement-ledger/tree/val-experimental), offers more automation for private/testing use, including timed/event-triggered update queues and native Achievement-window parking/rescaling. That branch is intentionally not the safer public/mainline flow described here.
+An experimental branch, [`achieve-ex-experimental`](https://github.com/vauxra/achieve-ex/tree/achex-experimental), offers more automation for private/testing use, including timed/event-triggered update queues and native Achievement-window parking/rescaling. That branch is intentionally not the safer public/mainline flow described here.
 
 ## Status
 
 Beta build. Current features:
 
-- `/val` opens the ledger.
-- `/val config`, `/val configure`, and `/val man` open configuration.
-- `/val help` and `/val ?` open Help.
+- `/achex` opens the ledger.
+- `/achex config`, `/achex configure`, and `/achex man` open configuration.
+- `/achex help` and `/achex ?` open Help.
 - Track up to 20 achievements.
 - Search by name or category.
 - Hide completed achievements from search by default.
@@ -43,7 +43,7 @@ The plugin has no backend, telemetry, cloud sync, packet capture, gameplay autom
 
 ## Basic use
 
-1. Run `/val`.
+1. Run `/achex`.
 2. Click **Configure** and add achievements.
 3. Optional: save your current tracked list as a preset, or load a saved preset.
 4. Click the reload icon beside an achievement, or **Update Next**.
@@ -55,7 +55,7 @@ Tracked achievements, presets, and cached Cosmic score data are saved between lo
 
 ## Cosmic Class progress
 
-Some Cosmic Class achievements only expose normal achievement completion as complete/incomplete. When WKS/Cosmic score data is available locally, Veela's Achievement Ledger reads the local class score cache and maps those scores to the related Cosmic Class achievements for planning.
+Some Cosmic Class achievements only expose normal achievement completion as complete/incomplete. When WKS/Cosmic score data is available locally, Achieve Ex+ reads the local class score cache and maps those scores to the related Cosmic Class achievements for planning.
 
 This is read-only local ClientStructs state. It does not request achievement progress from the server.
 
@@ -73,8 +73,8 @@ export DOTNET_ROOT="$HOME/.dotnet"
 
 Outputs:
 
-- `AchievementTracker/bin/Debug/VeelasAchievementLedger.dll`
-- `AchievementTracker/bin/Release/VeelasAchievementLedger.dll`
+- `AchievementTracker/bin/Debug/AchieveExPlus.dll`
+- `AchievementTracker/bin/Release/AchieveExPlus.dll`
 
 ## References
 
