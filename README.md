@@ -28,7 +28,7 @@ A lightweight experimental achievement organizer and tracker for FFXIV.
 
 ## Big picture
 
-For a tree-style map of the `val-experimental` architecture and runtime flow, see [`docs/val-experimental-addon-flow.md`](docs/val-experimental-addon-flow.md). It traces filenames and method/function calls down to the state, queues, native UI surfaces, hooks, reads, writes, and return values each flow touches.
+For a tree-style map of the `achieve-ex-experimental` architecture and runtime flow, see [`docs/achex-experimental-addon-flow.md`](docs/achex-experimental-addon-flow.md). It traces filenames and method/function calls down to the state, queues, native UI surfaces, hooks, reads, writes, and return values each flow touches.
 
 ## Expected flow summary
 
@@ -48,7 +48,7 @@ Plain-English testing flow:
 
 ## Status
 
-Experimental build on `val-experimental`. Current features:
+Experimental build on `achieve-ex-experimental`. Current features:
 
 - `/achex` opens the ledger.
 - `/achex config`, `/achex configure`, and `/achex man` open configuration.

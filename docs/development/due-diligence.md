@@ -4,7 +4,7 @@ Achieve Ex+ is developed with human review, AI assistance, and repeatable local 
 
 ## Branch stance
 
-`val-experimental` is a private/testing branch, not a normal Dalamud submission candidate. It intentionally explores achievement-progress behavior that the safer public/beta design avoids.
+`achieve-ex-experimental` is a private/testing branch, not a normal Dalamud submission candidate. It intentionally explores achievement-progress behavior that the safer public/beta design avoids.
 
 The branch must stay clear about its risks:
 
@@ -84,6 +84,6 @@ For merge/submission, run a fresh-context review using:
 
 - `docs/ai-policy-audits/adversarial-code-review-agent.md`
 
-For `val-experimental`, policy findings about direct progress requests or timers may be warnings if the README/Help clearly label the branch as experimental. Security, lifecycle, crash, privacy, and secret-handling findings remain blockers.
+For `achieve-ex-experimental`, policy findings about direct progress requests or timers may be warnings if the README/Help clearly label the branch as experimental. Security, lifecycle, crash, privacy, and secret-handling findings remain blockers.
 
 Provide the diff plus verification output.

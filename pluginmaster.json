@@ -4,11 +4,11 @@
     "Name": "Achieve Ex+",
     "InternalName": "AchieveExPlus",
     "AssemblyVersion": "0.0.0.0",
-    "Description": "Achieve Ex+ 0.3.1.2 testing build. Fixes event-trigger/native Achievement window ownership so background updates close plugin-opened windows correctly, while preserving 0.3.1 search/layout/cosmic progress changes.",
+    "Description": "Experimental Achieve Ex+ testing build. Use /achex to track achievements and test native Achievement update flows.",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 15,
     "Punchline": "Experimental Ex+ native Achievement testing build for /achex.",
-    "RepoUrl": "https://github.com/vauxra/veelas-achievement-ledger",
+    "RepoUrl": "https://github.com/vauxra/achieve-ex",
     "Tags": [
       "achievement",
       "tracker",
@@ -19,11 +19,13 @@
     "DownloadLinkInstall": "",
     "DownloadLinkUpdate": "",
     "LastUpdate": "1781475181",
-    "TestingAssemblyVersion": "0.3.1.2",
+    "TestingAssemblyVersion": "0.3.1.3",
     "TestingDalamudApiLevel": 15,
     "TestingChangelog": "Testing build 0.3.1.2: fix event-trigger/native Achievement window ownership so queued updates close plugin-opened windows correctly; keep 0.3.1.1 search defaults and manual-open scale restore behavior.",
-    "DownloadLinkTesting": "https://github.com/vauxra/veelas-achievement-ledger/releases/download/v0.3.1.2-rc/AchieveExPlus_0_3_1_2_rc.zip",
-    "IconUrl": "https://raw.githubusercontent.com/vauxra/veelas-achievement-ledger/val-experimental/AchievementTracker/images/icon.png",
-    "ImageUrls": []
+    "DownloadLinkTesting": "https://github.com/vauxra/achieve-ex/releases/download/v0.3.1.3-rc/AchieveExPlus_0_3_1_3_rc.zip",
+    "IconUrl": "https://raw.githubusercontent.com/vauxra/achieve-ex/achieve-ex-experimental/AchievementTracker/images/icon.png",
+    "ImageUrls": [
+      "https://raw.githubusercontent.com/vauxra/achieve-ex/achieve-ex-experimental/AchievementTracker/images/icon.png"
+    ]
   }
 ]

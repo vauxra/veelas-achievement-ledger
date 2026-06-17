@@ -1,6 +1,6 @@
-# Val-experimental addon big picture and flow
+# Achieve Ex+ experimental addon big picture and flow
 
-This document maps the current `val-experimental` branch for Achieve Ex+. It is intentionally implementation-oriented: each tree names the file and method/function chain, then states what the final call reads, writes, returns, queues, or touches.
+This document maps the current `achieve-ex-experimental` branch for Achieve Ex+. It is intentionally implementation-oriented: each tree names the file and method/function chain, then states what the final call reads, writes, returns, queues, or touches.
 
 ## Top-level architecture
 
@@ -61,7 +61,7 @@ Manual row update / Update All / timed auto update / enabled event trigger
 Important branch-specific caveats:
 
 ```text
-val-experimental
+achieve-ex-experimental
 ├─ does not call Achievement.RequestAchievementProgress directly
 ├─ does queue native Achievement UI opens from timed/event/manual triggers
 ├─ does park/rescale/move the native Achievement window during queued updates

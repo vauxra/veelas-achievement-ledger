@@ -1,4 +1,4 @@
-# Veela's Achievement Ledger Agent Guide
+# Achieve Ex+ Agent Guide
 
 This repo is a Final Fantasy XIV Dalamud plugin. Treat Dalamud's official docs at <https://dalamud.dev> as the source of truth.
 
@@ -12,9 +12,9 @@ This repo is a Final Fantasy XIV Dalamud plugin. Treat Dalamud's official docs a
 
 ## Product shape
 
-The public/beta-safe shape for Veela's Achievement Ledger is intentionally small:
+The public/beta-safe shape for Achieve Ex+ is intentionally small:
 
-- `/val` opens the ledger.
+- `/achex` opens the ledger.
 - the row reload icon opens the native Achievement entry.
 - Numeric progress is cached only when the native Achievement UI returns progress data.
 - Tracked achievement IDs persist between logouts; observed ordinary achievement progress cache resets on login/logout.
@@ -28,10 +28,10 @@ For public/beta-safe branches, do not reintroduce:
 - packet capture/network experiments,
 - backend sync, telemetry, analytics, or leaderboards.
 
-## `val-experimental` branch stance
+## `achieve-ex-experimental` branch stance
 
 This branch is explicitly **not meant for Dalamud publishing**. When the current
-branch is `val-experimental`, treat Dalamud publishing restrictions as risk
+branch is `achieve-ex-experimental`, treat Dalamud publishing restrictions as risk
 guidance and documentation requirements, not hard blockers. It is acceptable on
 this branch to prototype direct `RequestAchievementProgress` calls, automatic
 progress refresh queues, event-triggered refreshes, seconds-based auto timers,
@@ -51,7 +51,7 @@ Do still block on:
 - changes that accidentally position this branch as official-submission safe.
 
 Local tripwires may downgrade Dalamud-publishing policy violations to warnings
-on `val-experimental`; security and lifecycle failures remain blockers.
+on `achieve-ex-experimental`; security and lifecycle failures remain blockers.
 
 ## Security review requirements
 
