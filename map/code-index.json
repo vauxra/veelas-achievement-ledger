@@ -118,7 +118,7 @@
       ],
       [
         48,
-        "public WindowSystem WindowSystem { get; } = new(\"VeelasAchievementLedger\");"
+        "public WindowSystem WindowSystem { get; } = new(\"AchieveExPlus\");"
       ],
       [
         58,

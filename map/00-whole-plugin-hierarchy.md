@@ -8,10 +8,10 @@ This is the broad map of the entire plugin. Read it top-to-bottom like a Python 
 AchievementTracker/
 ├─ Plugin.cs                         # main app object, service wiring, commands, framework callbacks
 ├─ Configuration.cs                  # saved plugin config/settings
-├─ VeelasAchievementLedger.json      # Dalamud plugin manifest
+├─ AchieveExPlus.json      # Dalamud plugin manifest
 ├─ images/
 │  └─ icon.png                       # plugin icon
-├─ Models/                           # small data/value objects
+├─ Models/                           # small data/achexue objects
 │  ├─ AchievementInfo.cs             # display info for one achievement
 │  ├─ AchievementProgress.cs         # progress states and display text
 │  ├─ CosmicClassScoreCache.cs       # saved Cosmic score cache
@@ -32,7 +32,7 @@ AchievementTracker/
 │  └─ TrackedAchievementStore.cs     # ordered tracked achievement IDs
 └─ Windows/                          # ImGui UI
    ├─ ConfigWindow.cs                # configure/search/presets/help window
-   └─ TrackerWindow.cs               # main /val tracker window
+   └─ TrackerWindow.cs               # main /achex tracker window
 ```
 
 ## Main dependency graph
@@ -75,7 +75,7 @@ Dalamud loads plugin
    ├─ create windows
    ├─ InstallPassiveAchievementObserver()
    ├─ WindowSystem.AddWindow(...)
-   ├─ CommandManager.AddHandler("/val", OnCommand)
+   ├─ CommandManager.AddHandler("/achex", OnCommand)
    ├─ register UI draw/open callbacks
    ├─ register Framework.Update
    └─ register ClientState.Login/Logout cache resets
@@ -89,7 +89,7 @@ Dalamud unloads plugin
    ├─ unregister UI callbacks
    ├─ unregister Framework.Update
    ├─ unregister ClientState.Login/Logout
-   ├─ CommandManager.RemoveHandler("/val")
+   ├─ CommandManager.RemoveHandler("/achex")
    ├─ PassiveAchievementProgressObserver.Dispose()
    │  ├─ dispose receive hook
    │  └─ dispose completed hook
@@ -99,7 +99,7 @@ Dalamud unloads plugin
 ## User command hierarchy
 
 ```text
-/val
+/achex
 └─ Plugin.OnCommand(command, args)
    ├─ no args / unknown args
    │  └─ ToggleMainUi()

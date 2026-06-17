@@ -1,6 +1,6 @@
 # C# primer for Python readers
 
-This document explains the C# conventions used in Veela's Achievement Ledger by comparing them to Python ideas.
+This document explains the C# conventions used in Achieve Ex+ by comparing them to Python ideas.
 
 ## Files, namespaces, and classes
 

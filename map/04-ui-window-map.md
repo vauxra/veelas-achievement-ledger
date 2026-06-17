@@ -4,7 +4,7 @@ The UI code is in `AchievementTracker/Windows/`. It uses ImGui, which is immedia
 
 ## Main window: `TrackerWindow.cs`
 
-Purpose: the normal `/val` window where you view tracked achievements.
+Purpose: the normal `/achex` window where you view tracked achievements.
 
 ```text
 TrackerWindow.Draw()
@@ -67,7 +67,7 @@ ConfigWindow.Draw()
 
 ### Header
 
-- **Open VAL**
+- **Open Achieve Ex+**
   - calls `Plugin.OpenMainUi()`
   - risk: low
 

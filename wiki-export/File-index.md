@@ -47,7 +47,7 @@ Types: `Plugin`
 Members found:
 - line 18: `private static readonly TimeSpan AchievementUpdateOpenLockout = TimeSpan.FromSeconds(5);`
 - line 19: `private static readonly TimeSpan CosmicCacheRefreshInterval = TimeSpan.FromSeconds(30);`
-- line 48: `public WindowSystem WindowSystem { get; } = new("VeelasAchievementLedger");`
+- line 48: `public WindowSystem WindowSystem { get; } = new("AchieveExPlus");`
 - line 58: `public Plugin()`
 - line 77: `public void Dispose()`
 - line 88: `public void SaveTrackedAchievements()`

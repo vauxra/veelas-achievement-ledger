@@ -96,7 +96,7 @@ Risk notes:
 
 ### `OnCommand(string command, string args)`
 
-Purpose: route `/val` commands.
+Purpose: route `/achex` commands.
 
 ```text
 OnCommand(...)
@@ -105,7 +105,7 @@ OnCommand(...)
 └─ anything else → ToggleMainUi()
 ```
 
-## `TrackerWindow.cs` — main `/val` window
+## `TrackerWindow.cs` — main `/achex` window
 
 ### `Draw()`
 

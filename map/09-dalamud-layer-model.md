@@ -1,4 +1,4 @@
-# Dalamud layer model for Veela's Achievement Ledger
+# Dalamud layer model for Achieve Ex+
 
 This is an OSI-style mental model for the plugin: each layer is a lower-level system that the layer above depends on. The higher you go, the more the code is ordinary plugin/product logic. The lower you go, the closer the code is to Dalamud, ClientStructs, native game UI, or raw game state.
 
@@ -6,7 +6,7 @@ This is an OSI-style mental model for the plugin: each layer is a lower-level sy
 
 Generated from this working tree and local Dalamud dev environment.
 
-- Plugin project: `VeelasAchievementLedger`
+- Plugin project: `AchieveExPlus`
 - Plugin version: `0.2.0.17`
 - Project SDK: `Dalamud.NET.Sdk/15.0.0`
 - Package lock:
@@ -39,14 +39,14 @@ For this repo, use these practical meanings:
 
 ```text
 Layer 8 — Product intent / player workflow
-  Veela's Achievement Ledger behavior:
+  Achieve Ex+ behavior:
   track achievements, open native Achievement entries, show observed progress, manage presets/search/help.
 
 Layer 7 — Plugin UI and commands
   AchievementTracker/Plugin.cs
   AchievementTracker/Windows/TrackerWindow.cs
   AchievementTracker/Windows/ConfigWindow.cs
-  /val command, ImGui windows, buttons, help text, local UI state.
+  /achex command, ImGui windows, buttons, help text, local UI state.
 
 Layer 6 — Plugin domain services and models
   AchievementCatalog, AchievementProgressService, TrackedAchievementStore,
@@ -81,7 +81,7 @@ Layer 1 — Game process, local memory, and Square Enix servers
 ```mermaid
 flowchart TB
     L8["Layer 8: Product workflow\nTrack / inspect / plan achievements"]
-    L7["Layer 7: Plugin UI + commands\nPlugin.cs, TrackerWindow, ConfigWindow, /val"]
+    L7["Layer 7: Plugin UI + commands\nPlugin.cs, TrackerWindow, ConfigWindow, /achex"]
     L6["Layer 6: Plugin domain logic\nCatalog, progress service, tracked store, presets, config, models"]
     L5["Layer 5: Dalamud managed services\nPluginInterface, CommandManager, DataManager, UnlockState, ClientState, Framework, InteropProvider"]
     L4["Layer 4: Dalamud UI/data libraries\nImGui bindings, WindowSystem helpers, Lumina sheets"]
@@ -243,7 +243,7 @@ Risk: highest. Avoid unless explicitly isolated as a private experiment and sepa
 ## Call placement examples
 
 ```text
-/val command
+/achex command
 Layer 7: Plugin.OnCommand
 Layer 7: ToggleMainUi / OpenConfigUi
 Layer 7: WindowSystem draws UI

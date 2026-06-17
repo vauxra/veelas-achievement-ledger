@@ -1,6 +1,6 @@
 # Big picture
 
-Veela's Achievement Ledger is a Dalamud plugin with three main jobs:
+Achieve Ex+ is a Dalamud plugin with three main jobs:
 
 1. Let the player choose achievements to track.
 2. Help the player open the native FFXIV Achievement window/entry for those achievements.
@@ -32,7 +32,7 @@ Plugin
 ├─ PassiveAchievementProgressObserver
 │  └─ hooks native progress/completion callbacks and caches observations
 ├─ TrackerWindow
-│  └─ main `/val` window
+│  └─ main `/achex` window
 └─ ConfigWindow
    └─ configure/search/presets/help window
 ```
@@ -45,7 +45,7 @@ Plugin constructor
 ├─ normalizes config
 ├─ builds services/windows
 ├─ installs passive progress observer hooks
-├─ registers /val command
+├─ registers /achex command
 ├─ registers UI draw callbacks
 ├─ registers Framework.Update
 └─ registers login/logout cache resets
@@ -56,7 +56,7 @@ Plugin constructor
 ### Open the ledger
 
 ```text
-User runs /val
+User runs /achex
 └─ Plugin.OnCommand(...)
    └─ TrackerWindow.Toggle()
 ```
@@ -64,7 +64,7 @@ User runs /val
 ### Configure tracked achievements
 
 ```text
-User clicks Configure or runs /val config
+User clicks Configure or runs /achex config
 └─ Plugin.OpenConfigUi()
    └─ ConfigWindow.OpenConfig()
       └─ ConfigWindow.Draw()

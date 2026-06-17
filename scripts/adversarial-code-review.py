@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Adversarial local review tripwire for Veela's Achievement Ledger.
+"""Adversarial local review tripwire for Achieve Ex+.
 
 This script is intentionally conservative. It does not replace human/agent review;
 it catches obvious Dalamud-policy and C# security bad-practice patterns before a

@@ -1,4 +1,4 @@
-# Code map for Veela's Achievement Ledger
+# Code map for Achieve Ex+
 
 This folder is a human-friendly map of the C# codebase. It is written for someone who is more comfortable with Python than C#.
 

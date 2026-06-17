@@ -14,7 +14,7 @@ public sealed class TrackerWindow : Window
     private readonly Plugin plugin;
 
     public TrackerWindow(Plugin plugin)
-        : base("Veela's Achievement Ledger##AchievementLedgerLive")
+        : base("Achieve Ex+##AchievementLedgerLive")
     {
         this.plugin = plugin;
         this.SizeConstraints = new WindowSizeConstraints
@@ -24,7 +24,7 @@ public sealed class TrackerWindow : Window
         };
     }
 
-    // Section: main /val window draw loop.
+    // Section: main /achex window draw loop.
     // Component: ImGui UI. Risk: low; button clicks call clearly named Plugin/service methods.
     public override void Draw()
     {
