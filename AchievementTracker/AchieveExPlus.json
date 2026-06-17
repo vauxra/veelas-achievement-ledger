@@ -1,0 +1,16 @@
+{
+  "Author": "Saagi",
+  "Name": "Achieve Ex+",
+  "Punchline": "Lightweight achievement organizer and tracker.",
+  "Description": "Use /achex to track achievements, open native Achievement entries, and passively cache observed progress.",
+  "RepoUrl": "https://github.com/vauxra/achieve-ex",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "achievement",
+    "ledger",
+    "tracker",
+    "utility"
+  ],
+  "InternalName": "AchieveExPlus",
+  "IconUrl": "https://raw.githubusercontent.com/vauxra/achieve-ex/rewrite-guided-achievement-ui/AchievementTracker/images/icon.png"
+}

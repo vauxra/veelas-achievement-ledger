@@ -1,6 +1,6 @@
 # Development due diligence
 
-Veela's Achievement Ledger is developed with human review, AI assistance, and repeatable local checks.
+Achieve Ex+ is developed with human review, AI assistance, and repeatable local checks.
 
 ## Methodology
 
@@ -14,7 +14,7 @@ Veela's Achievement Ledger is developed with human review, AI assistance, and re
 
 Before a beta build, verify in game:
 
-- `/val` opens the ledger.
+- `/achex` opens the ledger.
 - Configure can search, add, remove, and reorder tracked achievements.
 - Tracked achievements persist after logout/login.
 - the row reload icon opens the chosen native Achievement entry.

@@ -26,26 +26,26 @@ import sys
 import zipfile
 from pathlib import Path
 
-manifest_path = Path("AchievementTracker/bin/Release/VeelasAchievementLedger.json")
-zip_path = Path("AchievementTracker/bin/Release/VeelasAchievementLedger/latest.zip")
+manifest_path = Path("AchievementTracker/bin/Release/AchieveExPlus.json")
+zip_path = Path("AchievementTracker/bin/Release/AchieveExPlus/latest.zip")
 if not manifest_path.exists() or not zip_path.exists():
     print("Missing generated release manifest or latest.zip.", file=sys.stderr)
     raise SystemExit(1)
 manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 expected = {
-    "VeelasAchievementLedger.dll",
-    "VeelasAchievementLedger.deps.json",
-    "VeelasAchievementLedger.json",
+    "AchieveExPlus.dll",
+    "AchieveExPlus.deps.json",
+    "AchieveExPlus.json",
 }
 with zipfile.ZipFile(zip_path) as zf:
     names = set(zf.namelist())
-if manifest.get("InternalName") != "VeelasAchievementLedger":
+if manifest.get("InternalName") != "AchieveExPlus":
     print(f"Unexpected InternalName: {manifest.get('InternalName')}", file=sys.stderr)
     raise SystemExit(1)
 if names != expected:
     print(f"Unexpected latest.zip contents: {sorted(names)}", file=sys.stderr)
     raise SystemExit(1)
-print("Release package contains only VeelasAchievementLedger DLL/deps/manifest.")
+print("Release package contains only AchieveExPlus DLL/deps/manifest.")
 PY
 
 echo "== CodeQL C# security/quality scan =="

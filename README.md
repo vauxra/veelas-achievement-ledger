@@ -1,4 +1,4 @@
-# Veela's Achievement Ledger
+# Achieve Ex+
 
 A lightweight assistive achievement organizer and tracker for FFXIV.
 
@@ -6,7 +6,7 @@ A lightweight assistive achievement organizer and tracker for FFXIV.
 
 Beta build. Current features:
 
-- `/val` opens the ledger.
+- `/achex` opens the ledger.
 - Track up to 5 achievements.
 - Search by name or category.
 - Hide completed achievements from search by default.
@@ -17,7 +17,7 @@ The plugin has no backend, telemetry, cloud sync, or gameplay automation.
 
 ## Basic use
 
-1. Run `/val`.
+1. Run `/achex`.
 2. Click **Configure** and add achievements.
 3. Click the reload icon beside an achievement, or **Update Next**.
 4. Wait for the game entry to load; progress updates when the game returns data.
@@ -50,8 +50,8 @@ export DOTNET_ROOT="$HOME/.dotnet"
 
 Outputs:
 
-- `AchievementTracker/bin/Debug/VeelasAchievementLedger.dll`
-- `AchievementTracker/bin/Release/VeelasAchievementLedger.dll`
+- `AchievementTracker/bin/Debug/AchieveExPlus.dll`
+- `AchievementTracker/bin/Release/AchieveExPlus.dll`
 
 ## References
 

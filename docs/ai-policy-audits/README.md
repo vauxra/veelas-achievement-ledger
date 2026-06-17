@@ -1,6 +1,6 @@
 # AI and Dalamud Policy Audits
 
-Veela's Achievement Ledger uses this folder to keep project-specific audit guidance and reports for official Dalamud policy compliance.
+Achieve Ex+ uses this folder to keep project-specific audit guidance and reports for official Dalamud policy compliance.
 
 Run before commits and before any official submission:
 

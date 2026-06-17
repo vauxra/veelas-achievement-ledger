@@ -11,7 +11,7 @@ namespace AchievementTracker;
 
 public sealed class Plugin : IDalamudPlugin
 {
-    private const string CommandName = "/val";
+    private const string CommandName = "/achex";
 
     // Dalamud service injection pattern:
     // https://dalamud.dev/plugin-development/project-layout
@@ -35,7 +35,7 @@ public sealed class Plugin : IDalamudPlugin
     public IAchievementProgressSource AchievementProgressSource { get; }
     public ClientAchievementProgressSource ClientAchievementProgressSource { get; }
     public NativeAchievementNavigator NativeAchievementNavigator { get; }
-    public WindowSystem WindowSystem { get; } = new("VeelasAchievementLedger");
+    public WindowSystem WindowSystem { get; } = new("AchieveExPlus");
 
     private TrackerWindow TrackerWindow { get; }
     private ConfigWindow ConfigWindow { get; }
@@ -59,7 +59,7 @@ public sealed class Plugin : IDalamudPlugin
 
         CommandManager.AddHandler(CommandName, new CommandInfo(this.OnCommand)
         {
-            HelpMessage = "Open Veela's Achievement Ledger.",
+            HelpMessage = "Open Achieve Ex+.",
         });
 
         PluginInterface.UiBuilder.Draw += this.WindowSystem.Draw;
