@@ -166,7 +166,7 @@ public sealed class TrackerWindow : Window
         var hasCustomColor = string.Equals(presentation.ColorName, "Red", StringComparison.Ordinal);
         if (hasCustomColor)
         {
-            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.9f, 0.15f, 0.15f, 1f));
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.ButtonHovered]);
         }
 
         var clicked = ImGuiComponents.IconButton("toggle-tracked-buttons", FontAwesomeIcon.Eye);
