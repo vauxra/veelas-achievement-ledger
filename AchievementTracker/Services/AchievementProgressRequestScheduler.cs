@@ -29,6 +29,7 @@ public readonly record struct ScheduledAchievementProgressRequest(
 public sealed class AchievementProgressRequestScheduler
 {
     public const int MaxPendingRequests = 100;
+    private const int DirtyFinalPassDuplicateThreshold = 2;
     public static readonly TimeSpan ImmutableActionSpacing = TimeSpan.FromSeconds(1);
     public static readonly TimeSpan PerAchievementBackoff = TimeSpan.FromSeconds(5);
     public static readonly TimeSpan DefaultUpdateAllSpacing = TimeSpan.FromSeconds(15);
@@ -39,7 +40,7 @@ public sealed class AchievementProgressRequestScheduler
     private readonly Dictionary<uint, DateTimeOffset> lastRequestedAt = new();
     private readonly Dictionary<Guid, ActivityJobInfo> activityJobs = new();
     private readonly HashSet<ActivityUpdateKey> activeActivityKeys = [];
-    private readonly HashSet<ActivityUpdateKey> dirtyActivityKeys = [];
+    private readonly Dictionary<ActivityUpdateKey, int> dirtyActivityKeyCounts = new();
     private DateTimeOffset nextBatchCursor = DateTimeOffset.MinValue;
 
     public AchievementProgressRequestScheduler(Func<DateTimeOffset>? nowProvider = null, Func<TimeSpan>? jitterProvider = null)
@@ -86,7 +87,8 @@ public sealed class AchievementProgressRequestScheduler
 
         if (this.HasPendingOrActiveActivityKey(activityKey))
         {
-            this.dirtyActivityKeys.Add(activityKey);
+            this.dirtyActivityKeyCounts.TryGetValue(activityKey, out var duplicateCount);
+            this.dirtyActivityKeyCounts[activityKey] = duplicateCount + 1;
             this.UpdateLatestActivityJobIds(activityKey, normalizedIds);
             return 0;
         }
@@ -95,7 +97,10 @@ public sealed class AchievementProgressRequestScheduler
     }
 
     public bool IsActivityKeyDirty(ActivityUpdateKey activityKey)
-        => this.dirtyActivityKeys.Contains(activityKey);
+        => this.GetActivityKeyDirtyCount(activityKey) > 0;
+
+    public int GetActivityKeyDirtyCount(ActivityUpdateKey activityKey)
+        => this.dirtyActivityKeyCounts.TryGetValue(activityKey, out var count) ? count : 0;
 
     public int ActiveOrPendingActivityKeyCount => this.activeActivityKeys
         .Concat(this.pendingRequests
@@ -115,7 +120,8 @@ public sealed class AchievementProgressRequestScheduler
 
         this.activityJobs.Remove(jobId);
         this.activeActivityKeys.Remove(info.Key);
-        if (!this.dirtyActivityKeys.Remove(info.Key))
+        if (!this.dirtyActivityKeyCounts.Remove(info.Key, out var duplicateCount)
+            || duplicateCount < DirtyFinalPassDuplicateThreshold)
         {
             return;
         }
@@ -221,7 +227,7 @@ public sealed class AchievementProgressRequestScheduler
         this.lastRequestedAt.Clear();
         this.activityJobs.Clear();
         this.activeActivityKeys.Clear();
-        this.dirtyActivityKeys.Clear();
+        this.dirtyActivityKeyCounts.Clear();
         this.nextBatchCursor = DateTimeOffset.MinValue;
     }
 

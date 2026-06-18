@@ -41,6 +41,8 @@ var tests = new List<(string Name, Action Body)>
     ("Crafting log completion configuration path is removed", CraftingLogCompletionConfigurationPathIsRemoved),
     ("Activity trigger delay policy delays only crafting", ActivityTriggerDelayPolicyDelaysOnlyCrafting),
     ("Activity scheduler marks same pending key dirty", ActivitySchedulerMarksSamePendingKeyDirty),
+    ("Activity scheduler single duplicate does not queue dirty final pass", ActivitySchedulerSingleDuplicateDoesNotQueueDirtyFinalPass),
+    ("Activity scheduler two duplicates queue dirty final pass", ActivitySchedulerTwoDuplicatesQueueDirtyFinalPass),
     ("Activity scheduler appends dirty final pass behind later keys", ActivitySchedulerAppendsDirtyFinalPassBehindLaterKeys),
     ("Activity scheduler queues different keys normally", ActivitySchedulerQueuesDifferentKeysNormally),
     ("Manual scheduler requests are not activity-key coalesced", ManualSchedulerRequestsAreNotActivityKeyCoalesced),
@@ -482,6 +484,42 @@ static void ActivitySchedulerMarksSamePendingKeyDirty()
 
     AssertEqualInt(2, scheduler.PendingCount);
     AssertTrue(scheduler.IsActivityKeyDirty(key), "duplicate pending key should be dirty");
+    AssertEqualInt(1, scheduler.GetActivityKeyDirtyCount(key));
+}
+
+static void ActivitySchedulerSingleDuplicateDoesNotQueueDirtyFinalPass()
+{
+    var now = new DateTimeOffset(2026, 6, 10, 12, 0, 0, TimeSpan.Zero);
+    var scheduler = new AchievementProgressRequestScheduler(() => now, () => TimeSpan.Zero);
+    var key = new ActivityUpdateKey("Crafting", "Carpenter");
+
+    AssertEqualInt(1, scheduler.EnqueueActivityUpdateAll([101], "activity-trigger", TimeSpan.Zero, key, TimeSpan.Zero));
+    AssertEqualInt(0, scheduler.EnqueueActivityUpdateAll([101], "activity-trigger", TimeSpan.Zero, key, TimeSpan.Zero));
+
+    AssertTrue(scheduler.TryTakeDueRequest(now, out var original), "original carpenter request should be due");
+    AssertEqualUInt(101u, original.AchievementId);
+    scheduler.MarkActivityJobSettled(original.JobId, now);
+
+    AssertFalse(scheduler.TryTakeDueRequest(now.AddSeconds(5), out _), "one duplicate should be absorbed without dirty final pass");
+}
+
+static void ActivitySchedulerTwoDuplicatesQueueDirtyFinalPass()
+{
+    var now = new DateTimeOffset(2026, 6, 10, 12, 0, 0, TimeSpan.Zero);
+    var scheduler = new AchievementProgressRequestScheduler(() => now, () => TimeSpan.Zero);
+    var key = new ActivityUpdateKey("Crafting", "Carpenter");
+
+    AssertEqualInt(1, scheduler.EnqueueActivityUpdateAll([101], "activity-trigger", TimeSpan.Zero, key, TimeSpan.Zero));
+    AssertEqualInt(0, scheduler.EnqueueActivityUpdateAll([101], "activity-trigger", TimeSpan.Zero, key, TimeSpan.Zero));
+    AssertEqualInt(0, scheduler.EnqueueActivityUpdateAll([101], "activity-trigger", TimeSpan.Zero, key, TimeSpan.Zero));
+
+    AssertTrue(scheduler.TryTakeDueRequest(now, out var original), "original carpenter request should be due");
+    AssertEqualUInt(101u, original.AchievementId);
+    scheduler.MarkActivityJobSettled(original.JobId, now);
+
+    AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(5), out var finalPass), "two duplicates should queue dirty final pass at same-id backoff");
+    AssertEqualUInt(101u, finalPass.AchievementId);
+    AssertFalse(scheduler.TryTakeDueRequest(now.AddSeconds(5), out _), "two duplicates should queue exactly one dirty final pass");
 }
 
 static void ActivitySchedulerAppendsDirtyFinalPassBehindLaterKeys()
@@ -493,6 +531,7 @@ static void ActivitySchedulerAppendsDirtyFinalPassBehindLaterKeys()
 
     scheduler.EnqueueActivityUpdateAll([101], "activity-trigger", TimeSpan.Zero, carpenter, TimeSpan.Zero);
     scheduler.EnqueueActivityUpdateAll([201], "activity-trigger", TimeSpan.Zero, armorer, TimeSpan.Zero);
+    scheduler.EnqueueActivityUpdateAll([101], "activity-trigger", TimeSpan.Zero, carpenter, TimeSpan.Zero);
     scheduler.EnqueueActivityUpdateAll([101], "activity-trigger", TimeSpan.Zero, carpenter, TimeSpan.Zero);
 
     AssertTrue(scheduler.TryTakeDueRequest(now, out var first), "carpenter first should be due");
