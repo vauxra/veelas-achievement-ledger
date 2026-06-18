@@ -23,7 +23,8 @@ public readonly record struct ScheduledAchievementProgressRequest(
     string Reason,
     NativeAchievementActionKind Kind = NativeAchievementActionKind.Refresh,
     Guid JobId = default,
-    NativeAchievementJobKind JobKind = NativeAchievementJobKind.Single);
+    NativeAchievementJobKind JobKind = NativeAchievementJobKind.Single,
+    ActivityUpdateKey? ActivityKey = null);
 
 public sealed class AchievementProgressRequestScheduler
 {
@@ -36,6 +37,9 @@ public sealed class AchievementProgressRequestScheduler
     private readonly Func<TimeSpan> jitterProvider;
     private readonly List<ScheduledAchievementProgressRequest> pendingRequests = [];
     private readonly Dictionary<uint, DateTimeOffset> lastRequestedAt = new();
+    private readonly Dictionary<Guid, ActivityJobInfo> activityJobs = new();
+    private readonly HashSet<ActivityUpdateKey> activeActivityKeys = [];
+    private readonly HashSet<ActivityUpdateKey> dirtyActivityKeys = [];
     private DateTimeOffset nextBatchCursor = DateTimeOffset.MinValue;
 
     public AchievementProgressRequestScheduler(Func<DateTimeOffset>? nowProvider = null, Func<TimeSpan>? jitterProvider = null)
@@ -62,7 +66,62 @@ public sealed class AchievementProgressRequestScheduler
         => this.EnqueueUpdateAll(achievementIds, reason, DefaultUpdateAllSpacing);
 
     public void EnqueueUpdateAll(IEnumerable<uint> achievementIds, string reason, TimeSpan baseSpacing)
+        => _ = this.EnqueueUpdateAllAndCount(achievementIds, reason, baseSpacing);
+
+    public int EnqueueUpdateAllAndCount(IEnumerable<uint> achievementIds, string reason, TimeSpan baseSpacing)
         => this.EnqueueActions(achievementIds, reason, baseSpacing, NativeAchievementActionKind.Refresh);
+
+    public int EnqueueActivityUpdateAll(
+        IEnumerable<uint> achievementIds,
+        string reason,
+        TimeSpan baseSpacing,
+        ActivityUpdateKey activityKey,
+        TimeSpan initialDelay)
+    {
+        var normalizedIds = achievementIds.Where(id => id != 0).Distinct().ToList();
+        if (normalizedIds.Count == 0)
+        {
+            return 0;
+        }
+
+        if (this.HasPendingOrActiveActivityKey(activityKey))
+        {
+            this.dirtyActivityKeys.Add(activityKey);
+            this.UpdateLatestActivityJobIds(activityKey, normalizedIds);
+            return 0;
+        }
+
+        return this.EnqueueActions(normalizedIds, reason, baseSpacing, NativeAchievementActionKind.Refresh, activityKey, initialDelay);
+    }
+
+    public bool IsActivityKeyDirty(ActivityUpdateKey activityKey)
+        => this.dirtyActivityKeys.Contains(activityKey);
+
+    public int ActiveOrPendingActivityKeyCount => this.activeActivityKeys
+        .Concat(this.pendingRequests
+            .Select(request => request.ActivityKey)
+            .Where(key => key.HasValue)
+            .Select(key => key!.Value))
+        .Distinct()
+        .Count();
+
+    public void MarkActivityJobSettled(Guid jobId, DateTimeOffset now)
+    {
+        if (!this.activityJobs.TryGetValue(jobId, out var info)
+            || this.HasPendingRequestsForJob(jobId))
+        {
+            return;
+        }
+
+        this.activityJobs.Remove(jobId);
+        this.activeActivityKeys.Remove(info.Key);
+        if (!this.dirtyActivityKeys.Remove(info.Key))
+        {
+            return;
+        }
+
+        this.EnqueueActions(info.AchievementIds, info.Reason, info.BaseSpacing, NativeAchievementActionKind.Refresh, info.Key, TimeSpan.Zero);
+    }
 
     public bool EnqueueInspection(uint achievementId, string reason)
         => this.EnqueueActions([achievementId], reason, TimeSpan.Zero, NativeAchievementActionKind.Inspection) > 0;
@@ -71,11 +130,14 @@ public sealed class AchievementProgressRequestScheduler
         IEnumerable<uint> achievementIds,
         string reason,
         TimeSpan baseSpacing,
-        NativeAchievementActionKind kind)
+        NativeAchievementActionKind kind,
+        ActivityUpdateKey? activityKey = null,
+        TimeSpan initialDelay = default)
     {
         var now = this.nowProvider();
         var normalizedBaseSpacing = NormalizeBaseSpacing(baseSpacing);
         var cursor = this.pendingRequests.Count > 0 && this.nextBatchCursor > now ? this.nextBatchCursor : now;
+        cursor += NormalizeBaseSpacing(initialDelay);
         var normalizedIds = achievementIds.Where(id => id != 0).ToList();
         var jobId = Guid.NewGuid();
         var jobKind = kind == NativeAchievementActionKind.Inspection
@@ -107,13 +169,18 @@ public sealed class AchievementProgressRequestScheduler
             }
 
             var itemJobId = kind == NativeAchievementActionKind.Inspection ? Guid.NewGuid() : jobId;
-            this.pendingRequests.Add(new ScheduledAchievementProgressRequest(achievementId, dueAt, reason, kind, itemJobId, jobKind));
+            this.pendingRequests.Add(new ScheduledAchievementProgressRequest(achievementId, dueAt, reason, kind, itemJobId, jobKind, activityKey));
             added++;
             cursor = dueAt + ImmutableActionSpacing + normalizedBaseSpacing + NormalizeJitter(this.jitterProvider());
         }
 
         this.nextBatchCursor = cursor;
         this.pendingRequests.Sort(static (left, right) => left.DueAt.CompareTo(right.DueAt));
+        if (added > 0 && activityKey.HasValue)
+        {
+            this.activityJobs[jobId] = new ActivityJobInfo(activityKey.Value, normalizedIds.Distinct().ToList(), reason, normalizedBaseSpacing);
+        }
+
         return added;
     }
 
@@ -140,6 +207,11 @@ public sealed class AchievementProgressRequestScheduler
         request = this.pendingRequests[index];
         this.pendingRequests.RemoveAt(index);
         this.lastRequestedAt[request.AchievementId] = now;
+        if (request.ActivityKey.HasValue)
+        {
+            this.activeActivityKeys.Add(request.ActivityKey.Value);
+        }
+
         return true;
     }
 
@@ -147,16 +219,37 @@ public sealed class AchievementProgressRequestScheduler
     {
         this.pendingRequests.Clear();
         this.lastRequestedAt.Clear();
+        this.activityJobs.Clear();
+        this.activeActivityKeys.Clear();
+        this.dirtyActivityKeys.Clear();
         this.nextBatchCursor = DateTimeOffset.MinValue;
+    }
+
+    private bool HasPendingOrActiveActivityKey(ActivityUpdateKey activityKey)
+        => this.activeActivityKeys.Contains(activityKey)
+            || this.pendingRequests.Any(request => request.ActivityKey == activityKey);
+
+    private void UpdateLatestActivityJobIds(ActivityUpdateKey activityKey, IReadOnlyList<uint> achievementIds)
+    {
+        foreach (var (jobId, info) in this.activityJobs.ToList())
+        {
+            if (info.Key == activityKey)
+            {
+                this.activityJobs[jobId] = info with { AchievementIds = achievementIds };
+            }
+        }
     }
 
     private static NativeAchievementJobKind DetermineRefreshJobKind(int normalizedIdCount, string reason)
         => normalizedIdCount > 1
             || string.Equals(reason, "manual-update-all", StringComparison.Ordinal)
             || string.Equals(reason, "auto-update", StringComparison.Ordinal)
-            || string.Equals(reason, "activity-trigger", StringComparison.Ordinal)
+            || IsActivityReason(reason)
                 ? NativeAchievementJobKind.Batch
                 : NativeAchievementJobKind.Single;
+
+    private static bool IsActivityReason(string reason)
+        => reason.StartsWith("activity-", StringComparison.Ordinal);
 
     private static TimeSpan CreateDefaultJitter()
     {
@@ -183,4 +276,10 @@ public sealed class AchievementProgressRequestScheduler
 
         return jitter;
     }
+
+    private readonly record struct ActivityJobInfo(
+        ActivityUpdateKey Key,
+        IReadOnlyList<uint> AchievementIds,
+        string Reason,
+        TimeSpan BaseSpacing);
 }

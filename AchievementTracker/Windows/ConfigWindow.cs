@@ -624,8 +624,7 @@ public sealed class ConfigWindow : Window
             && this.plugin.Configuration.TriggerOnFishingActivities
             && this.plugin.Configuration.TriggerOnSpearfishingActivities
             && this.plugin.Configuration.TriggerOnCrafterActivities
-            && this.plugin.Configuration.TriggerOnCraftingActivities
-            && this.plugin.Configuration.TriggerOnCraftingLogActivities;
+            && this.plugin.Configuration.TriggerOnCraftingActivities;
         this.DrawTriggerCheckbox("All event types", allEventTypesEnabled, value =>
         {
             this.plugin.Configuration.TriggerOnMinerActivities = value;
@@ -639,7 +638,6 @@ public sealed class ConfigWindow : Window
             this.plugin.Configuration.TriggerOnSpearfishingActivities = value;
             this.plugin.Configuration.TriggerOnCrafterActivities = value;
             this.plugin.Configuration.TriggerOnCraftingActivities = value;
-            this.plugin.Configuration.TriggerOnCraftingLogActivities = value;
         });
 
         this.DrawTriggerCheckbox("All Miner", this.plugin.Configuration.TriggerOnMinerActivities, value =>
@@ -673,10 +671,8 @@ public sealed class ConfigWindow : Window
         {
             this.plugin.Configuration.TriggerOnCrafterActivities = value;
             this.plugin.Configuration.TriggerOnCraftingActivities = value;
-            this.plugin.Configuration.TriggerOnCraftingLogActivities = value;
         });
         this.DrawIndentedTriggerCheckbox("Successful synthesis", this.plugin.Configuration.TriggerOnCraftingActivities, value => this.plugin.Configuration.TriggerOnCraftingActivities = value);
-        this.DrawIndentedTriggerCheckbox("Crafting log completion", this.plugin.Configuration.TriggerOnCraftingLogActivities, value => this.plugin.Configuration.TriggerOnCraftingLogActivities = value);
     }
 
     private void DrawTriggerCheckbox(string label, bool value, Action<bool> applyValue)

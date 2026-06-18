@@ -35,7 +35,15 @@ var tests = new List<(string Name, Action Body)>
     ("Completion filters wait for loaded achievement state", CompletionFiltersWaitForLoadedAchievementState),
     ("Lumina search all does not wait for loaded achievement state", LuminaSearchAllDoesNotWaitForLoadedAchievementState),
     ("Native update batches do not park achievement windows", NativeUpdateBatchesDoNotParkAchievementWindows),
-    ("Activity classifier matches finish mining to miner category", ActivityClassifierMatchesFinishMiningToMinerCategory),
+    ("Activity classifier ignores text-only activity messages", ActivityClassifierIgnoresTextOnlyActivityMessages),
+    ("Activity classifier matches known log message ids", ActivityClassifierMatchesKnownLogMessageIds),
+    ("Activity classifier uses verified crafting success ids only", ActivityClassifierUsesVerifiedCraftingSuccessIdsOnly),
+    ("Crafting log completion configuration path is removed", CraftingLogCompletionConfigurationPathIsRemoved),
+    ("Activity trigger delay policy delays only crafting", ActivityTriggerDelayPolicyDelaysOnlyCrafting),
+    ("Activity scheduler marks same pending key dirty", ActivitySchedulerMarksSamePendingKeyDirty),
+    ("Activity scheduler appends dirty final pass behind later keys", ActivitySchedulerAppendsDirtyFinalPassBehindLaterKeys),
+    ("Activity scheduler queues different keys normally", ActivitySchedulerQueuesDifferentKeysNormally),
+    ("Manual scheduler requests are not activity-key coalesced", ManualSchedulerRequestsAreNotActivityKeyCoalesced),
     ("Activity classifier selects tracked achievements by category path", ActivityClassifierSelectsTrackedAchievementsByCategoryPath),
     ("Tracked toolbar hidden state shows default eye", TrackedToolbarHiddenStateShowsDefaultEye),
     ("Tracked toolbar shown state shows red eye", TrackedToolbarShownStateShowsRedEye),
@@ -405,28 +413,128 @@ static void NativeUpdateBatchesDoNotParkAchievementWindows()
     AssertFalse(NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(batchWindowWasOpenBeforeStart: true, completedAtLeastOneRequest: true), "player-opened Achievement windows should never be parked by update batches");
 }
 
-static void ActivityClassifierMatchesFinishMiningToMinerCategory()
+static void ActivityClassifierIgnoresTextOnlyActivityMessages()
 {
-    AssertTrue(AchievementActivityUpdateClassifier.TryClassify(1067, "", 0, out var fromLogId), "log id 1067 should classify as miner");
-    AssertEqual("Miner", fromLogId);
+    var textCases = new[]
+    {
+        ("You finish mining.", 16u),
+        ("You finish quarrying.", 16u),
+        ("You finish logging.", 17u),
+        ("You finish harvesting.", 17u),
+        ("You finish gathering.", 16u),
+        ("You reel in a fish.", 18u),
+        ("You catch a fish.", 18u),
+        ("Synthesis succeeds.", 10u),
+        ("You craft an item.", 8u),
+    };
 
-    AssertTrue(AchievementActivityUpdateClassifier.TryClassify(1068, "", 0, out var fromQuarry), "log id 1068 should classify as miner");
-    AssertEqual("Miner", fromQuarry);
+    foreach (var (text, classJobId) in textCases)
+    {
+        AssertFalse(AchievementActivityUpdateClassifier.TryClassify(0, text, classJobId, out _), $"text-only '{text}' should not classify");
+    }
+}
 
-    AssertTrue(AchievementActivityUpdateClassifier.TryClassify(0, "You finish mining.", 16, out var fromText), "finish mining text should classify as miner");
-    AssertEqual("Miner", fromText);
+static void ActivityClassifierMatchesKnownLogMessageIds()
+{
+    AssertActivityClassification(1067, 0, "Miner", AchievementActivityUpdateClassifier.MiningTrigger);
+    AssertActivityClassification(1068, 0, "Miner", AchievementActivityUpdateClassifier.QuarryingTrigger);
+    AssertActivityClassification(1069, 0, "Botanist", AchievementActivityUpdateClassifier.LoggingTrigger);
+    AssertActivityClassification(1070, 0, "Botanist", AchievementActivityUpdateClassifier.HarvestingTrigger);
+    AssertActivityClassification(1114, 0, "Fisher", AchievementActivityUpdateClassifier.FishingTrigger);
+    AssertActivityClassification(3576, 0, "Fisher", AchievementActivityUpdateClassifier.SpearfishingTrigger);
+}
 
-    AssertTrue(AchievementActivityUpdateClassifier.TryClassify(1069, "", 0, out var fromLogging), "log id 1069 should classify as botanist");
-    AssertEqual("Botanist", fromLogging);
+static void ActivityClassifierUsesVerifiedCraftingSuccessIdsOnly()
+{
+    AssertActivityClassification(1156, 10, "Armorer", AchievementActivityUpdateClassifier.CraftingTrigger);
+    AssertActivityClassification(1158, 10, "Armorer", AchievementActivityUpdateClassifier.CraftingTrigger);
 
-    AssertTrue(AchievementActivityUpdateClassifier.TryClassify(1070, "", 0, out var fromHarvesting), "log id 1070 should classify as botanist");
-    AssertEqual("Botanist", fromHarvesting);
+    AssertFalse(AchievementActivityUpdateClassifier.TryClassify(1159, "", 10, out _), "unverified 1159 should not classify");
+    AssertFalse(AchievementActivityUpdateClassifier.TryClassify(1144, "", 10, out _), "crafting failure 1144 should not classify");
+    AssertFalse(AchievementActivityUpdateClassifier.TryClassify(1223, "", 10, out _), "crafting failure 1223 should not classify");
+    AssertFalse(AchievementActivityUpdateClassifier.TryClassify(1178, "", 10, out _), "crafting log completion should not classify");
+}
 
-    AssertTrue(AchievementActivityUpdateClassifier.TryClassify(1158, "", 10, out var fromCrafting), "craft success should classify by current crafter job");
-    AssertEqual("Armorer", fromCrafting);
+static void CraftingLogCompletionConfigurationPathIsRemoved()
+{
+    var configurationSource = File.ReadAllText("AchievementTracker/Configuration.cs");
+    var configWindowSource = File.ReadAllText("AchievementTracker/Windows/ConfigWindow.cs");
 
-    AssertTrue(AchievementActivityUpdateClassifier.TryClassify(3512, "", 0, out var fromFishing), "fish catch should classify as fisher");
-    AssertEqual("Fisher", fromFishing);
+    AssertFalse(configurationSource.Contains("TriggerOnCraftingLogActivities", StringComparison.Ordinal), "crafting-log completion config flag should be removed");
+    AssertFalse(configWindowSource.Contains("Crafting log completion", StringComparison.Ordinal), "crafting-log completion UI checkbox should be removed");
+}
+
+static void ActivityTriggerDelayPolicyDelaysOnlyCrafting()
+{
+    AssertEqualInt(6, (int)ActivityTriggerDelayPolicy.GetInitialDelay(AchievementActivityUpdateClassifier.CraftingTrigger).TotalSeconds);
+    AssertEqualInt(0, (int)ActivityTriggerDelayPolicy.GetInitialDelay(AchievementActivityUpdateClassifier.MiningTrigger).TotalSeconds);
+    AssertEqualInt(0, (int)ActivityTriggerDelayPolicy.GetInitialDelay(AchievementActivityUpdateClassifier.FishingTrigger).TotalSeconds);
+}
+
+static void ActivitySchedulerMarksSamePendingKeyDirty()
+{
+    var now = new DateTimeOffset(2026, 6, 10, 12, 0, 0, TimeSpan.Zero);
+    var scheduler = new AchievementProgressRequestScheduler(() => now, () => TimeSpan.Zero);
+    var key = new ActivityUpdateKey("Crafting", "Carpenter");
+
+    AssertEqualInt(2, scheduler.EnqueueActivityUpdateAll([101, 102], "activity-trigger", TimeSpan.Zero, key, TimeSpan.Zero));
+    AssertEqualInt(0, scheduler.EnqueueActivityUpdateAll([101, 102], "activity-trigger", TimeSpan.Zero, key, TimeSpan.Zero));
+
+    AssertEqualInt(2, scheduler.PendingCount);
+    AssertTrue(scheduler.IsActivityKeyDirty(key), "duplicate pending key should be dirty");
+}
+
+static void ActivitySchedulerAppendsDirtyFinalPassBehindLaterKeys()
+{
+    var now = new DateTimeOffset(2026, 6, 10, 12, 0, 0, TimeSpan.Zero);
+    var scheduler = new AchievementProgressRequestScheduler(() => now, () => TimeSpan.Zero);
+    var carpenter = new ActivityUpdateKey("Crafting", "Carpenter");
+    var armorer = new ActivityUpdateKey("Crafting", "Armorer");
+
+    scheduler.EnqueueActivityUpdateAll([101], "activity-trigger", TimeSpan.Zero, carpenter, TimeSpan.Zero);
+    scheduler.EnqueueActivityUpdateAll([201], "activity-trigger", TimeSpan.Zero, armorer, TimeSpan.Zero);
+    scheduler.EnqueueActivityUpdateAll([101], "activity-trigger", TimeSpan.Zero, carpenter, TimeSpan.Zero);
+
+    AssertTrue(scheduler.TryTakeDueRequest(now, out var first), "carpenter first should be due");
+    AssertEqualUInt(101u, first.AchievementId);
+    scheduler.MarkActivityJobSettled(first.JobId, now);
+
+    AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(1), out var second), "armorer should stay before dirty final carpenter pass");
+    AssertEqualUInt(201u, second.AchievementId);
+    AssertTrue(scheduler.TryTakeDueRequest(now.AddSeconds(5), out var third), "dirty final pass should append behind armorer and respect same-id backoff");
+    AssertEqualUInt(101u, third.AchievementId);
+}
+
+static void ActivitySchedulerQueuesDifferentKeysNormally()
+{
+    var now = new DateTimeOffset(2026, 6, 10, 12, 0, 0, TimeSpan.Zero);
+    var scheduler = new AchievementProgressRequestScheduler(() => now, () => TimeSpan.Zero);
+
+    AssertEqualInt(1, scheduler.EnqueueActivityUpdateAll([101], "activity-log-message-Carpenter", TimeSpan.Zero, new ActivityUpdateKey("Crafting", "Carpenter"), TimeSpan.Zero));
+    AssertEqualInt(1, scheduler.EnqueueActivityUpdateAll([201], "activity-log-message-Armorer", TimeSpan.Zero, new ActivityUpdateKey("Crafting", "Armorer"), TimeSpan.Zero));
+
+    AssertTrue(scheduler.TryTakeDueRequest(now, out var first), "first activity request should be due");
+    AssertEqual(NativeAchievementJobKind.Batch.ToString(), first.JobKind.ToString());
+    AssertEqualInt(1, scheduler.PendingCount);
+}
+
+static void ManualSchedulerRequestsAreNotActivityKeyCoalesced()
+{
+    var now = new DateTimeOffset(2026, 6, 10, 12, 0, 0, TimeSpan.Zero);
+    var scheduler = new AchievementProgressRequestScheduler(() => now, () => TimeSpan.Zero);
+    var key = new ActivityUpdateKey("Crafting", "Carpenter");
+
+    scheduler.EnqueueActivityUpdateAll([101], "activity-trigger", TimeSpan.Zero, key, TimeSpan.Zero);
+    scheduler.EnqueueUpdateAll([201], "manual-update-all", TimeSpan.Zero);
+    AssertEqualInt(2, scheduler.PendingCount);
+    AssertFalse(scheduler.IsActivityKeyDirty(key), "manual update all should not mark activity key dirty");
+}
+
+static void AssertActivityClassification(uint logMessageId, uint classJobId, string expectedCategory, string expectedTrigger)
+{
+    AssertTrue(AchievementActivityUpdateClassifier.TryClassify(logMessageId, "text ignored", classJobId, out var category, out var trigger), $"log id {logMessageId} should classify");
+    AssertEqual(expectedCategory, category);
+    AssertEqual(expectedTrigger, trigger);
 }
 
 static void ActivityClassifierSelectsTrackedAchievementsByCategoryPath()

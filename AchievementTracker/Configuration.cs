@@ -58,8 +58,6 @@ public sealed class Configuration : IPluginConfiguration
 
     public bool TriggerOnCraftingActivities { get; set; } = true;
 
-    public bool TriggerOnCraftingLogActivities { get; set; } = true;
-
     public List<uint> AutoUpdateAchievementIds { get; set; } = [];
 
     public bool ExperimentalDebugLoggingEnabled { get; set; } = true;

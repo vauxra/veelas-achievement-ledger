@@ -306,12 +306,15 @@ public sealed class Plugin : IDalamudPlugin
             this.GetAchievementCategoryName,
             this.GetCurrentClassJobId,
             this.IsActivityTriggerEnabled,
-            this.EnqueueUpdateAchievements,
+            this.EnqueueActivityTriggeredAchievements,
             this.DebugLog);
     }
 
     private string GetAchievementCategoryName(uint achievementId)
         => this.AchievementCatalog.TryGet(achievementId, out var info) ? info.CategoryName : string.Empty;
+
+    private void EnqueueActivityTriggeredAchievements(IEnumerable<uint> achievementIds, string reason, ActivityUpdateKey activityKey, TimeSpan initialDelay)
+        => this.AchievementProgressUpdater.EnqueueActivityUpdateAll(this.FilterUpdateEligibleAchievements(achievementIds, reason), reason, activityKey, initialDelay);
 
     private uint GetCurrentClassJobId()
         => ObjectTable.LocalPlayer?.ClassJob.RowId ?? 0;
@@ -337,7 +340,6 @@ public sealed class Plugin : IDalamudPlugin
             AchievementActivityUpdateClassifier.FishingTrigger => this.Configuration.TriggerOnFisherActivities && this.Configuration.TriggerOnFishingActivities,
             AchievementActivityUpdateClassifier.SpearfishingTrigger => this.Configuration.TriggerOnFisherActivities && this.Configuration.TriggerOnSpearfishingActivities,
             AchievementActivityUpdateClassifier.CraftingTrigger => this.Configuration.TriggerOnCrafterActivities && this.Configuration.TriggerOnCraftingActivities,
-            AchievementActivityUpdateClassifier.CraftingLogTrigger => this.Configuration.TriggerOnCrafterActivities && this.Configuration.TriggerOnCraftingLogActivities,
             _ => false,
         };
     }

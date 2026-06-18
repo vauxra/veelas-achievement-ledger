@@ -13,9 +13,8 @@ public sealed class AchievementActivityUpdateObserver : IDisposable
     private readonly Func<uint, string> categoryNameProvider;
     private readonly Func<uint> currentClassJobIdProvider;
     private readonly Func<string, bool> triggerEnabledProvider;
-    private readonly Action<IEnumerable<uint>, string> enqueueUpdate;
+    private readonly Action<IEnumerable<uint>, string, ActivityUpdateKey, TimeSpan> enqueueUpdate;
     private readonly Action<string> debugLog;
-    private readonly Dictionary<string, DateTimeOffset> lastQueuedAtByCategory = new(StringComparer.Ordinal);
     private bool disposed;
 
     public AchievementActivityUpdateObserver(
@@ -24,7 +23,7 @@ public sealed class AchievementActivityUpdateObserver : IDisposable
         Func<uint, string> categoryNameProvider,
         Func<uint> currentClassJobIdProvider,
         Func<string, bool> triggerEnabledProvider,
-        Action<IEnumerable<uint>, string> enqueueUpdate,
+        Action<IEnumerable<uint>, string, ActivityUpdateKey, TimeSpan> enqueueUpdate,
         Action<string> debugLog)
     {
         this.chatGui = chatGui;
@@ -36,7 +35,6 @@ public sealed class AchievementActivityUpdateObserver : IDisposable
         this.debugLog = debugLog;
 
         this.chatGui.LogMessage += this.OnLogMessage;
-        this.chatGui.ChatMessageUnhandled += this.OnChatMessageUnhandled;
     }
 
     public void Dispose()
@@ -48,7 +46,6 @@ public sealed class AchievementActivityUpdateObserver : IDisposable
 
         this.disposed = true;
         this.chatGui.LogMessage -= this.OnLogMessage;
-        this.chatGui.ChatMessageUnhandled -= this.OnChatMessageUnhandled;
     }
 
     private void OnLogMessage(ILogMessage message)
@@ -57,14 +54,6 @@ public sealed class AchievementActivityUpdateObserver : IDisposable
             message.LogMessageId,
             message.FormatLogMessageForDebugging().ToString(),
             "activity-log-message");
-    }
-
-    private void OnChatMessageUnhandled(IChatMessage message)
-    {
-        this.TryQueueCategoryUpdate(
-            0,
-            message.Message.TextValue,
-            "activity-chat-message");
     }
 
     private void TryQueueCategoryUpdate(uint logMessageId, string messageText, string reason)
@@ -99,16 +88,9 @@ public sealed class AchievementActivityUpdateObserver : IDisposable
             return;
         }
 
-        var now = DateTimeOffset.UtcNow;
-        if (this.lastQueuedAtByCategory.TryGetValue(categoryName, out var lastQueuedAt)
-            && now - lastQueuedAt < TimeSpan.FromSeconds(2))
-        {
-            this.debugLog($"AchieveEx DebugTrace ActivityUpdateDedup reason={reason} logId={logMarker} category={categoryName} trigger={triggerName} currentClassJob={currentClassJobId} count={matchingIds.Count} text='{preview}'");
-            return;
-        }
-
-        this.lastQueuedAtByCategory[categoryName] = now;
-        this.debugLog($"AchieveEx DebugTrace ActivityUpdateQueue reason={reason} logId={logMarker} category={categoryName} trigger={triggerName} currentClassJob={currentClassJobId} count={matchingIds.Count} text='{preview}'");
-        this.enqueueUpdate(matchingIds, $"{reason}-{categoryName}");
+        var activityKey = new ActivityUpdateKey(triggerName, categoryName);
+        var initialDelay = ActivityTriggerDelayPolicy.GetInitialDelay(triggerName);
+        this.debugLog($"AchieveEx DebugTrace ActivityUpdateQueue reason={reason} logId={logMarker} category={categoryName} trigger={triggerName} key={activityKey} currentClassJob={currentClassJobId} count={matchingIds.Count} delaySeconds={initialDelay.TotalSeconds:0} text='{preview}'");
+        this.enqueueUpdate(matchingIds, $"{reason}-{categoryName}", activityKey, initialDelay);
     }
 }

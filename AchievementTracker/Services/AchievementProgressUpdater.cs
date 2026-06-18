@@ -80,6 +80,16 @@ public sealed class AchievementProgressUpdater
 
     public void EnqueueUpdateAll(IEnumerable<uint> achievementIds, string reason)
     {
+        this.EnqueueUpdateAllCore(achievementIds, reason, activityKey: null, initialDelay: TimeSpan.Zero);
+    }
+
+    public void EnqueueActivityUpdateAll(IEnumerable<uint> achievementIds, string reason, ActivityUpdateKey activityKey, TimeSpan initialDelay)
+    {
+        this.EnqueueUpdateAllCore(achievementIds, reason, activityKey, initialDelay);
+    }
+
+    private void EnqueueUpdateAllCore(IEnumerable<uint> achievementIds, string reason, ActivityUpdateKey? activityKey, TimeSpan initialDelay)
+    {
         if (this.nativeCircuitBroken)
         {
             this.debugLog($"AchieveEx DebugTrace QueueRejectedCircuitBroken reason={reason}");
@@ -98,7 +108,7 @@ public sealed class AchievementProgressUpdater
             var skippedCount = beforeCount - ids.Count;
             if (skippedCount > 0)
             {
-                    this.debugLog($"AchieveEx DebugTrace QueueSkipRecentlyObserved reason={reason} skipped={skippedCount} observedThresholdSeconds={ClientAchievementProgressSource.RecentlyObservedUpdateAllSkipThreshold.TotalSeconds:0} sameIdBackoffSeconds={SameAchievementBackoff.TotalSeconds:0}");
+                this.debugLog($"AchieveEx DebugTrace QueueSkipRecentlyObserved reason={reason} skipped={skippedCount} observedThresholdSeconds={ClientAchievementProgressSource.RecentlyObservedUpdateAllSkipThreshold.TotalSeconds:0} sameIdBackoffSeconds={SameAchievementBackoff.TotalSeconds:0}");
             }
         }
 
@@ -117,9 +127,20 @@ public sealed class AchievementProgressUpdater
 
         var baseSpacingSeconds = Math.Clamp(this.updateSpacingSecondsProvider(), 0, 3600);
         this.StartQueueRunIfIdle(now);
-        this.scheduler.EnqueueUpdateAll(ids, reason, TimeSpan.FromSeconds(baseSpacingSeconds));
+        var activePendingBefore = this.scheduler.ActiveOrPendingActivityKeyCount;
+        var added = activityKey.HasValue
+            ? this.scheduler.EnqueueActivityUpdateAll(ids, reason, TimeSpan.FromSeconds(baseSpacingSeconds), activityKey.Value, initialDelay)
+            : this.scheduler.EnqueueUpdateAllAndCount(ids, reason, TimeSpan.FromSeconds(baseSpacingSeconds));
         this.statusText = $"Progress queue: {this.PendingCount} pending.";
-        this.debugLog($"AchieveEx DebugTrace QueueProgressRefresh reason={reason} count={ids.Count} candidates={candidateCount} pending={this.PendingCount} userSpacingSeconds={baseSpacingSeconds} immutableSpacingSeconds={AchievementProgressRequestScheduler.ImmutableActionSpacing.TotalSeconds:0} sameIdBackoffSeconds={SameAchievementBackoff.TotalSeconds:0} jitterSeconds=1-2 executor=unified-native-queue-no-direct-server-call");
+        if (activityKey.HasValue)
+        {
+            var outcome = added > 0 ? "queued" : this.scheduler.IsActivityKeyDirty(activityKey.Value) ? "marked-dirty" : "skipped";
+            this.debugLog($"AchieveEx DebugTrace QueueActivityProgressRefresh outcome={outcome} reason={reason} key={activityKey.Value} count={ids.Count} added={added} candidates={candidateCount} pending={this.PendingCount} activityActivePendingBefore={activePendingBefore} activityActivePendingAfter={this.scheduler.ActiveOrPendingActivityKeyCount} delaySeconds={initialDelay.TotalSeconds:0} userSpacingSeconds={baseSpacingSeconds} immutableSpacingSeconds={AchievementProgressRequestScheduler.ImmutableActionSpacing.TotalSeconds:0} sameIdBackoffSeconds={SameAchievementBackoff.TotalSeconds:0} jitterSeconds=1-2 executor=unified-native-queue-no-direct-server-call");
+        }
+        else
+        {
+            this.debugLog($"AchieveEx DebugTrace QueueProgressRefresh reason={reason} count={ids.Count} candidates={candidateCount} pending={this.PendingCount} userSpacingSeconds={baseSpacingSeconds} immutableSpacingSeconds={AchievementProgressRequestScheduler.ImmutableActionSpacing.TotalSeconds:0} sameIdBackoffSeconds={SameAchievementBackoff.TotalSeconds:0} jitterSeconds=1-2 executor=unified-native-queue-no-direct-server-call");
+        }
     }
 
     public void QueueInspection(uint achievementId, string reason)
@@ -248,6 +269,7 @@ public sealed class AchievementProgressUpdater
         if (!this.nativeAchievementNavigator.OpenAchievement(request.AchievementId))
         {
             this.RegisterNativeFailure($"open-failed-refresh-{request.AchievementId}");
+            this.scheduler.MarkActivityJobSettled(request.JobId, now);
             this.debugLog($"AchieveEx DebugTrace NativeRefreshOpenFailed id={request.AchievementId} reason={request.Reason} pending={this.scheduler.PendingCount}");
             return;
         }
@@ -323,6 +345,7 @@ public sealed class AchievementProgressUpdater
             this.activeNativeRequest = null;
             this.RegisterNativeSuccess();
             this.CompleteRefreshWindowLifecycle(now, request);
+            this.scheduler.MarkActivityJobSettled(request.JobId, now);
             this.MarkNativeRequestSettled(now, request.Reason);
             return;
         }
@@ -333,6 +356,7 @@ public sealed class AchievementProgressUpdater
             this.activeNativeRequest = null;
             this.RegisterNativeFailure($"timeout-{request.AchievementId}");
             this.CompleteRefreshWindowLifecycle(now, request);
+            this.scheduler.MarkActivityJobSettled(request.JobId, now);
             this.MarkNativeRequestSettled(now, request.Reason);
         }
     }
