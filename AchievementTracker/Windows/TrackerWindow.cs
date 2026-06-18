@@ -66,7 +66,6 @@ public sealed class TrackerWindow : Window
     public override void Draw()
     {
         this.DrawToolbar();
-        this.DrawQueueStatus();
         ImGui.Separator();
         this.DrawMainPane();
     }
@@ -141,7 +140,6 @@ public sealed class TrackerWindow : Window
                     this.hideTrackedIcons = !this.hideTrackedIcons;
                     this.resetMainPanelScrollNextDraw = true;
                 }
-                AddTooltip(this.hideTrackedIcons ? "Show tracked achievement icons." : "Hide tracked achievement icons.");
                 break;
         }
     }
@@ -164,17 +162,20 @@ public sealed class TrackerWindow : Window
 
     private bool DrawTrackedButtonsToggle()
     {
-        if (this.hideTrackedIcons)
+        var presentation = TrackedToolbarIconPresentation.ForHiddenState(this.hideTrackedIcons);
+        var hasCustomColor = string.Equals(presentation.ColorName, "Red", StringComparison.Ordinal);
+        if (hasCustomColor)
         {
-            ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.ButtonHovered]);
+            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.9f, 0.15f, 0.15f, 1f));
         }
 
-        var clicked = ImGuiComponents.IconButton("toggle-tracked-buttons", this.hideTrackedIcons ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye);
-        if (this.hideTrackedIcons)
+        var clicked = ImGuiComponents.IconButton("toggle-tracked-buttons", FontAwesomeIcon.Eye);
+        if (hasCustomColor)
         {
             ImGui.PopStyleColor();
         }
 
+        AddTooltip(presentation.Tooltip);
         return clicked;
     }
 
@@ -630,9 +631,16 @@ public sealed class TrackerWindow : Window
 
     private void DrawTrackedColumn()
     {
-        ImGui.TextUnformatted("Tracked achievements");
-        ImGui.Separator();
         var trackedIds = this.plugin.TrackedAchievements.AchievementIds.ToList();
+        var staleTrackedCount = trackedIds.Count(this.IsTrackedAchievementStale);
+        var indicatorState = TrackedUpdateIndicatorPolicy.GetState(
+            this.plugin.AchievementProgressUpdater.PendingCount,
+            this.plugin.AchievementProgressUpdater.IsUpdateInProgress,
+            staleTrackedCount);
+
+        ImGui.TextUnformatted("Tracked achievements");
+        this.DrawTrackedUpdateIndicator(indicatorState, staleTrackedCount);
+        ImGui.Separator();
         if (trackedIds.Count == 0)
         {
             ImGui.TextWrapped("No achievements tracked. Use the search column to add one, or show Lists with the disk icon.");
@@ -645,20 +653,40 @@ public sealed class TrackerWindow : Window
         }
     }
 
+    private void DrawTrackedUpdateIndicator(TrackedUpdateIndicatorState state, int staleTrackedCount)
+    {
+        var (glyph, color, tooltip) = state switch
+        {
+            TrackedUpdateIndicatorState.Working => (this.GetWorkingIndicatorGlyph(), new Vector4(0.4f, 0.7f, 1f, 1f), "Updating tracked achievements."),
+            TrackedUpdateIndicatorState.NeedsUpdate => ("⚠", new Vector4(1f, 0.8f, 0.2f, 1f), $"{staleTrackedCount} tracked achievement{(staleTrackedCount == 1 ? string.Empty : "s")} need{(staleTrackedCount == 1 ? "s" : string.Empty)} an update."),
+            _ => ("✓", new Vector4(0.2f, 0.9f, 0.2f, 1f), "All tracked achievements are updated or complete."),
+        };
+
+        var currentX = ImGui.GetCursorPosX();
+        var width = ImGui.CalcTextSize(glyph).X;
+        var rightX = ImGui.GetWindowContentRegionMax().X - width;
+        ImGui.SameLine();
+        ImGui.SetCursorPosX(Math.Max(currentX, rightX));
+        ImGui.TextColored(color, glyph);
+        AddTooltip(tooltip);
+    }
+
+    private string GetWorkingIndicatorGlyph()
+    {
+        var frame = ((int)(DateTime.UtcNow.TimeOfDay.TotalMilliseconds / 250d)) % 4;
+        return frame switch
+        {
+            0 => "◐",
+            1 => "◓",
+            2 => "◑",
+            _ => "◒",
+        };
+    }
+
     private void DrawTrackedAchievement(uint achievementId)
     {
         _ = this.plugin.AchievementCatalog.TryGet(achievementId, out var info);
-        var progressText = "not updated yet";
-        if (this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row))
-        {
-            var hasObservedProgress = this.plugin.ClientAchievementProgressSource.TryGetObservation(achievementId, out _);
-            var isComplete = this.plugin.AchievementProgressService.IsComplete(row);
-            var hasCosmicProgressOverride = this.plugin.CosmicClassProgressProvider.Handles(row);
-            if (TrackedProgressDisplayPolicy.ShouldEvaluateProgress(hasObservedProgress, isComplete, hasCosmicProgressOverride))
-            {
-                progressText = this.plugin.AchievementProgressService.GetProgress(row).ToDisplayText();
-            }
-        }
+        var progressText = this.GetTrackedProgressText(achievementId);
 
         ImGui.PushID((int)achievementId);
         if (this.ShouldShowTrackedIcon("Auto update"))
@@ -728,6 +756,27 @@ public sealed class TrackerWindow : Window
         ImGui.TextDisabled(progressText);
         ImGui.PopID();
     }
+
+    private string GetTrackedProgressText(uint achievementId)
+    {
+        if (!this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row))
+        {
+            return "not updated yet";
+        }
+
+        var hasObservedProgress = this.plugin.ClientAchievementProgressSource.TryGetObservation(achievementId, out _);
+        var isComplete = this.plugin.AchievementProgressService.IsComplete(row);
+        var hasCosmicProgressOverride = this.plugin.CosmicClassProgressProvider.Handles(row);
+        if (!TrackedProgressDisplayPolicy.ShouldEvaluateProgress(hasObservedProgress, isComplete, hasCosmicProgressOverride))
+        {
+            return "not updated yet";
+        }
+
+        return this.plugin.AchievementProgressService.GetProgress(row).ToDisplayText();
+    }
+
+    private bool IsTrackedAchievementStale(uint achievementId)
+        => string.Equals(this.GetTrackedProgressText(achievementId), "not updated yet", StringComparison.Ordinal);
 
     private void DrawPresetButtons()
     {
@@ -1082,23 +1131,6 @@ public sealed class TrackerWindow : Window
         cached = (kindOrder, categoryOrder, row.Order, row.RowId);
         this.gameSortKeyCache[info.Id] = cached;
         return cached;
-    }
-
-    private void DrawQueueStatus()
-    {
-        var pending = this.plugin.AchievementProgressUpdater.PendingCount;
-        if (pending > 0)
-        {
-            ImGui.TextDisabled($"{pending} pending");
-            return;
-        }
-
-        var nextAuto = this.plugin.AchievementProgressUpdater.NextAutoUpdateAt;
-        if (nextAuto.HasValue)
-        {
-            var seconds = Math.Max(0, (nextAuto.Value - DateTimeOffset.UtcNow).TotalSeconds);
-            ImGui.TextDisabled($"Auto update ({seconds:0}s)");
-        }
     }
 
     private static (string Category, string Subcategory) SplitCategoryPath(string categoryPath)

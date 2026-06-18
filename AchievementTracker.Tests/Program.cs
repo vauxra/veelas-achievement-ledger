@@ -37,6 +37,11 @@ var tests = new List<(string Name, Action Body)>
     ("Native update batches do not park achievement windows", NativeUpdateBatchesDoNotParkAchievementWindows),
     ("Activity classifier matches finish mining to miner category", ActivityClassifierMatchesFinishMiningToMinerCategory),
     ("Activity classifier selects tracked achievements by category path", ActivityClassifierSelectsTrackedAchievementsByCategoryPath),
+    ("Tracked toolbar hidden state shows default eye", TrackedToolbarHiddenStateShowsDefaultEye),
+    ("Tracked toolbar shown state shows red eye", TrackedToolbarShownStateShowsRedEye),
+    ("Tracked update indicator shows working while queue active", TrackedUpdateIndicatorShowsWorkingWhileQueueActive),
+    ("Tracked update indicator shows needs update when stale and idle", TrackedUpdateIndicatorShowsNeedsUpdateWhenStaleAndIdle),
+    ("Tracked update indicator shows all updated when idle without stale rows", TrackedUpdateIndicatorShowsAllUpdatedWhenIdleWithoutStaleRows),
 };
 
 foreach (var test in tests)
@@ -433,6 +438,40 @@ static void ActivityClassifierSelectsTrackedAchievementsByCategoryPath()
 
     var matches = AchievementActivityUpdateClassifier.SelectTrackedIdsForCategory([1, 2, 3], id => categories[id], "Miner");
     AssertSequence(matches, [1]);
+}
+
+static void TrackedToolbarHiddenStateShowsDefaultEye()
+{
+    var presentation = TrackedToolbarIconPresentation.ForHiddenState(hidden: true);
+
+    AssertEqual("Eye", presentation.IconName);
+    AssertEqual("Default", presentation.ColorName);
+    AssertEqual("Show tracked achievement icons.", presentation.Tooltip);
+}
+
+static void TrackedToolbarShownStateShowsRedEye()
+{
+    var presentation = TrackedToolbarIconPresentation.ForHiddenState(hidden: false);
+
+    AssertEqual("Eye", presentation.IconName);
+    AssertEqual("Red", presentation.ColorName);
+    AssertEqual("Hide tracked achievement icons.", presentation.Tooltip);
+}
+
+static void TrackedUpdateIndicatorShowsWorkingWhileQueueActive()
+{
+    AssertEqual(TrackedUpdateIndicatorState.Working.ToString(), TrackedUpdateIndicatorPolicy.GetState(pendingCount: 1, isUpdateInProgress: false, staleTrackedCount: 0).ToString());
+    AssertEqual(TrackedUpdateIndicatorState.Working.ToString(), TrackedUpdateIndicatorPolicy.GetState(pendingCount: 0, isUpdateInProgress: true, staleTrackedCount: 0).ToString());
+}
+
+static void TrackedUpdateIndicatorShowsNeedsUpdateWhenStaleAndIdle()
+{
+    AssertEqual(TrackedUpdateIndicatorState.NeedsUpdate.ToString(), TrackedUpdateIndicatorPolicy.GetState(pendingCount: 0, isUpdateInProgress: false, staleTrackedCount: 1).ToString());
+}
+
+static void TrackedUpdateIndicatorShowsAllUpdatedWhenIdleWithoutStaleRows()
+{
+    AssertEqual(TrackedUpdateIndicatorState.AllUpdated.ToString(), TrackedUpdateIndicatorPolicy.GetState(pendingCount: 0, isUpdateInProgress: false, staleTrackedCount: 0).ToString());
 }
 
 static void AssertEqual(string expected, string actual)

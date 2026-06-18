@@ -703,8 +703,8 @@ public sealed class ConfigWindow : Window
             ["Update All", "Auto update", "Lists", "Search", "Config", "Tracked buttons"]);
 
         ImGui.Separator();
-        ImGui.TextUnformatted("Tracked achievement buttons hidden by the eye-slash button");
-        ImGui.TextDisabled("White eye = normal/default and shows all tracked achievement buttons. Red slash-eye = hide only the checked buttons below.");
+        ImGui.TextUnformatted("Tracked achievement buttons hidden by the red eye button");
+        ImGui.TextDisabled("White eye = normal/default and shows all tracked achievement buttons. Red eye = hide only the checked buttons below.");
         this.DrawHiddenToggleGroup(
             "All tracked achievement buttons",
             this.plugin.Configuration.HiddenTrackedAchievementIcons,
