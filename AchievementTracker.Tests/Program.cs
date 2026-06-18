@@ -35,6 +35,7 @@ var tests = new List<(string Name, Action Body)>
     ("Completion filters wait for loaded achievement state", CompletionFiltersWaitForLoadedAchievementState),
     ("Lumina search all does not wait for loaded achievement state", LuminaSearchAllDoesNotWaitForLoadedAchievementState),
     ("Native update batches do not park achievement windows", NativeUpdateBatchesDoNotParkAchievementWindows),
+    ("Active refresh polls progress slot fallback", ActiveRefreshPollsProgressSlotFallback),
     ("Activity classifier ignores text-only activity messages", ActivityClassifierIgnoresTextOnlyActivityMessages),
     ("Activity classifier matches known log message ids", ActivityClassifierMatchesKnownLogMessageIds),
     ("Activity classifier uses verified crafting success ids only", ActivityClassifierUsesVerifiedCraftingSuccessIdsOnly),
@@ -413,6 +414,13 @@ static void NativeUpdateBatchesDoNotParkAchievementWindows()
     AssertFalse(NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(batchWindowWasOpenBeforeStart: false, completedAtLeastOneRequest: false), "queued native refreshes should not shrink/move the native Achievement window before first row settles");
     AssertFalse(NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(batchWindowWasOpenBeforeStart: false, completedAtLeastOneRequest: true), "queued native refreshes should remain geometry-neutral even after one row settles");
     AssertFalse(NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(batchWindowWasOpenBeforeStart: true, completedAtLeastOneRequest: true), "player-opened Achievement windows should never be parked by update batches");
+}
+
+static void ActiveRefreshPollsProgressSlotFallback()
+{
+    var source = File.ReadAllText("AchievementTracker/Services/AchievementProgressUpdater.cs");
+    AssertTrue(source.Contains("TryGetFreshObservation(request.AchievementId, request.StartedAt", StringComparison.Ordinal), "active native refresh should poll the ClientStructs progress slot fallback instead of relying only on passive hook cache");
+    AssertFalse(source.Contains("TryGetFreshCachedObservation(request.AchievementId, request.StartedAt", StringComparison.Ordinal), "active native refresh must not be hook-cache-only because hook install/firing failures make manual Update All and row refresh time out");
 }
 
 static void ActivityClassifierIgnoresTextOnlyActivityMessages()

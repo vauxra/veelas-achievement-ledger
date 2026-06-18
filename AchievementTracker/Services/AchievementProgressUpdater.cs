@@ -339,7 +339,7 @@ public sealed class AchievementProgressUpdater
             return;
         }
 
-        if (this.progressSource.TryGetFreshCachedObservation(request.AchievementId, request.StartedAt, out var progress))
+        if (this.progressSource.TryGetFreshObservation(request.AchievementId, request.StartedAt, out var progress))
         {
             this.debugLog($"AchieveEx DebugTrace NativeRefreshLoaded id={request.AchievementId} reason={request.Reason} current={progress.Current} max={progress.Max} source={progress.Source} elapsedMs={(now - request.StartedAt).TotalMilliseconds:0}");
             this.activeNativeRequest = null;
