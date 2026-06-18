@@ -42,6 +42,8 @@ var tests = new List<(string Name, Action Body)>
     ("Tracked update indicator shows working while queue active", TrackedUpdateIndicatorShowsWorkingWhileQueueActive),
     ("Tracked update indicator shows needs update when stale and idle", TrackedUpdateIndicatorShowsNeedsUpdateWhenStaleAndIdle),
     ("Tracked update indicator shows all updated when idle without stale rows", TrackedUpdateIndicatorShowsAllUpdatedWhenIdleWithoutStaleRows),
+    ("Auto update status row formats running queue", AutoUpdateStatusRowFormatsRunningQueue),
+    ("Auto update status row formats idle queue", AutoUpdateStatusRowFormatsIdleQueue),
 };
 
 foreach (var test in tests)
@@ -472,6 +474,20 @@ static void TrackedUpdateIndicatorShowsNeedsUpdateWhenStaleAndIdle()
 static void TrackedUpdateIndicatorShowsAllUpdatedWhenIdleWithoutStaleRows()
 {
     AssertEqual(TrackedUpdateIndicatorState.AllUpdated.ToString(), TrackedUpdateIndicatorPolicy.GetState(pendingCount: 0, isUpdateInProgress: false, staleTrackedCount: 0).ToString());
+}
+
+static void AutoUpdateStatusRowFormatsRunningQueue()
+{
+    var text = AutoUpdateQueueStatusRow.Format(isRunning: true, tasksLeft: 3, elapsed: TimeSpan.FromSeconds(65));
+
+    AssertEqual("Status: Running — 3 tasks left — running 1m 05s", text);
+}
+
+static void AutoUpdateStatusRowFormatsIdleQueue()
+{
+    var text = AutoUpdateQueueStatusRow.Format(isRunning: false, tasksLeft: 0, elapsed: null);
+
+    AssertEqual("Status: Idle — 0 tasks left — running 0s", text);
 }
 
 static void AssertEqual(string expected, string actual)

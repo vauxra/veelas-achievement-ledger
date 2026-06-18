@@ -35,6 +35,7 @@ public sealed class AchievementProgressUpdater
     private int consecutiveNativeFailures;
     private bool nativeCircuitBroken;
     private string statusText = string.Empty;
+    private DateTimeOffset? queueRunStartedAt;
 
     public AchievementProgressUpdater(
         ClientAchievementProgressSource progressSource,
@@ -66,6 +67,10 @@ public sealed class AchievementProgressUpdater
 
     public bool IsUpdateInProgress => this.activeNativeRequest.HasValue
         || this.scheduler.HasPendingRequests;
+
+    public TimeSpan? QueueElapsed => this.queueRunStartedAt.HasValue
+        ? DateTimeOffset.UtcNow - this.queueRunStartedAt.Value
+        : null;
 
     public bool IsNativeCircuitBroken => this.nativeCircuitBroken;
 
@@ -111,6 +116,7 @@ public sealed class AchievementProgressUpdater
         }
 
         var baseSpacingSeconds = Math.Clamp(this.updateSpacingSecondsProvider(), 0, 3600);
+        this.StartQueueRunIfIdle(now);
         this.scheduler.EnqueueUpdateAll(ids, reason, TimeSpan.FromSeconds(baseSpacingSeconds));
         this.statusText = $"Progress queue: {this.PendingCount} pending.";
         this.debugLog($"AchieveEx DebugTrace QueueProgressRefresh reason={reason} count={ids.Count} candidates={candidateCount} pending={this.PendingCount} userSpacingSeconds={baseSpacingSeconds} immutableSpacingSeconds={AchievementProgressRequestScheduler.ImmutableActionSpacing.TotalSeconds:0} sameIdBackoffSeconds={SameAchievementBackoff.TotalSeconds:0} jitterSeconds=1-2 executor=unified-native-queue-no-direct-server-call");
@@ -129,7 +135,13 @@ public sealed class AchievementProgressUpdater
             return;
         }
 
+        var wasIdle = !this.IsUpdateInProgress;
         var queued = this.scheduler.EnqueueInspection(achievementId, reason);
+        if (queued && wasIdle)
+        {
+            this.queueRunStartedAt = DateTimeOffset.UtcNow;
+        }
+
         this.statusText = queued ? "Native Achievement open queued." : "Native Achievement open already queued or queue is full.";
         this.debugLog($"AchieveEx DebugTrace NativeInspectionQueued id={achievementId} reason={reason} queued={queued} pending={this.PendingCount} maxPending={AchievementProgressRequestScheduler.MaxPendingRequests} inputBufferMs={NativeOpenInputBuffer.TotalMilliseconds:0}");
     }
@@ -147,6 +159,7 @@ public sealed class AchievementProgressUpdater
         this.MaybeEnqueueAutoUpdate(now);
         this.ProcessActiveNativeRequest(now);
         this.TryApplyPendingNativeWindowScale(now);
+        this.FinishQueueRunIfIdle();
 
         if (this.activeNativeRequest.HasValue || now < this.nextNativeOpenAllowedAt)
         {
@@ -167,6 +180,7 @@ public sealed class AchievementProgressUpdater
         this.nextAutoUpdateAt = DateTimeOffset.MinValue;
         this.ClearPendingScaleOperations();
         this.statusText = string.Empty;
+        this.queueRunStartedAt = null;
     }
 
     public void ResetAutoUpdateCountdown()
@@ -178,6 +192,22 @@ public sealed class AchievementProgressUpdater
     private static bool IsUpdateAllReason(string reason)
         => string.Equals(reason, "manual-update-all", StringComparison.Ordinal)
             || string.Equals(reason, "auto-update", StringComparison.Ordinal);
+
+    private void StartQueueRunIfIdle(DateTimeOffset now)
+    {
+        if (!this.queueRunStartedAt.HasValue && !this.IsUpdateInProgress)
+        {
+            this.queueRunStartedAt = now;
+        }
+    }
+
+    private void FinishQueueRunIfIdle()
+    {
+        if (!this.IsUpdateInProgress)
+        {
+            this.queueRunStartedAt = null;
+        }
+    }
 
     public static IReadOnlyList<uint> LimitNativeRefreshBatch(IReadOnlyList<uint> achievementIds)
         => achievementIds.Take(MaximumNativeRefreshesPerEnqueue).ToList();

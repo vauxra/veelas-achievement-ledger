@@ -534,6 +534,9 @@ public sealed class ConfigWindow : Window
             this.plugin.StopAutoUpdateAndClearQueue();
         }
         this.AddTooltip("Disable auto update and clear queue.");
+        ImGui.NewLine();
+
+        this.DrawAutoUpdateStatusRow();
 
         var interval = Math.Clamp(this.plugin.Configuration.ExperimentalAutoUpdateIntervalSeconds, 1, 86_400);
         ImGui.SetNextItemWidth(120);
@@ -566,6 +569,17 @@ public sealed class ConfigWindow : Window
 
 
         ImGui.Separator();
+    }
+
+    private void DrawAutoUpdateStatusRow()
+    {
+        var updater = this.plugin.AchievementProgressUpdater;
+        var text = AutoUpdateQueueStatusRow.Format(
+            updater.IsUpdateInProgress,
+            updater.PendingCount,
+            updater.QueueElapsed);
+        ImGui.TextDisabled(text);
+        this.AddTooltip("Shows whether update jobs are running, remaining queued tasks, and how long the current queue has been active.");
     }
 
 
