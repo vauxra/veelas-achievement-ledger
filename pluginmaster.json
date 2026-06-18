@@ -18,11 +18,11 @@
         "IsTestingExclusive": true,
         "DownloadLinkInstall": "",
         "DownloadLinkUpdate": "",
-        "LastUpdate": "1781817867",
-        "TestingAssemblyVersion": "0.3.2.3",
+        "LastUpdate": "1781818079",
+        "TestingAssemblyVersion": "0.3.2.4",
         "TestingDalamudApiLevel": 15,
         "TestingChangelog": "Restores progress-slot polling fallback for manual Update All and row refresh while preserving 0.3.2 event-trigger queue fixes.",
-        "DownloadLinkTesting": "https://github.com/vauxra/achieve-ex/releases/download/v0.3.2.3/AchieveExPlus_0_3_2_3.zip",
+        "DownloadLinkTesting": "https://github.com/vauxra/achieve-ex/releases/download/v0.3.2.4/AchieveExPlus_0_3_2_4.zip",
         "IconUrl": "https://raw.githubusercontent.com/vauxra/achieve-ex/achieve-ex-experimental/AchievementTracker/images/icon.png",
         "ImageUrls": []
     }
