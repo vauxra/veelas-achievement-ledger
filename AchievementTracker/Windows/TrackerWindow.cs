@@ -655,33 +655,27 @@ public sealed class TrackerWindow : Window
 
     private void DrawTrackedUpdateIndicator(TrackedUpdateIndicatorState state, int staleTrackedCount)
     {
-        var (glyph, color, tooltip) = state switch
+        var (icon, color, tooltip) = state switch
         {
-            TrackedUpdateIndicatorState.Working => (this.GetWorkingIndicatorGlyph(), new Vector4(0.4f, 0.7f, 1f, 1f), "Updating tracked achievements."),
-            TrackedUpdateIndicatorState.NeedsUpdate => ("✕", new Vector4(1f, 0.8f, 0.2f, 1f), $"{staleTrackedCount} tracked achievement{(staleTrackedCount == 1 ? string.Empty : "s")} need{(staleTrackedCount == 1 ? "s" : string.Empty)} an update."),
-            _ => ("✓", new Vector4(0.2f, 0.9f, 0.2f, 1f), "All tracked achievements are updated or complete."),
+            TrackedUpdateIndicatorState.Working => (FontAwesomeIcon.SyncAlt, new Vector4(0.4f, 0.7f, 1f, 1f), "Updating tracked achievements."),
+            TrackedUpdateIndicatorState.NeedsUpdate => (FontAwesomeIcon.Times, new Vector4(1f, 0.8f, 0.2f, 1f), $"{staleTrackedCount} tracked achievement{(staleTrackedCount == 1 ? string.Empty : "s")} need{(staleTrackedCount == 1 ? "s" : string.Empty)} an update."),
+            _ => (FontAwesomeIcon.Check, new Vector4(0.2f, 0.9f, 0.2f, 1f), "All tracked achievements are updated or complete."),
         };
+        var glyph = IconString(icon);
 
+        ImGui.PushFont(UiBuilder.IconFontFixedWidth);
         var currentX = ImGui.GetCursorPosX();
         var width = ImGui.CalcTextSize(glyph).X;
         var rightX = ImGui.GetWindowContentRegionMax().X - width;
         ImGui.SameLine();
         ImGui.SetCursorPosX(Math.Max(currentX, rightX));
         ImGui.TextColored(color, glyph);
+        ImGui.PopFont();
         AddTooltip(tooltip);
     }
 
-    private string GetWorkingIndicatorGlyph()
-    {
-        var frame = ((int)(DateTime.UtcNow.TimeOfDay.TotalMilliseconds / 250d)) % 4;
-        return frame switch
-        {
-            0 => "↻",
-            1 => "↷",
-            2 => "⟳",
-            _ => "↺",
-        };
-    }
+    private static string IconString(FontAwesomeIcon icon)
+        => char.ConvertFromUtf32((int)icon);
 
     private void DrawTrackedAchievement(uint achievementId)
     {
