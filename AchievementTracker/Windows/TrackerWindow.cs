@@ -658,7 +658,7 @@ public sealed class TrackerWindow : Window
         var (glyph, color, tooltip) = state switch
         {
             TrackedUpdateIndicatorState.Working => (this.GetWorkingIndicatorGlyph(), new Vector4(0.4f, 0.7f, 1f, 1f), "Updating tracked achievements."),
-            TrackedUpdateIndicatorState.NeedsUpdate => ("⚠", new Vector4(1f, 0.8f, 0.2f, 1f), $"{staleTrackedCount} tracked achievement{(staleTrackedCount == 1 ? string.Empty : "s")} need{(staleTrackedCount == 1 ? "s" : string.Empty)} an update."),
+            TrackedUpdateIndicatorState.NeedsUpdate => ("✕", new Vector4(1f, 0.8f, 0.2f, 1f), $"{staleTrackedCount} tracked achievement{(staleTrackedCount == 1 ? string.Empty : "s")} need{(staleTrackedCount == 1 ? "s" : string.Empty)} an update."),
             _ => ("✓", new Vector4(0.2f, 0.9f, 0.2f, 1f), "All tracked achievements are updated or complete."),
         };
 
@@ -676,10 +676,10 @@ public sealed class TrackerWindow : Window
         var frame = ((int)(DateTime.UtcNow.TimeOfDay.TotalMilliseconds / 250d)) % 4;
         return frame switch
         {
-            0 => "◐",
-            1 => "◓",
-            2 => "◑",
-            _ => "◒",
+            0 => "↻",
+            1 => "↷",
+            2 => "⟳",
+            _ => "↺",
         };
     }
 
