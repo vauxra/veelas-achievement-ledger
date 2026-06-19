@@ -12,6 +12,7 @@ public sealed class AchievementProgressUpdater
     private static readonly TimeSpan RefreshMinimumWait = TimeSpan.FromSeconds(1.5);
     private static readonly TimeSpan RefreshMaximumWait = TimeSpan.FromSeconds(15);
     private static readonly TimeSpan PostProgressSettleMinimum = TimeSpan.Zero;
+    private static readonly TimeSpan NativeScaleOperationRetryWindow = TimeSpan.FromSeconds(8);
     private const int MaxConsecutiveNativeFailures = 3;
     private const int MaximumNativeRefreshesPerEnqueue = AchievementProgressRequestScheduler.MaxPendingRequests;
 
@@ -469,7 +470,7 @@ public sealed class AchievementProgressUpdater
         this.pendingParkForActiveRefresh |= parkForRefresh;
         this.pendingRestoreForInspection |= restoreForInspection;
         this.pendingRestoreWhenIdle |= restoreWhenIdle;
-        this.pendingScaleOperationUntil = now.AddSeconds(3);
+        this.pendingScaleOperationUntil = now + NativeScaleOperationRetryWindow;
         this.TryApplyPendingNativeWindowScale(now);
     }
 

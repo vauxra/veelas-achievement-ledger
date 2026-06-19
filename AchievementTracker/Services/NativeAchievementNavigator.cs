@@ -94,7 +94,7 @@ public unsafe sealed class NativeAchievementNavigator
         }
 
         var currentState = new ParkedAchievementWindowState(addon.X, addon.Y, addon.Scale);
-        if (!IsParkedState(currentState))
+        if (!IsParkedState(currentState) && NativeAchievementWindowScalePolicy.IsRestorableUserScale(currentState.Scale))
         {
             this.lastUserWindowState = currentState;
             this.parkedState ??= currentState;
@@ -118,6 +118,12 @@ public unsafe sealed class NativeAchievementNavigator
         }
 
         var state = stateToRestore.Value;
+        if (!NativeAchievementWindowScalePolicy.IsRestorableUserScale(state.Scale))
+        {
+            this.parkedState = null;
+            return this.ResetAchievementWindowScale();
+        }
+
         var addon = this.gameGui.GetAddonByName(AchievementAddonName, 1);
         if (addon.IsNull || !addon.IsReady || !addon.IsVisible || addon.Address == IntPtr.Zero)
         {

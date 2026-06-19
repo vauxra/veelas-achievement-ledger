@@ -26,6 +26,7 @@ var tests = new List<(string Name, Action Body)>
     ("Scale policy closes only at refresh job end", ScalePolicyClosesOnlyAtRefreshJobEnd),
     ("Scale policy parks refresh only when native window was closed", ScalePolicyParksRefreshOnlyWhenNativeWindowWasClosed),
     ("Scale policy restores inspection actions", ScalePolicyRestoresInspectionActions),
+    ("Scale policy rejects parked scales as user restore state", ScalePolicyRejectsParkedScalesAsUserRestoreState),
     ("Scale policy restores when idle only for parked windows", ScalePolicyRestoresWhenIdleOnlyForParkedWindows),
     ("Scale policy restores only on user-visible reopen", ScalePolicyRestoresOnlyOnUserVisibleReopen),
     ("Configuration defaults use requested main column widths", ConfigurationDefaultsUseRequestedMainColumnWidths),
@@ -343,6 +344,14 @@ static void ScalePolicyRestoresInspectionActions()
 {
     AssertTrue(NativeAchievementWindowScalePolicy.ShouldRestoreForAction(NativeAchievementActionKind.Inspection), "inspection should restore");
     AssertFalse(NativeAchievementWindowScalePolicy.ShouldRestoreForAction(NativeAchievementActionKind.Refresh), "refresh should not restore at start");
+}
+
+static void ScalePolicyRejectsParkedScalesAsUserRestoreState()
+{
+    AssertFalse(NativeAchievementWindowScalePolicy.IsRestorableUserScale(NativeAchievementNavigator.ParkedScale), "current tiny parked scale should not be restored as a user scale");
+    AssertFalse(NativeAchievementWindowScalePolicy.IsRestorableUserScale(0.55f), "legacy parked scale should not be restored as a user scale");
+    AssertTrue(NativeAchievementWindowScalePolicy.IsRestorableUserScale(0.56f), "ordinary user scales above legacy parking should be restorable");
+    AssertTrue(NativeAchievementWindowScalePolicy.IsRestorableUserScale(1.0f), "default scale should be restorable");
 }
 
 static void ScalePolicyRestoresWhenIdleOnlyForParkedWindows()
