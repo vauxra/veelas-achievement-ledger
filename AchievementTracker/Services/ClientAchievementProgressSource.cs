@@ -13,6 +13,8 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
     private readonly Action<string> debugLog;
     private string lastSlotDebugLine = string.Empty;
     private DateTimeOffset nextPassiveCacheReadAt = DateTimeOffset.MinValue;
+    private bool lastProgressSlotWasLoaded;
+    private ProgressSlotFingerprint lastProgressSlotFingerprint;
 
     public ClientAchievementProgressSource(Action<string>? debugLog = null)
     {
@@ -50,9 +52,18 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
 
         if (state != Achievement.AchievementState.Loaded || max == 0)
         {
+            this.lastProgressSlotWasLoaded = false;
             return;
         }
 
+        var fingerprint = new ProgressSlotFingerprint(achievementId, current, max);
+        if (!ShouldRecordProgressSlotObservation(this.lastProgressSlotWasLoaded, this.lastProgressSlotFingerprint, fingerprint))
+        {
+            return;
+        }
+
+        this.lastProgressSlotWasLoaded = true;
+        this.lastProgressSlotFingerprint = fingerprint;
         this.cachedProgress[achievementId] = new ObservedAchievementProgress(current, max, DateTimeOffset.UtcNow, "Achievement state slot");
         if (current >= max)
         {
@@ -134,4 +145,12 @@ public unsafe sealed class ClientAchievementProgressSource : IAchievementProgres
     }
 
     public bool IsObservedComplete(uint achievementId) => this.observedCompletions.Contains(achievementId);
+
+    public static bool ShouldRecordProgressSlotObservation(
+        bool previousSlotWasLoaded,
+        ProgressSlotFingerprint previousFingerprint,
+        ProgressSlotFingerprint currentFingerprint)
+        => !previousSlotWasLoaded || previousFingerprint != currentFingerprint;
+
+    public readonly record struct ProgressSlotFingerprint(uint AchievementId, uint Current, uint Max);
 }

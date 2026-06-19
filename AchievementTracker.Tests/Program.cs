@@ -36,6 +36,7 @@ var tests = new List<(string Name, Action Body)>
     ("Lumina search all does not wait for loaded achievement state", LuminaSearchAllDoesNotWaitForLoadedAchievementState),
     ("Native update batches do not park achievement windows", NativeUpdateBatchesDoNotParkAchievementWindows),
     ("Active refresh polls progress slot fallback", ActiveRefreshPollsProgressSlotFallback),
+    ("Progress slot fallback does not restamp unchanged loaded slot", ProgressSlotFallbackDoesNotRestampUnchangedLoadedSlot),
     ("Activity classifier ignores text-only activity messages", ActivityClassifierIgnoresTextOnlyActivityMessages),
     ("Activity classifier matches known log message ids", ActivityClassifierMatchesKnownLogMessageIds),
     ("Activity classifier uses verified crafting success ids only", ActivityClassifierUsesVerifiedCraftingSuccessIdsOnly),
@@ -421,6 +422,19 @@ static void ActiveRefreshPollsProgressSlotFallback()
     var source = File.ReadAllText("AchievementTracker/Services/AchievementProgressUpdater.cs");
     AssertTrue(source.Contains("TryGetFreshObservation(request.AchievementId, request.StartedAt", StringComparison.Ordinal), "active native refresh should poll the ClientStructs progress slot fallback instead of relying only on passive hook cache");
     AssertFalse(source.Contains("TryGetFreshCachedObservation(request.AchievementId, request.StartedAt", StringComparison.Ordinal), "active native refresh must not be hook-cache-only because hook install/firing failures make manual Update All and row refresh time out");
+}
+
+static void ProgressSlotFallbackDoesNotRestampUnchangedLoadedSlot()
+{
+    var previous = new ClientAchievementProgressSource.ProgressSlotFingerprint(750, 10, 100);
+    var same = new ClientAchievementProgressSource.ProgressSlotFingerprint(750, 10, 100);
+    var changedProgress = new ClientAchievementProgressSource.ProgressSlotFingerprint(750, 11, 100);
+    var changedAchievement = new ClientAchievementProgressSource.ProgressSlotFingerprint(751, 10, 500);
+
+    AssertTrue(ClientAchievementProgressSource.ShouldRecordProgressSlotObservation(previousSlotWasLoaded: false, previous, same), "first loaded slot sample should be recorded");
+    AssertFalse(ClientAchievementProgressSource.ShouldRecordProgressSlotObservation(previousSlotWasLoaded: true, previous, same), "unchanged loaded slot should not get a new timestamp because that makes active refreshes close early on stale progress");
+    AssertTrue(ClientAchievementProgressSource.ShouldRecordProgressSlotObservation(previousSlotWasLoaded: true, previous, changedProgress), "changed current progress should be recorded");
+    AssertTrue(ClientAchievementProgressSource.ShouldRecordProgressSlotObservation(previousSlotWasLoaded: true, previous, changedAchievement), "changed achievement id should be recorded");
 }
 
 static void ActivityClassifierIgnoresTextOnlyActivityMessages()
