@@ -18,11 +18,11 @@
         "IsTestingExclusive": true,
         "DownloadLinkInstall": "",
         "DownloadLinkUpdate": "",
-        "LastUpdate": "1781818079",
-        "TestingAssemblyVersion": "0.3.2.4",
+        "LastUpdate": "1781832041",
+        "TestingAssemblyVersion": "0.3.2.6",
         "TestingDalamudApiLevel": 15,
-        "TestingChangelog": "Restores progress-slot polling fallback for manual Update All and row refresh while preserving 0.3.2 event-trigger queue fixes.",
-        "DownloadLinkTesting": "https://github.com/vauxra/achieve-ex/releases/download/v0.3.2.4/AchieveExPlus_0_3_2_4.zip",
+        "TestingChangelog": "Fixes native Achievement magnifying-glass inspect restore from tracked/search rows, and prevents stale progress-slot samples from completing event refreshes early.",
+        "DownloadLinkTesting": "https://github.com/vauxra/achieve-ex/releases/download/v0.3.2.6/AchieveExPlus_0_3_2_6.zip",
         "IconUrl": "https://raw.githubusercontent.com/vauxra/achieve-ex/achieve-ex-experimental/AchievementTracker/images/icon.png",
         "ImageUrls": []
     }
