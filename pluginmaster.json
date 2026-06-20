@@ -18,11 +18,11 @@
         "IsTestingExclusive": true,
         "DownloadLinkInstall": "",
         "DownloadLinkUpdate": "",
-        "LastUpdate": "1781832041",
-        "TestingAssemblyVersion": "0.3.2.6",
+        "LastUpdate": "1781996738",
+        "TestingAssemblyVersion": "0.3.3.1",
         "TestingDalamudApiLevel": 15,
-        "TestingChangelog": "Fixes native Achievement magnifying-glass inspect restore from tracked/search rows, and prevents stale progress-slot samples from completing event refreshes early.",
-        "DownloadLinkTesting": "https://github.com/vauxra/achieve-ex/releases/download/v0.3.2.6/AchieveExPlus_0_3_2_6.zip",
+        "TestingChangelog": "Links search/category counts to the completion filter, adds tracked-row right-click removal, and excludes Cosmic/WKS-backed achievements from event-triggered native updates.",
+        "DownloadLinkTesting": "https://github.com/vauxra/achieve-ex/releases/download/v0.3.3.1/AchieveExPlus_0_3_3_1.zip",
         "IconUrl": "https://raw.githubusercontent.com/vauxra/achieve-ex/achieve-ex-experimental/AchievementTracker/images/icon.png",
         "ImageUrls": []
     }
