@@ -34,6 +34,7 @@ var tests = new List<(string Name, Action Body)>
     ("Cosmic progress override parses achievement details", CosmicProgressOverrideParsesAchievementDetails),
     ("Auto updater selects only explicitly included tracked achievements", AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements),
     ("Completion filters wait for loaded achievement state", CompletionFiltersWaitForLoadedAchievementState),
+    ("Completion-filtered counts fall back to all while unloaded", CompletionFilteredCountsFallBackToAllWhileUnloaded),
     ("Lumina search all does not wait for loaded achievement state", LuminaSearchAllDoesNotWaitForLoadedAchievementState),
     ("Native update batches do not park achievement windows", NativeUpdateBatchesDoNotParkAchievementWindows),
     ("Active refresh polls progress slot fallback", ActiveRefreshPollsProgressSlotFallback),
@@ -403,13 +404,20 @@ static void AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements()
 
 static void CompletionFiltersWaitForLoadedAchievementState()
 {
-    AssertFalse(SearchCompletionFilterPolicy.CanEvaluate("Completed", completionStateLoaded: false, updateInProgress: false), "Completed search should wait for loaded completion state");
-    AssertFalse(SearchCompletionFilterPolicy.CanEvaluate("Incomplete", completionStateLoaded: false, updateInProgress: false), "Incomplete search should wait for loaded completion state");
-    AssertTrue(SearchCompletionFilterPolicy.CanEvaluate("Completed", completionStateLoaded: true, updateInProgress: false), "Completed search can run after completion state loads");
-    AssertTrue(SearchCompletionFilterPolicy.Matches("Completed", isComplete: true), "completed filter should match completed rows");
-    AssertFalse(SearchCompletionFilterPolicy.Matches("Completed", isComplete: false), "completed filter should reject incomplete rows");
-    AssertTrue(SearchCompletionFilterPolicy.Matches("Incomplete", isComplete: false), "incomplete filter should match incomplete rows");
-    AssertFalse(SearchCompletionFilterPolicy.Matches("Incomplete", isComplete: true), "incomplete filter should reject completed rows");
+    AssertTrue(SearchCompletionFilterPolicy.CanEvaluate("All", completionStateLoaded: false, updateInProgress: false), "All should not need live completion state");
+    AssertFalse(SearchCompletionFilterPolicy.CanEvaluate("Completed", completionStateLoaded: false, updateInProgress: false), "Completed should wait for completion state");
+    AssertFalse(SearchCompletionFilterPolicy.CanEvaluate("Incomplete", completionStateLoaded: false, updateInProgress: false), "Incomplete should wait for completion state");
+    AssertTrue(SearchCompletionFilterPolicy.CanEvaluate("Completed", completionStateLoaded: true, updateInProgress: false), "Completed should work after load");
+}
+
+static void CompletionFilteredCountsFallBackToAllWhileUnloaded()
+{
+    AssertTrue(SearchCompletionFilterPolicy.MatchesForCount("Completed", completionStateLoaded: false, isComplete: false), "category/search counts should stay all-counts until completion state is loaded");
+    AssertTrue(SearchCompletionFilterPolicy.MatchesForCount("Incomplete", completionStateLoaded: false, isComplete: true), "category/search counts should stay all-counts until completion state is loaded");
+    AssertTrue(SearchCompletionFilterPolicy.MatchesForCount("Completed", completionStateLoaded: true, isComplete: true), "completed counts include complete rows after load");
+    AssertFalse(SearchCompletionFilterPolicy.MatchesForCount("Completed", completionStateLoaded: true, isComplete: false), "completed counts exclude incomplete rows after load");
+    AssertTrue(SearchCompletionFilterPolicy.MatchesForCount("Incomplete", completionStateLoaded: true, isComplete: false), "incomplete counts include incomplete rows after load");
+    AssertFalse(SearchCompletionFilterPolicy.MatchesForCount("Incomplete", completionStateLoaded: true, isComplete: true), "incomplete counts exclude complete rows after load");
 }
 
 static void LuminaSearchAllDoesNotWaitForLoadedAchievementState()

@@ -309,7 +309,8 @@ public sealed class TrackerWindow : Window
     private void DrawAchievementCategoryColumn()
     {
         var searchableAchievements = this.GetSearchableAchievements();
-        ImGui.TextUnformatted($"Achievement categories ({searchableAchievements.Count})");
+        var completionFilteredCategoryCount = searchableAchievements.Count(this.MatchesCompletionCountFilter);
+        ImGui.TextUnformatted($"Achievement categories ({completionFilteredCategoryCount})");
         this.DrawDisabledWrapped("Ctrl-click to select multiple categories or subcategories.");
         ImGui.Separator();
 
@@ -317,7 +318,8 @@ public sealed class TrackerWindow : Window
         {
             var categoryKey = categoryGroup.Category;
             var selectedCategory = this.selectedCategoryFilters.Contains(categoryKey);
-            var categoryLabel = $"{categoryKey} ({categoryGroup.Entries.Count})";
+            var categoryCount = categoryGroup.Entries.Count(entry => this.MatchesCompletionCountFilter(entry.Info));
+            var categoryLabel = $"{categoryKey} ({categoryCount})";
             var collapsed = this.collapsedSearchCategories.Contains(categoryKey);
 
             ImGui.PushID($"category-{categoryKey}");
@@ -351,7 +353,8 @@ public sealed class TrackerWindow : Window
             {
                 var subcategoryKey = BuildSubcategoryFilterKey(categoryKey, subcategoryGroup.Key);
                 var selected = this.selectedSubcategoryFilters.Contains(subcategoryKey);
-                var subcategoryLabel = $"{subcategoryGroup.Key} ({subcategoryGroup.Count()})";
+                var subcategoryCount = subcategoryGroup.Count(entry => this.MatchesCompletionCountFilter(entry.Info));
+                var subcategoryLabel = $"{subcategoryGroup.Key} ({subcategoryCount})";
                 ImGui.PushID(subcategoryKey);
                 if (ImGui.Selectable(subcategoryLabel, selected))
                 {
@@ -466,7 +469,11 @@ public sealed class TrackerWindow : Window
 
         ImGui.Separator();
         var shownCount = matchingResults.Count;
-        this.DrawDisabledWrapped($"Results: {shownCount}");
+        var completionFilter = this.plugin.Configuration.SearchCompletionFilter;
+        var countLabel = string.Equals(completionFilter, SearchCompletionFilterPolicy.All, StringComparison.Ordinal)
+            ? $"Results: {shownCount}"
+            : $"Results: {shownCount} {completionFilter.ToLowerInvariant()} / {searchResults.QueryFilteredCount} matching search/category";
+        this.DrawDisabledWrapped(countLabel);
 
         if (matchingResults.Count == 0)
         {
@@ -681,8 +688,10 @@ public sealed class TrackerWindow : Window
     {
         _ = this.plugin.AchievementCatalog.TryGet(achievementId, out var info);
         var progressText = this.GetTrackedProgressText(achievementId);
+        var removeRequested = false;
 
         ImGui.PushID((int)achievementId);
+        ImGui.BeginGroup();
         if (this.ShouldShowTrackedIcon("Auto update"))
         {
             var included = this.plugin.Configuration.AutoUpdateAchievementIds.Contains(achievementId);
@@ -708,9 +717,7 @@ public sealed class TrackerWindow : Window
         {
             if (ImGuiComponents.IconButton("tracked-remove-main", FontAwesomeIcon.Times))
             {
-                _ = this.RemoveTrackedAchievement(achievementId);
-                ImGui.PopID();
-                return;
+                removeRequested = true;
             }
             AddTooltip("Remove from tracked.");
             ImGui.SameLine();
@@ -748,6 +755,25 @@ public sealed class TrackerWindow : Window
 
         ImGui.TextWrapped(info.Name);
         ImGui.TextDisabled(progressText);
+        ImGui.EndGroup();
+
+        if (ImGui.BeginPopupContextItem("tracked-achievement-context"))
+        {
+            ImGui.TextUnformatted(info.Name);
+            ImGui.Separator();
+            if (ImGui.MenuItem("Remove from tracked list"))
+            {
+                removeRequested = true;
+            }
+
+            ImGui.EndPopup();
+        }
+
+        if (removeRequested)
+        {
+            _ = this.RemoveTrackedAchievement(achievementId);
+        }
+
         ImGui.PopID();
     }
 
@@ -1029,6 +1055,12 @@ public sealed class TrackerWindow : Window
 
         return SearchCompletionFilterPolicy.Matches(this.plugin.Configuration.SearchCompletionFilter, this.IsComplete(info.Id));
     }
+
+    private bool MatchesCompletionCountFilter(AchievementInfo info)
+        => SearchCompletionFilterPolicy.MatchesForCount(
+            this.plugin.Configuration.SearchCompletionFilter,
+            this.plugin.AchievementProgressService.AreCompletionStatesLoaded,
+            this.IsComplete(info.Id));
 
     private bool ShouldShowTrackedIcon(string iconName)
         => !this.hideTrackedIcons || !this.plugin.Configuration.HiddenTrackedAchievementIcons.Contains(iconName);

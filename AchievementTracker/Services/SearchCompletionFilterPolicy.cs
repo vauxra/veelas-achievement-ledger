@@ -19,4 +19,9 @@ public static class SearchCompletionFilterPolicy
             Incomplete => !isComplete,
             _ => true,
         };
+
+    public static bool MatchesForCount(string filter, bool completionStateLoaded, bool isComplete)
+        => CanEvaluate(filter, completionStateLoaded, updateInProgress: false)
+            ? Matches(filter, isComplete)
+            : true;
 }
