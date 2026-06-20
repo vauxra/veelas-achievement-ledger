@@ -320,9 +320,24 @@ public sealed class Plugin : IDalamudPlugin
         => ObjectTable.LocalPlayer?.ClassJob.RowId ?? 0;
 
     private IReadOnlyList<uint> GetActivityTriggerCandidateAchievementIds()
-        => this.Configuration.TriggerUpdatesRespectAutoUpdateSelection
+    {
+        var sourceIds = this.Configuration.TriggerUpdatesRespectAutoUpdateSelection
             ? this.Configuration.GetAutoUpdateTrackedAchievementIds()
             : this.TrackedAchievements.AchievementIds;
+
+        var filteredIds = ActivityTriggerCandidateSelection.ExcludeCosmicClassAchievements(sourceIds, this.IsCosmicClassAchievement);
+        var skipped = sourceIds.Where(id => id != 0).Distinct().Count() - filteredIds.Count;
+        if (skipped > 0)
+        {
+            this.DebugLog($"AchieveEx DebugTrace ActivityUpdateSkipCosmicCandidates skipped={skipped} reason=cosmic-progress-uses-wks-cache");
+        }
+
+        return filteredIds;
+    }
+
+    private bool IsCosmicClassAchievement(uint achievementId)
+        => this.AchievementCatalog.TryGetRow(achievementId, out var row)
+            && this.CosmicClassProgressProvider.Handles(row);
 
     private bool IsActivityTriggerEnabled(string triggerName)
     {

@@ -51,6 +51,7 @@ var tests = new List<(string Name, Action Body)>
     ("Activity scheduler queues different keys normally", ActivitySchedulerQueuesDifferentKeysNormally),
     ("Manual scheduler requests are not activity-key coalesced", ManualSchedulerRequestsAreNotActivityKeyCoalesced),
     ("Activity classifier selects tracked achievements by category path", ActivityClassifierSelectsTrackedAchievementsByCategoryPath),
+    ("Activity trigger candidates exclude cosmic class achievements", ActivityTriggerCandidatesExcludeCosmicClassAchievements),
     ("Tracked toolbar hidden state shows default eye", TrackedToolbarHiddenStateShowsDefaultEye),
     ("Tracked toolbar shown state shows red eye", TrackedToolbarShownStateShowsRedEye),
     ("Tracked update indicator shows working while queue active", TrackedUpdateIndicatorShowsWorkingWhileQueueActive),
@@ -626,6 +627,15 @@ static void ActivityClassifierSelectsTrackedAchievementsByCategoryPath()
 
     var matches = AchievementActivityUpdateClassifier.SelectTrackedIdsForCategory([1, 2, 3], id => categories[id], "Miner");
     AssertSequence(matches, [1]);
+}
+
+static void ActivityTriggerCandidatesExcludeCosmicClassAchievements()
+{
+    var selected = ActivityTriggerCandidateSelection.ExcludeCosmicClassAchievements(
+        [101, 3704, 101, 0, 3728, 202],
+        CosmicClassProgressProvider.IsCosmicClassAchievement);
+
+    AssertSequence(selected, [101, 202]);
 }
 
 static void TrackedToolbarHiddenStateShowsDefaultEye()
