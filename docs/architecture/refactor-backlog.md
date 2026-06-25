@@ -2,11 +2,11 @@
 
 This backlog comes from the code-structure review. It is intentionally conservative: the current repo is mostly well separated, and native Achievement behavior is sensitive. Prefer docs and small pure extractions over broad reshuffles.
 
-## Medium priority
+## Completed structure improvements
 
 ### Extract update eligibility policy
 
-Current owner: `Plugin.FilterUpdateEligibleAchievements`.
+Implemented owner: `AchievementTracker/Services/UpdateEligibilityPolicy.cs`.
 
 Why:
 
@@ -16,7 +16,7 @@ Why:
 - It removes completed/native-unsafe IDs from configured auto-update IDs.
 - It emits several debug counters and can trigger config save/reset behavior.
 
-Potential shape:
+Implemented shape:
 
 - `UpdateEligibilityPolicy.Evaluate(...)` returns:
   - eligible IDs,
@@ -25,13 +25,17 @@ Potential shape:
   - skip counts/reasons.
 - `Plugin` remains responsible for applying config mutation, saving config, resetting countdown, and logging.
 
-Tests to add first:
+Tests cover:
 
 - zero and duplicate IDs are ignored,
 - native-unsafe rows are skipped and marked for auto-update removal,
 - completed rows are skipped and marked for auto-update removal,
 - eligible rows preserve order after distinct filtering,
 - no config save/reset is requested when nothing is removed.
+
+## Medium priority
+
+No medium-priority refactors are currently queued. Keep future medium-priority items limited to pure, test-backed service extractions.
 
 ## Low priority
 

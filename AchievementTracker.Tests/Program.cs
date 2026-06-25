@@ -33,6 +33,9 @@ var tests = new List<(string Name, Action Body)>
     ("Tracked display evaluates cosmic progress overrides", TrackedDisplayEvaluatesCosmicProgressOverrides),
     ("Cosmic progress override parses achievement details", CosmicProgressOverrideParsesAchievementDetails),
     ("Auto updater selects only explicitly included tracked achievements", AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements),
+    ("Update eligibility keeps distinct eligible ids in order", UpdateEligibilityKeepsDistinctEligibleIdsInOrder),
+    ("Update eligibility reports completed and native-unsafe removals", UpdateEligibilityReportsCompletedAndNativeUnsafeRemovals),
+    ("Update eligibility leaves config untouched when skipped ids are not auto-updated", UpdateEligibilityLeavesConfigUntouchedWhenSkippedIdsAreNotAutoUpdated),
     ("Completion filters wait for loaded achievement state", CompletionFiltersWaitForLoadedAchievementState),
     ("Completion-filtered counts fall back to all while unloaded", CompletionFilteredCountsFallBackToAllWhileUnloaded),
     ("Lumina search all does not wait for loaded achievement state", LuminaSearchAllDoesNotWaitForLoadedAchievementState),
@@ -401,6 +404,56 @@ static void CosmicProgressOverrideParsesAchievementDetails()
 static void AutoUpdaterSelectsOnlyExplicitlyIncludedTrackedAchievements()
 {
     AssertSequence(AutoUpdateSelection.SelectIncludedTrackedAchievements([1, 2, 3, 4], [2, 4, 999]), [2, 4]);
+}
+
+static void UpdateEligibilityKeepsDistinctEligibleIdsInOrder()
+{
+    var result = UpdateEligibilityPolicy.Evaluate(
+        [0, 42, 42, 7, 9, 7],
+        _ => NativeAchievementOpenEligibility.Eligible,
+        _ => false,
+        []);
+
+    AssertSequence(result.EligibleAchievementIds, [42, 7, 9]);
+    AssertEqualInt(0, result.CompletedAchievementIds.Count);
+    AssertEqualInt(0, result.NativeUnsafeAchievementIds.Count);
+    AssertFalse(result.ShouldRemoveAutoUpdateEntries, "no skipped ids were configured for auto update");
+}
+
+static void UpdateEligibilityReportsCompletedAndNativeUnsafeRemovals()
+{
+    var result = UpdateEligibilityPolicy.Evaluate(
+        [10, 20, 30, 40],
+        id => id == 20
+            ? NativeAchievementOpenEligibility.Ineligible("hidden category")
+            : NativeAchievementOpenEligibility.Eligible,
+        id => id == 30,
+        [20, 30, 99]);
+
+    AssertSequence(result.EligibleAchievementIds, [10, 40]);
+    AssertSequence(result.CompletedAchievementIds, [30]);
+    AssertSequence(result.AutoUpdateAchievementIdsToRemove, [20, 30]);
+    AssertTrue(result.ShouldRemoveAutoUpdateEntries, "skipped configured ids should be removed from auto update");
+    AssertEqualInt(1, result.NativeUnsafeAchievementIds.Count);
+    AssertEqualUInt(20u, result.NativeUnsafeAchievementIds[0].AchievementId);
+    AssertEqual("hidden category", result.NativeUnsafeAchievementIds[0].Reason);
+}
+
+static void UpdateEligibilityLeavesConfigUntouchedWhenSkippedIdsAreNotAutoUpdated()
+{
+    var result = UpdateEligibilityPolicy.Evaluate(
+        [10, 20, 30],
+        id => id == 20
+            ? NativeAchievementOpenEligibility.Ineligible("not in native UI")
+            : NativeAchievementOpenEligibility.Eligible,
+        id => id == 30,
+        [10]);
+
+    AssertSequence(result.EligibleAchievementIds, [10]);
+    AssertSequence(result.CompletedAchievementIds, [30]);
+    AssertEqualInt(1, result.NativeUnsafeAchievementIds.Count);
+    AssertSequence(result.AutoUpdateAchievementIdsToRemove, []);
+    AssertFalse(result.ShouldRemoveAutoUpdateEntries, "skipped ids not in auto update should not trigger config mutation");
 }
 
 static void CompletionFiltersWaitForLoadedAchievementState()

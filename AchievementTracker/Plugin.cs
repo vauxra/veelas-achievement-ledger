@@ -141,49 +141,48 @@ public sealed class Plugin : IDalamudPlugin
 
     private IReadOnlyList<uint> FilterUpdateEligibleAchievements(IEnumerable<uint> achievementIds, string reason)
     {
-        var eligible = new List<uint>();
-        var removedAutoUpdateCompleted = 0;
-        var skippedCompleted = 0;
-        var skippedNativeUnsafe = 0;
-        foreach (var achievementId in achievementIds.Where(id => id != 0).Distinct())
+        var result = UpdateEligibilityPolicy.Evaluate(
+            achievementIds,
+            achievementId => this.AchievementCatalog.CanOpenInNativeAchievementUi(achievementId, out var nativeSafetyReason)
+                ? NativeAchievementOpenEligibility.Eligible
+                : NativeAchievementOpenEligibility.Ineligible(nativeSafetyReason),
+            achievementId => this.AchievementCatalog.TryGetRow(achievementId, out var row)
+                && this.AchievementProgressService.IsComplete(row),
+            this.Configuration.AutoUpdateAchievementIds);
+
+        var removedAutoUpdateEntries = 0;
+        foreach (var achievementId in result.AutoUpdateAchievementIdsToRemove)
         {
-            if (!this.AchievementCatalog.CanOpenInNativeAchievementUi(achievementId, out var nativeSafetyReason))
-            {
-                skippedNativeUnsafe++;
-                removedAutoUpdateCompleted += this.Configuration.AutoUpdateAchievementIds.RemoveAll(id => id == achievementId);
-                this.DebugLog($"AchieveEx DebugTrace UpdateSkipNativeUnsafe reason={reason} id={achievementId} detail={nativeSafetyReason}");
-                continue;
-            }
-
-            if (this.AchievementCatalog.TryGetRow(achievementId, out var row)
-                && this.AchievementProgressService.IsComplete(row))
-            {
-                skippedCompleted++;
-                removedAutoUpdateCompleted += this.Configuration.AutoUpdateAchievementIds.RemoveAll(id => id == achievementId);
-                this.ClientAchievementProgressSource.RecordObservedProgress(achievementId, 1, 1, "Completion check");
-                continue;
-            }
-
-            eligible.Add(achievementId);
+            removedAutoUpdateEntries += this.Configuration.AutoUpdateAchievementIds.RemoveAll(id => id == achievementId);
         }
 
-        if (removedAutoUpdateCompleted > 0)
+        foreach (var achievementId in result.CompletedAchievementIds)
+        {
+            this.ClientAchievementProgressSource.RecordObservedProgress(achievementId, 1, 1, "Completion check");
+        }
+
+        if (removedAutoUpdateEntries > 0)
         {
             this.SaveConfiguration();
             this.ResetAutoUpdateCountdownIfActive();
         }
 
-        if (skippedCompleted > 0)
+        foreach (var skipped in result.NativeUnsafeAchievementIds)
         {
-            this.DebugLog($"AchieveEx DebugTrace UpdateSkipCompleted reason={reason} skipped={skippedCompleted} removedAuto={removedAutoUpdateCompleted}");
+            this.DebugLog($"AchieveEx DebugTrace UpdateSkipNativeUnsafe reason={reason} id={skipped.AchievementId} detail={skipped.Reason}");
         }
 
-        if (skippedNativeUnsafe > 0)
+        if (result.CompletedAchievementIds.Count > 0)
         {
-            this.DebugLog($"AchieveEx DebugTrace UpdateSkipNativeUnsafeSummary reason={reason} skipped={skippedNativeUnsafe}");
+            this.DebugLog($"AchieveEx DebugTrace UpdateSkipCompleted reason={reason} skipped={result.CompletedAchievementIds.Count} removedAuto={removedAutoUpdateEntries}");
         }
 
-        return eligible;
+        if (result.NativeUnsafeAchievementIds.Count > 0)
+        {
+            this.DebugLog($"AchieveEx DebugTrace UpdateSkipNativeUnsafeSummary reason={reason} skipped={result.NativeUnsafeAchievementIds.Count}");
+        }
+
+        return result.EligibleAchievementIds;
     }
 
     public void ResetAutoUpdateCountdownIfActive()

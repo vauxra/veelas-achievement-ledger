@@ -21,6 +21,7 @@ Use this file to decide where new code belongs. The default rule is: UI owns pre
 | `IAchievementProgressSource` / `ClientAchievementProgressSource` | Observed ordinary achievement progress cache and passive native progress-slot reads. |
 | `CosmicClassProgressProvider` | Experimental WKS/Cosmic score read/cache/override behavior. Keep this isolated from ordinary progress refresh queues. |
 | `AchievementProgressRequestScheduler` | Pure scheduling, spacing, dedupe, dirty activity-key final pass, and pending request ordering. |
+| `UpdateEligibilityPolicy` | Pure update-candidate filtering: zero/duplicate removal, native-open eligibility, completion skip reporting, and auto-update removal intent. |
 | `AchievementProgressUpdater` | Serialized native Achievement refresh/inspection state machine, queue run lifecycle, circuit breaker, and update status text. |
 | `NativeAchievementNavigator` | Narrow unsafe/native adapter for `AgentAchievement`, `IGameGui`, and Achievement addon position/scale/show/hide. |
 | `NativeAchievementWindowScalePolicy` / `NativeAchievementUpdateWindowPolicy` | Pure native Achievement window park/restore/close decisions. |
@@ -40,6 +41,7 @@ Use this file to decide where new code belongs. The default rule is: UI owns pre
 Before adding a new service or helper, search for an existing owner:
 
 - Queueing/spacing/dedupe belongs in `AchievementProgressRequestScheduler` or `AchievementProgressUpdater`.
+- Update-candidate filtering belongs in `UpdateEligibilityPolicy`; `Plugin` only applies the returned side effects/logging.
 - Native Achievement open/show/hide/park/restore belongs in `NativeAchievementNavigator` plus `NativeAchievementWindowScalePolicy`.
 - Progress display belongs in `AchievementProgress`, `AchievementProgressService`, and related display policies.
 - Search/category/completion filtering should use `AchievementCatalog` and `SearchCompletionFilterPolicy` first.

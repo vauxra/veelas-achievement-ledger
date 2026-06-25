@@ -10,7 +10,7 @@ Use this map to locate the current owner of a feature before adding code.
 | Search and categories | Search manually viewable achievements, group by category/subcategory, filter by completion. | `TrackerWindow`, `ConfigWindow` | `AchievementCatalog`, `SearchCompletionFilterPolicy`, `AchievementProgressService` | Completion filter/search policy tests; add pure search index tests if extracting. |
 | Completion/progress display | Show complete/incomplete/numeric/current-unavailable states. | Windows render progress text. | `AchievementProgress`, `AchievementProgressService`, `ClientAchievementProgressSource`, `CosmicClassProgressProvider` | Progress display and Cosmic override tests. |
 | Row open/inspection | Open a native Achievement entry for inspection. | `Plugin.OpenNativeAchievementForInspection`, windows | `AchievementProgressUpdater`, `AchievementProgressRequestScheduler`, `NativeAchievementNavigator`, `NativeAchievementWindowScalePolicy` | Scheduler/window policy/inspection tests. |
-| Manual update all/one | Queue one or more eligible tracked achievements through native Achievement UI. | `Plugin.EnqueueUpdate*`, windows | `AchievementProgressUpdater`, `AchievementProgressRequestScheduler`, `ClientAchievementProgressSource`, `NativeAchievementNavigator` | Scheduler/updater tests. |
+| Manual update all/one | Queue one or more eligible tracked achievements through native Achievement UI. | `Plugin.EnqueueUpdate*`, windows | `UpdateEligibilityPolicy`, `AchievementProgressUpdater`, `AchievementProgressRequestScheduler`, `ClientAchievementProgressSource`, `NativeAchievementNavigator` | Update eligibility, scheduler, and updater tests. |
 | Timed auto update | Experimental timed refresh cycles for selected tracked IDs. | `Plugin.OnFrameworkUpdate`, `ConfigWindow`, `TrackerWindow` | `AchievementProgressUpdater`, `AutoUpdateSelection`, `AutoUpdateQueueStatusRow` | Auto-selection/scheduler/status tests. |
 | Activity-triggered update | Experimental craft/gather activity log events enqueue matching tracked IDs. | `AchievementActivityUpdateObserver`, `Plugin.InstallActivityUpdateObserver` | `AchievementActivityUpdateClassifier`, `ActivityTriggerDelayPolicy`, `ActivityTriggerCandidateSelection`, scheduler dirty-key behavior | Classifier, delay, candidate-selection, dirty-key scheduler tests. |
 | Cosmic class progress | Show Cosmic/WKS achievement progress from live/cached class scores. | `Plugin.RefreshCosmicCacheFromLiveState`, windows | `CosmicClassProgressProvider`, `CosmicClassScoreCache`, `AchievementProgressService` | Cosmic rule/cache/progress override tests. |
@@ -30,9 +30,10 @@ Use this map to locate the current owner of a feature before adding code.
 ### Change refresh behavior
 
 1. Start in `AchievementProgressUpdater` and `AchievementProgressRequestScheduler`.
-2. Do not add another queue or timer.
-3. Keep native open/show/hide/park/restore in `NativeAchievementNavigator`.
-4. Add/extend tests before changing timing, dedupe, dirty-key, or native lifecycle decisions.
+2. Use `UpdateEligibilityPolicy` for candidate filtering before queueing.
+3. Do not add another queue or timer.
+4. Keep native open/show/hide/park/restore in `NativeAchievementNavigator`.
+5. Add/extend tests before changing timing, dedupe, dirty-key, eligibility, or native lifecycle decisions.
 
 ### Change search/completion behavior
 
