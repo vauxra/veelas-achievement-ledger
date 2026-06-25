@@ -10,8 +10,8 @@
       "source_location": null,
       "_origin": "ast",
       "id": "achievementtracker_tests_achievementtracker_tests",
-      "community": 14,
-      "community_name": "Community 14",
+      "community": 13,
+      "community_name": "Community 13",
       "norm_label": "achievementtracker.tests"
     },
     {
@@ -21,8 +21,8 @@
       "source_location": null,
       "_origin": "ast",
       "id": "framework_net10_0_windows7_0",
-      "community": 14,
-      "community_name": "Community 14",
+      "community": 13,
+      "community_name": "Community 13",
       "norm_label": "net10.0-windows7.0"
     },
     {
@@ -32,8 +32,8 @@
       "source_location": null,
       "_origin": "ast",
       "id": "achievementtracker_achievementtracker",
-      "community": 14,
-      "community_name": "Community 14",
+      "community": 13,
+      "community_name": "Community 13",
       "norm_label": "achievementtracker.csproj"
     },
     {
@@ -43,8 +43,8 @@
       "source_location": null,
       "_origin": "ast",
       "id": "sdk_microsoft_net_sdk",
-      "community": 14,
-      "community_name": "Community 14",
+      "community": 13,
+      "community_name": "Community 13",
       "norm_label": "microsoft.net.sdk"
     },
     {
@@ -54,8 +54,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "achievementtracker_tests_program",
-      "community": 14,
-      "community_name": "Community 14",
+      "community": 13,
+      "community_name": "Community 13",
       "norm_label": "program.cs"
     },
     {
@@ -65,8 +65,8 @@
       "source_location": null,
       "_origin": "ast",
       "id": "achievementtracker",
-      "community": 14,
-      "community_name": "Community 14",
+      "community": 13,
+      "community_name": "Community 13",
       "norm_label": "achievementtracker.sln"
     },
     {
@@ -76,8 +76,8 @@
       "source_location": null,
       "_origin": "ast",
       "id": "sdk_dalamud_net_sdk_15_0_0",
-      "community": 14,
-      "community_name": "Community 14",
+      "community": 13,
+      "community_name": "Community 13",
       "norm_label": "dalamud.net.sdk/15.0.0"
     },
     {
@@ -241,8 +241,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_achievementprogress",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "achievementprogress.cs"
     },
     {
@@ -252,8 +252,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "models_achievementprogress_completionlistnotloaded",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "completionlistnotloaded()"
     },
     {
@@ -263,8 +263,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "achievementprogress",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "achievementprogress"
     },
     {
@@ -274,8 +274,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "models_achievementprogress_complete",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "complete()"
     },
     {
@@ -285,8 +285,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "models_achievementprogress_incomplete",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "incomplete()"
     },
     {
@@ -296,8 +296,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "models_achievementprogress_numeric",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "numeric()"
     },
     {
@@ -307,8 +307,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "models_achievementprogress_targetknown",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "targetknown()"
     },
     {
@@ -318,8 +318,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "models_achievementprogress_unavailable",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "unavailable()"
     },
     {
@@ -329,8 +329,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "models_achievementprogress_datanotavailable",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "datanotavailable()"
     },
     {
@@ -340,8 +340,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "models_achievementprogress_todisplaytext",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "todisplaytext()"
     },
     {
@@ -351,8 +351,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_cosmicclassscorecache",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "cosmicclassscorecache.cs"
     },
     {
@@ -362,8 +362,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "models_cosmicclassscorecache_cosmicclassscorecache",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "cosmicclassscorecache"
     },
     {
@@ -406,8 +406,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "achievementtracker_plugin",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": "plugin.cs"
     },
     {
@@ -417,8 +417,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": "plugin"
     },
     {
@@ -428,8 +428,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "idalamudplugin",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": "idalamudplugin"
     },
     {
@@ -472,8 +472,8 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_dispose",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".dispose()"
     },
     {
@@ -483,8 +483,8 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_savetrackedachievements",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".savetrackedachievements()"
     },
     {
@@ -494,8 +494,8 @@
       "source_location": "L127",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_saveconfiguration",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".saveconfiguration()"
     },
     {
@@ -505,8 +505,8 @@
       "source_location": "L133",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_enqueueupdatealltracked",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".enqueueupdatealltracked()"
     },
     {
@@ -516,8 +516,8 @@
       "source_location": "L136",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_enqueueupdateachievements",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".enqueueupdateachievements()"
     },
     {
@@ -527,8 +527,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "ienumerable",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": "ienumerable"
     },
     {
@@ -538,8 +538,8 @@
       "source_location": "L139",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_enqueueupdateone",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".enqueueupdateone()"
     },
     {
@@ -549,8 +549,8 @@
       "source_location": "L142",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_filterupdateeligibleachievements",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".filterupdateeligibleachievements()"
     },
     {
@@ -571,8 +571,8 @@
       "source_location": "L188",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_resetautoupdatecountdownifactive",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".resetautoupdatecountdownifactive()"
     },
     {
@@ -582,8 +582,8 @@
       "source_location": "L196",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_stopautoupdateandclearqueue",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".stopautoupdateandclearqueue()"
     },
     {
@@ -593,8 +593,8 @@
       "source_location": "L204",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_clearupdatequeue",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".clearupdatequeue()"
     },
     {
@@ -604,8 +604,8 @@
       "source_location": "L210",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_isachievementcompleteforsearch",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".isachievementcompleteforsearch()"
     },
     {
@@ -615,8 +615,8 @@
       "source_location": "L215",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_opennativeachievementsforinitialload",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".opennativeachievementsforinitialload()"
     },
     {
@@ -626,8 +626,8 @@
       "source_location": "L221",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_opennativeachievementforinspection",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".opennativeachievementforinspection()"
     },
     {
@@ -637,8 +637,8 @@
       "source_location": "L233",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_resetnativeachievementwindowscale",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".resetnativeachievementwindowscale()"
     },
     {
@@ -648,8 +648,8 @@
       "source_location": "L249",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_debuglog",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".debuglog()"
     },
     {
@@ -659,8 +659,8 @@
       "source_location": "L257",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_getbuildversion",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".getbuildversion()"
     },
     {
@@ -670,8 +670,8 @@
       "source_location": "L260",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_getinformationalversion",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".getinformationalversion()"
     },
     {
@@ -681,8 +681,8 @@
       "source_location": "L263",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_togglemainui",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".togglemainui()"
     },
     {
@@ -692,8 +692,8 @@
       "source_location": "L269",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_openmainui",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".openmainui()"
     },
     {
@@ -703,8 +703,8 @@
       "source_location": "L275",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_closemainui",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".closemainui()"
     },
     {
@@ -714,8 +714,8 @@
       "source_location": "L281",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_toggleconfigui",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".toggleconfigui()"
     },
     {
@@ -725,8 +725,8 @@
       "source_location": "L285",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_openconfigui",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".openconfigui()"
     },
     {
@@ -736,8 +736,8 @@
       "source_location": "L297",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_opentrackedachievementsconfig",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".opentrackedachievementsconfig()"
     },
     {
@@ -747,8 +747,8 @@
       "source_location": "L300",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_installactivityupdateobserver",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".installactivityupdateobserver()"
     },
     {
@@ -758,8 +758,8 @@
       "source_location": "L312",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_getachievementcategoryname",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".getachievementcategoryname()"
     },
     {
@@ -769,8 +769,8 @@
       "source_location": "L315",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_enqueueactivitytriggeredachievements",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".enqueueactivitytriggeredachievements()"
     },
     {
@@ -802,8 +802,8 @@
       "source_location": "L318",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_getcurrentclassjobid",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".getcurrentclassjobid()"
     },
     {
@@ -813,8 +813,8 @@
       "source_location": "L321",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_getactivitytriggercandidateachievementids",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".getactivitytriggercandidateachievementids()"
     },
     {
@@ -824,8 +824,8 @@
       "source_location": "L337",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_iscosmicclassachievement",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".iscosmicclassachievement()"
     },
     {
@@ -835,8 +835,8 @@
       "source_location": "L341",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_isactivitytriggerenabled",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".isactivitytriggerenabled()"
     },
     {
@@ -846,8 +846,8 @@
       "source_location": "L361",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_resetprogressstate",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".resetprogressstate()"
     },
     {
@@ -857,8 +857,8 @@
       "source_location": "L369",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_onframeworkupdate",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".onframeworkupdate()"
     },
     {
@@ -868,8 +868,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "iframework",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": "iframework"
     },
     {
@@ -879,8 +879,8 @@
       "source_location": "L376",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_trycompletependingnativeachievementscalereset",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".trycompletependingnativeachievementscalereset()"
     },
     {
@@ -890,8 +890,8 @@
       "source_location": "L392",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_refreshcosmiccachefromlivestate",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".refreshcosmiccachefromlivestate()"
     },
     {
@@ -901,8 +901,8 @@
       "source_location": "L404",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_resetprogressstateonlogout",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".resetprogressstateonlogout()"
     },
     {
@@ -912,8 +912,8 @@
       "source_location": "L406",
       "_origin": "ast",
       "id": "achievementtracker_plugin_plugin_oncommand",
-      "community": 1,
-      "community_name": "Community 1",
+      "community": 2,
+      "community_name": "Community 2",
       "norm_label": ".oncommand()"
     },
     {
@@ -1121,8 +1121,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_achievementcatalog",
-      "community": 12,
-      "community_name": "Community 12",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "achievementcatalog.cs"
     },
     {
@@ -1132,8 +1132,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "services_achievementcatalog_achievementcatalog",
-      "community": 12,
-      "community_name": "Community 12",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "achievementcatalog"
     },
     {
@@ -1143,8 +1143,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "idatamanager",
-      "community": 12,
-      "community_name": "Community 12",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "idatamanager"
     },
     {
@@ -1187,8 +1187,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "services_achievementcatalog_achievementcatalog_tryget",
-      "community": 12,
-      "community_name": "Community 12",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".tryget()"
     },
     {
@@ -1198,8 +1198,8 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "services_achievementcatalog_achievementcatalog_trygetrow",
-      "community": 12,
-      "community_name": "Community 12",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".trygetrow()"
     },
     {
@@ -1209,8 +1209,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "achievement",
-      "community": 12,
-      "community_name": "Community 12",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "achievement"
     },
     {
@@ -1220,8 +1220,8 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "services_achievementcatalog_achievementcatalog_ismanuallyviewable",
-      "community": 12,
-      "community_name": "Community 12",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".ismanuallyviewable()"
     },
     {
@@ -1231,8 +1231,8 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "services_achievementcatalog_achievementcatalog_canopeninnativeachievementui",
-      "community": 12,
-      "community_name": "Community 12",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".canopeninnativeachievementui()"
     },
     {
@@ -1242,8 +1242,8 @@
       "source_location": "L156",
       "_origin": "ast",
       "id": "services_achievementcatalog_achievementcatalog_isknownplayervisiblekind",
-      "community": 12,
-      "community_name": "Community 12",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".isknownplayervisiblekind()"
     },
     {
@@ -1253,8 +1253,8 @@
       "source_location": "L166",
       "_origin": "ast",
       "id": "services_achievementcatalog_achievementcatalog_toinfo",
-      "community": 12,
-      "community_name": "Community 12",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".toinfo()"
     },
     {
@@ -1264,8 +1264,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_achievementcategorypath",
-      "community": 15,
-      "community_name": "Community 15",
+      "community": 14,
+      "community_name": "Community 14",
       "norm_label": "achievementcategorypath.cs"
     },
     {
@@ -1275,8 +1275,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "services_achievementcategorypath_parse",
-      "community": 15,
-      "community_name": "Community 15",
+      "community": 14,
+      "community_name": "Community 14",
       "norm_label": "parse()"
     },
     {
@@ -1286,8 +1286,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "achievementcategorypath",
-      "community": 15,
-      "community_name": "Community 15",
+      "community": 14,
+      "community_name": "Community 14",
       "norm_label": "achievementcategorypath"
     },
     {
@@ -1297,8 +1297,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "services_achievementcategorypath_matchescategory",
-      "community": 15,
-      "community_name": "Community 15",
+      "community": 14,
+      "community_name": "Community 14",
       "norm_label": "matchescategory()"
     },
     {
@@ -1308,8 +1308,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "services_achievementcategorypath_buildsubcategoryfilterkey",
-      "community": 15,
-      "community_name": "Community 15",
+      "community": 14,
+      "community_name": "Community 14",
       "norm_label": "buildsubcategoryfilterkey()"
     },
     {
@@ -1616,8 +1616,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_achievementprogressservice",
-      "community": 12,
-      "community_name": "Community 12",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "achievementprogressservice.cs"
     },
     {
@@ -1627,8 +1627,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "services_achievementprogressservice_achievementprogressservice",
-      "community": 12,
-      "community_name": "Community 12",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "achievementprogressservice"
     },
     {
@@ -1638,8 +1638,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "iunlockstate",
-      "community": 12,
-      "community_name": "Community 12",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "iunlockstate"
     },
     {
@@ -1649,8 +1649,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "services_achievementprogressservice_achievementprogressservice_getprogress",
-      "community": 12,
-      "community_name": "Community 12",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".getprogress()"
     },
     {
@@ -1660,8 +1660,8 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "services_achievementprogressservice_achievementprogressservice_iscomplete",
-      "community": 12,
-      "community_name": "Community 12",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".iscomplete()"
     },
     {
@@ -1671,8 +1671,8 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "services_achievementprogressservice_achievementprogressservice_getrequiredtarget",
-      "community": 12,
-      "community_name": "Community 12",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".getrequiredtarget()"
     },
     {
@@ -2397,8 +2397,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "cosmicclassprogressprovider.cs"
     },
     {
@@ -2408,8 +2408,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "cosmicclassprogressprovider"
     },
     {
@@ -2419,8 +2419,8 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_handles",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".handles()"
     },
     {
@@ -2430,8 +2430,8 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_refreshcachefromlivescores",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".refreshcachefromlivescores()"
     },
     {
@@ -2441,8 +2441,8 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_getprogress",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".getprogress()"
     },
     {
@@ -2452,8 +2452,8 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_trycreateprogressoverride",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".trycreateprogressoverride()"
     },
     {
@@ -2463,8 +2463,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "cosmicachievementrule",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "cosmicachievementrule"
     },
     {
@@ -2474,8 +2474,8 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_buildprogress",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".buildprogress()"
     },
     {
@@ -2485,8 +2485,8 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_getdiagnostics",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".getdiagnostics()"
     },
     {
@@ -2496,8 +2496,8 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_trycreaterulefromachievementdetails",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".trycreaterulefromachievementdetails()"
     },
     {
@@ -2507,8 +2507,8 @@
       "source_location": "L123",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_trycreaterulefromdetails",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".trycreaterulefromdetails()"
     },
     {
@@ -2518,8 +2518,8 @@
       "source_location": "L156",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_getscoreindexesfordescription",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".getscoreindexesfordescription()"
     },
     {
@@ -2529,8 +2529,8 @@
       "source_location": "L165",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_iscosmicscoredescription",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".iscosmicscoredescription()"
     },
     {
@@ -2540,8 +2540,8 @@
       "source_location": "L169",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_getscoreindexesforcategory",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".getscoreindexesforcategory()"
     },
     {
@@ -2551,8 +2551,8 @@
       "source_location": "L178",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_cosmictargetregex",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".cosmictargetregex()"
     },
     {
@@ -2562,8 +2562,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "regex",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "regex"
     },
     {
@@ -2573,8 +2573,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "generatedregex",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": "generatedregex"
     },
     {
@@ -2584,8 +2584,8 @@
       "source_location": "L181",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_iscosmicclassachievement",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".iscosmicclassachievement()"
     },
     {
@@ -2595,8 +2595,8 @@
       "source_location": "L183",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_getrule",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".getrule()"
     },
     {
@@ -2606,8 +2606,8 @@
       "source_location": "L229",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_single",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".single()"
     },
     {
@@ -2617,8 +2617,8 @@
       "source_location": "L231",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_any",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".any()"
     },
     {
@@ -2628,8 +2628,8 @@
       "source_location": "L233",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_every",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".every()"
     },
     {
@@ -2639,8 +2639,8 @@
       "source_location": "L235",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_normalizecache",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".normalizecache()"
     },
     {
@@ -2650,8 +2650,8 @@
       "source_location": "L245",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_tryreadcachedscores",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".tryreadcachedscores()"
     },
     {
@@ -2661,8 +2661,8 @@
       "source_location": "L256",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_tryreadlivescores",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".tryreadlivescores()"
     },
     {
@@ -2672,8 +2672,8 @@
       "source_location": "L281",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_getlivestatesummary",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".getlivestatesummary()"
     },
     {
@@ -2683,8 +2683,8 @@
       "source_location": "L292",
       "_origin": "ast",
       "id": "services_cosmicclassprogressprovider_cosmicclassprogressprovider_scoresequalcache",
-      "community": 2,
-      "community_name": "Community 2",
+      "community": 1,
+      "community_name": "Community 1",
       "norm_label": ".scoresequalcache()"
     },
     {
@@ -2958,8 +2958,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_nativeachievementupdatewindowpolicy",
-      "community": 22,
-      "community_name": "Community 22",
+      "community": 21,
+      "community_name": "Community 21",
       "norm_label": "nativeachievementupdatewindowpolicy.cs"
     },
     {
@@ -2969,8 +2969,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "services_nativeachievementupdatewindowpolicy_nativeachievementupdatewindowpolicy",
-      "community": 22,
-      "community_name": "Community 22",
+      "community": 21,
+      "community_name": "Community 21",
       "norm_label": "nativeachievementupdatewindowpolicy"
     },
     {
@@ -2980,8 +2980,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "services_nativeachievementupdatewindowpolicy_nativeachievementupdatewindowpolicy_shouldparkduringbatch",
-      "community": 22,
-      "community_name": "Community 22",
+      "community": 21,
+      "community_name": "Community 21",
       "norm_label": ".shouldparkduringbatch()"
     },
     {
@@ -3442,8 +3442,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_trackedprogressdisplaypolicy",
-      "community": 23,
-      "community_name": "Community 23",
+      "community": 22,
+      "community_name": "Community 22",
       "norm_label": "trackedprogressdisplaypolicy.cs"
     },
     {
@@ -3453,8 +3453,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "services_trackedprogressdisplaypolicy_trackedprogressdisplaypolicy",
-      "community": 23,
-      "community_name": "Community 23",
+      "community": 22,
+      "community_name": "Community 22",
       "norm_label": "trackedprogressdisplaypolicy"
     },
     {
@@ -3464,8 +3464,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "services_trackedprogressdisplaypolicy_trackedprogressdisplaypolicy_shouldevaluateprogress",
-      "community": 23,
-      "community_name": "Community 23",
+      "community": 22,
+      "community_name": "Community 22",
       "norm_label": ".shouldevaluateprogress()"
     },
     {
@@ -3475,8 +3475,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_trackedtoolbariconpresentation",
-      "community": 24,
-      "community_name": "Community 24",
+      "community": 23,
+      "community_name": "Community 23",
       "norm_label": "trackedtoolbariconpresentation.cs"
     },
     {
@@ -3486,8 +3486,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "services_trackedtoolbariconpresentation_forhiddenstate",
-      "community": 24,
-      "community_name": "Community 24",
+      "community": 23,
+      "community_name": "Community 23",
       "norm_label": "forhiddenstate()"
     },
     {
@@ -3497,8 +3497,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "trackedtoolbariconpresentation",
-      "community": 24,
-      "community_name": "Community 24",
+      "community": 23,
+      "community_name": "Community 23",
       "norm_label": "trackedtoolbariconpresentation"
     },
     {
@@ -3508,8 +3508,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_trackedupdateindicatorpolicy",
-      "community": 21,
-      "community_name": "Community 21",
+      "community": 20,
+      "community_name": "Community 20",
       "norm_label": "trackedupdateindicatorpolicy.cs"
     },
     {
@@ -3519,8 +3519,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "services_trackedupdateindicatorpolicy_trackedupdateindicatorpolicy",
-      "community": 21,
-      "community_name": "Community 21",
+      "community": 20,
+      "community_name": "Community 20",
       "norm_label": "trackedupdateindicatorpolicy"
     },
     {
@@ -3530,8 +3530,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "services_trackedupdateindicatorpolicy_trackedupdateindicatorpolicy_getstate",
-      "community": 21,
-      "community_name": "Community 21",
+      "community": 20,
+      "community_name": "Community 20",
       "norm_label": ".getstate()"
     },
     {
@@ -3541,8 +3541,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "trackedupdateindicatorstate",
-      "community": 21,
-      "community_name": "Community 21",
+      "community": 20,
+      "community_name": "Community 20",
       "norm_label": "trackedupdateindicatorstate"
     },
     {
@@ -4839,8 +4839,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "achievementtracker_packages_lock",
-      "community": 13,
-      "community_name": "Community 13",
+      "community": 12,
+      "community_name": "Community 12",
       "norm_label": "packages.lock.json"
     },
     {
@@ -4850,8 +4850,8 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "achievementtracker_packages_lock_version",
-      "community": 13,
-      "community_name": "Community 13",
+      "community": 12,
+      "community_name": "Community 12",
       "norm_label": "version"
     },
     {
@@ -4861,8 +4861,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "achievementtracker_packages_lock_dependencies",
-      "community": 13,
-      "community_name": "Community 13",
+      "community": 12,
+      "community_name": "Community 12",
       "norm_label": "dependencies"
     },
     {
@@ -4872,8 +4872,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "achievementtracker_packages_lock_dependencies_net10_0_windows7_0",
-      "community": 13,
-      "community_name": "Community 13",
+      "community": 12,
+      "community_name": "Community 12",
       "norm_label": "net10.0-windows7.0"
     },
     {
@@ -4883,8 +4883,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "achievementtracker_packages_lock_net10_0_windows7_0_dalamudpackager",
-      "community": 13,
-      "community_name": "Community 13",
+      "community": 12,
+      "community_name": "Community 12",
       "norm_label": "dalamudpackager"
     },
     {
@@ -4894,8 +4894,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "achievementtracker_packages_lock_dalamudpackager_type",
-      "community": 13,
-      "community_name": "Community 13",
+      "community": 12,
+      "community_name": "Community 12",
       "norm_label": "type"
     },
     {
@@ -4905,8 +4905,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "achievementtracker_packages_lock_dalamudpackager_requested",
-      "community": 13,
-      "community_name": "Community 13",
+      "community": 12,
+      "community_name": "Community 12",
       "norm_label": "requested"
     },
     {
@@ -4916,8 +4916,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "achievementtracker_packages_lock_dalamudpackager_resolved",
-      "community": 13,
-      "community_name": "Community 13",
+      "community": 12,
+      "community_name": "Community 12",
       "norm_label": "resolved"
     },
     {
@@ -4927,8 +4927,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "achievementtracker_packages_lock_dalamudpackager_contenthash",
-      "community": 13,
-      "community_name": "Community 13",
+      "community": 12,
+      "community_name": "Community 12",
       "norm_label": "contenthash"
     },
     {
@@ -4938,8 +4938,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "achievementtracker_packages_lock_net10_0_windows7_0_dotnet_reproduciblebuilds",
-      "community": 13,
-      "community_name": "Community 13",
+      "community": 12,
+      "community_name": "Community 12",
       "norm_label": "dotnet.reproduciblebuilds"
     },
     {
@@ -4949,8 +4949,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "achievementtracker_packages_lock_dotnet_reproduciblebuilds_type",
-      "community": 13,
-      "community_name": "Community 13",
+      "community": 12,
+      "community_name": "Community 12",
       "norm_label": "type"
     },
     {
@@ -4960,8 +4960,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "achievementtracker_packages_lock_dotnet_reproduciblebuilds_requested",
-      "community": 13,
-      "community_name": "Community 13",
+      "community": 12,
+      "community_name": "Community 12",
       "norm_label": "requested"
     },
     {
@@ -4971,8 +4971,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "achievementtracker_packages_lock_dotnet_reproduciblebuilds_resolved",
-      "community": 13,
-      "community_name": "Community 13",
+      "community": 12,
+      "community_name": "Community 12",
       "norm_label": "resolved"
     },
     {
@@ -4982,8 +4982,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "achievementtracker_packages_lock_dotnet_reproduciblebuilds_contenthash",
-      "community": 13,
-      "community_name": "Community 13",
+      "community": 12,
+      "community_name": "Community 12",
       "norm_label": "contenthash"
     },
     {
@@ -5180,8 +5180,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_audit_ai_policy",
-      "community": 17,
-      "community_name": "Community 17",
+      "community": 16,
+      "community_name": "Community 16",
       "norm_label": "audit-ai-policy.py"
     },
     {
@@ -5191,8 +5191,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "scripts_audit_ai_policy_pattern",
-      "community": 17,
-      "community_name": "Community 17",
+      "community": 16,
+      "community_name": "Community 16",
       "norm_label": "pattern"
     },
     {
@@ -5202,8 +5202,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "scripts_audit_ai_policy_is_scanned_path",
-      "community": 17,
-      "community_name": "Community 17",
+      "community": 16,
+      "community_name": "Community 16",
       "norm_label": "is_scanned_path()"
     },
     {
@@ -5213,8 +5213,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "scripts_audit_ai_policy_run_git_diff",
-      "community": 17,
-      "community_name": "Community 17",
+      "community": 16,
+      "community_name": "Community 16",
       "norm_label": "run_git_diff()"
     },
     {
@@ -5224,8 +5224,8 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "scripts_audit_ai_policy_main",
-      "community": 17,
-      "community_name": "Community 17",
+      "community": 16,
+      "community_name": "Community 16",
       "norm_label": "main()"
     },
     {
@@ -5239,8 +5239,8 @@
       },
       "_origin": "ast",
       "id": "scripts_codeql_build",
-      "community": 18,
-      "community_name": "Community 18",
+      "community": 17,
+      "community_name": "Community 17",
       "norm_label": "codeql-build.sh"
     },
     {
@@ -5254,8 +5254,8 @@
       },
       "_origin": "ast",
       "id": "mnt_mintdata_git_achieve_ex_scripts_codeql_build_sh__entry",
-      "community": 18,
-      "community_name": "Community 18",
+      "community": 17,
+      "community_name": "Community 17",
       "norm_label": "codeql-build.sh script"
     },
     {
@@ -5269,8 +5269,8 @@
       },
       "_origin": "ast",
       "id": "scripts_codeql_build_path",
-      "community": 18,
-      "community_name": "Community 18",
+      "community": 17,
+      "community_name": "Community 17",
       "norm_label": "path"
     },
     {
@@ -5284,8 +5284,8 @@
       },
       "_origin": "ast",
       "id": "scripts_codeql_build_dotnet_root",
-      "community": 18,
-      "community_name": "Community 18",
+      "community": 17,
+      "community_name": "Community 17",
       "norm_label": "dotnet_root"
     },
     {
@@ -5299,8 +5299,8 @@
       },
       "_origin": "ast",
       "id": "scripts_codeql_local",
-      "community": 19,
-      "community_name": "Community 19",
+      "community": 18,
+      "community_name": "Community 18",
       "norm_label": "codeql-local.sh"
     },
     {
@@ -5314,8 +5314,8 @@
       },
       "_origin": "ast",
       "id": "mnt_mintdata_git_achieve_ex_scripts_codeql_local_sh__entry",
-      "community": 19,
-      "community_name": "Community 19",
+      "community": 18,
+      "community_name": "Community 18",
       "norm_label": "codeql-local.sh script"
     },
     {
@@ -5329,8 +5329,8 @@
       },
       "_origin": "ast",
       "id": "scripts_codeql_local_path",
-      "community": 19,
-      "community_name": "Community 19",
+      "community": 18,
+      "community_name": "Community 18",
       "norm_label": "path"
     },
     {
@@ -5344,8 +5344,8 @@
       },
       "_origin": "ast",
       "id": "scripts_codeql_local_dotnet_root",
-      "community": 19,
-      "community_name": "Community 19",
+      "community": 18,
+      "community_name": "Community 18",
       "norm_label": "dotnet_root"
     },
     {
@@ -5355,8 +5355,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_patch_manifest_icon",
-      "community": 16,
-      "community_name": "Community 16",
+      "community": 15,
+      "community_name": "Community 15",
       "norm_label": "patch_manifest_icon.py"
     },
     {
@@ -5366,8 +5366,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "scripts_patch_manifest_icon_patch_manifest",
-      "community": 16,
-      "community_name": "Community 16",
+      "community": 15,
+      "community_name": "Community 15",
       "norm_label": "patch_manifest()"
     },
     {
@@ -5377,8 +5377,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "path",
-      "community": 16,
-      "community_name": "Community 16",
+      "community": 15,
+      "community_name": "Community 15",
       "norm_label": "path"
     },
     {
@@ -5388,8 +5388,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "scripts_patch_manifest_icon_patch_zip",
-      "community": 16,
-      "community_name": "Community 16",
+      "community": 15,
+      "community_name": "Community 15",
       "norm_label": "patch_zip()"
     },
     {
@@ -5399,9 +5399,39 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "scripts_patch_manifest_icon_main",
-      "community": 16,
-      "community_name": "Community 16",
+      "community": 15,
+      "community_name": "Community 15",
       "norm_label": "main()"
+    },
+    {
+      "label": "regenerate-graphify.sh",
+      "file_type": "code",
+      "source_file": "scripts/regenerate-graphify.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "file"
+      },
+      "_origin": "ast",
+      "id": "scripts_regenerate_graphify",
+      "community": 24,
+      "community_name": "Community 24",
+      "norm_label": "regenerate-graphify.sh"
+    },
+    {
+      "label": "regenerate-graphify.sh script",
+      "file_type": "code",
+      "source_file": "scripts/regenerate-graphify.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_entrypoint"
+      },
+      "_origin": "ast",
+      "id": "mnt_mintdata_git_achieve_ex_scripts_regenerate_graphify_sh__entry",
+      "community": 24,
+      "community_name": "Community 24",
+      "norm_label": "regenerate-graphify.sh script"
     },
     {
       "label": "verify-local.sh",
@@ -5414,8 +5444,8 @@
       },
       "_origin": "ast",
       "id": "scripts_verify_local",
-      "community": 20,
-      "community_name": "Community 20",
+      "community": 19,
+      "community_name": "Community 19",
       "norm_label": "verify-local.sh"
     },
     {
@@ -5429,8 +5459,8 @@
       },
       "_origin": "ast",
       "id": "mnt_mintdata_git_achieve_ex_scripts_verify_local_sh__entry",
-      "community": 20,
-      "community_name": "Community 20",
+      "community": 19,
+      "community_name": "Community 19",
       "norm_label": "verify-local.sh script"
     },
     {
@@ -5444,8 +5474,8 @@
       },
       "_origin": "ast",
       "id": "scripts_verify_local_path",
-      "community": 20,
-      "community_name": "Community 20",
+      "community": 19,
+      "community_name": "Community 19",
       "norm_label": "path"
     },
     {
@@ -5459,8 +5489,8 @@
       },
       "_origin": "ast",
       "id": "scripts_verify_local_dotnet_root",
-      "community": 20,
-      "community_name": "Community 20",
+      "community": 19,
+      "community_name": "Community 19",
       "norm_label": "dotnet_root"
     }
   ],
@@ -15753,6 +15783,16 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "scripts/regenerate-graphify.sh",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "scripts_regenerate_graphify",
+      "target": "mnt_mintdata_git_achieve_ex_scripts_regenerate_graphify_sh__entry",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "scripts/verify-local.sh",
       "source_location": "L1",
       "weight": 1.0,
@@ -15782,5 +15822,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "a889da8d85624f9b29378bee51223d3f6b424eab"
+  "built_at_commit": "a79ecd1b7208f56ae7f197d959dfb959925f6bfc"
 }

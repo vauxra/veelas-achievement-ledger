@@ -60,7 +60,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 <div class="container">
 
 <h1>achieve-ex — Complete Call Flow &amp; Architecture Documentation</h1>
-<p class="subtitle">Generated from graphify knowledge graph: 492 nodes, 974 edges, 28 communities. Commit: a889da8</p>
+<p class="subtitle">Generated from graphify knowledge graph: 494 nodes, 975 edges, 28 communities. Commit: a79ecd1</p>
 
 <div class="nav">
     <a href="#overview">Architecture Overview</a>
@@ -98,9 +98,9 @@ flowchart LR
     class TESTS_FIXTURES_B84B1DCC module;
     COMMUNITY_0_B056AD3D("Community 0<br/><small>68 nodes</small>")
     class COMMUNITY_0_B056AD3D module;
-    COMMUNITY_1_3073A0DB("Community 1<br/><small>41 nodes</small>")
+    COMMUNITY_1_3073A0DB("Community 1<br/><small>55 nodes</small>")
     class COMMUNITY_1_3073A0DB module;
-    COMMUNITY_2_8C8DF7B9("Community 2<br/><small>39 nodes</small>")
+    COMMUNITY_2_8C8DF7B9("Community 2<br/><small>41 nodes</small>")
     class COMMUNITY_2_8C8DF7B9 module;
     COMMUNITY_3_D8DFCEA7("Community 3<br/><small>39 nodes</small>")
     class COMMUNITY_3_D8DFCEA7 module;
@@ -116,20 +116,20 @@ flowchart LR
     class COMMUNITY_8_9FC4FAC0 module;
     COMMUNITY_9_1D55D1EE("Community 9<br/><small>22 nodes</small>")
     class COMMUNITY_9_1D55D1EE module;
-    OTHER_D0941E68("Other<br/><small>59 nodes</small>")
+    OTHER_D0941E68("Other<br/><small>45 nodes</small>")
     class OTHER_D0941E68 module;
     COMMUNITY_6_7D637A07 -->|references x10| COMMUNITY_4_AC2DC2A9
-    COMMUNITY_1_3073A0DB -->|references x6| COMMUNITY_6_7D637A07
+    COMMUNITY_2_8C8DF7B9 -->|references x6| COMMUNITY_6_7D637A07
+    COMMUNITY_0_B056AD3D -->|references x6| COMMUNITY_1_3073A0DB
     COMMUNITY_4_AC2DC2A9 -->|references x5| OTHER_D0941E68
-    COMMUNITY_1_3073A0DB -->|references x4| COMMUNITY_4_AC2DC2A9
-    COMMUNITY_1_3073A0DB -->|references x4| COMMUNITY_8_9FC4FAC0
-    COMMUNITY_1_3073A0DB -->|references x4| COMMUNITY_0_B056AD3D
-    COMMUNITY_1_3073A0DB -->|references x4| COMMUNITY_5_2966028D
-    OTHER_D0941E68 -->|references x4| COMMUNITY_2_8C8DF7B9
+    COMMUNITY_2_8C8DF7B9 -->|references x4| COMMUNITY_4_AC2DC2A9
+    COMMUNITY_2_8C8DF7B9 -->|references x4| COMMUNITY_8_9FC4FAC0
+    COMMUNITY_2_8C8DF7B9 -->|references x4| COMMUNITY_0_B056AD3D
+    COMMUNITY_2_8C8DF7B9 -->|references x4| COMMUNITY_5_2966028D
     COMMUNITY_5_2966028D -->|references x3| COMMUNITY_0_B056AD3D
-    COMMUNITY_1_3073A0DB -->|references x3| COMMUNITY_9_1D55D1EE
+    COMMUNITY_2_8C8DF7B9 -->|references x3| COMMUNITY_9_1D55D1EE
     COMMUNITY_9_1D55D1EE -->|references x3| COMMUNITY_0_B056AD3D
-    COMMUNITY_0_B056AD3D -->|references x3| OTHER_D0941E68
+    COMMUNITY_5_2966028D -->|references x2| COMMUNITY_8_9FC4FAC0
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -146,19 +146,19 @@ flowchart LR
     <h4>Architecture Layers</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>Layer</th><th>Nodes</th><th>Communities</th></tr>
-      <tr><td>Graph Build</td><td>18</td><td><code>13, 18</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>30</td><td><code>11, 17, 19, 20</code></td></tr><tr><td>Ingestion &amp; Updates</td><td>5</td><td><code>16</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>7</td><td><code>14</code></td></tr><tr><td>Community 0</td><td>68</td><td><code>0</code></td></tr><tr><td>Community 1</td><td>41</td><td><code>1</code></td></tr><tr><td>Community 2</td><td>39</td><td><code>2</code></td></tr><tr><td>Community 3</td><td>39</td><td><code>3</code></td></tr><tr><td>Community 4</td><td>39</td><td><code>4</code></td></tr><tr><td>Community 5</td><td>38</td><td><code>5</code></td></tr><tr><td>Community 6</td><td>30</td><td><code>6</code></td></tr><tr><td>Community 7</td><td>30</td><td><code>7</code></td></tr><tr><td>Community 8</td><td>27</td><td><code>8</code></td></tr><tr><td>Community 9</td><td>22</td><td><code>9</code></td></tr><tr><td>Other</td><td>59</td><td><code>10, 12, 15, 21, 22, 23, 24, 25, 26, 27</code></td></tr>
+      <tr><td>Graph Build</td><td>18</td><td><code>12, 17</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>30</td><td><code>11, 16, 18, 19</code></td></tr><tr><td>Ingestion &amp; Updates</td><td>5</td><td><code>15</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>7</td><td><code>13</code></td></tr><tr><td>Community 0</td><td>68</td><td><code>0</code></td></tr><tr><td>Community 1</td><td>55</td><td><code>1</code></td></tr><tr><td>Community 2</td><td>41</td><td><code>2</code></td></tr><tr><td>Community 3</td><td>39</td><td><code>3</code></td></tr><tr><td>Community 4</td><td>39</td><td><code>4</code></td></tr><tr><td>Community 5</td><td>38</td><td><code>5</code></td></tr><tr><td>Community 6</td><td>30</td><td><code>6</code></td></tr><tr><td>Community 7</td><td>30</td><td><code>7</code></td></tr><tr><td>Community 8</td><td>27</td><td><code>8</code></td></tr><tr><td>Community 9</td><td>22</td><td><code>9</code></td></tr><tr><td>Other</td><td>45</td><td><code>10, 14, 20, 21, 22, 23, 24, 25, 26, 27</code></td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Core Flow</h4>
-    <div class="arrow-chain">Graph Build -&gt; Analysis &amp; Clustering -&gt; Ingestion &amp; Updates -&gt; Tests &amp; Fixtures -&gt; Community 0 -&gt; Other -&gt; Community 2</div>
+    <div class="arrow-chain">Graph Build -&gt; Analysis &amp; Clustering -&gt; Ingestion &amp; Updates -&gt; Tests &amp; Fixtures -&gt; Community 0 -&gt; Community 1 -&gt; Community 9</div>
   </div>
 </div>
 <div class="grid">
   <div class="card">
     <h4>Graph Report Highlights</h4>
     <ul>
-      <li>492 nodes · 974 edges · 28 communities (24 shown, 4 thin omitted)</li>
+      <li>494 nodes · 975 edges · 28 communities (23 shown, 5 thin omitted)</li>
       <li>Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS</li>
       <li>Token cost: 0 input · 0 output</li>
       <li>1. `TrackerWindow` - 64 edges</li>
@@ -1346,12 +1346,369 @@ flowchart LR
 
 <!-- ====== 7. Community 1 ====== -->
 <h2 id="community-1">7. Community 1</h2>
-<p>Community 1 groups implementation around plugincs, achievementtracker, plugin, idalamudplugin, mostly in AchievementTracker/Plugin.cs. This section covers 41 nodes and 64 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Community 1 groups implementation around achievementtracker, services, cosmicclassprogressprovidercs, models, mostly in AchievementTracker/Services/CosmicClassProgressProvider.cs, AchievementTracker/Models/AchievementProgress.cs, AchievementTracker/Services/AchievementCatalog.cs. This section covers 55 nodes and 110 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Community 1 (41 nodes, 64 edges)
+    %% Section: Community 1 (55 nodes, 110 edges)
+    subgraph community_1_AchievementTracker_Services_Achievem_0e3abfcc["AchievementTracker/Services/AchievementCatalog.cs"]
+        services_achievementcatalog_achievementcatalog_910ee816("AchievementCatalog<br/><small>AchievementTracker/Services/AchievementCatalog.cs</small>")
+        services_achievementcatalog_achievementcatalog_c_83214cb0("CanOpenInNativeAchievementUi()<br/><small>AchievementTracker/Services/AchievementCatalog.cs</small>")
+        services_achievementcatalog_achievementcatalog_i_f1dd11e9("IsKnownPlayerVisibleKind()<br/><small>AchievementTracker/Services/AchievementCatalog.cs</small>")
+        services_achievementcatalog_achievementcatalog_i_a0c525d6("IsManuallyViewable()<br/><small>AchievementTracker/Services/AchievementCatalog.cs</small>")
+        services_achievementcatalog_achievementcatalog_t_8e2d6b8d("ToInfo()<br/><small>AchievementTracker/Services/AchievementCatalog.cs</small>")
+        services_achievementcatalog_achievementcatalog_t_d9ad1cf5("TryGet()<br/><small>AchievementTracker/Services/AchievementCatalog.cs</small>")
+        services_achievementcatalog_achievementcatalog_t_80b5a381("TryGetRow()<br/><small>AchievementTracker/Services/AchievementCatalog.cs</small>")
+    end
+    subgraph community_1_AchievementTracker_Services_CosmicCl_03e09788["AchievementTracker/Services/CosmicClassProgressProvider.cs"]
+        services_cosmicclassprogressprovider_cosmicclass_ef25c69b("CosmicClassProgressProvider<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
+        services_cosmicclassprogressprovider_cosmicclass_ce350b84("GetProgress()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
+        services_cosmicclassprogressprovider_cosmicclass_7daf5ba4("GetDiagnostics()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
+        services_cosmicclassprogressprovider_cosmicclass_a2b8d4df("TryCreateRuleFromDetails()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
+        services_cosmicclassprogressprovider_cosmicclass_95609b9e("Any()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
+        services_cosmicclassprogressprovider_cosmicclass_769a36d9("BuildProgress()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
+        services_cosmicclassprogressprovider_cosmicclass_5333ab78("CosmicTargetRegex()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
+    end
+    subgraph community_1_AchievementTracker_Services_Achievem_bc515ab1["AchievementTracker/Services/AchievementProgressService.cs"]
+        services_achievementprogressservice_achievementp_36d0dd6f("AchievementProgressService<br/><small>AchievementTracker/Services/AchievementProgressService.cs</small>")
+        services_achievementprogressservice_achievementp_4be43d72("GetProgress()<br/><small>AchievementTracker/Services/AchievementProgressService.cs</small>")
+        services_achievementprogressservice_achievementp_8cad4f05("GetRequiredTarget()<br/><small>AchievementTracker/Services/AchievementProgressService.cs</small>")
+        services_achievementprogressservice_achievementp_5f52fac5("IsComplete()<br/><small>AchievementTracker/Services/AchievementProgressService.cs</small>")
+    end
+    services_achievementcatalog_achievementcatalog_910ee816 -->|method| services_achievementcatalog_achievementcatalog_c_83214cb0
+    services_achievementcatalog_achievementcatalog_910ee816 -->|method| services_achievementcatalog_achievementcatalog_i_f1dd11e9
+    services_achievementcatalog_achievementcatalog_910ee816 -->|method| services_achievementcatalog_achievementcatalog_i_a0c525d6
+    services_achievementcatalog_achievementcatalog_910ee816 -->|method| services_achievementcatalog_achievementcatalog_t_8e2d6b8d
+    services_achievementcatalog_achievementcatalog_910ee816 -->|method| services_achievementcatalog_achievementcatalog_t_d9ad1cf5
+    services_achievementcatalog_achievementcatalog_910ee816 -->|method| services_achievementcatalog_achievementcatalog_t_80b5a381
+    services_achievementcatalog_achievementcatalog_t_d9ad1cf5 -->|calls| services_achievementcatalog_achievementcatalog_t_8e2d6b8d
+    services_achievementcatalog_achievementcatalog_t_d9ad1cf5 -->|calls| services_achievementcatalog_achievementcatalog_t_80b5a381
+    services_achievementcatalog_achievementcatalog_t_80b5a381 -->|calls| services_achievementcatalog_achievementcatalog_c_83214cb0
+    services_achievementcatalog_achievementcatalog_t_80b5a381 -->|calls| services_achievementcatalog_achievementcatalog_i_a0c525d6
+    services_achievementcatalog_achievementcatalog_i_a0c525d6 -->|calls| services_achievementcatalog_achievementcatalog_c_83214cb0
+    services_achievementcatalog_achievementcatalog_i_a0c525d6 -->|calls| services_achievementcatalog_achievementcatalog_i_f1dd11e9
+    services_achievementprogressservice_achievementp_36d0dd6f -->|method| services_achievementprogressservice_achievementp_4be43d72
+    services_achievementprogressservice_achievementp_36d0dd6f -->|method| services_achievementprogressservice_achievementp_8cad4f05
+    services_achievementprogressservice_achievementp_36d0dd6f -->|method| services_achievementprogressservice_achievementp_5f52fac5
+    services_achievementprogressservice_achievementp_4be43d72 -->|calls| services_achievementprogressservice_achievementp_8cad4f05
+    services_achievementprogressservice_achievementp_4be43d72 -->|calls| services_achievementprogressservice_achievementp_5f52fac5
+    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_95609b9e
+    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_769a36d9
+    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_5333ab78
+    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_7daf5ba4
+    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_ce350b84
+    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_a2b8d4df
+    services_cosmicclassprogressprovider_cosmicclass_ce350b84 -->|calls| services_cosmicclassprogressprovider_cosmicclass_769a36d9
+    %% Omitted for readability: 37 nodes, 1 edges
+    class services_achievementcatalog_achievementcatalog_910ee816 klass;
+    class services_achievementcatalog_achievementcatalog_c_83214cb0 function;
+    class services_achievementcatalog_achievementcatalog_i_f1dd11e9 function;
+    class services_achievementcatalog_achievementcatalog_i_a0c525d6 function;
+    class services_achievementcatalog_achievementcatalog_t_8e2d6b8d function;
+    class services_achievementcatalog_achievementcatalog_t_d9ad1cf5 function;
+    class services_achievementcatalog_achievementcatalog_t_80b5a381 function;
+    class services_cosmicclassprogressprovider_cosmicclass_ef25c69b klass;
+    class services_cosmicclassprogressprovider_cosmicclass_ce350b84 function;
+    class services_cosmicclassprogressprovider_cosmicclass_7daf5ba4 function;
+    class services_cosmicclassprogressprovider_cosmicclass_a2b8d4df function;
+    class services_cosmicclassprogressprovider_cosmicclass_95609b9e function;
+    class services_cosmicclassprogressprovider_cosmicclass_769a36d9 function;
+    class services_cosmicclassprogressprovider_cosmicclass_5333ab78 function;
+    class services_achievementprogressservice_achievementp_36d0dd6f async;
+    class services_achievementprogressservice_achievementp_4be43d72 function;
+    class services_achievementprogressservice_achievementp_8cad4f05 function;
+    class services_achievementprogressservice_achievementp_5f52fac5 function;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>AchievementProgress.cs</code><br><small style="color:var(--muted)">AchievementTracker/Models/AchievementProgress.cs</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>AchievementProgress.cs node in AchievementTracker/Models/AchievementProgress.cs.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>CompletionListNotLoaded()</code><br><small style="color:var(--muted)">AchievementTracker/Models/AchievementProgress.cs</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>CompletionListNotLoaded() node in AchievementTracker/Models/AchievementProgress.cs.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>AchievementProgress</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>AchievementProgress node in project.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>Complete()</code><br><small style="color:var(--muted)">AchievementTracker/Models/AchievementProgress.cs</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Complete() node in AchievementTracker/Models/AchievementProgress.cs.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>Incomplete()</code><br><small style="color:var(--muted)">AchievementTracker/Models/AchievementProgress.cs</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Incomplete() node in AchievementTracker/Models/AchievementProgress.cs.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>Numeric()</code><br><small style="color:var(--muted)">AchievementTracker/Models/AchievementProgress.cs</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Numeric() node in AchievementTracker/Models/AchievementProgress.cs.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>TargetKnown()</code><br><small style="color:var(--muted)">AchievementTracker/Models/AchievementProgress.cs</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>TargetKnown() node in AchievementTracker/Models/AchievementProgress.cs.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>Unavailable()</code><br><small style="color:var(--muted)">AchievementTracker/Models/AchievementProgress.cs</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Unavailable() node in AchievementTracker/Models/AchievementProgress.cs.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>DataNotAvailable()</code><br><small style="color:var(--muted)">AchievementTracker/Models/AchievementProgress.cs</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>DataNotAvailable() node in AchievementTracker/Models/AchievementProgress.cs.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>ToDisplayText()</code><br><small style="color:var(--muted)">AchievementTracker/Models/AchievementProgress.cs</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>ToDisplayText() node in AchievementTracker/Models/AchievementProgress.cs.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>CosmicClassScoreCache.cs</code><br><small style="color:var(--muted)">AchievementTracker/Models/CosmicClassScoreCache.cs</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Caches analysis results or computes cache keys.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>CosmicClassScoreCache</code><br><small style="color:var(--muted)">AchievementTracker/Models/CosmicClassScoreCache.cs</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Caches analysis results or computes cache keys.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>AchievementCatalog.cs</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>AchievementCatalog.cs node in AchievementTracker/Services/AchievementCatalog.cs.</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>AchievementCatalog</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>CanOpenInNativeAchievementUi()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>IsKnownPlayerVisibleKind()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>IsManuallyViewable()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br>+3 more</td>
+  <td>AchievementCatalog node in AchievementTracker/Services/AchievementCatalog.cs.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>IDataManager</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>IDataManager node in project.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>.TryGet()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>AchievementCatalog</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td><code>ToInfo()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>TryGetRow()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td>.TryGet() node in AchievementTracker/Services/AchievementCatalog.cs.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>.TryGetRow()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>AchievementCatalog</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>TryGet()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td><code>CanOpenInNativeAchievementUi()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>IsManuallyViewable()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td>.TryGetRow() node in AchievementTracker/Services/AchievementCatalog.cs.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>Achievement</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Achievement node in project.</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td><code>.IsManuallyViewable()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>AchievementCatalog</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>TryGetRow()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td><code>CanOpenInNativeAchievementUi()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>IsKnownPlayerVisibleKind()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td>.IsManuallyViewable() node in AchievementTracker/Services/AchievementCatalog.cs.</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td><code>.CanOpenInNativeAchievementUi()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>AchievementCatalog</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>IsManuallyViewable()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>TryGetRow()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td>No direct outbound edge</td>
+  <td>.CanOpenInNativeAchievementUi() node in AchievementTracker/Services/AchievementCatalog.cs.</td>
+</tr>
+<tr>
+  <td>21</td>
+  <td><code>.IsKnownPlayerVisibleKind()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>AchievementCatalog</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>IsManuallyViewable()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td>No direct outbound edge</td>
+  <td>.IsKnownPlayerVisibleKind() node in AchievementTracker/Services/AchievementCatalog.cs.</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td><code>.ToInfo()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>AchievementCatalog</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>TryGet()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td>No direct outbound edge</td>
+  <td>.ToInfo() node in AchievementTracker/Services/AchievementCatalog.cs.</td>
+</tr>
+<tr>
+  <td>23</td>
+  <td><code>AchievementProgressService.cs</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementProgressService.cs</small></td>
+  <td><span class="tag tag-async">Async</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>AchievementProgressService.cs node in AchievementTracker/Services/AchievementProgressService.cs.</td>
+</tr>
+<tr>
+  <td>24</td>
+  <td><code>AchievementProgressService</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementProgressService.cs</small></td>
+  <td><span class="tag tag-async">Async</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>GetProgress()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementProgressService.cs</small><br><code>GetRequiredTarget()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementProgressService.cs</small><br><code>IsComplete()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementProgressService.cs</small></td>
+  <td>AchievementProgressService node in AchievementTracker/Services/AchievementProgressService.cs.</td>
+</tr>
+<tr>
+  <td>25</td>
+  <td><code>IUnlockState</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>IUnlockState node in project.</td>
+</tr>
+<tr>
+  <td>26</td>
+  <td><code>.GetProgress()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementProgressService.cs</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>AchievementProgressService</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementProgressService.cs</small></td>
+  <td><code>GetRequiredTarget()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementProgressService.cs</small><br><code>IsComplete()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementProgressService.cs</small></td>
+  <td>.GetProgress() node in AchievementTracker/Services/AchievementProgressService.cs.</td>
+</tr>
+<tr>
+  <td>27</td>
+  <td><code>.IsComplete()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementProgressService.cs</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>AchievementProgressService</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementProgressService.cs</small><br><code>GetProgress()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementProgressService.cs</small></td>
+  <td>No direct outbound edge</td>
+  <td>.IsComplete() node in AchievementTracker/Services/AchievementProgressService.cs.</td>
+</tr>
+<tr>
+  <td>28</td>
+  <td><code>.GetRequiredTarget()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementProgressService.cs</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>AchievementProgressService</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementProgressService.cs</small><br><code>GetProgress()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementProgressService.cs</small></td>
+  <td>No direct outbound edge</td>
+  <td>.GetRequiredTarget() node in AchievementTracker/Services/AchievementProgressService.cs.</td>
+</tr>
+<tr>
+  <td>29</td>
+  <td><code>CosmicClassProgressProvider.cs</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>CosmicClassProgressProvider.cs node in AchievementTracker/Services/CosmicClassProgressProvider.cs.</td>
+</tr>
+<tr>
+  <td>30</td>
+  <td><code>CosmicClassProgressProvider</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>Any()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>BuildProgress()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>CosmicTargetRegex()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br>+19 more</td>
+  <td>CosmicClassProgressProvider node in AchievementTracker/Services/CosmicClassProgressProvider.cs.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>AchievementTracker/Services/CosmicClassProgressProvider.cs</code></td><td>24 nodes</td></tr>
+<tr><td><code>AchievementTracker/Models/AchievementProgress.cs</code></td><td>9 nodes</td></tr>
+<tr><td><code>AchievementTracker/Services/AchievementCatalog.cs</code></td><td>8 nodes</td></tr>
+<tr><td><code>AchievementTracker/Services/AchievementProgressService.cs</code></td><td>5 nodes</td></tr>
+<tr><td><code>AchievementTracker/Models/CosmicClassScoreCache.cs</code></td><td>2 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: references x35, calls x32, method x31, contains x12. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 8. Community 2 ====== -->
+<h2 id="community-2">8. Community 2</h2>
+<p>Community 2 groups implementation around plugincs, achievementtracker, plugin, idalamudplugin, mostly in AchievementTracker/Plugin.cs. This section covers 41 nodes and 64 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Community 2 (41 nodes, 64 edges)
     achievementtracker_plugin_plugin_c7c73485("Plugin<br/><small>AchievementTracker/Plugin.cs</small>")
     achievementtracker_plugin_plugin_onframeworkupda_bfa7f04c("OnFrameworkUpdate()<br/><small>AchievementTracker/Plugin.cs</small>")
     achievementtracker_plugin_plugin_saveconfigurati_8498cf7a("SaveConfiguration()<br/><small>AchievementTracker/Plugin.cs</small>")
@@ -1687,355 +2044,6 @@ flowchart LR
   <div class="card">
     <h4>Design Notes</h4>
     <p>This section comes from graphify community clustering. Relationship summary: method x36, calls x22, references x4, imports x1. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
-  </div>
-</div>
-<hr>
-
-<!-- ====== 8. Community 2 ====== -->
-<h2 id="community-2">8. Community 2</h2>
-<p>Community 2 groups implementation around achievementtracker, cosmicclassprogressprovidercs, services, models, mostly in AchievementTracker/Services/CosmicClassProgressProvider.cs, AchievementTracker/Models/AchievementProgress.cs, AchievementTracker/Models/CosmicClassScoreCache.cs. This section covers 39 nodes and 78 internal edges; the diagram shows only representative relationships to stay readable.</p>
-
-<div class="mermaid">
-%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
-flowchart LR
-    %% Section: Community 2 (39 nodes, 78 edges)
-    services_cosmicclassprogressprovider_cosmicclass_ef25c69b("CosmicClassProgressProvider<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
-    services_cosmicclassprogressprovider_cosmicclass_ce350b84("GetProgress()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
-    services_cosmicclassprogressprovider_cosmicclass_7daf5ba4("GetDiagnostics()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
-    services_cosmicclassprogressprovider_cosmicclass_a2b8d4df("TryCreateRuleFromDetails()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
-    services_cosmicclassprogressprovider_cosmicclass_6c857e86("Handles()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
-    services_cosmicclassprogressprovider_cosmicclass_b6b454cb("TryCreateProgressOverride()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
-    services_cosmicclassprogressprovider_cosmicclass_95609b9e("Any()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
-    services_cosmicclassprogressprovider_cosmicclass_769a36d9("BuildProgress()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
-    services_cosmicclassprogressprovider_cosmicclass_5333ab78("CosmicTargetRegex()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
-    services_cosmicclassprogressprovider_cosmicclass_ca1cb9ab("Every()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
-    services_cosmicclassprogressprovider_cosmicclass_853de29c("GetLiveStateSummary()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
-    services_cosmicclassprogressprovider_cosmicclass_625553d8("GetRule()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
-    services_cosmicclassprogressprovider_cosmicclass_0b02aa63("GetScoreIndexesForCategory()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
-    services_cosmicclassprogressprovider_cosmicclass_a6a67470("GetScoreIndexesForDescription()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
-    services_cosmicclassprogressprovider_cosmicclass_d1e9240f("IsCosmicClassAchievement()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
-    services_cosmicclassprogressprovider_cosmicclass_042a94ec("IsCosmicScoreDescription()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
-    services_cosmicclassprogressprovider_cosmicclass_acd35584("NormalizeCache()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
-    services_cosmicclassprogressprovider_cosmicclass_9e4cf303("RefreshCacheFromLiveScores()<br/><small>AchievementTracker/Services/CosmicClassProgressProvider.cs</small>")
-    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_95609b9e
-    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_769a36d9
-    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_5333ab78
-    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_ca1cb9ab
-    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_7daf5ba4
-    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_853de29c
-    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_ce350b84
-    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_625553d8
-    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_0b02aa63
-    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_a6a67470
-    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_6c857e86
-    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_d1e9240f
-    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_042a94ec
-    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_acd35584
-    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_9e4cf303
-    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_b6b454cb
-    services_cosmicclassprogressprovider_cosmicclass_ef25c69b -->|method| services_cosmicclassprogressprovider_cosmicclass_a2b8d4df
-    services_cosmicclassprogressprovider_cosmicclass_6c857e86 -->|calls| services_cosmicclassprogressprovider_cosmicclass_625553d8
-    services_cosmicclassprogressprovider_cosmicclass_ce350b84 -->|calls| services_cosmicclassprogressprovider_cosmicclass_769a36d9
-    services_cosmicclassprogressprovider_cosmicclass_ce350b84 -->|calls| services_cosmicclassprogressprovider_cosmicclass_625553d8
-    services_cosmicclassprogressprovider_cosmicclass_b6b454cb -->|calls| services_cosmicclassprogressprovider_cosmicclass_769a36d9
-    services_cosmicclassprogressprovider_cosmicclass_b6b454cb -->|calls| services_cosmicclassprogressprovider_cosmicclass_a2b8d4df
-    services_cosmicclassprogressprovider_cosmicclass_7daf5ba4 -->|calls| services_cosmicclassprogressprovider_cosmicclass_853de29c
-    services_cosmicclassprogressprovider_cosmicclass_a2b8d4df -->|calls| services_cosmicclassprogressprovider_cosmicclass_5333ab78
-    %% Omitted for readability: 21 nodes, 6 edges
-    class services_cosmicclassprogressprovider_cosmicclass_ef25c69b klass;
-    class services_cosmicclassprogressprovider_cosmicclass_ce350b84 function;
-    class services_cosmicclassprogressprovider_cosmicclass_7daf5ba4 function;
-    class services_cosmicclassprogressprovider_cosmicclass_a2b8d4df function;
-    class services_cosmicclassprogressprovider_cosmicclass_6c857e86 function;
-    class services_cosmicclassprogressprovider_cosmicclass_b6b454cb function;
-    class services_cosmicclassprogressprovider_cosmicclass_95609b9e function;
-    class services_cosmicclassprogressprovider_cosmicclass_769a36d9 function;
-    class services_cosmicclassprogressprovider_cosmicclass_5333ab78 function;
-    class services_cosmicclassprogressprovider_cosmicclass_ca1cb9ab function;
-    class services_cosmicclassprogressprovider_cosmicclass_853de29c function;
-    class services_cosmicclassprogressprovider_cosmicclass_625553d8 function;
-    class services_cosmicclassprogressprovider_cosmicclass_0b02aa63 function;
-    class services_cosmicclassprogressprovider_cosmicclass_a6a67470 function;
-    class services_cosmicclassprogressprovider_cosmicclass_d1e9240f function;
-    class services_cosmicclassprogressprovider_cosmicclass_042a94ec function;
-    class services_cosmicclassprogressprovider_cosmicclass_acd35584 function;
-    class services_cosmicclassprogressprovider_cosmicclass_9e4cf303 function;
-    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
-    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
-    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
-    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
-    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
-    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
-    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
-    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
-    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
-</div>
-
-<h3>Call Details</h3>
-<table class="call-table">
-<tr>
-  <th style="width:5%">#</th>
-  <th style="width:28%">Node</th>
-  <th style="width:10%">Type</th>
-  <th style="width:17%">Caller</th>
-  <th style="width:20%">Callees</th>
-  <th style="width:20%">Description</th>
-</tr>
-<tr>
-  <td>1</td>
-  <td><code>AchievementProgress.cs</code><br><small style="color:var(--muted)">AchievementTracker/Models/AchievementProgress.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>AchievementProgress.cs node in AchievementTracker/Models/AchievementProgress.cs.</td>
-</tr>
-<tr>
-  <td>2</td>
-  <td><code>CompletionListNotLoaded()</code><br><small style="color:var(--muted)">AchievementTracker/Models/AchievementProgress.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>CompletionListNotLoaded() node in AchievementTracker/Models/AchievementProgress.cs.</td>
-</tr>
-<tr>
-  <td>3</td>
-  <td><code>AchievementProgress</code><br><small style="color:var(--muted)"></small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>AchievementProgress node in project.</td>
-</tr>
-<tr>
-  <td>4</td>
-  <td><code>Complete()</code><br><small style="color:var(--muted)">AchievementTracker/Models/AchievementProgress.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Complete() node in AchievementTracker/Models/AchievementProgress.cs.</td>
-</tr>
-<tr>
-  <td>5</td>
-  <td><code>Incomplete()</code><br><small style="color:var(--muted)">AchievementTracker/Models/AchievementProgress.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Incomplete() node in AchievementTracker/Models/AchievementProgress.cs.</td>
-</tr>
-<tr>
-  <td>6</td>
-  <td><code>Numeric()</code><br><small style="color:var(--muted)">AchievementTracker/Models/AchievementProgress.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Numeric() node in AchievementTracker/Models/AchievementProgress.cs.</td>
-</tr>
-<tr>
-  <td>7</td>
-  <td><code>TargetKnown()</code><br><small style="color:var(--muted)">AchievementTracker/Models/AchievementProgress.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>TargetKnown() node in AchievementTracker/Models/AchievementProgress.cs.</td>
-</tr>
-<tr>
-  <td>8</td>
-  <td><code>Unavailable()</code><br><small style="color:var(--muted)">AchievementTracker/Models/AchievementProgress.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Unavailable() node in AchievementTracker/Models/AchievementProgress.cs.</td>
-</tr>
-<tr>
-  <td>9</td>
-  <td><code>DataNotAvailable()</code><br><small style="color:var(--muted)">AchievementTracker/Models/AchievementProgress.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>DataNotAvailable() node in AchievementTracker/Models/AchievementProgress.cs.</td>
-</tr>
-<tr>
-  <td>10</td>
-  <td><code>ToDisplayText()</code><br><small style="color:var(--muted)">AchievementTracker/Models/AchievementProgress.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>ToDisplayText() node in AchievementTracker/Models/AchievementProgress.cs.</td>
-</tr>
-<tr>
-  <td>11</td>
-  <td><code>CosmicClassScoreCache.cs</code><br><small style="color:var(--muted)">AchievementTracker/Models/CosmicClassScoreCache.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Caches analysis results or computes cache keys.</td>
-</tr>
-<tr>
-  <td>12</td>
-  <td><code>CosmicClassScoreCache</code><br><small style="color:var(--muted)">AchievementTracker/Models/CosmicClassScoreCache.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Caches analysis results or computes cache keys.</td>
-</tr>
-<tr>
-  <td>13</td>
-  <td><code>CosmicClassProgressProvider.cs</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>CosmicClassProgressProvider.cs node in AchievementTracker/Services/CosmicClassProgressProvider.cs.</td>
-</tr>
-<tr>
-  <td>14</td>
-  <td><code>CosmicClassProgressProvider</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>Any()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>BuildProgress()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>CosmicTargetRegex()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br>+19 more</td>
-  <td>CosmicClassProgressProvider node in AchievementTracker/Services/CosmicClassProgressProvider.cs.</td>
-</tr>
-<tr>
-  <td>15</td>
-  <td><code>.Handles()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>CosmicClassProgressProvider</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><code>GetRule()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>TryCreateRuleFromAchievementDetails()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td>.Handles() node in AchievementTracker/Services/CosmicClassProgressProvider.cs.</td>
-</tr>
-<tr>
-  <td>16</td>
-  <td><code>.RefreshCacheFromLiveScores()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>CosmicClassProgressProvider</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><code>TryReadLiveScores()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td>Caches analysis results or computes cache keys.</td>
-</tr>
-<tr>
-  <td>17</td>
-  <td><code>.GetProgress()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>CosmicClassProgressProvider</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><code>BuildProgress()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>GetRule()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>TryCreateRuleFromAchievementDetails()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br>+2 more</td>
-  <td>.GetProgress() node in AchievementTracker/Services/CosmicClassProgressProvider.cs.</td>
-</tr>
-<tr>
-  <td>18</td>
-  <td><code>.TryCreateProgressOverride()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>CosmicClassProgressProvider</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><code>BuildProgress()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>TryCreateRuleFromDetails()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td>.TryCreateProgressOverride() node in AchievementTracker/Services/CosmicClassProgressProvider.cs.</td>
-</tr>
-<tr>
-  <td>19</td>
-  <td><code>CosmicAchievementRule</code><br><small style="color:var(--muted)"></small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>CosmicAchievementRule node in project.</td>
-</tr>
-<tr>
-  <td>20</td>
-  <td><code>.BuildProgress()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>CosmicClassProgressProvider</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>GetProgress()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>TryCreateProgressOverride()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td>No direct outbound edge</td>
-  <td>.BuildProgress() node in AchievementTracker/Services/CosmicClassProgressProvider.cs.</td>
-</tr>
-<tr>
-  <td>21</td>
-  <td><code>.GetDiagnostics()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>CosmicClassProgressProvider</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><code>GetLiveStateSummary()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>TryReadCachedScores()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>TryReadLiveScores()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td>.GetDiagnostics() node in AchievementTracker/Services/CosmicClassProgressProvider.cs.</td>
-</tr>
-<tr>
-  <td>22</td>
-  <td><code>.TryCreateRuleFromAchievementDetails()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>CosmicClassProgressProvider</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>GetProgress()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>Handles()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><code>TryCreateRuleFromDetails()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td>.TryCreateRuleFromAchievementDetails() node in AchievementTracker/Services/CosmicClassProgressProvider.cs.</td>
-</tr>
-<tr>
-  <td>23</td>
-  <td><code>.TryCreateRuleFromDetails()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>CosmicClassProgressProvider</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>TryCreateProgressOverride()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>TryCreateRuleFromAchievementDetails()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><code>CosmicTargetRegex()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>GetScoreIndexesForCategory()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>GetScoreIndexesForDescription()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br>+1 more</td>
-  <td>.TryCreateRuleFromDetails() node in AchievementTracker/Services/CosmicClassProgressProvider.cs.</td>
-</tr>
-<tr>
-  <td>24</td>
-  <td><code>.GetScoreIndexesForDescription()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>CosmicClassProgressProvider</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>TryCreateRuleFromDetails()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td>No direct outbound edge</td>
-  <td>.GetScoreIndexesForDescription() node in AchievementTracker/Services/CosmicClassProgressProvider.cs.</td>
-</tr>
-<tr>
-  <td>25</td>
-  <td><code>.IsCosmicScoreDescription()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>CosmicClassProgressProvider</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>TryCreateRuleFromDetails()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td>No direct outbound edge</td>
-  <td>.IsCosmicScoreDescription() node in AchievementTracker/Services/CosmicClassProgressProvider.cs.</td>
-</tr>
-<tr>
-  <td>26</td>
-  <td><code>.GetScoreIndexesForCategory()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>CosmicClassProgressProvider</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>TryCreateRuleFromDetails()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td>No direct outbound edge</td>
-  <td>.GetScoreIndexesForCategory() node in AchievementTracker/Services/CosmicClassProgressProvider.cs.</td>
-</tr>
-<tr>
-  <td>27</td>
-  <td><code>.CosmicTargetRegex()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>CosmicClassProgressProvider</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small><br><code>TryCreateRuleFromDetails()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td>No direct outbound edge</td>
-  <td>.CosmicTargetRegex() node in AchievementTracker/Services/CosmicClassProgressProvider.cs.</td>
-</tr>
-<tr>
-  <td>28</td>
-  <td><code>Regex</code><br><small style="color:var(--muted)"></small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Regex node in project.</td>
-</tr>
-<tr>
-  <td>29</td>
-  <td><code>GeneratedRegex</code><br><small style="color:var(--muted)"></small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>GeneratedRegex node in project.</td>
-</tr>
-<tr>
-  <td>30</td>
-  <td><code>.IsCosmicClassAchievement()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>CosmicClassProgressProvider</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td><code>GetRule()</code><br><small style="color:var(--muted)">AchievementTracker/Services/CosmicClassProgressProvider.cs</small></td>
-  <td>.IsCosmicClassAchievement() node in AchievementTracker/Services/CosmicClassProgressProvider.cs.</td>
-</tr>
-</table>
-
-<div class="grid">
-  <div class="card">
-    <h4>Key Files</h4>
-    <table style="width:100%;font-size:0.85rem;">
-      <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>AchievementTracker/Services/CosmicClassProgressProvider.cs</code></td><td>24 nodes</td></tr>
-<tr><td><code>AchievementTracker/Models/AchievementProgress.cs</code></td><td>9 nodes</td></tr>
-<tr><td><code>AchievementTracker/Models/CosmicClassScoreCache.cs</code></td><td>2 nodes</td></tr>
-    </table>
-  </div>
-  <div class="card">
-    <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: calls x24, references x22, method x22, contains x10. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -4407,78 +4415,74 @@ flowchart LR
 
 <!-- ====== 16. Other ====== -->
 <h2 id="other">16. Other</h2>
-<p>Other groups implementation around achievementtracker, services, clientachievementprogresssourcecs, achievementcatalogcs, mostly in AchievementTracker/Services/ClientAchievementProgressSource.cs, AchievementTracker/Services/AchievementCatalog.cs, AchievementTracker/Services/IAchievementProgressSource.cs. This section covers 59 nodes and 72 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Other groups implementation around achievementtracker, services, clientachievementprogresssourcecs, iachievementprogresssourcecs, mostly in AchievementTracker/Services/ClientAchievementProgressSource.cs, AchievementTracker/Services/IAchievementProgressSource.cs, AchievementTracker/Services/AchievementCategoryPath.cs. This section covers 45 nodes and 45 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Other (59 nodes, 72 edges)
-    subgraph other_AchievementTracker_Services_AchievementCat_91ed8f2b["AchievementTracker/Services/AchievementCatalog.cs"]
-        services_achievementcatalog_achievementcatalog_910ee816("AchievementCatalog<br/><small>AchievementTracker/Services/AchievementCatalog.cs</small>")
-        services_achievementcatalog_achievementcatalog_t_d9ad1cf5("TryGet()<br/><small>AchievementTracker/Services/AchievementCatalog.cs</small>")
-        services_achievementcatalog_achievementcatalog_c_83214cb0("CanOpenInNativeAchievementUi()<br/><small>AchievementTracker/Services/AchievementCatalog.cs</small>")
-        services_achievementcatalog_achievementcatalog_i_f1dd11e9("IsKnownPlayerVisibleKind()<br/><small>AchievementTracker/Services/AchievementCatalog.cs</small>")
-        services_achievementcatalog_achievementcatalog_i_a0c525d6("IsManuallyViewable()<br/><small>AchievementTracker/Services/AchievementCatalog.cs</small>")
-        services_achievementcatalog_achievementcatalog_t_8e2d6b8d("ToInfo()<br/><small>AchievementTracker/Services/AchievementCatalog.cs</small>")
-        services_achievementcatalog_achievementcatalog_t_80b5a381("TryGetRow()<br/><small>AchievementTracker/Services/AchievementCatalog.cs</small>")
-    end
-    subgraph other_AchievementTracker_Services_AchievementPro_6b0ac716["AchievementTracker/Services/AchievementProgressService.cs"]
-        services_achievementprogressservice_achievementp_36d0dd6f("AchievementProgressService<br/><small>AchievementTracker/Services/AchievementProgressService.cs</small>")
-        services_achievementprogressservice_achievementp_4be43d72("GetProgress()<br/><small>AchievementTracker/Services/AchievementProgressService.cs</small>")
-        services_achievementprogressservice_achievementp_8cad4f05("GetRequiredTarget()<br/><small>AchievementTracker/Services/AchievementProgressService.cs</small>")
-        services_achievementprogressservice_achievementp_5f52fac5("IsComplete()<br/><small>AchievementTracker/Services/AchievementProgressService.cs</small>")
-    end
+    %% Section: Other (45 nodes, 45 edges)
     subgraph other_AchievementTracker_Services_ClientAchievem_e49fe140["AchievementTracker/Services/ClientAchievementProgressSource.cs"]
         services_clientachievementprogresssource_clienta_9bcb9e2e("ClientAchievementProgressSource<br/><small>AchievementTracker/Services/ClientAchievementProgressSource.cs</small>")
         services_clientachievementprogresssource_clienta_b0c75412("UpdateCache()<br/><small>AchievementTracker/Services/ClientAchievementProgressSource.cs</small>")
         services_clientachievementprogresssource_clienta_5dee546c("ClearCache()<br/><small>AchievementTracker/Services/ClientAchievementProgressSource.cs</small>")
         services_clientachievementprogresssource_clienta_209a640c("IsObservedComplete()<br/><small>AchievementTracker/Services/ClientAchievementProgressSource.cs</small>")
+        services_clientachievementprogresssource_clienta_ba08df77("IsRecentlyObserved()<br/><small>AchievementTracker/Services/ClientAchievementProgressSource.cs</small>")
+        services_clientachievementprogresssource_clienta_b13366d2("RecordObservedCompletion()<br/><small>AchievementTracker/Services/ClientAchievementProgressSource.cs</small>")
+        services_clientachievementprogresssource_clienta_e8272ddc("RecordObservedProgress()<br/><small>AchievementTracker/Services/ClientAchievementProgressSource.cs</small>")
+        services_clientachievementprogresssource_clienta_45f4b731("ShouldRecordProgressSlotObservation()<br/><small>AchievementTracker/Services/ClientAchievementProgressSource.cs</small>")
+        services_clientachievementprogresssource_clienta_66593547("TryGetFreshCachedObservation()<br/><small>AchievementTracker/Services/ClientAchievementProgressSource.cs</small>")
+        services_clientachievementprogresssource_clienta_6d466b3f("TryGetFreshObservation()<br/><small>AchievementTracker/Services/ClientAchievementProgressSource.cs</small>")
+        services_clientachievementprogresssource_clienta_889c315f("TryGetObservation()<br/><small>AchievementTracker/Services/ClientAchievementProgressSource.cs</small>")
+        services_clientachievementprogresssource_clienta_ecda58b1("TryGetProgress()<br/><small>AchievementTracker/Services/ClientAchievementProgressSource.cs</small>")
     end
     subgraph other_AchievementTracker_Services_AchievementCat_29bb0135["AchievementTracker/Services/AchievementCategoryPath.cs"]
         services_achievementcategorypath_parse_35fe1519("Parse()<br/><small>AchievementTracker/Services/AchievementCategoryPath.cs</small>")
         services_achievementcategorypath_matchescategory_1d907660("MatchesCategory()<br/><small>AchievementTracker/Services/AchievementCategoryPath.cs</small>")
     end
-    services_iachievementprogresssource_iachievement_4c6ae27a("IAchievementProgressSource<br/><small>AchievementTracker/Services/IAchievementProgressSource.cs</small>")
-    services_achievementcatalog_achievementcatalog_910ee816 -->|method| services_achievementcatalog_achievementcatalog_c_83214cb0
-    services_achievementcatalog_achievementcatalog_910ee816 -->|method| services_achievementcatalog_achievementcatalog_i_f1dd11e9
-    services_achievementcatalog_achievementcatalog_910ee816 -->|method| services_achievementcatalog_achievementcatalog_i_a0c525d6
-    services_achievementcatalog_achievementcatalog_910ee816 -->|method| services_achievementcatalog_achievementcatalog_t_8e2d6b8d
-    services_achievementcatalog_achievementcatalog_910ee816 -->|method| services_achievementcatalog_achievementcatalog_t_d9ad1cf5
-    services_achievementcatalog_achievementcatalog_910ee816 -->|method| services_achievementcatalog_achievementcatalog_t_80b5a381
-    services_achievementcatalog_achievementcatalog_t_d9ad1cf5 -->|calls| services_achievementcatalog_achievementcatalog_t_8e2d6b8d
-    services_achievementcatalog_achievementcatalog_t_d9ad1cf5 -->|calls| services_achievementcatalog_achievementcatalog_t_80b5a381
-    services_achievementcatalog_achievementcatalog_t_80b5a381 -->|calls| services_achievementcatalog_achievementcatalog_c_83214cb0
-    services_achievementcatalog_achievementcatalog_t_80b5a381 -->|calls| services_achievementcatalog_achievementcatalog_i_a0c525d6
-    services_achievementcatalog_achievementcatalog_i_a0c525d6 -->|calls| services_achievementcatalog_achievementcatalog_c_83214cb0
-    services_achievementcatalog_achievementcatalog_i_a0c525d6 -->|calls| services_achievementcatalog_achievementcatalog_i_f1dd11e9
+    subgraph other_AchievementTracker_Services_IAchievementPr_970f3cc9["AchievementTracker/Services/IAchievementProgressSource.cs"]
+        services_iachievementprogresssource_iachievement_4c6ae27a("IAchievementProgressSource<br/><small>AchievementTracker/Services/IAchievementProgressSource.cs</small>")
+        services_iachievementprogresssource_iachievement_40eee895("ClearCache()<br/><small>AchievementTracker/Services/IAchievementProgressSource.cs</small>")
+    end
+    services_nativeachievementupdatewindowpolicy_nat_18135bb2("NativeAchievementUpdateWindowPolicy<br/><small>AchievementTracker/Services/NativeAchievementUpdateWindowPolicy.cs</small>")
+    services_trackedprogressdisplaypolicy_trackedpro_a62a8c85("TrackedProgressDisplayPolicy<br/><small>AchievementTracker/Services/TrackedProgressDisplayPolicy.cs</small>")
     services_achievementcategorypath_parse_35fe1519 -->|calls| services_achievementcategorypath_matchescategory_1d907660
-    services_achievementprogressservice_achievementp_36d0dd6f -->|method| services_achievementprogressservice_achievementp_4be43d72
-    services_achievementprogressservice_achievementp_36d0dd6f -->|method| services_achievementprogressservice_achievementp_8cad4f05
-    services_achievementprogressservice_achievementp_36d0dd6f -->|method| services_achievementprogressservice_achievementp_5f52fac5
-    services_achievementprogressservice_achievementp_4be43d72 -->|calls| services_achievementprogressservice_achievementp_8cad4f05
-    services_achievementprogressservice_achievementp_4be43d72 -->|calls| services_achievementprogressservice_achievementp_5f52fac5
     services_clientachievementprogresssource_clienta_9bcb9e2e -->|method| services_clientachievementprogresssource_clienta_5dee546c
     services_clientachievementprogresssource_clienta_9bcb9e2e -->|method| services_clientachievementprogresssource_clienta_209a640c
+    services_clientachievementprogresssource_clienta_9bcb9e2e -->|method| services_clientachievementprogresssource_clienta_ba08df77
+    services_clientachievementprogresssource_clienta_9bcb9e2e -->|method| services_clientachievementprogresssource_clienta_b13366d2
+    services_clientachievementprogresssource_clienta_9bcb9e2e -->|method| services_clientachievementprogresssource_clienta_e8272ddc
+    services_clientachievementprogresssource_clienta_9bcb9e2e -->|method| services_clientachievementprogresssource_clienta_45f4b731
+    services_clientachievementprogresssource_clienta_9bcb9e2e -->|method| services_clientachievementprogresssource_clienta_66593547
+    services_clientachievementprogresssource_clienta_9bcb9e2e -->|method| services_clientachievementprogresssource_clienta_6d466b3f
+    services_clientachievementprogresssource_clienta_9bcb9e2e -->|method| services_clientachievementprogresssource_clienta_889c315f
+    services_clientachievementprogresssource_clienta_9bcb9e2e -->|method| services_clientachievementprogresssource_clienta_ecda58b1
     services_clientachievementprogresssource_clienta_9bcb9e2e -->|method| services_clientachievementprogresssource_clienta_b0c75412
-    %% Omitted for readability: 41 nodes, 0 edges
-    class services_achievementcatalog_achievementcatalog_910ee816 klass;
-    class services_achievementcatalog_achievementcatalog_t_d9ad1cf5 function;
-    class services_achievementcatalog_achievementcatalog_c_83214cb0 function;
-    class services_achievementcatalog_achievementcatalog_i_f1dd11e9 function;
-    class services_achievementcatalog_achievementcatalog_i_a0c525d6 function;
-    class services_achievementcatalog_achievementcatalog_t_8e2d6b8d function;
-    class services_achievementcatalog_achievementcatalog_t_80b5a381 function;
-    class services_achievementprogressservice_achievementp_36d0dd6f async;
-    class services_achievementprogressservice_achievementp_4be43d72 function;
-    class services_achievementprogressservice_achievementp_8cad4f05 function;
-    class services_achievementprogressservice_achievementp_5f52fac5 function;
+    services_clientachievementprogresssource_clienta_b0c75412 -->|calls| services_clientachievementprogresssource_clienta_ba08df77
+    services_clientachievementprogresssource_clienta_b0c75412 -->|calls| services_clientachievementprogresssource_clienta_6d466b3f
+    services_clientachievementprogresssource_clienta_b0c75412 -->|calls| services_clientachievementprogresssource_clienta_889c315f
+    services_clientachievementprogresssource_clienta_b0c75412 -->|calls| services_clientachievementprogresssource_clienta_ecda58b1
+    services_clientachievementprogresssource_clienta_b0c75412 -->|calls| services_clientachievementprogresssource_clienta_45f4b731
+    services_clientachievementprogresssource_clienta_6d466b3f -->|calls| services_clientachievementprogresssource_clienta_66593547
+    services_iachievementprogresssource_iachievement_4c6ae27a -->|method| services_iachievementprogresssource_iachievement_40eee895
+    %% Omitted for readability: 27 nodes, 0 edges
     class services_clientachievementprogresssource_clienta_9bcb9e2e entry;
     class services_clientachievementprogresssource_clienta_b0c75412 function;
     class services_clientachievementprogresssource_clienta_5dee546c function;
     class services_clientachievementprogresssource_clienta_209a640c function;
+    class services_clientachievementprogresssource_clienta_ba08df77 function;
+    class services_clientachievementprogresssource_clienta_b13366d2 function;
+    class services_clientachievementprogresssource_clienta_e8272ddc function;
+    class services_clientachievementprogresssource_clienta_45f4b731 function;
+    class services_clientachievementprogresssource_clienta_66593547 function;
+    class services_clientachievementprogresssource_clienta_6d466b3f function;
+    class services_clientachievementprogresssource_clienta_889c315f function;
+    class services_clientachievementprogresssource_clienta_ecda58b1 function;
     class services_achievementcategorypath_parse_35fe1519 function;
     class services_achievementcategorypath_matchescategory_1d907660 function;
     class services_iachievementprogresssource_iachievement_4c6ae27a klass;
+    class services_iachievementprogresssource_iachievement_40eee895 function;
+    class services_nativeachievementupdatewindowpolicy_nat_18135bb2 klass;
+    class services_trackedprogressdisplaypolicy_trackedpro_a62a8c85 klass;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -4670,75 +4674,75 @@ flowchart LR
 </tr>
 <tr>
   <td>22</td>
-  <td><code>AchievementCatalog.cs</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td><code>AchievementCategoryPath.cs</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCategoryPath.cs</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>AchievementCatalog.cs node in AchievementTracker/Services/AchievementCatalog.cs.</td>
+  <td>AchievementCategoryPath.cs node in AchievementTracker/Services/AchievementCategoryPath.cs.</td>
 </tr>
 <tr>
   <td>23</td>
-  <td><code>AchievementCatalog</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
+  <td><code>Parse()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCategoryPath.cs</small></td>
+  <td><span class="tag tag-func">Function</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>CanOpenInNativeAchievementUi()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>IsKnownPlayerVisibleKind()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>IsManuallyViewable()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br>+3 more</td>
-  <td>AchievementCatalog node in AchievementTracker/Services/AchievementCatalog.cs.</td>
+  <td><code>MatchesCategory()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCategoryPath.cs</small></td>
+  <td>Parse() node in AchievementTracker/Services/AchievementCategoryPath.cs.</td>
 </tr>
 <tr>
   <td>24</td>
-  <td><code>IDataManager</code><br><small style="color:var(--muted)"></small></td>
+  <td><code>AchievementCategoryPath</code><br><small style="color:var(--muted)"></small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>IDataManager node in project.</td>
+  <td>AchievementCategoryPath node in project.</td>
 </tr>
 <tr>
   <td>25</td>
-  <td><code>.TryGet()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td><code>MatchesCategory()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCategoryPath.cs</small></td>
   <td><span class="tag tag-func">Function</span></td>
-  <td><code>AchievementCatalog</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
-  <td><code>ToInfo()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>TryGetRow()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
-  <td>.TryGet() node in AchievementTracker/Services/AchievementCatalog.cs.</td>
+  <td><code>Parse()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCategoryPath.cs</small></td>
+  <td>No direct outbound edge</td>
+  <td>MatchesCategory() node in AchievementTracker/Services/AchievementCategoryPath.cs.</td>
 </tr>
 <tr>
   <td>26</td>
-  <td><code>.TryGetRow()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td><code>BuildSubcategoryFilterKey()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCategoryPath.cs</small></td>
   <td><span class="tag tag-func">Function</span></td>
-  <td><code>AchievementCatalog</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>TryGet()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
-  <td><code>CanOpenInNativeAchievementUi()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>IsManuallyViewable()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
-  <td>.TryGetRow() node in AchievementTracker/Services/AchievementCatalog.cs.</td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>BuildSubcategoryFilterKey() node in AchievementTracker/Services/AchievementCategoryPath.cs.</td>
 </tr>
 <tr>
   <td>27</td>
-  <td><code>Achievement</code><br><small style="color:var(--muted)"></small></td>
+  <td><code>TrackedUpdateIndicatorPolicy.cs</code><br><small style="color:var(--muted)">AchievementTracker/Services/TrackedUpdateIndicatorPolicy.cs</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Achievement node in project.</td>
+  <td>TrackedUpdateIndicatorPolicy.cs node in AchievementTracker/Services/TrackedUpdateIndicatorPolicy.cs.</td>
 </tr>
 <tr>
   <td>28</td>
-  <td><code>.IsManuallyViewable()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>AchievementCatalog</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>TryGetRow()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
-  <td><code>CanOpenInNativeAchievementUi()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>IsKnownPlayerVisibleKind()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
-  <td>.IsManuallyViewable() node in AchievementTracker/Services/AchievementCatalog.cs.</td>
+  <td><code>TrackedUpdateIndicatorPolicy</code><br><small style="color:var(--muted)">AchievementTracker/Services/TrackedUpdateIndicatorPolicy.cs</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>GetState()</code><br><small style="color:var(--muted)">AchievementTracker/Services/TrackedUpdateIndicatorPolicy.cs</small></td>
+  <td>TrackedUpdateIndicatorPolicy node in AchievementTracker/Services/TrackedUpdateIndicatorPolicy.cs.</td>
 </tr>
 <tr>
   <td>29</td>
-  <td><code>.CanOpenInNativeAchievementUi()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td><code>.GetState()</code><br><small style="color:var(--muted)">AchievementTracker/Services/TrackedUpdateIndicatorPolicy.cs</small></td>
   <td><span class="tag tag-func">Function</span></td>
-  <td><code>AchievementCatalog</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>IsManuallyViewable()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>TryGetRow()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td><code>TrackedUpdateIndicatorPolicy</code><br><small style="color:var(--muted)">AchievementTracker/Services/TrackedUpdateIndicatorPolicy.cs</small></td>
   <td>No direct outbound edge</td>
-  <td>.CanOpenInNativeAchievementUi() node in AchievementTracker/Services/AchievementCatalog.cs.</td>
+  <td>.GetState() node in AchievementTracker/Services/TrackedUpdateIndicatorPolicy.cs.</td>
 </tr>
 <tr>
   <td>30</td>
-  <td><code>.IsKnownPlayerVisibleKind()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>AchievementCatalog</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small><br><code>IsManuallyViewable()</code><br><small style="color:var(--muted)">AchievementTracker/Services/AchievementCatalog.cs</small></td>
+  <td><code>TrackedUpdateIndicatorState</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>.IsKnownPlayerVisibleKind() node in AchievementTracker/Services/AchievementCatalog.cs.</td>
+  <td>TrackedUpdateIndicatorState node in project.</td>
 </tr>
 </table>
 
@@ -4748,18 +4752,18 @@ flowchart LR
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
       <tr><td><code>AchievementTracker/Services/ClientAchievementProgressSource.cs</code></td><td>13 nodes</td></tr>
-<tr><td><code>AchievementTracker/Services/AchievementCatalog.cs</code></td><td>8 nodes</td></tr>
 <tr><td><code>AchievementTracker/Services/IAchievementProgressSource.cs</code></td><td>6 nodes</td></tr>
-<tr><td><code>AchievementTracker/Services/AchievementProgressService.cs</code></td><td>5 nodes</td></tr>
 <tr><td><code>AchievementTracker/Services/AchievementCategoryPath.cs</code></td><td>4 nodes</td></tr>
 <tr><td><code>AchievementTracker/Services/NativeAchievementUpdateWindowPolicy.cs</code></td><td>3 nodes</td></tr>
 <tr><td><code>AchievementTracker/Services/TrackedProgressDisplayPolicy.cs</code></td><td>3 nodes</td></tr>
 <tr><td><code>AchievementTracker/Services/TrackedUpdateIndicatorPolicy.cs</code></td><td>3 nodes</td></tr>
+<tr><td><code>AchievementTracker/Services/ActivityUpdateKey.cs</code></td><td>2 nodes</td></tr>
+<tr><td><code>AchievementTracker/Services/TrackedToolbarIconPresentation.cs</code></td><td>2 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: method x27, references x17, calls x15, contains x12. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: method x18, contains x11, references x8, calls x7. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -4770,8 +4774,8 @@ flowchart LR
   <div class="card">
     <h4>Graph</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>Nodes</td><td>492</td></tr>
-      <tr><td>Edges</td><td>974</td></tr>
+      <tr><td>Nodes</td><td>494</td></tr>
+      <tr><td>Edges</td><td>975</td></tr>
       <tr><td>Hyperedges</td><td>0</td></tr>
       <tr><td>Communities</td><td>28</td></tr>
       <tr><td>Documented Sections</td><td>15</td></tr>
@@ -4780,7 +4784,7 @@ flowchart LR
   <div class="card">
     <h4>Edge Confidence</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>EXTRACTED</td><td>974</td></tr>
+      <tr><td>EXTRACTED</td><td>975</td></tr>
       <tr><td>INFERRED</td><td>0</td></tr>
       <tr><td>AMBIGUOUS</td><td>0</td></tr>
     </table>
@@ -4789,7 +4793,7 @@ flowchart LR
 
 <div style="text-align:center; padding:40px 0; color: var(--muted); font-size:0.9rem;">
   <p>achieve-ex — Architecture Documentation</p>
-  <p>Generated: 2026-06-25 00:39 UTC · graphify callflow-html</p>
+  <p>Generated: 2026-06-25 00:55 UTC · graphify callflow-html</p>
 </div>
 
 </div><!-- .container -->

@@ -4,12 +4,12 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 492 nodes · 974 edges · 28 communities (24 shown, 4 thin omitted)
+- 494 nodes · 975 edges · 28 communities (23 shown, 5 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `a889da8d`
+- Built from commit: `a79ecd1b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -67,19 +67,19 @@
 ## Import Cycles
 - None detected.
 
-## Communities (28 total, 4 thin omitted)
+## Communities (28 total, 5 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.07
 Nodes (12): AchievementInfo, AchievementOrder, CategoryOrder, DateTime, FontAwesomeIcon, IReadOnlyList, KindOrder, RowId (+4 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.08
-Nodes (4): Plugin, IDalamudPlugin, IEnumerable, IFramework
+Cohesion: 0.07
+Nodes (18): Achievement, AchievementProgress, CosmicAchievementRule, GeneratedRegex, IDataManager, IUnlockState, Complete(), CompletionListNotLoaded() (+10 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.11
-Nodes (13): AchievementProgress, CosmicAchievementRule, GeneratedRegex, Complete(), CompletionListNotLoaded(), DataNotAvailable(), Incomplete(), Numeric() (+5 more)
+Cohesion: 0.08
+Nodes (4): Plugin, IDalamudPlugin, IEnumerable, IFramework
 
 ### Community 3 - "Community 3"
 Cohesion: 0.12
@@ -118,60 +118,56 @@ Cohesion: 0.27
 Nodes (16): CompletedProcess, added_lines_by_file(), apply_experimental_mode(), Finding, get_changed_files(), get_diff(), get_untracked_files(), include_untracked_as_added() (+8 more)
 
 ### Community 12 - "Community 12"
-Cohesion: 0.23
-Nodes (5): Achievement, IDataManager, IUnlockState, AchievementCatalog, AchievementProgressService
-
-### Community 13 - "Community 13"
 Cohesion: 0.14
 Nodes (13): contentHash, requested, resolved, type, dependencies, net10.0-windows7.0, contentHash, requested (+5 more)
 
-### Community 14 - "Community 14"
+### Community 13 - "Community 13"
 Cohesion: 0.33
 Nodes (4): AchievementTracker.Tests, net10.0-windows7.0, Dalamud.NET.Sdk/15.0.0, Microsoft.NET.Sdk
 
-### Community 15 - "Community 15"
+### Community 14 - "Community 14"
 Cohesion: 0.50
 Nodes (3): AchievementCategoryPath, MatchesCategory(), Parse()
 
-### Community 16 - "Community 16"
+### Community 15 - "Community 15"
 Cohesion: 0.80
 Nodes (4): Path, main(), patch_manifest(), patch_zip()
 
-### Community 17 - "Community 17"
+### Community 16 - "Community 16"
 Cohesion: 0.60
 Nodes (4): is_scanned_path(), main(), Pattern, run_git_diff()
 
-### Community 18 - "Community 18"
+### Community 17 - "Community 17"
 Cohesion: 0.50
 Nodes (3): codeql-build.sh script, DOTNET_ROOT, PATH
 
-### Community 19 - "Community 19"
+### Community 18 - "Community 18"
 Cohesion: 0.50
 Nodes (3): codeql-local.sh script, DOTNET_ROOT, PATH
 
-### Community 20 - "Community 20"
+### Community 19 - "Community 19"
 Cohesion: 0.50
 Nodes (3): verify-local.sh script, DOTNET_ROOT, PATH
 
 ## Knowledge Gaps
-- **22 isolated node(s):** `net10.0-windows7.0`, `Microsoft.NET.Sdk`, `Dalamud.NET.Sdk/15.0.0`, `version`, `type` (+17 more)
+- **23 isolated node(s):** `net10.0-windows7.0`, `Microsoft.NET.Sdk`, `Dalamud.NET.Sdk/15.0.0`, `version`, `type` (+18 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **4 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **5 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `TrackerWindow` connect `Community 0` to `Community 1`, `Community 3`, `Community 7`, `Community 8`, `Community 9`?**
-  _High betweenness centrality (0.228) - this node is a cross-community bridge._
-- **Why does `Plugin` connect `Community 1` to `Community 0`, `Community 3`, `Community 4`, `Community 8`, `Community 9`?**
-  _High betweenness centrality (0.161) - this node is a cross-community bridge._
+- **Why does `TrackerWindow` connect `Community 0` to `Community 2`, `Community 3`, `Community 7`, `Community 8`, `Community 9`?**
+  _High betweenness centrality (0.226) - this node is a cross-community bridge._
+- **Why does `Plugin` connect `Community 2` to `Community 0`, `Community 3`, `Community 4`, `Community 8`, `Community 9`?**
+  _High betweenness centrality (0.160) - this node is a cross-community bridge._
 - **Why does `AchievementProgressUpdater` connect `Community 4` to `Community 3`, `Community 5`, `Community 6`, `Community 7`, `Community 8`, `Community 9`, `Community 10`?**
-  _High betweenness centrality (0.143) - this node is a cross-community bridge._
+  _High betweenness centrality (0.142) - this node is a cross-community bridge._
 - **What connects `net10.0-windows7.0`, `Microsoft.NET.Sdk`, `Dalamud.NET.Sdk/15.0.0` to the rest of the system?**
-  _23 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _24 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.06935908691834942 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.07804878048780488 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07407407407407407 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.10526315789473684 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07804878048780488 - nodes in this community are weakly interconnected._

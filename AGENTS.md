@@ -130,8 +130,5 @@ Rules:
 Regeneration command:
 
 ```bash
-rm -rf graphify-out
-uvx --from graphifyy graphify extract . --no-cluster --out .
-uvx --from graphifyy graphify cluster-only . --graph graphify-out/graph.json --no-label
-uvx --from graphifyy graphify export callflow-html
+bash scripts/regenerate-graphify.sh
 ```

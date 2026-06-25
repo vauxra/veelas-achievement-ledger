@@ -239,6 +239,11 @@
     "ast_hash": "00783e12d6281ef1f012f13fbcdff36b",
     "semantic_hash": "00783e12d6281ef1f012f13fbcdff36b"
   },
+  "scripts/regenerate-graphify.sh": {
+    "mtime": 1782348938.4583926,
+    "ast_hash": "2ade6ff7b5fd45932badc320f175c860",
+    "semantic_hash": "2ade6ff7b5fd45932badc320f175c860"
+  },
   "scripts/verify-local.sh": {
     "mtime": 1781722604.8944602,
     "ast_hash": "cda948ca89f9cf1fe227775b712f8e6a",
