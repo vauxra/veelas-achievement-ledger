@@ -6,6 +6,9 @@ Follow this workflow when an AI agent or reviewer works in this repository.
 
 - Read `AGENTS.md`.
 - Read `docs/architecture/README.md` and the architecture doc relevant to the feature.
+- For broad orientation, query the committed Graphify graph before broad source searches:
+  - `uvx --from graphifyy graphify query "<question>" --graph graphify-out/graph.json`
+  - `uvx --from graphifyy graphify path "<A>" "<B>" --graph graphify-out/graph.json`
 - Search for the existing owner before creating a new service or helper.
 - For Dalamud APIs, native UI, ClientStructs, or hooks, read the relevant Dalamud docs first.
 - Inspect neighboring files and tests before changing code.
@@ -66,9 +69,21 @@ Approved external references may be fetched under ignored `local-src/` for local
 
 Current guidance:
 
+- Use committed `graphify-out/` as an AI-orientation/navigation artifact for broad topology questions. It is generated from code/project manifests only so regeneration stays local and API-key-free.
+- Regenerate Graphify manually after architecture, service-boundary, or major code-topology changes; do not install Graphify git hooks in this repo.
 - Use SharpToolsMCP as a future optional C#/Roslyn MCP analysis aid after configuring Hermes MCP and restarting the session.
+- Prefer SharpToolsMCP/Roslyn over Graphify for exact C# references, type resolution, compiler-aware navigation, or semantic correctness questions.
 - Do not rely on Magellan by default for Achieve Ex+ C# analysis; the fetched snapshot did not show useful C#/Roslyn support.
 - Keep raw logs and tool output ignored. Promote durable conclusions into committed docs.
+
+Graphify regeneration:
+
+```bash
+rm -rf graphify-out
+uvx --from graphifyy graphify extract . --no-cluster --out .
+uvx --from graphifyy graphify cluster-only . --graph graphify-out/graph.json --no-label
+uvx --from graphifyy graphify export callflow-html
+```
 
 ## 6. Verification
 

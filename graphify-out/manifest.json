@@ -1,0 +1,247 @@
+{
+  "AchievementTracker.Tests/AchievementTracker.Tests.csproj": {
+    "mtime": 1781722519.4323418,
+    "ast_hash": "6950a123af267e149ed8078c96c179f2",
+    "semantic_hash": "6950a123af267e149ed8078c96c179f2"
+  },
+  "AchievementTracker.Tests/Program.cs": {
+    "mtime": 1782346525.0177124,
+    "ast_hash": "679ee97638cb62ed222c7f2d329d5a9c",
+    "semantic_hash": "679ee97638cb62ed222c7f2d329d5a9c"
+  },
+  "AchievementTracker.sln": {
+    "mtime": 1781722519.4325964,
+    "ast_hash": "c0b15c906caca75ae7f10b2d1f8a6e8f",
+    "semantic_hash": "c0b15c906caca75ae7f10b2d1f8a6e8f"
+  },
+  "AchievementTracker/AchieveExPlus.json": {
+    "mtime": 1781723424.6630626,
+    "ast_hash": "14bedb3f4c6088e0f250e56759ef52f6",
+    "semantic_hash": "14bedb3f4c6088e0f250e56759ef52f6"
+  },
+  "AchievementTracker/AchievementTracker.csproj": {
+    "mtime": 1781996584.898499,
+    "ast_hash": "60160974992071fd424ae2c8f19e5245",
+    "semantic_hash": "60160974992071fd424ae2c8f19e5245"
+  },
+  "AchievementTracker/Configuration.cs": {
+    "mtime": 1781795566.3600295,
+    "ast_hash": "fa32d7736aa174a5ace751df009d0ac7",
+    "semantic_hash": "fa32d7736aa174a5ace751df009d0ac7"
+  },
+  "AchievementTracker/Models/AchievementInfo.cs": {
+    "mtime": 1781722519.4327307,
+    "ast_hash": "e21f350994be070b5f7f389c09ec400e",
+    "semantic_hash": "e21f350994be070b5f7f389c09ec400e"
+  },
+  "AchievementTracker/Models/AchievementProgress.cs": {
+    "mtime": 1781723419.0790873,
+    "ast_hash": "22e60fc4dd50fabd5c30df2dcadb1575",
+    "semantic_hash": "22e60fc4dd50fabd5c30df2dcadb1575"
+  },
+  "AchievementTracker/Models/CosmicClassScoreCache.cs": {
+    "mtime": 1781723419.0790873,
+    "ast_hash": "6eda5b98788190cf3be59134b1b123d0",
+    "semantic_hash": "6eda5b98788190cf3be59134b1b123d0"
+  },
+  "AchievementTracker/Models/TrackedAchievement.cs": {
+    "mtime": 1781722519.4327917,
+    "ast_hash": "952e5b5c56a4637c009949b37bae597f",
+    "semantic_hash": "952e5b5c56a4637c009949b37bae597f"
+  },
+  "AchievementTracker/Models/TrackedAchievementPreset.cs": {
+    "mtime": 1781723419.0790873,
+    "ast_hash": "a4a8a7066a9aef6ebf607c9df014b032",
+    "semantic_hash": "a4a8a7066a9aef6ebf607c9df014b032"
+  },
+  "AchievementTracker/Plugin.cs": {
+    "mtime": 1782346158.4314535,
+    "ast_hash": "b8a26bc0f9f7f16ee54f4dcb927ed974",
+    "semantic_hash": "b8a26bc0f9f7f16ee54f4dcb927ed974"
+  },
+  "AchievementTracker/Services/AchievementActivityUpdateClassifier.cs": {
+    "mtime": 1782346565.905485,
+    "ast_hash": "7ba451010ab74c1a07d5b8e448fc2622",
+    "semantic_hash": "7ba451010ab74c1a07d5b8e448fc2622"
+  },
+  "AchievementTracker/Services/AchievementActivityUpdateObserver.cs": {
+    "mtime": 1781795542.348131,
+    "ast_hash": "2fa1bccbdd567c37700f99e92ad9d349",
+    "semantic_hash": "2fa1bccbdd567c37700f99e92ad9d349"
+  },
+  "AchievementTracker/Services/AchievementCatalog.cs": {
+    "mtime": 1781723424.6630626,
+    "ast_hash": "892862ab10c2b5805a43c13447015bb5",
+    "semantic_hash": "892862ab10c2b5805a43c13447015bb5"
+  },
+  "AchievementTracker/Services/AchievementCategoryPath.cs": {
+    "mtime": 1782346565.5846617,
+    "ast_hash": "6cae194d7b2f0e254963c60de9f059bb",
+    "semantic_hash": "6cae194d7b2f0e254963c60de9f059bb"
+  },
+  "AchievementTracker/Services/AchievementProgressRequestScheduler.cs": {
+    "mtime": 1781798316.1709533,
+    "ast_hash": "7fc9182fc087d49bc476ebbe7188bcbe",
+    "semantic_hash": "7fc9182fc087d49bc476ebbe7188bcbe"
+  },
+  "AchievementTracker/Services/AchievementProgressService.cs": {
+    "mtime": 1781723424.6630626,
+    "ast_hash": "4ff54ed70f1dbca5ae328362e4cea4e6",
+    "semantic_hash": "4ff54ed70f1dbca5ae328362e4cea4e6"
+  },
+  "AchievementTracker/Services/AchievementProgressUpdater.cs": {
+    "mtime": 1781831130.144018,
+    "ast_hash": "d4d68aaa1d620202f78c6f6ec4c5447d",
+    "semantic_hash": "d4d68aaa1d620202f78c6f6ec4c5447d"
+  },
+  "AchievementTracker/Services/ActivityTriggerCandidateSelection.cs": {
+    "mtime": 1781996529.7625842,
+    "ast_hash": "73de26613c50e897bd983a665f30d8ee",
+    "semantic_hash": "73de26613c50e897bd983a665f30d8ee"
+  },
+  "AchievementTracker/Services/ActivityTriggerDelayPolicy.cs": {
+    "mtime": 1781795319.056112,
+    "ast_hash": "5d3dfd4b10c50f20bfea833744ad2137",
+    "semantic_hash": "5d3dfd4b10c50f20bfea833744ad2137"
+  },
+  "AchievementTracker/Services/ActivityUpdateKey.cs": {
+    "mtime": 1781795314.346671,
+    "ast_hash": "8d48fb175a85bdbacf9a345925625155",
+    "semantic_hash": "8d48fb175a85bdbacf9a345925625155"
+  },
+  "AchievementTracker/Services/AutoUpdateQueueStatusRow.cs": {
+    "mtime": 1781791489.9534738,
+    "ast_hash": "4d908c7da3a9bf4285cfef0b03e80c8c",
+    "semantic_hash": "4d908c7da3a9bf4285cfef0b03e80c8c"
+  },
+  "AchievementTracker/Services/AutoUpdateSelection.cs": {
+    "mtime": 1781723424.6430628,
+    "ast_hash": "187dc4b91f1a6d1e969900f156e00cfe",
+    "semantic_hash": "187dc4b91f1a6d1e969900f156e00cfe"
+  },
+  "AchievementTracker/Services/ClientAchievementProgressSource.cs": {
+    "mtime": 1781829892.5822861,
+    "ast_hash": "f52a5a0f1d1b72d97d7313495e20d5a5",
+    "semantic_hash": "f52a5a0f1d1b72d97d7313495e20d5a5"
+  },
+  "AchievementTracker/Services/CosmicClassProgressProvider.cs": {
+    "mtime": 1781723424.6640627,
+    "ast_hash": "a91c4e1500b81a93b31898906436ccb7",
+    "semantic_hash": "a91c4e1500b81a93b31898906436ccb7"
+  },
+  "AchievementTracker/Services/IAchievementProgressSource.cs": {
+    "mtime": 1781723419.0790873,
+    "ast_hash": "1910b5657caca13ef670a89e3c46a3a3",
+    "semantic_hash": "1910b5657caca13ef670a89e3c46a3a3"
+  },
+  "AchievementTracker/Services/MainPanelColumnWidthDefaults.cs": {
+    "mtime": 1781723424.6640627,
+    "ast_hash": "99b3051e92f05ea6dbfaa7139889e8ab",
+    "semantic_hash": "99b3051e92f05ea6dbfaa7139889e8ab"
+  },
+  "AchievementTracker/Services/NativeAchievementNavigator.cs": {
+    "mtime": 1781831115.3741004,
+    "ast_hash": "bca3587e7434e4f6c36d9bf280b33a73",
+    "semantic_hash": "bca3587e7434e4f6c36d9bf280b33a73"
+  },
+  "AchievementTracker/Services/NativeAchievementUpdateWindowPolicy.cs": {
+    "mtime": 1781723424.6640627,
+    "ast_hash": "4984a61e373f94644a0d004cd3db8ef1",
+    "semantic_hash": "4984a61e373f94644a0d004cd3db8ef1"
+  },
+  "AchievementTracker/Services/NativeAchievementWindowScalePolicy.cs": {
+    "mtime": 1781831108.6523235,
+    "ast_hash": "f67664a4084057ec3274e5edaa9b1dff",
+    "semantic_hash": "f67664a4084057ec3274e5edaa9b1dff"
+  },
+  "AchievementTracker/Services/PassiveAchievementProgressObserver.cs": {
+    "mtime": 1781723424.6640627,
+    "ast_hash": "6c2abf936b377659f79f21e3a4bbfe47",
+    "semantic_hash": "6c2abf936b377659f79f21e3a4bbfe47"
+  },
+  "AchievementTracker/Services/SearchCompletionFilterPolicy.cs": {
+    "mtime": 1781996084.3230848,
+    "ast_hash": "e880ff7204baf0052e1ba8e980da1525",
+    "semantic_hash": "e880ff7204baf0052e1ba8e980da1525"
+  },
+  "AchievementTracker/Services/TrackedAchievementPresetStore.cs": {
+    "mtime": 1781723424.6640627,
+    "ast_hash": "0c192c1bf7444667433efec4faa974ed",
+    "semantic_hash": "0c192c1bf7444667433efec4faa974ed"
+  },
+  "AchievementTracker/Services/TrackedAchievementStore.cs": {
+    "mtime": 1781723419.0790873,
+    "ast_hash": "ce26261c1ecd1712f9a6022d8681d759",
+    "semantic_hash": "ce26261c1ecd1712f9a6022d8681d759"
+  },
+  "AchievementTracker/Services/TrackedProgressDisplayPolicy.cs": {
+    "mtime": 1781723424.6640627,
+    "ast_hash": "229bb21466d72a8c5549617c0d96ce76",
+    "semantic_hash": "229bb21466d72a8c5549617c0d96ce76"
+  },
+  "AchievementTracker/Services/TrackedToolbarIconPresentation.cs": {
+    "mtime": 1781789979.1815383,
+    "ast_hash": "a51c6383b544c90c393bc8cd215b94ec",
+    "semantic_hash": "a51c6383b544c90c393bc8cd215b94ec"
+  },
+  "AchievementTracker/Services/TrackedUpdateIndicatorPolicy.cs": {
+    "mtime": 1781789985.1443374,
+    "ast_hash": "c9ff6315880ab390671e458d97d2c665",
+    "semantic_hash": "c9ff6315880ab390671e458d97d2c665"
+  },
+  "AchievementTracker/Services/UpdateEligibilityPolicy.cs": {
+    "mtime": 1782346158.1246808,
+    "ast_hash": "f8365d5bad90727e4ceaf7f0bc9cbbd5",
+    "semantic_hash": "f8365d5bad90727e4ceaf7f0bc9cbbd5"
+  },
+  "AchievementTracker/Windows/ConfigWindow.cs": {
+    "mtime": 1781795582.5571253,
+    "ast_hash": "091a075b6e9ea9add1b2577d19456fb4",
+    "semantic_hash": "091a075b6e9ea9add1b2577d19456fb4"
+  },
+  "AchievementTracker/Windows/TrackerWindow.cs": {
+    "mtime": 1782346623.9694266,
+    "ast_hash": "53fd2b11884631d59342ea6dbb0bb50f",
+    "semantic_hash": "53fd2b11884631d59342ea6dbb0bb50f"
+  },
+  "AchievementTracker/packages.lock.json": {
+    "mtime": 1781722519.4333417,
+    "ast_hash": "42587296c63b8d207b801ae267a4c770",
+    "semantic_hash": "42587296c63b8d207b801ae267a4c770"
+  },
+  "pluginmaster.json": {
+    "mtime": 1781996749.171271,
+    "ast_hash": "06240a9698f247584a17463ad9b8f661",
+    "semantic_hash": "06240a9698f247584a17463ad9b8f661"
+  },
+  "scripts/adversarial-code-review.py": {
+    "mtime": 1782347949.0731664,
+    "ast_hash": "cf5735c5b0d34ed70984eb6180b176a2",
+    "semantic_hash": "cf5735c5b0d34ed70984eb6180b176a2"
+  },
+  "scripts/audit-ai-policy.py": {
+    "mtime": 1782347936.7173781,
+    "ast_hash": "4c8de50b3193068ce49557cf3fd1bbe6",
+    "semantic_hash": "4c8de50b3193068ce49557cf3fd1bbe6"
+  },
+  "scripts/codeql-build.sh": {
+    "mtime": 1781722519.4341707,
+    "ast_hash": "bb1059822564aec226d74720e34fcf0a",
+    "semantic_hash": "bb1059822564aec226d74720e34fcf0a"
+  },
+  "scripts/codeql-local.sh": {
+    "mtime": 1781722519.4341707,
+    "ast_hash": "ec368c51367d3a8920dd2bd01f057b20",
+    "semantic_hash": "ec368c51367d3a8920dd2bd01f057b20"
+  },
+  "scripts/patch_manifest_icon.py": {
+    "mtime": 1781723424.6640627,
+    "ast_hash": "00783e12d6281ef1f012f13fbcdff36b",
+    "semantic_hash": "00783e12d6281ef1f012f13fbcdff36b"
+  },
+  "scripts/verify-local.sh": {
+    "mtime": 1781722604.8944602,
+    "ast_hash": "cda948ca89f9cf1fe227775b712f8e6a",
+    "semantic_hash": "cda948ca89f9cf1fe227775b712f8e6a"
+  }
+}

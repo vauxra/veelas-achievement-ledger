@@ -1,0 +1,12 @@
+# Keep the committed graphify-out deterministic and API-key-free.
+# Headless Graphify extracts code/manifests locally, but Markdown/images require
+# an LLM backend. Architecture docs remain the source of truth; graphify-out is
+# the generated code/project graph for AI orientation.
+*.md
+*.mdx
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.svg

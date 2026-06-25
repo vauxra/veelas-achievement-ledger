@@ -25,7 +25,7 @@ class Finding:
 
 
 CODE_SUFFIXES = {".cs", ".csproj", ".json", ".py", ".sln", ".sh"}
-EXCLUDED_PREFIXES = ("docs/", ".hermes/", "bin/", "obj/", "released/")
+EXCLUDED_PREFIXES = ("docs/", ".hermes/", "bin/", "obj/", "graphify-out/", "released/")
 ALLOWED_ACHIEVEMENT_REQUEST_FILES: set[str] = set()
 SCANNER_IMPLEMENTATION_FILES = {
     "scripts/audit-ai-policy.py",
@@ -161,7 +161,7 @@ def get_changed_files(base: str) -> list[str]:
 
 
 def get_diff(base: str) -> str:
-    result = run(["git", "diff", base, "--", ":(exclude)docs/**", ":(exclude).hermes/**"])
+    result = run(["git", "diff", base, "--", ":(exclude)docs/**", ":(exclude).hermes/**", ":(exclude)graphify-out/**"])
     if result.returncode != 0:
         print(result.stderr, file=sys.stderr)
         raise SystemExit(result.returncode)

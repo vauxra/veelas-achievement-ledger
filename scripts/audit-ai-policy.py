@@ -41,7 +41,7 @@ WARN_PATTERNS = [
 ]
 
 
-EXCLUDED_PREFIXES = ("docs/", ".hermes/", "released/")
+EXCLUDED_PREFIXES = ("docs/", ".hermes/", "graphify-out/", "released/")
 EXCLUDED_EXACT = {"scripts/audit-ai-policy.py", "scripts/adversarial-code-review.py"}
 INCLUDED_UNTRACKED_SUFFIXES = (".cs", ".csproj", ".sln", ".json", ".py")
 
@@ -52,7 +52,7 @@ def is_scanned_path(path: str) -> bool:
 
 
 def run_git_diff(base: str) -> str:
-    result = subprocess.run(["git", "diff", base, "--", ":(exclude)*.md", ":(exclude)docs/**", ":(exclude).hermes/**", ":(exclude)released/**", ":(exclude)scripts/audit-ai-policy.py", ":(exclude)scripts/adversarial-code-review.py"], check=False, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    result = subprocess.run(["git", "diff", base, "--", ":(exclude)*.md", ":(exclude)docs/**", ":(exclude).hermes/**", ":(exclude)graphify-out/**", ":(exclude)released/**", ":(exclude)scripts/audit-ai-policy.py", ":(exclude)scripts/adversarial-code-review.py"], check=False, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if result.returncode != 0:
         print(result.stderr, file=sys.stderr)
         raise SystemExit(result.returncode)

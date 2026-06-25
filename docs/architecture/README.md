@@ -37,6 +37,7 @@ Achieve Ex+ is a Final Fantasy XIV Dalamud plugin that provides a compact achiev
 | `docs/research/` | Historical/research notes; useful for context but not the primary architecture map. |
 | `docs/ai-policy-audits/` | Reviewer/tripwire prompts and policy audit material. |
 | `docs/architecture/` | Current agent-facing architecture and workflow docs. |
+| `graphify-out/` | Committed Graphify code/project graph for AI orientation and broad topology queries. |
 | `scripts/verify-local.sh` | Local verification pipeline used before handoff/commit. |
 
 ## Current structure verdict
@@ -56,6 +57,9 @@ External reference repos and tool snapshots belong under ignored `local-src/`, n
 
 The coding-stack analysis found:
 
+- Graphify is useful for broad AI orientation and topology queries. Its committed `graphify-out/` graph is a navigation aid, not an authority over architecture docs or compiler semantics.
 - SharpToolsMCP is viable as a future C#/Roslyn analysis aid after MCP configuration/restart.
 - Magellan did not show useful C#/Roslyn support in the fetched source snapshot and should not be part of the default workflow.
 - The fetched Dalamud source/log context is local-only and should not be committed.
+
+Use Graphify before broad searches when `graphify-out/graph.json` exists, then use SharpToolsMCP/Roslyn or direct source reads for exact C# answers. Regenerate Graphify manually when architecture or major service topology changes; this repo intentionally does not use Graphify git hooks.

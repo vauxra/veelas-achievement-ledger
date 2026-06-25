@@ -107,5 +107,31 @@ For merge/submission, also run a fresh-context reviewer using:
 ## Commit hygiene
 
 - Keep feature/policy changes small.
-- Do not commit `bin/`, `obj/`, `released/`, `.hermes/`, or generated analysis output.
+- Do not commit `bin/`, `obj/`, `released/`, `.hermes/`, `local-src/`, or ad-hoc generated analysis output.
+- Exception: `graphify-out/` is intentionally committed on analysis branches as an AI-orientation artifact.
 - If a review finds issues, fix only those issues and re-run verification.
+
+## Graphify orientation graph
+
+This branch keeps a generated Graphify knowledge graph in `graphify-out/` for broad AI orientation. Use it to discover files, symbols, communities, and cross-file relationships before falling back to broad grep-style searches.
+
+Graphify is **not** the C# source of truth. Keep using Roslyn-based tooling such as SharpToolsMCP for deep C# semantics, exact references, type resolution, and compiler-aware analysis.
+
+Rules:
+- For codebase-orientation questions, query the committed graph first when `graphify-out/graph.json` exists:
+  - `uvx --from graphifyy graphify query "<question>" --graph graphify-out/graph.json`
+  - `uvx --from graphifyy graphify path "<A>" "<B>" --graph graphify-out/graph.json`
+  - `uvx --from graphifyy graphify explain "<concept>" --graph graphify-out/graph.json`
+- Treat `docs/architecture/` and Dalamud docs as the authoritative design guidance; treat Graphify as a generated navigation aid.
+- Do not install Graphify git hooks in this repo.
+- When architecture, service boundaries, or major code topology changes, manually regenerate and commit `graphify-out/` with the same branch slice.
+- Keep `.graphifyignore` conservative so headless regeneration stays local/API-key-free; Markdown architecture docs are read directly, not semantically extracted into the graph.
+
+Regeneration command:
+
+```bash
+rm -rf graphify-out
+uvx --from graphifyy graphify extract . --no-cluster --out .
+uvx --from graphifyy graphify cluster-only . --graph graphify-out/graph.json --no-label
+uvx --from graphifyy graphify export callflow-html
+```
