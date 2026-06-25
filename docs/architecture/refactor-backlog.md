@@ -78,6 +78,8 @@ Only extract if a future UI feature needs identical controls in both windows.
 
 Current owner: `AchievementProgressUpdater`.
 
+Status: documented with inline seam/rationale comments in `AchievementProgressUpdater.cs` and native-flow invariants in `native-refresh-flow.md`.
+
 Why:
 
 - It is large, but it owns one coherent state machine: serialized native Achievement refresh/inspection actions.

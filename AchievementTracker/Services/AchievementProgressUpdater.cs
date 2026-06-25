@@ -91,6 +91,8 @@ public sealed class AchievementProgressUpdater
 
     private void EnqueueUpdateAllCore(IEnumerable<uint> achievementIds, string reason, ActivityUpdateKey? activityKey, TimeSpan initialDelay)
     {
+        // Queue entry point: normalize/filter request IDs and hand spacing/dedupe to the scheduler.
+        // Actual native UI calls must stay serialized in Tick(), never in caller/UI context.
         if (this.nativeCircuitBroken)
         {
             this.debugLog($"AchieveEx DebugTrace QueueRejectedCircuitBroken reason={reason}");
@@ -170,6 +172,9 @@ public sealed class AchievementProgressUpdater
 
     public void Tick()
     {
+        // State-machine order is intentional: finish pending window scale work, let auto-update enqueue,
+        // settle an active native request, then start at most one due action. Keeping refresh and
+        // inspection in this single loop prevents competing native Achievement opens.
         if (this.nativeCircuitBroken)
         {
             return;
@@ -258,6 +263,8 @@ public sealed class AchievementProgressUpdater
 
     private void StartNativeRefresh(ScheduledAchievementProgressRequest request, DateTimeOffset now)
     {
+        // Refresh action: open the native Achievement entry, optionally park a window opened by us,
+        // then wait for ClientAchievementProgressSource to observe fresh progress data.
         var dueAt = Max(now, this.nextNativeOpenAllowedAt, this.GetSameAchievementBackoffUntil(request.AchievementId));
         if (dueAt > now)
         {
@@ -305,6 +312,8 @@ public sealed class AchievementProgressUpdater
 
     private void StartInspection(ScheduledAchievementProgressRequest request, DateTimeOffset now)
     {
+        // Inspection is user-visible and shares the native queue with refreshes so row-open clicks
+        // cannot race an active refresh batch. It restores any parked window before opening.
         var achievementId = request.AchievementId;
         this.ReclaimNativeWindowForInspection(now, achievementId);
 
@@ -329,6 +338,8 @@ public sealed class AchievementProgressUpdater
 
     private void ProcessActiveNativeRequest(DateTimeOffset now)
     {
+        // Active refresh settle point: success and timeout both clear active state, notify the
+        // scheduler/job, and apply the same native-window lifecycle cleanup.
         if (!this.activeNativeRequest.HasValue)
         {
             return;
@@ -375,6 +386,8 @@ public sealed class AchievementProgressUpdater
 
     private NativeUpdateJobState GetOrStartRefreshJob(ScheduledAchievementProgressRequest request, DateTimeOffset now)
     {
+        // Job state spans a batch of refresh items so the native window closes/restores only once
+        // at the end of the job instead of flickering between achievements.
         if (this.activeRefreshJob is { } existing && existing.JobId == request.JobId)
         {
             return existing;
@@ -440,6 +453,8 @@ public sealed class AchievementProgressUpdater
 
     private void CompleteRefreshWindowLifecycle(DateTimeOffset now, ActiveNativeAchievementRequest request)
     {
+        // Window cleanup is coupled to the job, not the individual row, to preserve native UI state
+        // across a batch and avoid fighting the player's already-open Achievement window.
         var hasPendingSameJob = this.scheduler.HasPendingRequestsForJob(request.JobId);
         var shouldClose = NativeAchievementWindowScalePolicy.ShouldCloseAfterRefreshJobItem(
             request.JobKind,
@@ -476,6 +491,8 @@ public sealed class AchievementProgressUpdater
 
     private void TryApplyPendingNativeWindowScale(DateTimeOffset now)
     {
+        // Scale operations can need multiple frames because the native addon may not exist yet.
+        // Keep retry state here instead of storing raw addon pointers across frames.
         if (this.pendingScaleOperationUntil != DateTimeOffset.MinValue && now > this.pendingScaleOperationUntil)
         {
             this.ClearPendingScaleOperations();

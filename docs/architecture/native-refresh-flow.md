@@ -63,6 +63,8 @@ Semantic owners:
 - `AchievementProgressUpdater` owns queue run state and native action lifecycle.
 - `AchievementProgressRequestScheduler` owns spacing, dedupe, backoff, and dirty activity-key behavior.
 
+`AchievementProgressUpdater` should stay one serialized state machine for refresh and inspection. Extract only pure decisions into test-backed policies; do not split queue entry, active request settling, and native window cleanup into competing services.
+
 ## Refresh execution lifecycle
 
 Purpose: execute one scheduled native refresh safely.
@@ -106,10 +108,12 @@ sequenceDiagram
 Key invariants:
 
 - Native opens happen from `Framework.Update`, not directly from arbitrary UI draw logic.
+- Refresh and inspection share one updater/scheduler queue so manual opens cannot race queued refreshes.
 - A refresh waits at least `RefreshMinimumWait` before accepting an observation.
 - A refresh times out after `RefreshMaximumWait`.
 - Repeated failures trip the native circuit breaker and clear pending native actions.
 - Same-achievement backoff prevents rapid repeated opens for one ID.
+- Native window park/restore/close cleanup is job-scoped, not row-scoped, to avoid flicker and preserve player-opened window state.
 
 ## Activity-triggered refresh
 
