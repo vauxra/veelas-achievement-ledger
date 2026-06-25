@@ -60,7 +60,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 <div class="container">
 
 <h1>achieve-ex — Complete Call Flow &amp; Architecture Documentation</h1>
-<p class="subtitle">Generated from graphify knowledge graph: 501 nodes, 1000 edges, 28 communities. Commit: ed08890</p>
+<p class="subtitle">Generated from graphify knowledge graph: 501 nodes, 1000 edges, 28 communities. Commit: 22bc014</p>
 
 <div class="nav">
     <a href="#overview">Architecture Overview</a>
@@ -4164,8 +4164,8 @@ flowchart LR
     end
     subgraph community_9_AchievementTracker_Services_SearchCo_3b90bb7b["AchievementTracker/Services/SearchCompletionFilterPolicy.cs"]
         services_searchcompletionfilterpolicy_searchcomp_ec43fbbd("SearchCompletionFilterPolicy<br/><small>AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small>")
-        services_searchcompletionfilterpolicy_searchcomp_b6681867("Matches()<br/><small>AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small>")
         services_searchcompletionfilterpolicy_searchcomp_1c18b832("RequiresCompletionState()<br/><small>AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small>")
+        services_searchcompletionfilterpolicy_searchcomp_b6681867("Matches()<br/><small>AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small>")
         services_searchcompletionfilterpolicy_searchcomp_603a694f("CanEvaluate()<br/><small>AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small>")
         services_searchcompletionfilterpolicy_searchcomp_38a925ba("MatchesForCount()<br/><small>AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small>")
     end
@@ -4192,7 +4192,7 @@ flowchart LR
     services_searchcompletionfilterpolicy_searchcomp_ec43fbbd -->|method| services_searchcompletionfilterpolicy_searchcomp_38a925ba
     services_searchcompletionfilterpolicy_searchcomp_ec43fbbd -->|method| services_searchcompletionfilterpolicy_searchcomp_1c18b832
     services_searchcompletionfilterpolicy_searchcomp_1c18b832 -->|calls| services_searchcompletionfilterpolicy_searchcomp_603a694f
-    services_searchcompletionfilterpolicy_searchcomp_603a694f -->|calls| services_searchcompletionfilterpolicy_searchcomp_38a925ba
+    services_searchcompletionfilterpolicy_searchcomp_1c18b832 -->|calls| services_searchcompletionfilterpolicy_searchcomp_38a925ba
     services_searchcompletionfilterpolicy_searchcomp_b6681867 -->|calls| services_searchcompletionfilterpolicy_searchcomp_38a925ba
     services_updateeligibilitypolicy_updateeligibili_9c676555 -->|method| services_updateeligibilitypolicy_updateeligibili_b7eb2080
     services_updateeligibilitypolicy_updateeligibili_9c676555 -->|method| services_updateeligibilitypolicy_updateeligibili_99d06ff3
@@ -4204,8 +4204,8 @@ flowchart LR
     class services_achievementactivityupdateclassifier_ach_3a0f8f1a function;
     class services_achievementactivityupdateclassifier_ach_d6e34027 function;
     class services_searchcompletionfilterpolicy_searchcomp_ec43fbbd klass;
-    class services_searchcompletionfilterpolicy_searchcomp_b6681867 function;
     class services_searchcompletionfilterpolicy_searchcomp_1c18b832 function;
+    class services_searchcompletionfilterpolicy_searchcomp_b6681867 function;
     class services_searchcompletionfilterpolicy_searchcomp_603a694f function;
     class services_searchcompletionfilterpolicy_searchcomp_38a925ba function;
     class hashset_4b39b97c klass;
@@ -4330,7 +4330,7 @@ flowchart LR
   <td><code>.RequiresCompletionState()</code><br><small style="color:var(--muted)">AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>SearchCompletionFilterPolicy</code><br><small style="color:var(--muted)">AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small></td>
-  <td><code>CanEvaluate()</code><br><small style="color:var(--muted)">AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small></td>
+  <td><code>CanEvaluate()</code><br><small style="color:var(--muted)">AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small><br><code>MatchesForCount()</code><br><small style="color:var(--muted)">AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small></td>
   <td>.RequiresCompletionState() node in AchievementTracker/Services/SearchCompletionFilterPolicy.cs.</td>
 </tr>
 <tr>
@@ -4338,7 +4338,7 @@ flowchart LR
   <td><code>.CanEvaluate()</code><br><small style="color:var(--muted)">AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>RequiresCompletionState()</code><br><small style="color:var(--muted)">AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small><br><code>SearchCompletionFilterPolicy</code><br><small style="color:var(--muted)">AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small></td>
-  <td><code>MatchesForCount()</code><br><small style="color:var(--muted)">AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small></td>
+  <td>No direct outbound edge</td>
   <td>.CanEvaluate() node in AchievementTracker/Services/SearchCompletionFilterPolicy.cs.</td>
 </tr>
 <tr>
@@ -4353,7 +4353,7 @@ flowchart LR
   <td>15</td>
   <td><code>.MatchesForCount()</code><br><small style="color:var(--muted)">AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small></td>
   <td><span class="tag tag-func">Function</span></td>
-  <td><code>CanEvaluate()</code><br><small style="color:var(--muted)">AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small><br><code>Matches()</code><br><small style="color:var(--muted)">AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small><br><code>SearchCompletionFilterPolicy</code><br><small style="color:var(--muted)">AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small></td>
+  <td><code>Matches()</code><br><small style="color:var(--muted)">AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small><br><code>RequiresCompletionState()</code><br><small style="color:var(--muted)">AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small><br><code>SearchCompletionFilterPolicy</code><br><small style="color:var(--muted)">AchievementTracker/Services/SearchCompletionFilterPolicy.cs</small></td>
   <td>No direct outbound edge</td>
   <td>.MatchesForCount() node in AchievementTracker/Services/SearchCompletionFilterPolicy.cs.</td>
 </tr>
@@ -4819,7 +4819,7 @@ flowchart LR
 
 <div style="text-align:center; padding:40px 0; color: var(--muted); font-size:0.9rem;">
   <p>achieve-ex — Architecture Documentation</p>
-  <p>Generated: 2026-06-25 01:13 UTC · graphify callflow-html</p>
+  <p>Generated: 2026-06-25 01:59 UTC · graphify callflow-html</p>
 </div>
 
 </div><!-- .container -->

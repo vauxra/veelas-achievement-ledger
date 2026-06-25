@@ -24,7 +24,7 @@ Public/beta-safe branches should keep the plugin shape small:
 
 Do not reintroduce plugin-originated progress requests, polling loops, background refresh queues, diagnostics UI, packet/network experiments, backend sync, telemetry, or leaderboards on public-safe branches.
 
-The `achieve-ex-experimental` branch is explicitly not intended for Dalamud publishing. On that branch, experimental auto refresh queues, activity-triggered refreshes, WKS/Cosmic reads, and debug instrumentation may exist if clearly labeled, isolated, easy to remove, and covered by lifecycle/security review.
+The `achex-experimental` branch is explicitly not intended for Dalamud publishing. On that branch, experimental auto refresh queues, activity-triggered refreshes, WKS/Cosmic reads, and debug instrumentation may exist if clearly labeled, isolated, easy to remove, and covered by lifecycle/security review.
 
 ## Native/ClientStructs boundaries
 

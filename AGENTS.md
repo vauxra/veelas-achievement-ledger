@@ -47,10 +47,10 @@ For public/beta-safe branches, do not reintroduce:
 - packet capture/network experiments,
 - backend sync, telemetry, analytics, or leaderboards.
 
-## `achieve-ex-experimental` branch stance
+## `achex-experimental` branch stance
 
 This branch is explicitly **not meant for Dalamud publishing**. When the current
-branch is `achieve-ex-experimental`, treat Dalamud publishing restrictions as risk
+branch is `achex-experimental`, treat Dalamud publishing restrictions as risk
 guidance and documentation requirements, not hard blockers. It is acceptable on
 this branch to prototype direct `RequestAchievementProgress` calls, automatic
 progress refresh queues, event-triggered refreshes, seconds-based auto timers,
@@ -70,7 +70,7 @@ Do still block on:
 - changes that accidentally position this branch as official-submission safe.
 
 Local tripwires may downgrade Dalamud-publishing policy violations to warnings
-on `achieve-ex-experimental`; security and lifecycle failures remain blockers.
+on `achex-experimental`; security and lifecycle failures remain blockers.
 
 ## Security review requirements
 

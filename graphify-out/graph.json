@@ -12596,7 +12596,7 @@
       "source_location": "L24",
       "weight": 1.0,
       "source": "services_searchcompletionfilterpolicy_searchcompletionfilterpolicy_matchesforcount",
-      "target": "services_searchcompletionfilterpolicy_searchcompletionfilterpolicy_canevaluate",
+      "target": "services_searchcompletionfilterpolicy_searchcompletionfilterpolicy_requirescompletionstate",
       "confidence_score": 1.0
     },
     {
@@ -12604,7 +12604,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "AchievementTracker/Services/SearchCompletionFilterPolicy.cs",
-      "source_location": "L25",
+      "source_location": "L24",
       "weight": 1.0,
       "source": "services_searchcompletionfilterpolicy_searchcompletionfilterpolicy_matchesforcount",
       "target": "services_searchcompletionfilterpolicy_searchcompletionfilterpolicy_matches",
@@ -16168,5 +16168,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "ed08890dbceec64ce1e6e4b9941d9691ef17913c"
+  "built_at_commit": "22bc01400c563c2f0f6530cc22490bce482cb00f"
 }

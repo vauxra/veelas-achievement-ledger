@@ -5,7 +5,7 @@
     "semantic_hash": "6950a123af267e149ed8078c96c179f2"
   },
   "AchievementTracker.Tests/Program.cs": {
-    "mtime": 1782349434.074805,
+    "mtime": 1782352053.539678,
     "ast_hash": "4b0e53541745d248eaa7c9e47d382a3f",
     "semantic_hash": "4b0e53541745d248eaa7c9e47d382a3f"
   },
@@ -20,9 +20,9 @@
     "semantic_hash": "14bedb3f4c6088e0f250e56759ef52f6"
   },
   "AchievementTracker/AchievementTracker.csproj": {
-    "mtime": 1781996584.898499,
-    "ast_hash": "60160974992071fd424ae2c8f19e5245",
-    "semantic_hash": "60160974992071fd424ae2c8f19e5245"
+    "mtime": 1782352053.5397694,
+    "ast_hash": "9b6b09e6469bd1741afe5475dec08c2f",
+    "semantic_hash": "9b6b09e6469bd1741afe5475dec08c2f"
   },
   "AchievementTracker/Configuration.cs": {
     "mtime": 1781795566.3600295,
@@ -55,12 +55,12 @@
     "semantic_hash": "a4a8a7066a9aef6ebf607c9df014b032"
   },
   "AchievementTracker/Plugin.cs": {
-    "mtime": 1782346158.4314535,
+    "mtime": 1782352053.5398607,
     "ast_hash": "b8a26bc0f9f7f16ee54f4dcb927ed974",
     "semantic_hash": "b8a26bc0f9f7f16ee54f4dcb927ed974"
   },
   "AchievementTracker/Services/AchievementActivityUpdateClassifier.cs": {
-    "mtime": 1782346565.905485,
+    "mtime": 1782352053.5399399,
     "ast_hash": "7ba451010ab74c1a07d5b8e448fc2622",
     "semantic_hash": "7ba451010ab74c1a07d5b8e448fc2622"
   },
@@ -75,7 +75,7 @@
     "semantic_hash": "892862ab10c2b5805a43c13447015bb5"
   },
   "AchievementTracker/Services/AchievementCategoryPath.cs": {
-    "mtime": 1782349954.1971774,
+    "mtime": 1782352053.5399835,
     "ast_hash": "6b3101da960a87cf5cf4efc713c21d8e",
     "semantic_hash": "6b3101da960a87cf5cf4efc713c21d8e"
   },
@@ -90,12 +90,12 @@
     "semantic_hash": "4ff54ed70f1dbca5ae328362e4cea4e6"
   },
   "AchievementTracker/Services/AchievementProgressUpdater.cs": {
-    "mtime": 1782349871.1632419,
-    "ast_hash": "f31608e73f840a79cd46feac324ebe1a",
-    "semantic_hash": "f31608e73f840a79cd46feac324ebe1a"
+    "mtime": 1782352053.5401075,
+    "ast_hash": "bdde6b33051618c7604dc9c0d2286826",
+    "semantic_hash": "bdde6b33051618c7604dc9c0d2286826"
   },
   "AchievementTracker/Services/AchievementSearchIndex.cs": {
-    "mtime": 1782349963.311041,
+    "mtime": 1782352053.540165,
     "ast_hash": "0a3773f265937756d83f68f261d7e165",
     "semantic_hash": "0a3773f265937756d83f68f261d7e165"
   },
@@ -165,9 +165,9 @@
     "semantic_hash": "6c2abf936b377659f79f21e3a4bbfe47"
   },
   "AchievementTracker/Services/SearchCompletionFilterPolicy.cs": {
-    "mtime": 1781996084.3230848,
-    "ast_hash": "e880ff7204baf0052e1ba8e980da1525",
-    "semantic_hash": "e880ff7204baf0052e1ba8e980da1525"
+    "mtime": 1782352053.5402217,
+    "ast_hash": "5f78faaf638c17b55f837b03b455e479",
+    "semantic_hash": "5f78faaf638c17b55f837b03b455e479"
   },
   "AchievementTracker/Services/TrackedAchievementPresetStore.cs": {
     "mtime": 1781723424.6640627,
@@ -195,7 +195,7 @@
     "semantic_hash": "c9ff6315880ab390671e458d97d2c665"
   },
   "AchievementTracker/Services/UpdateEligibilityPolicy.cs": {
-    "mtime": 1782349946.5040946,
+    "mtime": 1782352053.5402663,
     "ast_hash": "5f277209e967de274cd8bc0da6ff41ca",
     "semantic_hash": "5f277209e967de274cd8bc0da6ff41ca"
   },
@@ -205,7 +205,7 @@
     "semantic_hash": "091a075b6e9ea9add1b2577d19456fb4"
   },
   "AchievementTracker/Windows/TrackerWindow.cs": {
-    "mtime": 1782349762.5106902,
+    "mtime": 1782352053.540418,
     "ast_hash": "3a35d0be1477cf86675360a10b79dead",
     "semantic_hash": "3a35d0be1477cf86675360a10b79dead"
   },
@@ -215,17 +215,17 @@
     "semantic_hash": "42587296c63b8d207b801ae267a4c770"
   },
   "pluginmaster.json": {
-    "mtime": 1781996749.171271,
-    "ast_hash": "06240a9698f247584a17463ad9b8f661",
-    "semantic_hash": "06240a9698f247584a17463ad9b8f661"
+    "mtime": 1782352077.054528,
+    "ast_hash": "8d0e4c8a53deb79de62e268154c7ee46",
+    "semantic_hash": "8d0e4c8a53deb79de62e268154c7ee46"
   },
   "scripts/adversarial-code-review.py": {
-    "mtime": 1782347949.0731664,
+    "mtime": 1782352053.546484,
     "ast_hash": "cf5735c5b0d34ed70984eb6180b176a2",
     "semantic_hash": "cf5735c5b0d34ed70984eb6180b176a2"
   },
   "scripts/audit-ai-policy.py": {
-    "mtime": 1782347936.7173781,
+    "mtime": 1782352053.5465558,
     "ast_hash": "4c8de50b3193068ce49557cf3fd1bbe6",
     "semantic_hash": "4c8de50b3193068ce49557cf3fd1bbe6"
   },
@@ -245,7 +245,7 @@
     "semantic_hash": "00783e12d6281ef1f012f13fbcdff36b"
   },
   "scripts/regenerate-graphify.sh": {
-    "mtime": 1782348938.4583926,
+    "mtime": 1782352053.546599,
     "ast_hash": "2ade6ff7b5fd45932badc320f175c860",
     "semantic_hash": "2ade6ff7b5fd45932badc320f175c860"
   },

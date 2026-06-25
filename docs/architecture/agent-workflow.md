@@ -61,7 +61,7 @@ Before finalizing changes involving Dalamud/native code:
 - No background task/timer survives disposal.
 - No plugin input/config reaches shell/process execution.
 - No network/backend telemetry without explicit design/privacy review.
-- Public-safe branch behavior remains small unless explicitly working on `achieve-ex-experimental`.
+- Public-safe branch behavior remains small unless explicitly working on `achex-experimental`.
 
 ## 5. External reference/tool workflow
 
