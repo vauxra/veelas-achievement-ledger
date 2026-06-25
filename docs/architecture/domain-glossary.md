@@ -28,6 +28,10 @@ A named, sanitized saved list of tracked achievement IDs in `Configuration.Track
 
 The display path from Lumina category metadata, such as `Crafting & Gathering > Miner`. `AchievementCategoryPath` owns parsing this into top-level category and final subcategory, plus matching activity-trigger categories without partial text matches.
 
+### Search index
+
+The pure result-shaping layer for achievement search. `AchievementSearchIndex` consumes manually viewable `AchievementInfo` rows plus completion/sort callbacks and returns filtered counts, category groups, and sorted result rows. Windows own ImGui controls and cache timing; the index owns shared search semantics.
+
 ## Progress concepts
 
 ### Completion state
@@ -63,6 +67,8 @@ A user-visible native Achievement open, usually from a magnifying-glass/search a
 ### Refresh
 
 A queued native Achievement open intended to observe progress for one achievement. Refreshes are serialized by `AchievementProgressUpdater` and scheduled by `AchievementProgressRequestScheduler`.
+
+On public-safe branches, refresh uses the native Achievement UI instead of direct progress requests. Direct/plugin-originated progress requests remain experimental-only and require explicit direction because they change the risk profile from observing native UI state to asking the game/server for progress.
 
 ### Update eligibility
 

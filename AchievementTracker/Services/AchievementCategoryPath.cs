@@ -6,6 +6,8 @@ public readonly record struct AchievementCategoryPath(string Category, string Su
 {
     public static AchievementCategoryPath Parse(string? categoryPath)
     {
+        // Lumina category names can be multi-level display paths. Achieve Ex+ only treats the
+        // first segment as the broad category and the final segment as the selectable subcategory.
         if (string.IsNullOrWhiteSpace(categoryPath))
         {
             return new AchievementCategoryPath(string.Empty, string.Empty);
@@ -28,6 +30,8 @@ public readonly record struct AchievementCategoryPath(string Category, string Su
 
     public bool MatchesCategory(string categoryName)
     {
+        // Activity triggers name broad categories like "Miner". Match exact top-level/final
+        // subcategory names only so paths like "Miner Impostor" do not fire miner refreshes.
         if (string.IsNullOrWhiteSpace(categoryName))
         {
             return false;

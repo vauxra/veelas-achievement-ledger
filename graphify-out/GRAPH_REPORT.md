@@ -4,12 +4,12 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 500 nodes · 999 edges · 28 communities (24 shown, 4 thin omitted)
+- 501 nodes · 1000 edges · 28 communities (24 shown, 4 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `01817119`
+- Built from commit: `ed08890d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -71,35 +71,35 @@
 
 ### Community 0 - "Community 0"
 Cohesion: 0.08
-Nodes (6): DateTime, FontAwesomeIcon, SearchResultsCache, TrackedUpdateIndicatorPolicy, TrackedUpdateIndicatorState, TrackerWindow
+Nodes (7): DateTime, FontAwesomeIcon, SearchResultsCache, TrackedUpdateIndicatorPolicy, TrackedUpdateIndicatorState, Window, TrackerWindow
 
 ### Community 1 - "Community 1"
 Cohesion: 0.09
 Nodes (16): Achievement, AchievementProgress, CosmicAchievementRule, GeneratedRegex, IUnlockState, Complete(), CompletionListNotLoaded(), DataNotAvailable() (+8 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.11
-Nodes (14): AchievementInfo, AchievementSearchCategoryGroup, AchievementSearchQueryState, AchievementSearchResults, AchievementSearchSortKey, AchievementSearchSortMode, Func, IDataManager (+6 more)
+Cohesion: 0.09
+Nodes (10): Configuration, Dictionary, int, IPluginConfiguration, List, TrackedAchievementPreset, ActivityTriggerCandidateSelection, AutoUpdateSelection (+2 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.10
-Nodes (9): Configuration, Dictionary, int, IPluginConfiguration, List, TrackedAchievementPreset, AutoUpdateSelection, TrackedAchievementPresetStore (+1 more)
-
-### Community 4 - "Community 4"
 Cohesion: 0.08
 Nodes (3): Plugin, IDalamudPlugin, IFramework
 
+### Community 4 - "Community 4"
+Cohesion: 0.12
+Nodes (4): Action, ConfigSection, List<string>, ConfigWindow
+
 ### Community 5 - "Community 5"
 Cohesion: 0.12
-Nodes (5): Action, ConfigSection, List<string>, Window, ConfigWindow
+Nodes (13): AchievementInfo, AchievementSearchCategoryGroup, AchievementSearchQueryState, AchievementSearchResults, AchievementSearchSortKey, AchievementSearchSortMode, Func, IDataManager (+5 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.13
-Nodes (5): ActiveNativeAchievementRequest, DateTimeOffset, NativeUpdateJobState, ScheduledAchievementProgressRequest, AchievementProgressUpdater
+Cohesion: 0.12
+Nodes (7): ActivityUpdateKey, Guid, IEnumerable, AchievementProgressRequestScheduler, ActivityTriggerDelayPolicy, AutoUpdateQueueStatusRow, TimeSpan
 
 ### Community 7 - "Community 7"
-Cohesion: 0.13
-Nodes (6): ActivityUpdateKey, Guid, AchievementProgressRequestScheduler, ActivityTriggerDelayPolicy, AutoUpdateQueueStatusRow, TimeSpan
+Cohesion: 0.16
+Nodes (5): ActiveNativeAchievementRequest, DateTimeOffset, NativeUpdateJobState, ScheduledAchievementProgressRequest, AchievementProgressUpdater
 
 ### Community 8 - "Community 8"
 Cohesion: 0.09
@@ -107,11 +107,11 @@ Nodes (9): float, IGameGui, NativeAchievementActionKind, NativeAchievementJobKin
 
 ### Community 9 - "Community 9"
 Cohesion: 0.11
-Nodes (9): bool, Hook, IChatGui, IDisposable, ILogMessage, AchievementActivityUpdateObserver, PassiveAchievementProgressObserver, ImRaiiShim (+1 more)
+Nodes (10): HashSet, IReadOnlyCollection, IReadOnlyDictionary, NativeAchievementOpenEligibility, AchievementActivityUpdateClassifier, SearchCompletionFilterPolicy, Ineligible(), UpdateEligibilityPolicy (+2 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.12
-Nodes (10): HashSet, IReadOnlyCollection, IReadOnlyDictionary, NativeAchievementOpenEligibility, AchievementActivityUpdateClassifier, SearchCompletionFilterPolicy, Ineligible(), UpdateEligibilityPolicy (+2 more)
+Cohesion: 0.11
+Nodes (9): bool, Hook, IChatGui, IDisposable, ILogMessage, AchievementActivityUpdateObserver, PassiveAchievementProgressObserver, ImRaiiShim (+1 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.14
@@ -161,17 +161,17 @@ Nodes (3): verify-local.sh script, DOTNET_ROOT, PATH
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `TrackerWindow` connect `Community 0` to `Community 2`, `Community 3`, `Community 4`, `Community 5`, `Community 9`, `Community 10`?**
+- **Why does `TrackerWindow` connect `Community 0` to `Community 2`, `Community 3`, `Community 5`, `Community 9`, `Community 10`?**
   _High betweenness centrality (0.203) - this node is a cross-community bridge._
-- **Why does `Plugin` connect `Community 4` to `Community 0`, `Community 5`, `Community 6`, `Community 7`, `Community 9`, `Community 10`?**
+- **Why does `Plugin` connect `Community 3` to `Community 0`, `Community 4`, `Community 6`, `Community 7`, `Community 9`, `Community 10`?**
   _High betweenness centrality (0.158) - this node is a cross-community bridge._
-- **Why does `AchievementProgressUpdater` connect `Community 6` to `Community 2`, `Community 3`, `Community 5`, `Community 7`, `Community 8`, `Community 9`, `Community 10`, `Community 11`?**
+- **Why does `AchievementProgressUpdater` connect `Community 7` to `Community 2`, `Community 4`, `Community 5`, `Community 6`, `Community 8`, `Community 9`, `Community 10`, `Community 11`?**
   _High betweenness centrality (0.148) - this node is a cross-community bridge._
 - **What connects `net10.0-windows7.0`, `Microsoft.NET.Sdk`, `Dalamud.NET.Sdk/15.0.0` to the rest of the system?**
   _24 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.08455625436757512 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08215488215488216 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.08985507246376812 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.11201079622132254 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08826945412311266 - nodes in this community are weakly interconnected._

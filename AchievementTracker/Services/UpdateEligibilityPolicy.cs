@@ -36,6 +36,8 @@ public static class UpdateEligibilityPolicy
         ArgumentNullException.ThrowIfNull(completionProvider);
         ArgumentNullException.ThrowIfNull(autoUpdateAchievementIds);
 
+        // Keep this service pure: it reports which config entries should be removed, but Plugin
+        // applies config mutation/save/reset side effects because those depend on caller intent.
         var eligibleAchievementIds = new List<uint>();
         var completedAchievementIds = new List<uint>();
         var nativeUnsafeAchievementIds = new List<NativeUnsafeAchievementSkip>();

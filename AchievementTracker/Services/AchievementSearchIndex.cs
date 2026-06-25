@@ -55,6 +55,8 @@ public sealed record AchievementSearchCategoryGroup(string Category, IReadOnlyLi
 public static class AchievementSearchIndex
 {
     public static IReadOnlyList<AchievementInfo> GetSearchableAchievements(IEnumerable<AchievementInfo> achievements)
+        // Keep Lumina/manual-viewability in AchievementCatalog; this index only applies UI search
+        // semantics that are safe to share between windows and tests.
         => achievements
             .Where(info => !string.Equals(AchievementCategoryPath.Parse(info.CategoryName).Category, "Legacy", StringComparison.OrdinalIgnoreCase))
             .ToList();

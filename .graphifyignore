@@ -2,6 +2,8 @@
 # Headless Graphify extracts code/manifests locally, but Markdown/images require
 # an LLM backend. Architecture docs remain the source of truth; graphify-out is
 # the generated code/project graph for AI orientation.
+# Do not include docs/images here unless regeneration is deliberately switched
+# to an authenticated semantic backend and the generated output is reviewed.
 *.md
 *.mdx
 *.png

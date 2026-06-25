@@ -10,7 +10,7 @@ Community numbers are generated. Re-check `graphify-out/GRAPH_REPORT.md` and upd
 - Current report: `graphify-out/GRAPH_REPORT.md`.
 - Current interactive graph: `graphify-out/graph.html`.
 - Current call-flow view: `graphify-out/achieve-ex-callflow.html`.
-- Current shape: 500 nodes, 999 edges, 28 communities.
+- Current shape: 501 nodes, 1000 edges, 28 communities.
 
 ## Community legend
 
@@ -18,15 +18,15 @@ Community numbers are generated. Re-check `graphify-out/GRAPH_REPORT.md` and upd
 |---|---|---|---|
 | 0 | Tracker UI shell and row/status display wiring | `TrackerWindow`, `SearchResultsCache`, `TrackedUpdateIndicatorPolicy` | Finding ImGui layout, row drawing, toolbar/status wiring, and search cache timing. |
 | 1 | Achievement progress display plus Cosmic rules | `Achievement`, `AchievementProgress`, `CosmicAchievementRule`, `CosmicClassProgressProvider`, `IUnlockState` | Understanding progress formatting, completion checks, and Cosmic score overrides. |
-| 2 | Catalog/search index result shaping | `AchievementInfo`, `AchievementSearchIndex`, `AchievementSearchCategoryGroup`, `AchievementSearchQueryState`, `AchievementSearchSortKey`, `IDataManager` | Finding Lumina/manual-viewable rows, category/query/completion result shaping, and game-order search sort keys. |
-| 3 | Configuration, tracked list, and preset persistence | `Configuration`, `TrackedAchievementStore`, `TrackedAchievementPresetStore`, `AutoUpdateSelection` | Finding persisted tracked IDs, presets/lists, config normalization, and auto-update selections. |
-| 4 | Plugin composition and Dalamud lifecycle | `Plugin`, `IDalamudPlugin`, `IFramework` | Finding service construction, commands, event subscription, tick fan-out, config saves, and top-level orchestration. |
-| 5 | Configuration window UI | `ConfigWindow`, `ConfigSection`, `Window` | Finding settings UI, search/add controls in config, and presentation-only settings paths. |
-| 6 | Native progress updater state machine | `AchievementProgressUpdater`, `ActiveNativeAchievementRequest`, `NativeUpdateJobState`, `ScheduledAchievementProgressRequest` | Understanding serialized refresh/inspection work and the fragile native Achievement update loop. |
-| 7 | Scheduler, dedupe, backoff, and queue status | `AchievementProgressRequestScheduler`, `ActivityUpdateKey`, `ActivityTriggerDelayPolicy`, `AutoUpdateQueueStatusRow` | Understanding queue spacing, dirty activity keys, manual-vs-activity request behavior, and status text. |
+| 2 | Configuration, tracked list, preset persistence, and candidate selection | `Configuration`, `TrackedAchievementStore`, `TrackedAchievementPresetStore`, `AutoUpdateSelection`, `ActivityTriggerCandidateSelection` | Finding persisted tracked IDs, presets/lists, config normalization, auto-update selections, and ordinary trigger-candidate filtering. |
+| 3 | Plugin composition and Dalamud lifecycle | `Plugin`, `IDalamudPlugin`, `IFramework` | Finding service construction, commands, event subscription, tick fan-out, config saves, and top-level orchestration. |
+| 4 | Configuration window UI | `ConfigWindow`, `ConfigSection`, `List<string>` | Finding settings UI, search/add controls in config, and presentation-only settings paths. |
+| 5 | Catalog/search index result shaping | `AchievementInfo`, `AchievementSearchIndex`, `AchievementSearchCategoryGroup`, `AchievementSearchQueryState`, `AchievementSearchSortKey`, `IDataManager` | Finding Lumina/manual-viewable rows, category/query/completion result shaping, and game-order search sort keys. |
+| 6 | Scheduler, dedupe, backoff, and queue status | `AchievementProgressRequestScheduler`, `ActivityUpdateKey`, `ActivityTriggerDelayPolicy`, `AutoUpdateQueueStatusRow` | Understanding queue spacing, dirty activity keys, manual-vs-activity request behavior, and status text. |
+| 7 | Native progress updater state machine | `AchievementProgressUpdater`, `ActiveNativeAchievementRequest`, `NativeUpdateJobState`, `ScheduledAchievementProgressRequest` | Understanding serialized refresh/inspection work and the fragile native Achievement update loop. |
 | 8 | Native Achievement window navigation and parking | `NativeAchievementNavigator`, `IGameGui`, `ParkedAchievementWindowState`, `NativeAchievementActionKind` | Finding native UI open/park/restore/close behavior. Keep ClientStructs/native ordering changes conservative. |
-| 9 | Hooks, chat, and passive observers | `PassiveAchievementProgressObserver`, `AchievementActivityUpdateObserver`, `Hook`, `IChatGui`, `ILogMessage` | Finding event/hook subscriptions and disposal-sensitive observer paths. |
-| 10 | Pure eligibility/activity policies | `UpdateEligibilityPolicy`, `SearchCompletionFilterPolicy`, `AchievementActivityUpdateClassifier`, `NativeAchievementOpenEligibility` | Finding testable decision logic for update eligibility, completion filters, and activity-trigger selection. |
+| 9 | Pure eligibility/activity policies | `UpdateEligibilityPolicy`, `SearchCompletionFilterPolicy`, `AchievementActivityUpdateClassifier`, `NativeAchievementOpenEligibility` | Finding testable decision logic for update eligibility, completion filters, and activity-trigger selection. |
+| 10 | Hooks, chat, and passive observers | `PassiveAchievementProgressObserver`, `AchievementActivityUpdateObserver`, `Hook`, `IChatGui`, `ILogMessage` | Finding event/hook subscriptions and disposal-sensitive observer paths. |
 | 11 | Observed ordinary progress cache/source | `ClientAchievementProgressSource`, `ObservedAchievementProgress`, `ProgressSlotFingerprint`, `IAchievementProgressSource` | Understanding native-observed progress caching, slot fingerprinting, and login/logout reset behavior. |
 | 12 | Local policy/review scripts | `adversarial-code-review.py`, `audit-ai-policy.py`, helper functions | Finding tripwire logic and generated-output exclusions. |
 | 13 | Project/package manifest concepts | package lock and dependency metadata nodes | Usually low-signal for feature work; useful when dependency/project-file changes are involved. |

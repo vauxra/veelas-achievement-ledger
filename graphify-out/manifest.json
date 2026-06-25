@@ -75,9 +75,9 @@
     "semantic_hash": "892862ab10c2b5805a43c13447015bb5"
   },
   "AchievementTracker/Services/AchievementCategoryPath.cs": {
-    "mtime": 1782346565.5846617,
-    "ast_hash": "6cae194d7b2f0e254963c60de9f059bb",
-    "semantic_hash": "6cae194d7b2f0e254963c60de9f059bb"
+    "mtime": 1782349954.1971774,
+    "ast_hash": "6b3101da960a87cf5cf4efc713c21d8e",
+    "semantic_hash": "6b3101da960a87cf5cf4efc713c21d8e"
   },
   "AchievementTracker/Services/AchievementProgressRequestScheduler.cs": {
     "mtime": 1781798316.1709533,
@@ -90,14 +90,14 @@
     "semantic_hash": "4ff54ed70f1dbca5ae328362e4cea4e6"
   },
   "AchievementTracker/Services/AchievementProgressUpdater.cs": {
-    "mtime": 1781831130.144018,
-    "ast_hash": "d4d68aaa1d620202f78c6f6ec4c5447d",
-    "semantic_hash": "d4d68aaa1d620202f78c6f6ec4c5447d"
+    "mtime": 1782349871.1632419,
+    "ast_hash": "f31608e73f840a79cd46feac324ebe1a",
+    "semantic_hash": "f31608e73f840a79cd46feac324ebe1a"
   },
   "AchievementTracker/Services/AchievementSearchIndex.cs": {
-    "mtime": 1782349505.5025256,
-    "ast_hash": "a482f880e4d674321b2d923423490093",
-    "semantic_hash": "a482f880e4d674321b2d923423490093"
+    "mtime": 1782349963.311041,
+    "ast_hash": "0a3773f265937756d83f68f261d7e165",
+    "semantic_hash": "0a3773f265937756d83f68f261d7e165"
   },
   "AchievementTracker/Services/ActivityTriggerCandidateSelection.cs": {
     "mtime": 1781996529.7625842,
@@ -195,9 +195,9 @@
     "semantic_hash": "c9ff6315880ab390671e458d97d2c665"
   },
   "AchievementTracker/Services/UpdateEligibilityPolicy.cs": {
-    "mtime": 1782346158.1246808,
-    "ast_hash": "f8365d5bad90727e4ceaf7f0bc9cbbd5",
-    "semantic_hash": "f8365d5bad90727e4ceaf7f0bc9cbbd5"
+    "mtime": 1782349946.5040946,
+    "ast_hash": "5f277209e967de274cd8bc0da6ff41ca",
+    "semantic_hash": "5f277209e967de274cd8bc0da6ff41ca"
   },
   "AchievementTracker/Windows/ConfigWindow.cs": {
     "mtime": 1781795582.5571253,
@@ -205,9 +205,9 @@
     "semantic_hash": "091a075b6e9ea9add1b2577d19456fb4"
   },
   "AchievementTracker/Windows/TrackerWindow.cs": {
-    "mtime": 1782349622.5508142,
-    "ast_hash": "068d4fcbd82bcea3d9edddc133731a84",
-    "semantic_hash": "068d4fcbd82bcea3d9edddc133731a84"
+    "mtime": 1782349762.5106902,
+    "ast_hash": "3a35d0be1477cf86675360a10b79dead",
+    "semantic_hash": "3a35d0be1477cf86675360a10b79dead"
   },
   "AchievementTracker/packages.lock.json": {
     "mtime": 1781722519.4333417,
