@@ -53,6 +53,8 @@ var tests = new List<(string Name, Action Body)>
     ("Activity scheduler appends dirty final pass behind later keys", ActivitySchedulerAppendsDirtyFinalPassBehindLaterKeys),
     ("Activity scheduler queues different keys normally", ActivitySchedulerQueuesDifferentKeysNormally),
     ("Manual scheduler requests are not activity-key coalesced", ManualSchedulerRequestsAreNotActivityKeyCoalesced),
+    ("Achievement category path splits top-level and subcategory", AchievementCategoryPathSplitsTopLevelAndSubcategory),
+    ("Achievement category path matches exact category or final subcategory", AchievementCategoryPathMatchesExactCategoryOrFinalSubcategory),
     ("Activity classifier selects tracked achievements by category path", ActivityClassifierSelectsTrackedAchievementsByCategoryPath),
     ("Activity trigger candidates exclude cosmic class achievements", ActivityTriggerCandidatesExcludeCosmicClassAchievements),
     ("Tracked toolbar hidden state shows default eye", TrackedToolbarHiddenStateShowsDefaultEye),
@@ -660,6 +662,29 @@ static void ManualSchedulerRequestsAreNotActivityKeyCoalesced()
     scheduler.EnqueueUpdateAll([201], "manual-update-all", TimeSpan.Zero);
     AssertEqualInt(2, scheduler.PendingCount);
     AssertFalse(scheduler.IsActivityKeyDirty(key), "manual update all should not mark activity key dirty");
+}
+
+static void AchievementCategoryPathSplitsTopLevelAndSubcategory()
+{
+    var simple = AchievementCategoryPath.Parse("Miner");
+    AssertEqual("Miner", simple.Category);
+    AssertEqual(string.Empty, simple.Subcategory);
+
+    var nested = AchievementCategoryPath.Parse("Crafting & Gathering > Botanist > Harvesting");
+    AssertEqual("Crafting & Gathering", nested.Category);
+    AssertEqual("Harvesting", nested.Subcategory);
+
+    var empty = AchievementCategoryPath.Parse("  >  ");
+    AssertEqual(string.Empty, empty.Category);
+    AssertEqual(string.Empty, empty.Subcategory);
+}
+
+static void AchievementCategoryPathMatchesExactCategoryOrFinalSubcategory()
+{
+    AssertTrue(AchievementCategoryPath.MatchesCategory("Miner", "Miner"), "exact category should match");
+    AssertTrue(AchievementCategoryPath.MatchesCategory("Crafting & Gathering > Miner", "Miner"), "final subcategory should match");
+    AssertFalse(AchievementCategoryPath.MatchesCategory("Battle > Miner Impostor", "Miner"), "partial subcategory text should not match");
+    AssertFalse(AchievementCategoryPath.MatchesCategory("", "Miner"), "blank path should not match");
 }
 
 static void AssertActivityClassification(uint logMessageId, uint classJobId, string expectedCategory, string expectedTrigger)

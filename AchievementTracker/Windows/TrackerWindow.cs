@@ -351,7 +351,7 @@ public sealed class TrackerWindow : Window
             ImGui.Indent(24);
             foreach (var subcategoryGroup in subcategories)
             {
-                var subcategoryKey = BuildSubcategoryFilterKey(categoryKey, subcategoryGroup.Key);
+                var subcategoryKey = AchievementCategoryPath.BuildSubcategoryFilterKey(categoryKey, subcategoryGroup.Key);
                 var selected = this.selectedSubcategoryFilters.Contains(subcategoryKey);
                 var subcategoryCount = subcategoryGroup.Count(entry => this.MatchesCompletionCountFilter(entry.Info));
                 var subcategoryLabel = $"{subcategoryGroup.Key} ({subcategoryCount})";
@@ -544,7 +544,7 @@ public sealed class TrackerWindow : Window
         }
 
         this.cachedSearchableAchievements = this.plugin.AchievementCatalog.GetManuallyViewableAchievements()
-            .Where(result => !string.Equals(SplitCategoryPath(result.CategoryName).Category, "Legacy", StringComparison.OrdinalIgnoreCase))
+            .Where(result => !string.Equals(AchievementCategoryPath.Parse(result.CategoryName).Category, "Legacy", StringComparison.OrdinalIgnoreCase))
             .ToList();
         return this.cachedSearchableAchievements;
     }
@@ -559,7 +559,7 @@ public sealed class TrackerWindow : Window
         this.cachedSearchCategoryGroups = this.GetSearchableAchievements()
             .Select(info =>
             {
-                var parts = SplitCategoryPath(info.CategoryName);
+                var parts = AchievementCategoryPath.Parse(info.CategoryName);
                 var sort = this.GetGameSortKey(info);
                 return new SearchCategoryEntry(info, parts.Category, parts.Subcategory, sort.KindOrder);
             })
@@ -1072,7 +1072,7 @@ public sealed class TrackerWindow : Window
             return true;
         }
 
-        var parts = SplitCategoryPath(info.CategoryName);
+        var parts = AchievementCategoryPath.Parse(info.CategoryName);
         if (string.IsNullOrWhiteSpace(parts.Category))
         {
             return false;
@@ -1084,7 +1084,7 @@ public sealed class TrackerWindow : Window
         }
 
         return !string.IsNullOrWhiteSpace(parts.Subcategory)
-            && this.selectedSubcategoryFilters.Contains(BuildSubcategoryFilterKey(parts.Category, parts.Subcategory));
+            && this.selectedSubcategoryFilters.Contains(AchievementCategoryPath.BuildSubcategoryFilterKey(parts.Category, parts.Subcategory));
     }
 
     private void ToggleCategoryFilter(string category)
@@ -1112,7 +1112,7 @@ public sealed class TrackerWindow : Window
     {
         var ctrl = ImGui.GetIO().KeyCtrl;
         this.categoryFilterAll = false;
-        var key = BuildSubcategoryFilterKey(category, subcategory);
+        var key = AchievementCategoryPath.BuildSubcategoryFilterKey(category, subcategory);
         if (!ctrl)
         {
             this.selectedCategoryFilters.Clear();
@@ -1129,9 +1129,6 @@ public sealed class TrackerWindow : Window
 
         this.MarkSearchResultsDirty(resetVisibleResults: true);
     }
-
-    private static string BuildSubcategoryFilterKey(string category, string subcategory)
-        => $"{category}>{subcategory}";
 
     private bool IsComplete(uint achievementId)
         => this.plugin.IsAchievementCompleteForSearch(achievementId);
@@ -1159,16 +1156,6 @@ public sealed class TrackerWindow : Window
         return cached;
     }
 
-    private static (string Category, string Subcategory) SplitCategoryPath(string categoryPath)
-    {
-        var parts = categoryPath.Split('>', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-        return parts.Length switch
-        {
-            0 => (string.Empty, string.Empty),
-            1 => (parts[0], string.Empty),
-            _ => (parts[0], parts[^1]),
-        };
-    }
 
     private static void AddTooltip(string text)
     {

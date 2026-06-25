@@ -24,6 +24,10 @@ An achievement ID in `TrackedAchievementStore`. Tracked IDs persist through `Con
 
 A named, sanitized saved list of tracked achievement IDs in `Configuration.TrackedAchievementPresets`. `TrackedAchievementPresetStore` owns name and ID sanitation plus save/rename/delete/copy rules.
 
+### Category path
+
+The display path from Lumina category metadata, such as `Crafting & Gathering > Miner`. `AchievementCategoryPath` owns parsing this into top-level category and final subcategory, plus matching activity-trigger categories without partial text matches.
+
 ## Progress concepts
 
 ### Completion state

@@ -94,21 +94,13 @@ public static class AchievementActivityUpdateClassifier
         IEnumerable<uint> trackedAchievementIds,
         Func<uint, string> categoryNameProvider,
         string categoryName)
-    {
-        var expectedSuffix = $" > {categoryName}";
-        return trackedAchievementIds
-            .Where(id => IsCategoryMatch(categoryNameProvider(id), categoryName, expectedSuffix))
+        => trackedAchievementIds
+            .Where(id => AchievementCategoryPath.MatchesCategory(categoryNameProvider(id), categoryName))
             .Distinct()
             .ToList();
-    }
 
     public static bool TryGetCategoryForClassJob(uint classJobId, out string categoryName)
         => ClassJobCategories.TryGetValue(classJobId, out categoryName!);
-
-
-    private static bool IsCategoryMatch(string categoryPath, string categoryName, string expectedSuffix)
-        => string.Equals(categoryPath, categoryName, StringComparison.OrdinalIgnoreCase)
-            || categoryPath.EndsWith(expectedSuffix, StringComparison.OrdinalIgnoreCase);
 
     private static bool IsCrafterCategory(string categoryName)
         => !string.Equals(categoryName, "Miner", StringComparison.Ordinal)

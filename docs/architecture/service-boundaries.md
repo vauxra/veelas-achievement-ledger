@@ -17,6 +17,7 @@ Use this file to decide where new code belongs. The default rule is: UI owns pre
 | Service/file | Owns |
 |---|---|
 | `AchievementCatalog` | Lumina achievement lookup, manually viewable achievement filtering, native-open eligibility. |
+| `AchievementCategoryPath` | Shared parsing/matching for achievement category paths used by search UI and activity-trigger category selection. |
 | `AchievementProgressService` | Converts completion state, observed numeric progress, and Cosmic overrides into display progress. |
 | `IAchievementProgressSource` / `ClientAchievementProgressSource` | Observed ordinary achievement progress cache and passive native progress-slot reads. |
 | `CosmicClassProgressProvider` | Experimental WKS/Cosmic score read/cache/override behavior. Keep this isolated from ordinary progress refresh queues. |
@@ -45,6 +46,7 @@ Before adding a new service or helper, search for an existing owner:
 - Native Achievement open/show/hide/park/restore belongs in `NativeAchievementNavigator` plus `NativeAchievementWindowScalePolicy`.
 - Progress display belongs in `AchievementProgress`, `AchievementProgressService`, and related display policies.
 - Search/category/completion filtering should use `AchievementCatalog` and `SearchCompletionFilterPolicy` first.
+- Category path parsing/matching should use `AchievementCategoryPath`, not ad-hoc string suffix checks.
 - Preset/list sanitation belongs in `TrackedAchievementPresetStore`; tracked ordering belongs in `TrackedAchievementStore`.
 - Activity-trigger ID classification belongs in `AchievementActivityUpdateClassifier`, not UI or `Plugin`.
 - Cosmic/WKS score behavior belongs in `CosmicClassProgressProvider`, not the ordinary progress queue.
