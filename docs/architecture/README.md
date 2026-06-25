@@ -9,8 +9,10 @@ This directory is the starting point for future AI/code-review sessions. It maps
 3. Read `service-boundaries.md` before adding or moving code.
 4. Read `dalamud-conventions.md` before touching Dalamud services, ClientStructs, hooks, native UI, or framework/chat/login events.
 5. Read `feature-map.md` to find the current owner files for a feature.
-6. Read `agent-workflow.md` before implementing a change.
-7. Check `refactor-backlog.md` for known structure improvements that should remain small and test-backed.
+6. Read `domain-glossary.md` for stable product and code vocabulary.
+7. Read `native-refresh-flow.md` before changing refresh, inspection, activity-trigger, Cosmic, or login/logout behavior.
+8. Read `agent-workflow.md` before implementing a change.
+9. Check `refactor-backlog.md` for known structure improvements that should remain small and test-backed.
 
 ## Product goal
 

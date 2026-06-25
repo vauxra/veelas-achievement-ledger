@@ -10,6 +10,8 @@ Before adding or moving code, read the agent-facing architecture docs:
 - `docs/architecture/service-boundaries.md` — which layer/service owns each behavior.
 - `docs/architecture/dalamud-conventions.md` — Dalamud, ClientStructs, hook, and native UI rules.
 - `docs/architecture/feature-map.md` — feature-to-file/test ownership.
+- `docs/architecture/domain-glossary.md` — stable terms for achievement/progress/update concepts.
+- `docs/architecture/native-refresh-flow.md` — native refresh, inspection, activity, Cosmic, and cache-reset flows.
 - `docs/architecture/agent-workflow.md` — workflow for future AI/code-review sessions.
 - `docs/architecture/refactor-backlog.md` — conservative structure improvements to keep small and test-backed.
 
