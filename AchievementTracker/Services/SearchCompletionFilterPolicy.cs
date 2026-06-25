@@ -21,7 +21,7 @@ public static class SearchCompletionFilterPolicy
         };
 
     public static bool MatchesForCount(string filter, bool completionStateLoaded, bool isComplete)
-        => CanEvaluate(filter, completionStateLoaded, updateInProgress: false)
-            ? Matches(filter, isComplete)
-            : true;
+        => RequiresCompletionState(filter) && !completionStateLoaded
+            ? true
+            : Matches(filter, isComplete);
 }

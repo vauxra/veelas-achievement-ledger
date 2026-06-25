@@ -306,7 +306,7 @@ public sealed class AchievementProgressUpdater
             job.NativeWindowWasAlreadyOpen);
         this.statusText = "Waiting for data.";
         var hasPendingSameJob = this.scheduler.HasPendingRequestsForJob(request.JobId);
-        var closeAtJobEnd = NativeAchievementWindowScalePolicy.ShouldCloseAfterRefreshJobItem(request.JobKind, job.NativeWindowWasAlreadyOpen, hasPendingSameJob: false);
+        var closeAtJobEnd = NativeAchievementWindowScalePolicy.ShouldCloseAfterRefreshJobItem(request.JobKind, job.NativeWindowWasAlreadyOpen, hasPendingSameJob);
         this.debugLog($"AchieveEx DebugTrace NativeRefreshOpenSent id={request.AchievementId} reason={request.Reason} jobId={request.JobId} jobKind={request.JobKind} minWaitSeconds={RefreshMinimumWait.TotalSeconds:0.0} maxWaitSeconds={RefreshMaximumWait.TotalSeconds:0} pending={this.scheduler.PendingCount} pendingSameJob={this.scheduler.PendingCountForJob(request.JobId)} nativeWindowWasOpen={job.NativeWindowWasAlreadyOpen} scaleIntent={(shouldPark ? "park" : "none")} closeAtJobEnd={closeAtJobEnd}");
     }
 
