@@ -11,8 +11,9 @@ This directory is the starting point for future AI/code-review sessions. It maps
 5. Read `feature-map.md` to find the current owner files for a feature.
 6. Read `domain-glossary.md` for stable product and code vocabulary.
 7. Read `native-refresh-flow.md` before changing refresh, inspection, activity-trigger, Cosmic, or login/logout behavior.
-8. Read `agent-workflow.md` before implementing a change.
-9. Check `refactor-backlog.md` for known structure improvements that should remain small and test-backed.
+8. Read `graphify-map.md` when using `graphify-out/` for broad code topology questions.
+9. Read `agent-workflow.md` before implementing a change.
+10. Check `refactor-backlog.md` for known structure improvements that should remain small and test-backed.
 
 ## Product goal
 
