@@ -2,6 +2,21 @@
 
 This repo is a Final Fantasy XIV Dalamud plugin. Treat Dalamud's official docs at <https://dalamud.dev> as the source of truth.
 
+## Architecture map
+
+Before adding or moving code, read the agent-facing architecture docs:
+
+- `docs/architecture/README.md` — current repo map and product goal.
+- `docs/architecture/service-boundaries.md` — which layer/service owns each behavior.
+- `docs/architecture/dalamud-conventions.md` — Dalamud, ClientStructs, hook, and native UI rules.
+- `docs/architecture/feature-map.md` — feature-to-file/test ownership.
+- `docs/architecture/agent-workflow.md` — workflow for future AI/code-review sessions.
+- `docs/architecture/refactor-backlog.md` — conservative structure improvements to keep small and test-backed.
+
+Do not duplicate existing services. Extend the documented owner for queueing,
+native Achievement navigation, search/completion filtering, preset sanitation,
+progress display, activity triggers, and Cosmic/WKS progress behavior.
+
 ## Before code changes
 
 - Read the relevant Dalamud docs before changing APIs or ClientStructs code.

@@ -18,3 +18,9 @@ packages/
 
 # Local dev-plugin drops
 released/
+
+# Local source/context snapshots for agent analysis
+local-src/
+.magellan/
+*.magellan.db
+sharptools-logs/
