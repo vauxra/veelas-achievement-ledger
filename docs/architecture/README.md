@@ -12,8 +12,9 @@ This directory is the starting point for future AI/code-review sessions. It maps
 6. Read `domain-glossary.md` for stable product and code vocabulary.
 7. Read `native-refresh-flow.md` before changing refresh, inspection, activity-trigger, Cosmic, or login/logout behavior.
 8. Read `graphify-map.md` when using `graphify-out/` for broad code topology questions.
-9. Read `agent-workflow.md` before implementing a change.
-10. Check `refactor-backlog.md` for known structure improvements that should remain small and test-backed.
+9. Read `roslyn-analysis.md` when exact C# symbol, reference, type, or complexity analysis is needed.
+10. Read `agent-workflow.md` before implementing a change.
+11. Check `refactor-backlog.md` for known structure improvements that should remain small and test-backed.
 
 ## Product goal
 
@@ -59,7 +60,7 @@ External reference repos and tool snapshots belong under ignored `local-src/`, n
 The coding-stack analysis found:
 
 - Graphify is useful for broad AI orientation and topology queries. Its committed `graphify-out/` graph is a navigation aid, not an authority over architecture docs or compiler semantics.
-- SharpToolsMCP is viable as a future C#/Roslyn analysis aid after MCP configuration/restart.
+- SharpToolsMCP is viable as a C#/Roslyn analysis aid for exact symbols, references, types, and complexity after MCP configuration/restart. See `roslyn-analysis.md`.
 - Magellan did not show useful C#/Roslyn support in the fetched source snapshot and should not be part of the default workflow.
 - The fetched Dalamud source/log context is local-only and should not be committed.
 

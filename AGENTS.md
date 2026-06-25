@@ -14,6 +14,7 @@ Before adding or moving code, read the agent-facing architecture docs:
 - `docs/architecture/native-refresh-flow.md` — native refresh, inspection, activity, Cosmic, and cache-reset flows.
 - `docs/architecture/agent-workflow.md` — workflow for future AI/code-review sessions.
 - `docs/architecture/graphify-map.md` — generated Graphify community labels mapped to project concepts.
+- `docs/architecture/roslyn-analysis.md` — SharpToolsMCP/Roslyn workflow for exact C# semantics.
 - `docs/architecture/refactor-backlog.md` — conservative structure improvements to keep small and test-backed.
 
 Do not duplicate existing services. Extend the documented owner for queueing,

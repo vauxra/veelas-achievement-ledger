@@ -71,7 +71,7 @@ Current guidance:
 
 - Use committed `graphify-out/` as an AI-orientation/navigation artifact for broad topology questions. It is generated from code/project manifests only so regeneration stays local and API-key-free.
 - Regenerate Graphify manually after architecture, service-boundary, or major code-topology changes; do not install Graphify git hooks in this repo.
-- Use SharpToolsMCP as a future optional C#/Roslyn MCP analysis aid after configuring Hermes MCP and restarting the session.
+- Use SharpToolsMCP as the optional C#/Roslyn MCP analysis aid after configuring Hermes MCP and restarting the session; see `roslyn-analysis.md` for the local build/server shape.
 - Prefer SharpToolsMCP/Roslyn over Graphify for exact C# references, type resolution, compiler-aware navigation, or semantic correctness questions.
 - Do not rely on Magellan by default for Achieve Ex+ C# analysis; the fetched snapshot did not show useful C#/Roslyn support.
 - Keep raw logs and tool output ignored. Promote durable conclusions into committed docs.
