@@ -33,31 +33,35 @@ Tests cover:
 - eligible rows preserve order after distinct filtering,
 - no config save/reset is requested when nothing is removed.
 
+### Extract pure search/category index builder
+
+Implemented owner: `AchievementTracker/Services/AchievementSearchIndex.cs`.
+
+Why:
+
+- It keeps category/subcategory grouping, query/category/completion filtering, display counts, and search sort order out of ImGui layout code.
+- `TrackerWindow` remains responsible for controls, selections, drawing, and cache timing.
+- `AchievementCatalog` remains responsible for Lumina/manual-viewability source data.
+
+Implemented shape:
+
+- `AchievementSearchIndex.GetSearchableAchievements(...)` filters out top-level Legacy rows.
+- `AchievementSearchIndex.BuildResults(...)` returns searchable/category/query/completion counts plus sorted result rows.
+- `AchievementSearchIndex.BuildCategoryGroups(...)` returns category/subcategory entries with current completion-count visibility.
+- `AchievementSearchSortKey` carries game-order sort fields supplied by the UI/catalog boundary.
+
+Tests cover:
+
+- category/query/completion filter interactions,
+- category/subcategory display counts,
+- completion-filter count fallback while completion state is unloaded,
+- game-order sort stability.
+
 ## Medium priority
 
 No medium-priority refactors are currently queued. Keep future medium-priority items limited to pure, test-backed service extractions.
 
 ## Low priority
-
-### Extract pure search/category index builder
-
-Current owner: `TrackerWindow` search/category methods and cache state.
-
-Why:
-
-- Category/subcategory grouping, completion counts, and sort keys are mostly pure data transformations.
-- If config search or another UI screen needs the same grouping, duplication risk increases.
-
-Potential shape:
-
-- `AchievementSearchIndex` or `AchievementSearchViewModelBuilder` consumes catalog rows plus completion/progress callbacks and returns grouped/searchable result models.
-
-Tests to add first:
-
-- category/subcategory counts,
-- completion-filter fallback when completion state is unloaded,
-- game-order sort stability,
-- query/category/completion filter interactions.
 
 ### Keep preset UI duplicated for now
 

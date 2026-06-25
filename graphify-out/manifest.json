@@ -5,9 +5,9 @@
     "semantic_hash": "6950a123af267e149ed8078c96c179f2"
   },
   "AchievementTracker.Tests/Program.cs": {
-    "mtime": 1782346525.0177124,
-    "ast_hash": "679ee97638cb62ed222c7f2d329d5a9c",
-    "semantic_hash": "679ee97638cb62ed222c7f2d329d5a9c"
+    "mtime": 1782349434.074805,
+    "ast_hash": "4b0e53541745d248eaa7c9e47d382a3f",
+    "semantic_hash": "4b0e53541745d248eaa7c9e47d382a3f"
   },
   "AchievementTracker.sln": {
     "mtime": 1781722519.4325964,
@@ -93,6 +93,11 @@
     "mtime": 1781831130.144018,
     "ast_hash": "d4d68aaa1d620202f78c6f6ec4c5447d",
     "semantic_hash": "d4d68aaa1d620202f78c6f6ec4c5447d"
+  },
+  "AchievementTracker/Services/AchievementSearchIndex.cs": {
+    "mtime": 1782349505.5025256,
+    "ast_hash": "a482f880e4d674321b2d923423490093",
+    "semantic_hash": "a482f880e4d674321b2d923423490093"
   },
   "AchievementTracker/Services/ActivityTriggerCandidateSelection.cs": {
     "mtime": 1781996529.7625842,
@@ -200,9 +205,9 @@
     "semantic_hash": "091a075b6e9ea9add1b2577d19456fb4"
   },
   "AchievementTracker/Windows/TrackerWindow.cs": {
-    "mtime": 1782346623.9694266,
-    "ast_hash": "53fd2b11884631d59342ea6dbb0bb50f",
-    "semantic_hash": "53fd2b11884631d59342ea6dbb0bb50f"
+    "mtime": 1782349622.5508142,
+    "ast_hash": "068d4fcbd82bcea3d9edddc133731a84",
+    "semantic_hash": "068d4fcbd82bcea3d9edddc133731a84"
   },
   "AchievementTracker/packages.lock.json": {
     "mtime": 1781722519.4333417,

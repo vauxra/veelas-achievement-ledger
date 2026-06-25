@@ -7,7 +7,7 @@ Use this map to locate the current owner of a feature before adding code.
 | Slash command/windows | `/achex` opens/toggles the ledger/config help paths. | `Plugin.OnCommand`, `TrackerWindow`, `ConfigWindow` | n/a | Build/UI smoke only unless command parsing grows. |
 | Tracked achievement list | Add/remove/reorder tracked achievement IDs; persist across logouts. | `TrackerWindow`, `ConfigWindow`, `Plugin.SaveTrackedAchievements` | `TrackedAchievementStore`, `Configuration` | `AchievementTracker.Tests/Program.cs` tracked store tests. |
 | Lists/presets | Save, load, rename, delete named achievement lists. | `TrackerWindow`, `ConfigWindow` | `TrackedAchievementPresetStore`, `TrackedAchievementPreset` | Preset store tests. |
-| Search and categories | Search manually viewable achievements, group by category/subcategory, filter by completion. | `TrackerWindow`, `ConfigWindow` | `AchievementCatalog`, `AchievementCategoryPath`, `SearchCompletionFilterPolicy`, `AchievementProgressService` | Category path, completion filter/search policy tests; add pure search index tests if extracting. |
+| Search and categories | Search manually viewable achievements, group by category/subcategory, filter by completion. | `TrackerWindow`, `ConfigWindow` | `AchievementCatalog`, `AchievementSearchIndex`, `AchievementCategoryPath`, `SearchCompletionFilterPolicy`, `AchievementProgressService` | Category path, completion filter/search index tests. |
 | Completion/progress display | Show complete/incomplete/numeric/current-unavailable states. | Windows render progress text. | `AchievementProgress`, `AchievementProgressService`, `ClientAchievementProgressSource`, `CosmicClassProgressProvider` | Progress display and Cosmic override tests. |
 | Row open/inspection | Open a native Achievement entry for inspection. | `Plugin.OpenNativeAchievementForInspection`, windows | `AchievementProgressUpdater`, `AchievementProgressRequestScheduler`, `NativeAchievementNavigator`, `NativeAchievementWindowScalePolicy` | Scheduler/window policy/inspection tests. |
 | Manual update all/one | Queue one or more eligible tracked achievements through native Achievement UI. | `Plugin.EnqueueUpdate*`, windows | `UpdateEligibilityPolicy`, `AchievementProgressUpdater`, `AchievementProgressRequestScheduler`, `ClientAchievementProgressSource`, `NativeAchievementNavigator` | Update eligibility, scheduler, and updater tests. |
@@ -38,9 +38,10 @@ Use this map to locate the current owner of a feature before adding code.
 ### Change search/completion behavior
 
 1. Use `AchievementCatalog` for Lumina/manual-viewability rules.
-2. Use `SearchCompletionFilterPolicy` for completion-filter semantics.
-3. Use `AchievementProgressService` for progress/completion display state.
-4. If `TrackerWindow` category grouping grows, extract a pure search/index builder and test it.
+2. Use `AchievementSearchIndex` for category/query/completion result shaping and display counts.
+3. Use `SearchCompletionFilterPolicy` for completion-filter semantics.
+4. Use `AchievementProgressService` for progress/completion display state.
+5. Keep ImGui layout and user interaction wiring in the windows.
 
 ### Change Cosmic/WKS behavior
 

@@ -48,7 +48,7 @@ The codebase is already mostly aligned with a service-boundary layout:
 
 - `Plugin.cs` orchestrates Dalamud lifecycle and connects services.
 - `Windows/*` draw UI and translate clicks/settings into service calls.
-- `Services/*` own reusable mechanics: search/catalog, progress display, native queue scheduling, native window policy, activity classification, presets, and Cosmic progress.
+- `Services/*` own reusable mechanics: catalog/search indexing, progress display, native queue scheduling, native window policy, activity classification, presets, and Cosmic progress.
 - `Models/*` are simple value/config payloads.
 
 The main risk is future duplication: without this architecture map, agents may reimplement queue spacing, preset sanitation, native window policy, progress formatting, or completion filtering in a window or in `Plugin.cs`. Prefer extending existing services and tests.

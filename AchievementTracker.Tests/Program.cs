@@ -39,6 +39,9 @@ var tests = new List<(string Name, Action Body)>
     ("Completion filters wait for loaded achievement state", CompletionFiltersWaitForLoadedAchievementState),
     ("Completion-filtered counts fall back to all while unloaded", CompletionFilteredCountsFallBackToAllWhileUnloaded),
     ("Lumina search all does not wait for loaded achievement state", LuminaSearchAllDoesNotWaitForLoadedAchievementState),
+    ("Achievement search index filters category query and completion", AchievementSearchIndexFiltersCategoryQueryAndCompletion),
+    ("Achievement search index counts categories with unloaded completion fallback", AchievementSearchIndexCountsCategoriesWithUnloadedCompletionFallback),
+    ("Achievement search index keeps game order stable", AchievementSearchIndexKeepsGameOrderStable),
     ("Native update batches do not park achievement windows", NativeUpdateBatchesDoNotParkAchievementWindows),
     ("Active refresh polls progress slot fallback", ActiveRefreshPollsProgressSlotFallback),
     ("Progress slot fallback does not restamp unchanged loaded slot", ProgressSlotFallbackDoesNotRestampUnchangedLoadedSlot),
@@ -483,6 +486,106 @@ static void LuminaSearchAllDoesNotWaitForLoadedAchievementState()
     AssertFalse(SearchCompletionFilterPolicy.CanEvaluate("Completed", completionStateLoaded: false, updateInProgress: false), "Completed search still needs loaded completion state");
 }
 
+static void AchievementSearchIndexFiltersCategoryQueryAndCompletion()
+{
+    var achievements = new[]
+    {
+        SearchInfo(1, "Mine 10 items", "Crafting & Gathering > Miner"),
+        SearchInfo(2, "Harvest 20 items", "Crafting & Gathering > Botanist"),
+        SearchInfo(3, "Mine impostor", "Battle > Miner Impostor"),
+        SearchInfo(4, "Legacy mine", "Legacy > Events"),
+    };
+    var sortKeys = SearchSortKeys(
+        (1u, new AchievementSearchSortKey(0, 2, 2, 1)),
+        (2u, new AchievementSearchSortKey(0, 1, 1, 2)),
+        (3u, new AchievementSearchSortKey(1, 1, 1, 3)),
+        (4u, new AchievementSearchSortKey(0, 0, 0, 4)));
+
+    var results = AchievementSearchIndex.BuildResults(
+        AchievementSearchIndex.GetSearchableAchievements(achievements),
+        new AchievementSearchQueryState(
+            "mine",
+            CategoryFilterAll: false,
+            SelectedCategoryFilters: [],
+            SelectedSubcategoryFilters: [AchievementCategoryPath.BuildSubcategoryFilterKey("Crafting & Gathering", "Miner")],
+            SearchCompletionFilterPolicy.Incomplete,
+            AchievementSearchSortMode.GameOrder),
+        isComplete: id => id != 1,
+        getSortKey: info => sortKeys[info.Id]);
+
+    AssertEqualInt(3, results.SearchableCount);
+    AssertEqualInt(1, results.CategoryFilteredCount);
+    AssertEqualInt(1, results.QueryFilteredCount);
+    AssertEqualInt(1, results.CompletionFilteredCount);
+    AssertSequence(results.Results.Select(info => info.Id).ToList(), [1]);
+}
+
+static void AchievementSearchIndexCountsCategoriesWithUnloadedCompletionFallback()
+{
+    var achievements = AchievementSearchIndex.GetSearchableAchievements(
+    [
+        SearchInfo(1, "Mine 10 items", "Crafting & Gathering > Miner"),
+        SearchInfo(2, "Harvest 20 items", "Crafting & Gathering > Botanist"),
+        SearchInfo(3, "Win battles", "Battle > Field Operations"),
+    ]);
+    var sortKeys = SearchSortKeys(
+        (1u, new AchievementSearchSortKey(0, 2, 2, 1)),
+        (2u, new AchievementSearchSortKey(0, 1, 1, 2)),
+        (3u, new AchievementSearchSortKey(1, 1, 1, 3)));
+
+    var unloadedGroups = AchievementSearchIndex.BuildCategoryGroups(
+        achievements,
+        SearchCompletionFilterPolicy.Completed,
+        completionStateLoaded: false,
+        isComplete: id => id == 2,
+        getSortKey: info => sortKeys[info.Id]);
+
+    var craftingUnloaded = unloadedGroups.Single(group => group.Category == "Crafting & Gathering");
+    AssertEqualInt(2, craftingUnloaded.DisplayCount);
+    AssertEqualInt(1, craftingUnloaded.CountEntriesForSubcategory("Miner"));
+    AssertEqualInt(1, craftingUnloaded.CountEntriesForSubcategory("Botanist"));
+
+    var loadedGroups = AchievementSearchIndex.BuildCategoryGroups(
+        achievements,
+        SearchCompletionFilterPolicy.Completed,
+        completionStateLoaded: true,
+        isComplete: id => id == 2,
+        getSortKey: info => sortKeys[info.Id]);
+
+    var craftingLoaded = loadedGroups.Single(group => group.Category == "Crafting & Gathering");
+    AssertEqualInt(1, craftingLoaded.DisplayCount);
+    AssertEqualInt(0, craftingLoaded.CountEntriesForSubcategory("Miner"));
+    AssertEqualInt(1, craftingLoaded.CountEntriesForSubcategory("Botanist"));
+}
+
+static void AchievementSearchIndexKeepsGameOrderStable()
+{
+    var achievements = AchievementSearchIndex.GetSearchableAchievements(
+    [
+        SearchInfo(10, "Second", "Battle"),
+        SearchInfo(20, "First", "Crafting & Gathering > Miner"),
+        SearchInfo(30, "Third by row", "Crafting & Gathering > Miner"),
+    ]);
+    var sortKeys = SearchSortKeys(
+        (10u, new AchievementSearchSortKey(1, 1, 1, 10)),
+        (20u, new AchievementSearchSortKey(0, 1, 1, 20)),
+        (30u, new AchievementSearchSortKey(0, 1, 1, 30)));
+
+    var results = AchievementSearchIndex.BuildResults(
+        achievements,
+        new AchievementSearchQueryState(
+            string.Empty,
+            CategoryFilterAll: true,
+            SelectedCategoryFilters: [],
+            SelectedSubcategoryFilters: [],
+            SearchCompletionFilterPolicy.All,
+            AchievementSearchSortMode.GameOrder),
+        isComplete: _ => false,
+        getSortKey: info => sortKeys[info.Id]);
+
+    AssertSequence(results.Results.Select(info => info.Id).ToList(), [20, 30, 10]);
+}
+
 static void NativeUpdateBatchesDoNotParkAchievementWindows()
 {
     AssertFalse(NativeAchievementUpdateWindowPolicy.ShouldParkDuringBatch(batchWindowWasOpenBeforeStart: false, completedAtLeastOneRequest: false), "queued native refreshes should not shrink/move the native Achievement window before first row settles");
@@ -763,6 +866,12 @@ static void AutoUpdateStatusRowFormatsIdleQueue()
 
     AssertEqual("Status: Idle — 0 tasks left — running 0s", text);
 }
+
+static AchievementInfo SearchInfo(uint id, string name, string category)
+    => new(id, name, $"Description for {name}", Points: 0, category);
+
+static Dictionary<uint, AchievementSearchSortKey> SearchSortKeys(params (uint Id, AchievementSearchSortKey Key)[] entries)
+    => entries.ToDictionary(entry => entry.Id, entry => entry.Key);
 
 static void AssertEqual(string expected, string actual)
 {

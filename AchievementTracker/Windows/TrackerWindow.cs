@@ -18,7 +18,7 @@ public sealed class TrackerWindow : Window
     private bool hideTrackedIcons;
     private bool resetMainPanelScrollNextDraw;
     private bool searchPanelOpen = true;
-    private SearchSortMode searchSortMode = SearchSortMode.GameOrder;
+    private AchievementSearchSortMode searchSortMode = AchievementSearchSortMode.GameOrder;
     private string presetNameInput = string.Empty;
     private string selectedPresetName = string.Empty;
     private string achievementSearchQuery = string.Empty;
@@ -27,12 +27,11 @@ public sealed class TrackerWindow : Window
     private SearchResultsCache? cachedSearchResults;
     private bool searchResultsDirty = true;
     private IReadOnlyList<AchievementInfo>? cachedSearchableAchievements;
-    private IReadOnlyList<SearchCategoryGroup>? cachedSearchCategoryGroups;
     private bool categoryFilterAll = true;
     private readonly HashSet<string> selectedCategoryFilters = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> selectedSubcategoryFilters = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> collapsedSearchCategories = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<uint, (byte KindOrder, byte CategoryOrder, ushort AchievementOrder, uint RowId)> gameSortKeyCache = new();
+    private readonly Dictionary<uint, AchievementSearchSortKey> gameSortKeyCache = new();
 
     public TrackerWindow(Plugin plugin)
         : base("Achieve Ex+##AchieveExPlusLive", ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoBringToFrontOnFocus)
@@ -45,12 +44,6 @@ public sealed class TrackerWindow : Window
         };
     }
 
-    private enum SearchSortMode
-    {
-        GameOrder,
-        Alphabetical,
-    }
-
     private sealed record SearchResultsCache(
         IReadOnlyList<AchievementInfo> Results,
         int SearchableCount,
@@ -58,10 +51,6 @@ public sealed class TrackerWindow : Window
         int QueryFilteredCount,
         int CompletionFilteredCount,
         DateTime BuiltAtUtc);
-
-    private sealed record SearchCategoryEntry(AchievementInfo Info, string Category, string Subcategory, byte KindOrder);
-
-    private sealed record SearchCategoryGroup(string Category, IReadOnlyList<SearchCategoryEntry> Entries);
 
     public override void Draw()
     {
@@ -308,17 +297,17 @@ public sealed class TrackerWindow : Window
 
     private void DrawAchievementCategoryColumn()
     {
-        var searchableAchievements = this.GetSearchableAchievements();
-        var completionFilteredCategoryCount = searchableAchievements.Count(this.MatchesCompletionCountFilter);
+        var categoryGroups = this.GetSearchCategoryGroups();
+        var completionFilteredCategoryCount = categoryGroups.Sum(group => group.DisplayCount);
         ImGui.TextUnformatted($"Achievement categories ({completionFilteredCategoryCount})");
         this.DrawDisabledWrapped("Ctrl-click to select multiple categories or subcategories.");
         ImGui.Separator();
 
-        foreach (var categoryGroup in this.GetSearchCategoryGroups())
+        foreach (var categoryGroup in categoryGroups)
         {
             var categoryKey = categoryGroup.Category;
             var selectedCategory = this.selectedCategoryFilters.Contains(categoryKey);
-            var categoryCount = categoryGroup.Entries.Count(entry => this.MatchesCompletionCountFilter(entry.Info));
+            var categoryCount = categoryGroup.DisplayCount;
             var categoryLabel = $"{categoryKey} ({categoryCount})";
             var collapsed = this.collapsedSearchCategories.Contains(categoryKey);
 
@@ -353,7 +342,7 @@ public sealed class TrackerWindow : Window
             {
                 var subcategoryKey = AchievementCategoryPath.BuildSubcategoryFilterKey(categoryKey, subcategoryGroup.Key);
                 var selected = this.selectedSubcategoryFilters.Contains(subcategoryKey);
-                var subcategoryCount = subcategoryGroup.Count(entry => this.MatchesCompletionCountFilter(entry.Info));
+                var subcategoryCount = subcategoryGroup.Count(entry => entry.MatchesCompletionCountFilter);
                 var subcategoryLabel = $"{subcategoryGroup.Key} ({subcategoryCount})";
                 ImGui.PushID(subcategoryKey);
                 if (ImGui.Selectable(subcategoryLabel, selected))
@@ -434,18 +423,18 @@ public sealed class TrackerWindow : Window
 
         ImGui.TextUnformatted("Sort:");
         ImGui.SameLine();
-        var gameSort = this.searchSortMode == SearchSortMode.GameOrder;
+        var gameSort = this.searchSortMode == AchievementSearchSortMode.GameOrder;
         if (ImGui.RadioButton("Game", gameSort))
         {
-            this.searchSortMode = SearchSortMode.GameOrder;
+            this.searchSortMode = AchievementSearchSortMode.GameOrder;
             this.MarkSearchResultsDirty(resetVisibleResults: true);
         }
         AddTooltip("Use the in-game achievement category/subcategory/order.");
         ImGui.SameLine();
-        var alphabeticalSort = this.searchSortMode == SearchSortMode.Alphabetical;
+        var alphabeticalSort = this.searchSortMode == AchievementSearchSortMode.Alphabetical;
         if (ImGui.RadioButton("A-Z", alphabeticalSort))
         {
-            this.searchSortMode = SearchSortMode.Alphabetical;
+            this.searchSortMode = AchievementSearchSortMode.Alphabetical;
             this.MarkSearchResultsDirty(resetVisibleResults: true);
         }
         AddTooltip("Sort achievement names alphabetically.");
@@ -515,16 +504,23 @@ public sealed class TrackerWindow : Window
             return this.cachedSearchResults;
         }
 
-        var searchableResults = this.GetSearchableAchievements();
-        var categoryFilteredResults = searchableResults.Where(this.MatchesSelectedCategory).ToList();
-        var queryFilteredResults = categoryFilteredResults.Where(this.MatchesSearchQuery).ToList();
-        var matchingResults = this.SortSearchResults(queryFilteredResults.Where(this.MatchesCompletionFilter)).ToList();
+        var searchResults = AchievementSearchIndex.BuildResults(
+            this.GetSearchableAchievements(),
+            new AchievementSearchQueryState(
+                this.appliedAchievementSearchQuery,
+                this.categoryFilterAll,
+                this.selectedCategoryFilters,
+                this.selectedSubcategoryFilters,
+                this.plugin.Configuration.SearchCompletionFilter,
+                this.searchSortMode),
+            this.IsComplete,
+            this.GetGameSortKey);
         this.cachedSearchResults = new SearchResultsCache(
-            matchingResults,
-            searchableResults.Count,
-            categoryFilteredResults.Count,
-            queryFilteredResults.Count,
-            matchingResults.Count,
+            searchResults.Results,
+            searchResults.SearchableCount,
+            searchResults.CategoryFilteredCount,
+            searchResults.QueryFilteredCount,
+            searchResults.CompletionFilteredCount,
             DateTime.UtcNow);
         this.searchResultsDirty = false;
         return this.cachedSearchResults;
@@ -543,50 +539,17 @@ public sealed class TrackerWindow : Window
             return this.cachedSearchableAchievements;
         }
 
-        this.cachedSearchableAchievements = this.plugin.AchievementCatalog.GetManuallyViewableAchievements()
-            .Where(result => !string.Equals(AchievementCategoryPath.Parse(result.CategoryName).Category, "Legacy", StringComparison.OrdinalIgnoreCase))
-            .ToList();
+        this.cachedSearchableAchievements = AchievementSearchIndex.GetSearchableAchievements(this.plugin.AchievementCatalog.GetManuallyViewableAchievements());
         return this.cachedSearchableAchievements;
     }
 
-    private IReadOnlyList<SearchCategoryGroup> GetSearchCategoryGroups()
-    {
-        if (this.cachedSearchCategoryGroups is not null)
-        {
-            return this.cachedSearchCategoryGroups;
-        }
-
-        this.cachedSearchCategoryGroups = this.GetSearchableAchievements()
-            .Select(info =>
-            {
-                var parts = AchievementCategoryPath.Parse(info.CategoryName);
-                var sort = this.GetGameSortKey(info);
-                return new SearchCategoryEntry(info, parts.Category, parts.Subcategory, sort.KindOrder);
-            })
-            .Where(entry => !string.IsNullOrWhiteSpace(entry.Category))
-            .GroupBy(entry => entry.Category)
-            .OrderBy(group => group.Min(entry => entry.KindOrder))
-            .ThenBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
-            .Select(group => new SearchCategoryGroup(group.Key, group.ToList()))
-            .ToList();
-        return this.cachedSearchCategoryGroups;
-    }
-
-    private bool MatchesSearchQuery(AchievementInfo info)
-    {
-        var query = this.appliedAchievementSearchQuery.Trim();
-        return string.IsNullOrWhiteSpace(query)
-            || info.Name.Contains(query, StringComparison.CurrentCultureIgnoreCase)
-            || info.CategoryName.Contains(query, StringComparison.CurrentCultureIgnoreCase);
-    }
-
-    private IEnumerable<AchievementInfo> SortSearchResults(IEnumerable<AchievementInfo> results)
-        => this.searchSortMode == SearchSortMode.Alphabetical
-            ? results.OrderBy(result => result.Name, StringComparer.OrdinalIgnoreCase).ThenBy(result => result.Id)
-            : results.OrderBy(result => this.GetGameSortKey(result).KindOrder)
-                .ThenBy(result => this.GetGameSortKey(result).CategoryOrder)
-                .ThenBy(result => this.GetGameSortKey(result).AchievementOrder)
-                .ThenBy(result => this.GetGameSortKey(result).RowId);
+    private IReadOnlyList<AchievementSearchCategoryGroup> GetSearchCategoryGroups()
+        => AchievementSearchIndex.BuildCategoryGroups(
+            this.GetSearchableAchievements(),
+            this.plugin.Configuration.SearchCompletionFilter,
+            this.plugin.AchievementProgressService.AreCompletionStatesLoaded,
+            this.IsComplete,
+            this.GetGameSortKey);
 
     private void DrawSearchAchievementResult(AchievementInfo result, IReadOnlyList<uint> trackedIds)
     {
@@ -1046,46 +1009,8 @@ public sealed class TrackerWindow : Window
         return true;
     }
 
-    private bool MatchesCompletionFilter(AchievementInfo info)
-    {
-        if (string.Equals(this.plugin.Configuration.SearchCompletionFilter, "All", StringComparison.Ordinal))
-        {
-            return true;
-        }
-
-        return SearchCompletionFilterPolicy.Matches(this.plugin.Configuration.SearchCompletionFilter, this.IsComplete(info.Id));
-    }
-
-    private bool MatchesCompletionCountFilter(AchievementInfo info)
-        => SearchCompletionFilterPolicy.MatchesForCount(
-            this.plugin.Configuration.SearchCompletionFilter,
-            this.plugin.AchievementProgressService.AreCompletionStatesLoaded,
-            this.IsComplete(info.Id));
-
     private bool ShouldShowTrackedIcon(string iconName)
         => !this.hideTrackedIcons || !this.plugin.Configuration.HiddenTrackedAchievementIcons.Contains(iconName);
-
-    private bool MatchesSelectedCategory(AchievementInfo info)
-    {
-        if (this.categoryFilterAll)
-        {
-            return true;
-        }
-
-        var parts = AchievementCategoryPath.Parse(info.CategoryName);
-        if (string.IsNullOrWhiteSpace(parts.Category))
-        {
-            return false;
-        }
-
-        if (this.selectedCategoryFilters.Contains(parts.Category))
-        {
-            return true;
-        }
-
-        return !string.IsNullOrWhiteSpace(parts.Subcategory)
-            && this.selectedSubcategoryFilters.Contains(AchievementCategoryPath.BuildSubcategoryFilterKey(parts.Category, parts.Subcategory));
-    }
 
     private void ToggleCategoryFilter(string category)
     {
@@ -1133,7 +1058,7 @@ public sealed class TrackerWindow : Window
     private bool IsComplete(uint achievementId)
         => this.plugin.IsAchievementCompleteForSearch(achievementId);
 
-    private (byte KindOrder, byte CategoryOrder, ushort AchievementOrder, uint RowId) GetGameSortKey(AchievementInfo info)
+    private AchievementSearchSortKey GetGameSortKey(AchievementInfo info)
     {
         if (this.gameSortKeyCache.TryGetValue(info.Id, out var cached))
         {
@@ -1142,7 +1067,7 @@ public sealed class TrackerWindow : Window
 
         if (!this.plugin.AchievementCatalog.TryGetRow(info.Id, out var row))
         {
-            cached = (byte.MaxValue, byte.MaxValue, ushort.MaxValue, info.Id);
+            cached = AchievementSearchSortKey.Fallback(info.Id);
             this.gameSortKeyCache[info.Id] = cached;
             return cached;
         }
@@ -1151,7 +1076,7 @@ public sealed class TrackerWindow : Window
         var kindOrder = row.AchievementCategory.IsValid && row.AchievementCategory.Value.AchievementKind.IsValid
             ? row.AchievementCategory.Value.AchievementKind.Value.Order
             : byte.MaxValue;
-        cached = (kindOrder, categoryOrder, row.Order, row.RowId);
+        cached = new AchievementSearchSortKey(kindOrder, categoryOrder, row.Order, row.RowId);
         this.gameSortKeyCache[info.Id] = cached;
         return cached;
     }
