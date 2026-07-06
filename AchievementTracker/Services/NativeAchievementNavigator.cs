@@ -1,4 +1,6 @@
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace AchievementTracker.Services;
 
@@ -8,6 +10,13 @@ namespace AchievementTracker.Services;
 // Safety boundary: methods are called from user button clicks only and do not call direct progress-request methods.
 public unsafe sealed class NativeAchievementNavigator
 {
+    private readonly IGameGui gameGui;
+
+    public NativeAchievementNavigator(IGameGui gameGui)
+    {
+        this.gameGui = gameGui;
+    }
+
     public bool IsAchievementWindowOpen()
     {
         var agent = AgentAchievement.Instance();
@@ -48,6 +57,31 @@ public unsafe sealed class NativeAchievementNavigator
         }
 
         agent->Hide();
+        return true;
+    }
+
+    public bool RestoreDefaultScale()
+    {
+        // What this does:
+        // - Opens/shows the native Achievement UI if needed.
+        // - Resets the native Achievement addon scale to the game's default HUD-layout scale.
+        // Safety: this is UI-only and user-triggered from the config window recovery button.
+        // IGameGui/GetAddonByName docs: https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IGameGui
+        // AtkUnitBase ClientStructs interaction docs: https://dalamud.dev/plugin-development/interaction/
+        var agent = AgentAchievement.Instance();
+        if (agent == null)
+        {
+            return false;
+        }
+
+        agent->Show();
+        var addon = this.gameGui.GetAddonByName<AtkUnitBase>("Achievement", 1);
+        if (addon == null)
+        {
+            return false;
+        }
+
+        addon->SetScaleToHudLayoutScale();
         return true;
     }
 }

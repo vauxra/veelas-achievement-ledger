@@ -1,8 +1,8 @@
 {
   "Author": "Saagi",
-  "Name": "Achieve Ex+",
+  "Name": "Achieve Ex",
   "Punchline": "Track achievements with native Achievement-window assisted refreshes.",
-  "Description": "Use /achex to track achievements, open native Achievement entries, and passively cache observed progress.",
+  "Description": "Use /achex to track achievements, open native Achievement entries, and passively cache observed progress. The Ex mainline build is the non-automated branch; Ex+ is reserved for the experimental automation branch.",
   "IconUrl": "https://raw.githubusercontent.com/vauxra/achieve-ex/main/AchievementTracker/images/icon.png",
   "ImageUrls": [
     "https://raw.githubusercontent.com/vauxra/achieve-ex/main/AchievementTracker/images/icon.png"
@@ -14,6 +14,5 @@
     "ledger",
     "tracker",
     "utility"
-  ],
-  "InternalName": "AchieveExPlus"
+  ]
 }

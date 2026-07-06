@@ -20,9 +20,9 @@ public sealed class AchievementProgressService
 
     public AchievementProgress GetProgress(Achievement achievement)
     {
-        if (this.cosmicClassProgressProvider?.Handles(achievement.RowId) == true)
+        if (this.cosmicClassProgressProvider?.Handles(achievement) == true)
         {
-            return this.cosmicClassProgressProvider.GetProgress(achievement.RowId);
+            return this.cosmicClassProgressProvider.GetProgress(achievement);
         }
 
         var requiredTarget = GetRequiredTarget(achievement);
@@ -53,8 +53,10 @@ public sealed class AchievementProgressService
             : AchievementProgress.Incomplete();
     }
 
+    public bool AreCompletionStatesLoaded => this.unlockState.IsAchievementListLoaded;
+
     public bool IsComplete(Achievement achievement)
-        => this.unlockState.IsAchievementListLoaded && this.unlockState.IsAchievementComplete(achievement);
+        => this.AreCompletionStatesLoaded && this.unlockState.IsAchievementComplete(achievement);
 
     private static int? GetRequiredTarget(Achievement achievement)
     {

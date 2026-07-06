@@ -10,6 +10,7 @@ namespace AchievementTracker.Services;
 public sealed class AchievementCatalog
 {
     private readonly IDataManager dataManager;
+    private IReadOnlyList<AchievementInfo>? manuallyViewableAchievements;
 
     public AchievementCatalog(IDataManager dataManager)
     {
@@ -19,14 +20,7 @@ public sealed class AchievementCatalog
     public IEnumerable<AchievementInfo> Search(string query, int limit = 50)
     {
         var normalizedQuery = query.Trim();
-        // IDataManager.GetExcelSheet<T>() docs:
-        // https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IDataManager
-        var sheet = this.dataManager.GetExcelSheet<Achievement>();
-
-        var results = sheet
-            .Select(this.ToInfo)
-            .Where(info => !string.IsNullOrWhiteSpace(info.Name))
-            .Where(info => this.IsManuallyViewable(info.Id));
+        var results = this.GetManuallyViewableAchievements().AsEnumerable();
 
         if (!string.IsNullOrWhiteSpace(normalizedQuery))
         {
@@ -39,6 +33,25 @@ public sealed class AchievementCatalog
             .OrderBy(info => info.Name)
             .Take(limit)
             .ToList();
+    }
+
+    public IReadOnlyList<AchievementInfo> GetManuallyViewableAchievements()
+    {
+        if (this.manuallyViewableAchievements is not null)
+        {
+            return this.manuallyViewableAchievements;
+        }
+
+        // IDataManager.GetExcelSheet<T>() docs:
+        // https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IDataManager
+        var sheet = this.dataManager.GetExcelSheet<Achievement>();
+        this.manuallyViewableAchievements = sheet
+            .Where(this.IsManuallyViewable)
+            .Select(this.ToInfo)
+            .Where(info => !string.IsNullOrWhiteSpace(info.Name))
+            .OrderBy(info => info.Name)
+            .ToList();
+        return this.manuallyViewableAchievements;
     }
 
     public bool TryGet(uint achievementId, out AchievementInfo achievementInfo)
@@ -71,6 +84,29 @@ public sealed class AchievementCatalog
             return false;
         }
 
+        return this.IsManuallyViewable(achievement);
+    }
+
+    public bool CanOpenInNativeAchievementUi(uint achievementId, out string reason)
+    {
+        if (!this.TryGetRow(achievementId, out var achievement))
+        {
+            reason = "Achievement row is missing.";
+            return false;
+        }
+
+        if (!this.IsManuallyViewable(achievement))
+        {
+            reason = "Achievement is not listed in the in-game Achievement UI.";
+            return false;
+        }
+
+        reason = string.Empty;
+        return true;
+    }
+
+    private bool IsManuallyViewable(Achievement achievement)
+    {
         if (!achievement.AchievementCategory.IsValid
             || achievement.AchievementCategory.Value.HideCategory)
         {
@@ -86,8 +122,46 @@ public sealed class AchievementCatalog
             }
         }
 
-        return !string.IsNullOrWhiteSpace(achievement.Name.ToString());
+        if (string.IsNullOrWhiteSpace(achievement.Name.ToString()))
+        {
+            return false;
+        }
+
+        var categoryName = achievement.AchievementCategory.Value.Name.ToString();
+        if (string.IsNullOrWhiteSpace(categoryName))
+        {
+            return false;
+        }
+
+        var kind = achievement.AchievementCategory.Value.AchievementKind;
+        if (!kind.IsValid)
+        {
+            return false;
+        }
+
+        var kindName = kind.Value.Name.ToString();
+        if (string.IsNullOrWhiteSpace(kindName))
+        {
+            return false;
+        }
+
+        if (!IsKnownPlayerVisibleKind(kindName))
+        {
+            return false;
+        }
+
+        return achievement.Icon != 0;
     }
+
+    private static bool IsKnownPlayerVisibleKind(string kindName)
+        => kindName is "Battle"
+            or "PvP"
+            or "Character"
+            or "Items"
+            or "Crafting & Gathering"
+            or "Quests"
+            or "Exploration"
+            or "Grand Company";
 
     private AchievementInfo ToInfo(Achievement achievement)
     {

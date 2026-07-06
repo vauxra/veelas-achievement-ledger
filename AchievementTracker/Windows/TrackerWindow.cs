@@ -1,9 +1,11 @@
+using AchievementTracker.Models;
 using AchievementTracker.Services;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Windowing;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -12,178 +14,715 @@ namespace AchievementTracker.Windows;
 public sealed class TrackerWindow : Window
 {
     private readonly Plugin plugin;
+    private bool templatesOpen;
+    private bool hideTrackedIcons;
+    private bool resetMainPanelScrollNextDraw;
+    private bool searchPanelOpen = true;
+    private AchievementSearchSortMode searchSortMode = AchievementSearchSortMode.GameOrder;
+    private string presetNameInput = string.Empty;
+    private string selectedPresetName = string.Empty;
+    private string achievementSearchQuery = string.Empty;
+    private string appliedAchievementSearchQuery = string.Empty;
+    private DateTime searchQueryChangedAt = DateTime.MinValue;
+    private SearchResultsCache? cachedSearchResults;
+    private bool searchResultsDirty = true;
+    private IReadOnlyList<AchievementInfo>? cachedSearchableAchievements;
+    private bool categoryFilterAll = true;
+    private readonly HashSet<string> selectedCategoryFilters = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> selectedSubcategoryFilters = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> collapsedSearchCategories = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<uint, AchievementSearchSortKey> gameSortKeyCache = new();
 
     public TrackerWindow(Plugin plugin)
-        : base("Achieve Ex+##AchievementLedgerLive")
+        : base("Achieve Ex##AchieveExLive", ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoBringToFrontOnFocus)
     {
         this.plugin = plugin;
         this.SizeConstraints = new WindowSizeConstraints
         {
-            MinimumSize = new Vector2(420, 180),
+            MinimumSize = new Vector2(320, 260),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue),
         };
     }
 
-    // Section: main /achex window draw loop.
-    // Component: ImGui UI. Risk: low; button clicks call clearly named Plugin/service methods.
+    private sealed record SearchResultsCache(
+        IReadOnlyList<AchievementInfo> Results,
+        int SearchableCount,
+        int CategoryFilteredCount,
+        int QueryFilteredCount,
+        int CompletionFilteredCount,
+        DateTime BuiltAtUtc);
+
     public override void Draw()
     {
-        this.plugin.AchievementProgressSource.UpdateCache();
-        this.DrawTopButtons();
-        this.DrawTrackedAchievementList();
+        this.DrawToolbar();
+        ImGui.Separator();
+        this.DrawMainPane();
     }
 
-    // Section: top toolbar.
-    // Component: user-guided native Achievement UI actions. Risk: low-to-medium; native opens are button-driven and rate-limited.
-    private void DrawTopButtons()
+    public void ResetPanelScrollOnNextDraw()
+        => this.resetMainPanelScrollNextDraw = true;
+
+    private void DrawToolbar()
     {
-        this.DrawConfigureButton();
-        ImGui.SameLine();
         this.DrawUpdateNextButton();
         ImGui.SameLine();
-        this.DrawCloseAchievementsButton();
-        this.DrawUpdateOpenLockoutStatus();
-        ImGui.Separator();
-    }
 
-    private void DrawConfigureButton()
-    {
-        if (ImGui.Button("Configure"))
+        foreach (var item in this.plugin.Configuration.MainNavigationOrder)
         {
-            this.plugin.ToggleConfigUi();
+            if (!this.plugin.Configuration.ShownMainNavigationButtons.Contains(item))
+            {
+                continue;
+            }
+
+            this.DrawToolbarItem(item);
+            ImGui.SameLine();
         }
 
-        AddTooltip("Open configuration.");
+        ImGui.NewLine();
     }
 
     private void DrawUpdateNextButton()
     {
         var updateOpenLocked = !this.plugin.CanOpenAchievementForUpdate;
-        if (updateOpenLocked)
+        using (ImRaiiShim.Disabled(updateOpenLocked))
         {
-            ImGui.BeginDisabled();
+            if (ImGui.Button("Update Next"))
+            {
+                this.OpenNextTrackedAchievementForUpdate();
+            }
         }
 
-        if (ImGui.Button("Update Next"))
-        {
-            this.OpenNextTrackedAchievementForUpdate();
-        }
-
-        if (updateOpenLocked)
-        {
-            ImGui.EndDisabled();
-        }
-
-        AddTooltip("Open the next tracked Achievement entry.");
+        AddTooltip(updateOpenLocked
+            ? "Achievement update opens are cooling down."
+            : "Open one tracked Achievement entry needing progress data.");
     }
 
-    private void DrawCloseAchievementsButton()
+    private void DrawToolbarItem(string item)
     {
-        if (!ImGui.Button("Close Achievements"))
+        switch (item)
         {
-            AddTooltip("Close the native Achievements window.");
+            case "Lists":
+                if (this.DrawActiveIconButton("toggle-lists", FontAwesomeIcon.Save, this.templatesOpen))
+                {
+                    this.templatesOpen = !this.templatesOpen;
+                    this.resetMainPanelScrollNextDraw = true;
+                    this.EnsureSelectedPresetIsValid();
+                }
+                AddTooltip(this.templatesOpen ? "Hide Lists column." : "Show Lists column.");
+                break;
+            case "Search":
+                if (this.DrawActiveIconButton("toggle-main-search", FontAwesomeIcon.Book, this.searchPanelOpen))
+                {
+                    this.searchPanelOpen = !this.searchPanelOpen;
+                    this.resetMainPanelScrollNextDraw = true;
+                }
+                AddTooltip(this.searchPanelOpen ? "Hide category/search columns." : "Show category/search columns.");
+                break;
+            case "Config":
+                if (this.DrawActiveIconButton("toggle-config", FontAwesomeIcon.Cog, this.plugin.IsConfigUiOpen))
+                {
+                    this.plugin.ToggleConfigUi();
+                }
+                AddTooltip("Toggle configuration.");
+                break;
+            case "Tracked buttons":
+                if (this.DrawTrackedButtonsToggle())
+                {
+                    this.hideTrackedIcons = !this.hideTrackedIcons;
+                    this.resetMainPanelScrollNextDraw = true;
+                }
+                break;
+        }
+    }
+
+    private bool DrawActiveIconButton(string id, FontAwesomeIcon icon, bool active)
+    {
+        if (active)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.ButtonHovered]);
+        }
+
+        var clicked = ImGuiComponents.IconButton(id, icon);
+        if (active)
+        {
+            ImGui.PopStyleColor();
+        }
+
+        return clicked;
+    }
+
+    private bool DrawTrackedButtonsToggle()
+    {
+        var presentation = TrackedToolbarIconPresentation.ForHiddenState(this.hideTrackedIcons);
+        var hasCustomColor = string.Equals(presentation.ColorName, "Red", StringComparison.Ordinal);
+        if (hasCustomColor)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.ButtonHovered]);
+        }
+
+        var clicked = ImGuiComponents.IconButton("toggle-tracked-buttons", FontAwesomeIcon.Eye);
+        if (hasCustomColor)
+        {
+            ImGui.PopStyleColor();
+        }
+
+        AddTooltip(presentation.Tooltip);
+        return clicked;
+    }
+
+    private bool ShouldDrawColumn(string column)
+        => column switch
+        {
+            "Lists" => this.templatesOpen,
+            "Search Categories" => this.searchPanelOpen,
+            "Search Results" => this.searchPanelOpen,
+            "Tracked Achievements" => true,
+            _ => false,
+        };
+
+    private void DrawMainPane()
+    {
+        var spacing = ImGui.GetStyle().ItemSpacing.X;
+        var availableWidth = ImGui.GetContentRegionAvail().X;
+        var orderedColumns = this.plugin.Configuration.MainColumnOrder.Where(this.ShouldDrawColumn).ToList();
+        var widths = this.GetFittedColumnWidths(orderedColumns, availableWidth, spacing);
+
+        for (var i = 0; i < orderedColumns.Count; i++)
+        {
+            var column = orderedColumns[i];
+            ImGui.BeginChild($"##MainColumn-{column}", new Vector2(widths[i], 0), true, ImGuiWindowFlags.NoScrollbar);
+            if (this.resetMainPanelScrollNextDraw)
+            {
+                ImGui.SetScrollY(0);
+            }
+
+            this.DrawColumn(column);
+            ImGui.EndChild();
+            if (i < orderedColumns.Count - 1)
+            {
+                ImGui.SameLine();
+            }
+        }
+
+        this.resetMainPanelScrollNextDraw = false;
+    }
+
+    private List<float> GetFittedColumnWidths(IReadOnlyList<string> orderedColumns, float availableWidth, float spacing)
+    {
+        var widths = orderedColumns.Select(this.GetConfiguredColumnWidth).ToList();
+        if (widths.Count == 0)
+        {
+            return widths;
+        }
+
+        var spacingTotal = spacing * Math.Max(0, widths.Count - 1);
+        var targetWidth = Math.Max(120f * widths.Count, availableWidth - spacingTotal);
+        var totalWidth = widths.Sum();
+        if (totalWidth <= targetWidth)
+        {
+            return widths;
+        }
+
+        var scale = targetWidth / totalWidth;
+        for (var i = 0; i < widths.Count; i++)
+        {
+            widths[i] = Math.Max(this.GetMinimumColumnWidth(orderedColumns[i]), widths[i] * scale);
+        }
+
+        return widths;
+    }
+
+    private float GetConfiguredColumnWidth(string column)
+    {
+        var configured = this.plugin.Configuration.MainColumnWidths.TryGetValue(column, out var width) ? width : 260f;
+        return Math.Max(this.GetMinimumColumnWidth(column), configured);
+    }
+
+    private float GetMinimumColumnWidth(string column)
+    {
+        return column switch
+        {
+            "Lists" => MainPanelColumnWidthDefaults.Lists,
+            "Search Categories" => MainPanelColumnWidthDefaults.SearchCategories,
+            "Search Results" => MainPanelColumnWidthDefaults.SearchResults,
+            "Tracked Achievements" => MainPanelColumnWidthDefaults.TrackedAchievements,
+            _ => 180f,
+        };
+    }
+
+    private void DrawColumn(string column)
+    {
+        switch (column)
+        {
+            case "Lists":
+                this.DrawTemplateColumn();
+                break;
+            case "Search Categories":
+                this.DrawAchievementCategoryColumn();
+                break;
+            case "Search Results":
+                this.DrawAchievementSearchColumn();
+                break;
+            case "Tracked Achievements":
+                this.DrawTrackedColumn();
+                break;
+        }
+    }
+
+    private void DrawTemplateColumn()
+    {
+        this.EnsureSelectedPresetIsValid();
+        ImGui.TextUnformatted("Lists");
+        ImGui.Separator();
+        this.DrawPresetButtons();
+
+        ImGui.SetNextItemWidth(-1);
+        if (ImGui.InputTextWithHint("##PresetName", "List name", ref this.presetNameInput, TrackedAchievementPresetStore.MaxPresetNameLength))
+        {
+            this.presetNameInput = TrackedAchievementPresetStore.SanitizeName(this.presetNameInput);
+        }
+        AddTooltip("List name used by Save and Rename.");
+
+        ImGui.Separator();
+        this.DrawPresetList();
+        this.DrawPresetContextPopups();
+    }
+
+
+    private void DrawDisabledWrapped(string text)
+    {
+        var disabledColor = ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled];
+        ImGui.PushStyleColor(ImGuiCol.Text, disabledColor);
+        ImGui.TextWrapped(text);
+        ImGui.PopStyleColor();
+    }
+
+    private void DrawAchievementCategoryColumn()
+    {
+        var hideZeroCountEntries = AchievementSearchIndex.ShouldHideZeroCountCategories(
+            this.plugin.Configuration.SearchCompletionFilter,
+            this.plugin.Configuration.HideZeroCountIncompleteSearchCategories);
+        var categoryGroups = this.GetSearchCategoryGroups()
+            .Where(group => group.ShouldShow(hideZeroCountEntries))
+            .ToList();
+        var completionFilteredCategoryCount = categoryGroups.Sum(group => group.DisplayCount);
+        ImGui.TextUnformatted($"Achievement categories ({completionFilteredCategoryCount})");
+        this.DrawDisabledWrapped("Ctrl-click to select multiple categories or subcategories.");
+        ImGui.Separator();
+
+        foreach (var categoryGroup in categoryGroups)
+        {
+            var categoryKey = categoryGroup.Category;
+            var selectedCategory = this.selectedCategoryFilters.Contains(categoryKey);
+            var categoryCount = categoryGroup.DisplayCount;
+            var categoryLabel = $"{categoryKey} ({categoryCount})";
+            var collapsed = this.collapsedSearchCategories.Contains(categoryKey);
+
+            ImGui.PushID($"category-{categoryKey}");
+            if (ImGui.SmallButton(collapsed ? "▶" : "▼"))
+            {
+                if (!this.collapsedSearchCategories.Add(categoryKey))
+                {
+                    this.collapsedSearchCategories.Remove(categoryKey);
+                }
+            }
+            AddTooltip(collapsed ? "Expand category." : "Collapse category.");
+            ImGui.SameLine();
+            if (ImGui.Selectable(categoryLabel, selectedCategory))
+            {
+                this.ToggleCategoryFilter(categoryKey);
+            }
+            ImGui.PopID();
+
+            var subcategories = categoryGroup.Entries
+                .Where(entry => !string.IsNullOrWhiteSpace(entry.Subcategory))
+                .GroupBy(entry => entry.Subcategory)
+                .Where(group => categoryGroup.ShouldShowSubcategory(group.Key, hideZeroCountEntries))
+                .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            if (collapsed || subcategories.Count == 0)
+            {
+                continue;
+            }
+
+            ImGui.Indent(24);
+            foreach (var subcategoryGroup in subcategories)
+            {
+                var subcategoryKey = AchievementCategoryPath.BuildSubcategoryFilterKey(categoryKey, subcategoryGroup.Key);
+                var selected = this.selectedSubcategoryFilters.Contains(subcategoryKey);
+                var subcategoryCount = subcategoryGroup.Count(entry => entry.MatchesCompletionCountFilter);
+                var subcategoryLabel = $"{subcategoryGroup.Key} ({subcategoryCount})";
+                ImGui.PushID(subcategoryKey);
+                if (ImGui.Selectable(subcategoryLabel, selected))
+                {
+                    this.ToggleSubcategoryFilter(categoryKey, subcategoryGroup.Key);
+                }
+
+                ImGui.PopID();
+            }
+
+            ImGui.Unindent(24);
+        }
+    }
+
+    private void DrawAchievementSearchColumn()
+    {
+        ImGui.TextUnformatted("Achievement search");
+        ImGui.SetNextItemWidth(Math.Max(120f, ImGui.GetContentRegionAvail().X - 58f));
+        var previousSearchQuery = this.achievementSearchQuery;
+        if (ImGui.InputTextWithHint("##MainAchievementSearch", "Search name or category", ref this.achievementSearchQuery, 128)
+            && !string.Equals(previousSearchQuery, this.achievementSearchQuery, StringComparison.Ordinal))
+        {
+            this.searchQueryChangedAt = DateTime.UtcNow;
+        }
+
+        ImGui.SameLine();
+        if (ImGui.Button("Clear"))
+        {
+            this.achievementSearchQuery = string.Empty;
+            this.appliedAchievementSearchQuery = string.Empty;
+            this.MarkSearchResultsDirty(resetVisibleResults: true);
+        }
+        AddTooltip("Clear search text.");
+
+        ImGui.TextUnformatted("Category:");
+        ImGui.SameLine();
+        if (ImGui.RadioButton("All##CategoryFilter", this.categoryFilterAll))
+        {
+            this.categoryFilterAll = true;
+            this.selectedCategoryFilters.Clear();
+            this.selectedSubcategoryFilters.Clear();
+            this.MarkSearchResultsDirty(resetVisibleResults: true);
+        }
+        AddTooltip("Ignore selected categories.");
+        ImGui.SameLine();
+        if (ImGui.RadioButton("Selected##CategoryFilter", !this.categoryFilterAll))
+        {
+            this.categoryFilterAll = false;
+            this.MarkSearchResultsDirty(resetVisibleResults: true);
+        }
+        AddTooltip("Filter by selected categories/subcategories from the Achievement categories column. Ctrl-click there to select multiple.");
+
+        ImGui.TextUnformatted("Completion:");
+        ImGui.SameLine();
+        if (ImGui.RadioButton("All##CompletionFilter", this.plugin.Configuration.SearchCompletionFilter == "All"))
+        {
+            this.plugin.Configuration.SearchCompletionFilter = "All";
+            this.plugin.Configuration.HideCompletedInSearch = false;
+            this.plugin.SaveConfiguration();
+            this.MarkSearchResultsDirty(resetVisibleResults: true);
+        }
+        ImGui.SameLine();
+        if (ImGui.RadioButton("Completed##CompletionFilter", this.plugin.Configuration.SearchCompletionFilter == "Completed"))
+        {
+            this.plugin.Configuration.SearchCompletionFilter = "Completed";
+            this.plugin.Configuration.HideCompletedInSearch = false;
+            this.plugin.SaveConfiguration();
+            this.MarkSearchResultsDirty(resetVisibleResults: true);
+        }
+        ImGui.SameLine();
+        if (ImGui.RadioButton("Incomplete##CompletionFilter", this.plugin.Configuration.SearchCompletionFilter == "Incomplete"))
+        {
+            this.plugin.Configuration.SearchCompletionFilter = "Incomplete";
+            this.plugin.Configuration.HideCompletedInSearch = true;
+            this.plugin.SaveConfiguration();
+            this.MarkSearchResultsDirty(resetVisibleResults: true);
+        }
+
+        ImGui.TextUnformatted("Sort:");
+        ImGui.SameLine();
+        var gameSort = this.searchSortMode == AchievementSearchSortMode.GameOrder;
+        if (ImGui.RadioButton("Game", gameSort))
+        {
+            this.searchSortMode = AchievementSearchSortMode.GameOrder;
+            this.MarkSearchResultsDirty(resetVisibleResults: true);
+        }
+        AddTooltip("Use the in-game achievement category/subcategory/order.");
+        ImGui.SameLine();
+        var alphabeticalSort = this.searchSortMode == AchievementSearchSortMode.Alphabetical;
+        if (ImGui.RadioButton("A-Z", alphabeticalSort))
+        {
+            this.searchSortMode = AchievementSearchSortMode.Alphabetical;
+            this.MarkSearchResultsDirty(resetVisibleResults: true);
+        }
+        AddTooltip("Sort achievement names alphabetically.");
+
+        this.ApplyPendingSearchQueryIfReady();
+
+        if (!SearchCompletionFilterPolicy.CanEvaluate(
+                this.plugin.Configuration.SearchCompletionFilter,
+                this.plugin.AchievementProgressService.AreCompletionStatesLoaded,
+                updateInProgress: false))
+        {
+            ImGui.Separator();
+            this.DrawDisabledWrapped("Completed/Incomplete search needs the in-game achievement completion list loaded first.");
+            this.DrawDisabledWrapped("Search text and categories remain Lumina-only; no native Achievement window is opened automatically.");
             return;
         }
 
-        if (!this.plugin.NativeAchievementNavigator.CloseAchievements())
+        var trackedIds = this.plugin.TrackedAchievements.AchievementIds;
+        var searchResults = this.GetCachedSearchResults();
+        var matchingResults = searchResults.Results;
+
+        ImGui.Separator();
+        var shownCount = matchingResults.Count;
+        var completionFilter = this.plugin.Configuration.SearchCompletionFilter;
+        var countLabel = string.Equals(completionFilter, SearchCompletionFilterPolicy.All, StringComparison.Ordinal)
+            ? $"Results: {shownCount}"
+            : $"Results: {shownCount} {completionFilter.ToLowerInvariant()} / {searchResults.QueryFilteredCount} matching search/category";
+        this.DrawDisabledWrapped(countLabel);
+
+        if (matchingResults.Count == 0)
         {
-            ImGui.TextDisabled("Could not close Achievements right now.");
+            this.DrawDisabledWrapped("No matching manually viewable achievements found.");
+            return;
         }
 
-        AddTooltip("Close the native Achievements window.");
+        foreach (var result in matchingResults)
+        {
+            this.DrawSearchAchievementResult(result, trackedIds);
+        }
+
     }
 
-    // Section: tracked achievement rows.
-    // Component: plugin data + UI. Risk: low, except reload/search icons call native UI wrappers.
-    private void DrawTrackedAchievementList()
+
+    private void ApplyPendingSearchQueryIfReady()
+    {
+        if (string.Equals(this.appliedAchievementSearchQuery, this.achievementSearchQuery, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if ((DateTime.UtcNow - this.searchQueryChangedAt).TotalMilliseconds < 350)
+        {
+            return;
+        }
+
+        this.appliedAchievementSearchQuery = this.achievementSearchQuery;
+        this.MarkSearchResultsDirty(resetVisibleResults: true);
+    }
+
+    private SearchResultsCache GetCachedSearchResults()
+    {
+        if (this.cachedSearchResults is not null
+            && !this.searchResultsDirty
+            && (this.plugin.Configuration.SearchCompletionFilter == "All"
+                || (DateTime.UtcNow - this.cachedSearchResults.BuiltAtUtc).TotalSeconds < 2))
+        {
+            return this.cachedSearchResults;
+        }
+
+        var searchResults = AchievementSearchIndex.BuildResults(
+            this.GetSearchableAchievements(),
+            new AchievementSearchQueryState(
+                this.appliedAchievementSearchQuery,
+                this.categoryFilterAll,
+                this.selectedCategoryFilters,
+                this.selectedSubcategoryFilters,
+                this.plugin.Configuration.SearchCompletionFilter,
+                this.searchSortMode),
+            this.IsComplete,
+            this.GetGameSortKey);
+        this.cachedSearchResults = new SearchResultsCache(
+            searchResults.Results,
+            searchResults.SearchableCount,
+            searchResults.CategoryFilteredCount,
+            searchResults.QueryFilteredCount,
+            searchResults.CompletionFilteredCount,
+            DateTime.UtcNow);
+        this.searchResultsDirty = false;
+        return this.cachedSearchResults;
+    }
+
+    private void MarkSearchResultsDirty(bool resetVisibleResults)
+    {
+        this.searchResultsDirty = true;
+        _ = resetVisibleResults;
+    }
+
+    private IReadOnlyList<AchievementInfo> GetSearchableAchievements()
+    {
+        if (this.cachedSearchableAchievements is not null)
+        {
+            return this.cachedSearchableAchievements;
+        }
+
+        this.cachedSearchableAchievements = AchievementSearchIndex.GetSearchableAchievements(this.plugin.AchievementCatalog.GetManuallyViewableAchievements());
+        return this.cachedSearchableAchievements;
+    }
+
+    private IReadOnlyList<AchievementSearchCategoryGroup> GetSearchCategoryGroups()
+        => AchievementSearchIndex.BuildCategoryGroups(
+            this.GetSearchableAchievements(),
+            this.plugin.Configuration.SearchCompletionFilter,
+            this.plugin.AchievementProgressService.AreCompletionStatesLoaded,
+            this.IsComplete,
+            this.GetGameSortKey);
+
+    private void DrawSearchAchievementResult(AchievementInfo result, IReadOnlyList<uint> trackedIds)
+    {
+        ImGui.PushID($"search-{result.Id}");
+        ImGui.SetCursorPosX(ImGui.GetStyle().WindowPadding.X);
+        var alreadyTracked = trackedIds.Contains(result.Id);
+        var canAdd = trackedIds.Count < TrackedAchievementStore.MaxTrackedAchievements;
+        using (ImRaiiShim.Disabled(!alreadyTracked && !canAdd))
+        {
+            if (ImGuiComponents.IconButton("search-add-remove", alreadyTracked ? FontAwesomeIcon.Times : FontAwesomeIcon.Plus))
+            {
+                if (alreadyTracked)
+                {
+                    _ = this.RemoveTrackedAchievement(result.Id);
+                }
+                else
+                {
+                    this.AddTrackedAchievement(result.Id);
+                }
+            }
+        }
+        AddTooltip(alreadyTracked ? "Remove from tracked list." : canAdd ? "Add to tracked list." : "Tracked list is full.");
+
+        ImGui.SameLine();
+        if (ImGuiComponents.IconButton("search-open-native", FontAwesomeIcon.Search))
+        {
+            this.plugin.OpenNativeAchievementForInspection(result.Id);
+        }
+        AddTooltip("Open in Achievements and update status if progress data loads.");
+
+        ImGui.SameLine();
+        ImGui.BeginGroup();
+        ImGui.PushTextWrapPos(ImGui.GetCursorPosX() + Math.Max(80f, ImGui.GetContentRegionAvail().X));
+        ImGui.TextWrapped(result.Name);
+        if (this.IsComplete(result.Id))
+        {
+            ImGui.SameLine();
+            ImGui.TextColored(new Vector4(0.2f, 0.9f, 0.2f, 1f), "✓");
+        }
+
+        if (!string.IsNullOrWhiteSpace(result.Description))
+        {
+            this.DrawDisabledWrapped(result.Description);
+        }
+        ImGui.PopTextWrapPos();
+        ImGui.EndGroup();
+        ImGui.PopID();
+    }
+
+    private void DrawTrackedColumn()
     {
         var trackedIds = this.plugin.TrackedAchievements.AchievementIds.ToList();
+        ImGui.TextUnformatted("Tracked achievements");
+        ImGui.Separator();
         if (trackedIds.Count == 0)
         {
-            ImGui.TextWrapped("No achievements tracked. Use Configure to add one.");
+            ImGui.TextWrapped("No achievements tracked. Use the search column to add one, or show Lists with the disk icon.");
             return;
         }
 
         foreach (var achievementId in trackedIds)
         {
-            this.DrawAchievement(achievementId);
+            this.DrawTrackedAchievement(achievementId);
         }
     }
 
-    private void DrawAchievement(uint achievementId)
+    private void DrawTrackedAchievement(uint achievementId)
     {
         _ = this.plugin.AchievementCatalog.TryGet(achievementId, out var info);
-        var progressText = this.GetProgressText(achievementId);
-        var updatedText = this.GetLastObservedText(achievementId);
+        var progressText = this.GetTrackedProgressText(achievementId);
+        var removeRequested = false;
 
         ImGui.PushID((int)achievementId);
-        this.DrawRowUpdateButton(achievementId);
-        ImGui.SameLine();
-        this.DrawRowInspectButton(achievementId);
-        ImGui.SameLine();
+        ImGui.BeginGroup();
+        if (this.ShouldShowTrackedIcon("Remove"))
+        {
+            if (ImGuiComponents.IconButton("tracked-remove-main", FontAwesomeIcon.Times))
+            {
+                removeRequested = true;
+            }
+            AddTooltip("Remove from tracked.");
+            ImGui.SameLine();
+        }
+
+        var nativeSafe = this.plugin.AchievementCatalog.CanOpenInNativeAchievementUi(achievementId, out var nativeUnsafeReason);
+
+        if (this.ShouldShowTrackedIcon("Refresh"))
+        {
+            using (ImRaiiShim.Disabled(!nativeSafe))
+            {
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.SyncAlt))
+                {
+                    this.OpenAchievementForUpdate(achievementId);
+                }
+            }
+
+            AddTooltip(nativeSafe ? "Update this achievement." : nativeUnsafeReason);
+            ImGui.SameLine();
+        }
+
+        if (this.ShouldShowTrackedIcon("Open"))
+        {
+            using (ImRaiiShim.Disabled(!nativeSafe))
+            {
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.Search))
+                {
+                    this.plugin.OpenNativeAchievementForInspection(achievementId);
+                }
+            }
+
+            AddTooltip(nativeSafe ? "Open in Achievements and update status if progress data loads." : nativeUnsafeReason);
+            ImGui.SameLine();
+        }
+
         ImGui.TextWrapped(info.Name);
         ImGui.TextDisabled(progressText);
-        ImGui.SameLine();
-        ImGui.TextDisabled(updatedText);
+        ImGui.EndGroup();
+
+        if (ImGui.BeginPopupContextItem("tracked-achievement-context"))
+        {
+            ImGui.TextUnformatted(info.Name);
+            ImGui.Separator();
+            if (ImGui.MenuItem("Remove from tracked list"))
+            {
+                removeRequested = true;
+            }
+
+            ImGui.EndPopup();
+        }
+
+        if (removeRequested)
+        {
+            _ = this.RemoveTrackedAchievement(achievementId);
+        }
+
         ImGui.PopID();
     }
 
-    private void DrawRowUpdateButton(uint achievementId)
-    {
-        var updateOpenLocked = !this.plugin.CanOpenAchievementForUpdate;
-        if (updateOpenLocked)
-        {
-            ImGui.BeginDisabled();
-        }
-
-        if (ImGuiComponents.IconButton(FontAwesomeIcon.SyncAlt))
-        {
-            this.OpenNativeAchievementForUpdate(achievementId);
-        }
-
-        if (updateOpenLocked)
-        {
-            ImGui.EndDisabled();
-        }
-
-        AddTooltip("Open native Achievement entry to update.");
-    }
-
-    private void DrawRowInspectButton(uint achievementId)
-    {
-        if (ImGuiComponents.IconButton(FontAwesomeIcon.Search))
-        {
-            this.OpenNativeAchievement(achievementId);
-        }
-
-        AddTooltip("Open in Achievements.");
-    }
-
-    private string GetProgressText(uint achievementId)
+    private string GetTrackedProgressText(uint achievementId)
     {
         if (!this.plugin.AchievementCatalog.TryGetRow(achievementId, out var row))
         {
-            return "Progress unavailable";
+            return "not updated yet";
+        }
+
+        var hasObservedProgress = this.plugin.ClientAchievementProgressSource.TryGetObservation(achievementId, out _);
+        var isComplete = this.plugin.AchievementProgressService.IsComplete(row);
+        var hasCosmicProgressOverride = this.plugin.CosmicClassProgressProvider.Handles(row);
+        if (!TrackedProgressDisplayPolicy.ShouldEvaluateProgress(hasObservedProgress, isComplete, hasCosmicProgressOverride))
+        {
+            return "not updated yet";
         }
 
         return this.plugin.AchievementProgressService.GetProgress(row).ToDisplayText();
     }
 
-    private string GetLastObservedText(uint achievementId)
-    {
-        return this.plugin.ClientAchievementProgressSource.TryGetCachedObservation(achievementId, out var observation)
-            ? $"updated {FormatAge(observation.ObservedAt)}"
-            : "not updated yet";
-    }
+    private bool IsTrackedAchievementStale(uint achievementId)
+        => string.Equals(this.GetTrackedProgressText(achievementId), "not updated yet", StringComparison.Ordinal);
 
-    // Section: choosing and opening achievements.
-    // Component: user-guided native Achievement UI action. Risk: low-to-medium; no progress request is called directly.
     private void OpenNextTrackedAchievementForUpdate()
     {
         var nextId = this.GetNextTrackedAchievementId();
         if (nextId.HasValue)
         {
-            this.OpenNativeAchievementForUpdate(nextId.Value);
+            this.OpenAchievementForUpdate(nextId.Value);
         }
     }
 
@@ -213,7 +752,313 @@ public sealed class TrackerWindow : Window
             .First().Id;
     }
 
-    private void OpenNativeAchievementForUpdate(uint achievementId)
+    private void DrawPresetButtons()
+    {
+        if (ImGuiComponents.IconButton("template-save", FontAwesomeIcon.Save))
+        {
+            this.SaveCurrentTemplate();
+        }
+        AddTooltip("Save current tracked list as this list name.");
+
+        ImGui.SameLine(0, 4);
+        if (ImGuiComponents.IconButton("template-load", FontAwesomeIcon.FolderOpen))
+        {
+            this.LoadSelectedPreset();
+        }
+        AddTooltip("Load selected list.");
+
+        ImGui.SameLine(0, 4);
+        if (ImGuiComponents.IconButton("template-rename", FontAwesomeIcon.Edit))
+        {
+            this.RenameSelectedPreset();
+        }
+        AddTooltip("Rename selected list to the typed name.");
+
+        ImGui.SameLine(0, 4);
+        if (ImGuiComponents.IconButton("template-copy", FontAwesomeIcon.Copy))
+        {
+            this.CopySelectedPreset();
+        }
+        AddTooltip("Make a copy of the selected list.");
+
+        ImGui.SameLine(0, 4);
+        using (ImRaiiShim.Disabled(!ImGui.GetIO().KeyShift))
+        {
+            if (ImGuiComponents.IconButton("template-delete", FontAwesomeIcon.Trash))
+            {
+                this.DeleteSelectedPreset();
+            }
+        }
+        AddTooltip("Hold Shift to delete selected list.");
+    }
+
+    private void DrawPresetList()
+    {
+        if (this.plugin.Configuration.TrackedAchievementPresets.Count == 0)
+        {
+            ImGui.TextDisabled("No saved lists yet.");
+            ImGui.TextWrapped("Type a name, then press save to capture the current tracked achievements.");
+            return;
+        }
+
+        ImGui.TextDisabled("Click to select. Double-click to load. Right-click for options.");
+        ImGui.BeginChild("##TemplateList", Vector2.Zero, true);
+        foreach (var preset in this.plugin.Configuration.TrackedAchievementPresets.OrderBy(preset => preset.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            this.DrawPresetListItem(preset);
+        }
+
+        ImGui.EndChild();
+    }
+
+    private void DrawPresetListItem(TrackedAchievementPreset preset)
+    {
+        var selected = string.Equals(preset.Name, this.selectedPresetName, StringComparison.OrdinalIgnoreCase);
+        var label = $"{(selected ? "> " : string.Empty)}{preset.Name} ({preset.AchievementIds.Count})";
+        ImGui.PushID($"template-{preset.Name}");
+        if (ImGui.Selectable(label, selected, ImGuiSelectableFlags.AllowDoubleClick))
+        {
+            this.selectedPresetName = preset.Name;
+            this.presetNameInput = preset.Name;
+            if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+            {
+                this.LoadSelectedPreset();
+            }
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Right-click for list options. Double-click to load.");
+        }
+
+        this.DrawPresetContextMenu(preset);
+        ImGui.PopID();
+    }
+
+    private void DrawPresetContextMenu(TrackedAchievementPreset preset)
+    {
+        if (!ImGui.BeginPopupContextItem($"template-context-{preset.Name}"))
+        {
+            return;
+        }
+
+        this.selectedPresetName = preset.Name;
+        if (string.IsNullOrWhiteSpace(this.presetNameInput))
+        {
+            this.presetNameInput = preset.Name;
+        }
+
+        if (ImGui.Selectable("Load"))
+        {
+            this.LoadSelectedPreset();
+        }
+
+        if (ImGui.Selectable("Rename to typed name", false, ImGuiSelectableFlags.DontClosePopups))
+        {
+            this.RenameSelectedPreset();
+        }
+
+        if (ImGui.Selectable("Make a copy"))
+        {
+            this.CopySelectedPreset();
+        }
+
+        ImGui.Separator();
+        using (ImRaiiShim.Disabled(!ImGui.GetIO().KeyShift))
+        {
+            if (ImGui.Selectable("Delete", false, ImGuiSelectableFlags.DontClosePopups))
+            {
+                this.DeleteSelectedPreset();
+            }
+        }
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+        {
+            ImGui.SetTooltip("Hold Shift to delete.");
+        }
+
+        ImGui.EndPopup();
+    }
+
+    private void DrawPresetContextPopups()
+    {
+        // Reserved for modal-style template actions; keeps the template surface structured like AutoHook's list/context area.
+    }
+
+    private void SaveCurrentTemplate()
+    {
+        var trackedIds = this.plugin.TrackedAchievements.AchievementIds;
+        if (TrackedAchievementPresetStore.SavePreset(this.plugin.Configuration.TrackedAchievementPresets, this.presetNameInput, trackedIds, out var savedName))
+        {
+            this.selectedPresetName = savedName;
+            this.presetNameInput = savedName;
+            this.plugin.SaveConfiguration();
+        }
+    }
+
+    private void LoadSelectedPreset()
+    {
+        var preset = TrackedAchievementPresetStore.FindPreset(this.plugin.Configuration.TrackedAchievementPresets, this.selectedPresetName);
+        if (preset is null)
+        {
+            return;
+        }
+
+        this.plugin.TrackedAchievements.LoadFrom(preset.AchievementIds.Where(this.plugin.AchievementCatalog.IsManuallyViewable));
+        this.plugin.SaveTrackedAchievements();
+    }
+
+    private void RenameSelectedPreset()
+    {
+        if (TrackedAchievementPresetStore.RenamePreset(this.plugin.Configuration.TrackedAchievementPresets, this.selectedPresetName, this.presetNameInput, out var renamedTo))
+        {
+            this.selectedPresetName = renamedTo;
+            this.presetNameInput = renamedTo;
+            this.plugin.SaveConfiguration();
+        }
+    }
+
+    private void CopySelectedPreset()
+    {
+        var preset = TrackedAchievementPresetStore.FindPreset(this.plugin.Configuration.TrackedAchievementPresets, this.selectedPresetName);
+        if (preset is null)
+        {
+            return;
+        }
+
+        var copyName = TrackedAchievementPresetStore.BuildCopyName(this.plugin.Configuration.TrackedAchievementPresets, preset.Name);
+        if (TrackedAchievementPresetStore.SavePreset(this.plugin.Configuration.TrackedAchievementPresets, copyName, preset.AchievementIds, out var savedName))
+        {
+            this.selectedPresetName = savedName;
+            this.presetNameInput = savedName;
+            this.plugin.SaveConfiguration();
+        }
+    }
+
+    private void DeleteSelectedPreset()
+    {
+        if (TrackedAchievementPresetStore.DeletePreset(this.plugin.Configuration.TrackedAchievementPresets, this.selectedPresetName))
+        {
+            this.selectedPresetName = string.Empty;
+            this.presetNameInput = string.Empty;
+            this.plugin.SaveConfiguration();
+            this.EnsureSelectedPresetIsValid();
+        }
+    }
+
+    private void EnsureSelectedPresetIsValid()
+    {
+        TrackedAchievementPresetStore.Normalize(this.plugin.Configuration.TrackedAchievementPresets);
+        if (!string.IsNullOrWhiteSpace(this.selectedPresetName)
+            && TrackedAchievementPresetStore.FindPreset(this.plugin.Configuration.TrackedAchievementPresets, this.selectedPresetName) is not null)
+        {
+            return;
+        }
+
+        this.selectedPresetName = this.plugin.Configuration.TrackedAchievementPresets
+            .OrderBy(preset => preset.Name, StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault()?.Name ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(this.presetNameInput))
+        {
+            this.presetNameInput = this.selectedPresetName;
+        }
+    }
+
+    private bool AddTrackedAchievement(uint achievementId)
+    {
+        if (!this.plugin.TrackedAchievements.TryAdd(achievementId))
+        {
+            return false;
+        }
+
+        this.plugin.SaveTrackedAchievements();
+        return true;
+    }
+
+    private bool RemoveTrackedAchievement(uint achievementId)
+    {
+        if (!this.plugin.TrackedAchievements.Remove(achievementId))
+        {
+            return false;
+        }
+
+        this.plugin.SaveTrackedAchievements();
+        return true;
+    }
+
+    private bool ShouldShowTrackedIcon(string iconName)
+        => !this.hideTrackedIcons || !this.plugin.Configuration.HiddenTrackedAchievementIcons.Contains(iconName);
+
+    private void ToggleCategoryFilter(string category)
+    {
+        var ctrl = ImGui.GetIO().KeyCtrl;
+        this.categoryFilterAll = false;
+        if (!ctrl)
+        {
+            this.selectedCategoryFilters.Clear();
+            this.selectedSubcategoryFilters.Clear();
+            this.selectedCategoryFilters.Add(category);
+            this.MarkSearchResultsDirty(resetVisibleResults: true);
+            return;
+        }
+
+        if (!this.selectedCategoryFilters.Add(category))
+        {
+            this.selectedCategoryFilters.Remove(category);
+        }
+
+        this.MarkSearchResultsDirty(resetVisibleResults: true);
+    }
+
+    private void ToggleSubcategoryFilter(string category, string subcategory)
+    {
+        var ctrl = ImGui.GetIO().KeyCtrl;
+        this.categoryFilterAll = false;
+        var key = AchievementCategoryPath.BuildSubcategoryFilterKey(category, subcategory);
+        if (!ctrl)
+        {
+            this.selectedCategoryFilters.Clear();
+            this.selectedSubcategoryFilters.Clear();
+            this.selectedSubcategoryFilters.Add(key);
+            this.MarkSearchResultsDirty(resetVisibleResults: true);
+            return;
+        }
+
+        if (!this.selectedSubcategoryFilters.Add(key))
+        {
+            this.selectedSubcategoryFilters.Remove(key);
+        }
+
+        this.MarkSearchResultsDirty(resetVisibleResults: true);
+    }
+
+    private bool IsComplete(uint achievementId)
+        => this.plugin.IsAchievementCompleteForSearch(achievementId);
+
+    private AchievementSearchSortKey GetGameSortKey(AchievementInfo info)
+    {
+        if (this.gameSortKeyCache.TryGetValue(info.Id, out var cached))
+        {
+            return cached;
+        }
+
+        if (!this.plugin.AchievementCatalog.TryGetRow(info.Id, out var row))
+        {
+            cached = AchievementSearchSortKey.Fallback(info.Id);
+            this.gameSortKeyCache[info.Id] = cached;
+            return cached;
+        }
+
+        var categoryOrder = row.AchievementCategory.IsValid ? row.AchievementCategory.Value.Order : byte.MaxValue;
+        var kindOrder = row.AchievementCategory.IsValid && row.AchievementCategory.Value.AchievementKind.IsValid
+            ? row.AchievementCategory.Value.AchievementKind.Value.Order
+            : byte.MaxValue;
+        cached = new AchievementSearchSortKey(kindOrder, categoryOrder, row.Order, row.RowId);
+        this.gameSortKeyCache[info.Id] = cached;
+        return cached;
+    }
+
+
+    private void OpenAchievementForUpdate(uint achievementId)
     {
         if (this.plugin.OpenAchievementForUpdate(achievementId))
         {
@@ -225,46 +1070,43 @@ public sealed class TrackerWindow : Window
             : "Achievement update opens are cooling down.");
     }
 
-    private void OpenNativeAchievement(uint achievementId)
-    {
-        if (!this.plugin.NativeAchievementNavigator.OpenAchievement(achievementId))
-        {
-            ImGui.TextDisabled("Could not open Achievements right now.");
-        }
-    }
-
-    // Section: small UI formatting helpers.
-    // Component: pure UI. Risk: low.
-    private void DrawUpdateOpenLockoutStatus()
-    {
-        var status = this.plugin.AchievementUpdateOpenStatusText;
-        if (!string.IsNullOrEmpty(status))
-        {
-            ImGui.TextDisabled(status);
-        }
-    }
-
     private static void AddTooltip(string text)
     {
-        if (ImGui.IsItemHovered())
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
         {
             ImGui.SetTooltip(text);
         }
     }
 
-    private static string FormatAge(DateTimeOffset observedAt)
+    private void SameLineOrWrap(float estimatedNextItemWidth)
     {
-        var age = DateTimeOffset.UtcNow - observedAt;
-        if (age.TotalSeconds < 60)
+        if (ImGui.GetContentRegionAvail().X >= estimatedNextItemWidth)
         {
-            return "just now";
+            ImGui.SameLine();
+        }
+    }
+
+    private sealed class ImRaiiShim : IDisposable
+    {
+        private readonly bool disabled;
+
+        private ImRaiiShim(bool disabled)
+        {
+            this.disabled = disabled;
+            if (disabled)
+            {
+                ImGui.BeginDisabled();
+            }
         }
 
-        if (age.TotalMinutes < 60)
-        {
-            return $"{(int)age.TotalMinutes}m ago";
-        }
+        public static ImRaiiShim Disabled(bool disabled) => new(disabled);
 
-        return $"{(int)age.TotalHours}h ago";
+        public void Dispose()
+        {
+            if (this.disabled)
+            {
+                ImGui.EndDisabled();
+            }
+        }
     }
 }

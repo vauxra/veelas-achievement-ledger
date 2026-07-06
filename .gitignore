@@ -15,6 +15,7 @@ packages/
 # Local CodeQL analysis artifacts
 .codeql-db/
 .codeql-results/
+local-src/
 
 # Local dev-plugin drops
 released/

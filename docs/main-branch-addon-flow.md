@@ -1,6 +1,6 @@
 # Main-branch addon big picture and flow
 
-This document maps the current `origin/main` addon shape for Achieve Ex+. It is intentionally implementation-oriented: each tree names the file and method/function chain, then states what the final call reads, writes, returns, or touches.
+This document maps the current `origin/main` addon shape for Achieve Ex. It is intentionally implementation-oriented: each tree names the file and method/function chain, then states what the final call reads, writes, returns, or touches. The `Achieve Ex+` designation is reserved for the experimental automation branch.
 
 ## Top-level architecture
 
@@ -228,9 +228,11 @@ TrackerWindow.DrawTrackedAchievementList()
       │  └─ reload icon -> OpenNativeAchievementForUpdate(achievementId)
       │     └─ see "User-guided update open flow"
       ├─ DrawRowInspectButton(achievementId)
-      │  └─ magnifying glass -> OpenNativeAchievement(achievementId)
-      │     └─ plugin.NativeAchievementNavigator.OpenAchievement(achievementId)
-      │        └─ AgentAchievement.OpenById(achievementId); returns true/false
+      │  └─ magnifying glass -> plugin.OpenNativeAchievementForInspection(achievementId)
+      │     ├─ NativeAchievementNavigator.OpenAchievement(achievementId)
+      │     │  └─ AgentAchievement.OpenById(achievementId); returns true/false
+      │     └─ ClientAchievementProgressSource.BeginObservation(achievementId, 15 seconds)
+      │        └─ allows the inspect open to update cached status when matching progress data loads
       └─ draws info.Name, progressText, and updatedText
 ```
 
@@ -286,6 +288,18 @@ AchievementTracker/Windows/ConfigWindow.cs
    └─ reload icon -> OpenAchievementForUpdate(achievementId)
       └─ plugin.OpenAchievementForUpdate(achievementId)
          └─ same chain as above
+```
+
+The magnifying-glass inspection path also starts a bounded observation window, but it does not set the update-open lockout/status timer:
+
+```text
+TrackerWindow magnifying-glass button
+└─ plugin.OpenNativeAchievementForInspection(achievementId)
+   ├─ AchievementCatalog.CanOpenInNativeAchievementUi(achievementId, out _)
+   ├─ NativeAchievementNavigator.OpenAchievement(achievementId)
+   │  └─ AgentAchievement.OpenById(achievementId)
+   ├─ ClientAchievementProgressSource.BeginObservation(achievementId, 15 seconds)
+   └─ returns true/false
 ```
 
 ## Update-open lockout/status flow
@@ -381,7 +395,13 @@ AchievementTracker/Models/AchievementProgress.cs
 AchievementTracker/Windows/ConfigWindow.cs
 └─ ConfigWindow.Draw()
    ├─ DrawHeader()
-   │  └─ ImGui.Button("Open Achieve Ex+") -> plugin.OpenMainUi() -> TrackerWindow.IsOpen = true
+   │  └─ ImGui.Button("Open Achieve Ex") -> plugin.OpenMainUi() -> TrackerWindow.IsOpen = true
+   ├─ ImGui.Button("Restore Achievement window default scale")
+   │  └─ plugin.RestoreNativeAchievementWindowDefaultScale()
+   │     └─ NativeAchievementNavigator.RestoreDefaultScale()
+   │        ├─ AgentAchievement.Instance()->Show()
+   │        ├─ IGameGui.GetAddonByName<AtkUnitBase>("Achievement", 1)
+   │        └─ addon.Struct->SetScaleToHudLayoutScale()
    ├─ DrawLeftNavigation()
    │  ├─ DrawNavItem("Tracked Achievements") -> selectedSection = TrackedAchievements
    │  └─ DrawNavItem("Help") -> selectedSection = Help

@@ -1,4 +1,4 @@
-# Achieve Ex+ Agent Guide
+# Achieve Ex Agent Guide
 
 This repo is a Final Fantasy XIV Dalamud plugin. Treat the official Dalamud documentation and API reference as authoritative for coding, review, and release decisions:
 
@@ -29,7 +29,7 @@ This repo is a Final Fantasy XIV Dalamud plugin. Treat the official Dalamud docu
 
 ## Current product shape
 
-Achieve Ex+ is intentionally small:
+Achieve Ex is intentionally small. Reserve the `Achieve Ex+` name/designation for the experimental automation branch only; mainline/non-automated code, manifests, UI, and docs should say `Achieve Ex`.
 
 - `/achex` opens the ledger.
 - Users track up to 20 achievements.

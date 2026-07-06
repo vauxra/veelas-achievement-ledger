@@ -26,26 +26,26 @@ import sys
 import zipfile
 from pathlib import Path
 
-manifest_path = Path("AchievementTracker/bin/Release/AchieveExPlus.json")
-zip_path = Path("AchievementTracker/bin/Release/AchieveExPlus/latest.zip")
+manifest_path = Path("AchievementTracker/bin/Release/AchieveEx.json")
+zip_path = Path("AchievementTracker/bin/Release/AchieveEx/latest.zip")
 if not manifest_path.exists() or not zip_path.exists():
     print("Missing generated release manifest or latest.zip.", file=sys.stderr)
     raise SystemExit(1)
 manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 expected = {
-    "AchieveExPlus.dll",
-    "AchieveExPlus.deps.json",
-    "AchieveExPlus.json",
+    "AchieveEx.dll",
+    "AchieveEx.deps.json",
+    "AchieveEx.json",
 }
 with zipfile.ZipFile(zip_path) as zf:
     names = set(zf.namelist())
-if manifest.get("InternalName") != "AchieveExPlus":
+if manifest.get("InternalName") != "AchieveEx":
     print(f"Unexpected InternalName: {manifest.get('InternalName')}", file=sys.stderr)
     raise SystemExit(1)
 if names != expected:
     print(f"Unexpected latest.zip contents: {sorted(names)}", file=sys.stderr)
     raise SystemExit(1)
-print("Release package contains only AchieveExPlus DLL/deps/manifest.")
+print("Release package contains only AchieveEx DLL/deps/manifest.")
 PY
 
 echo "== CodeQL C# security/quality scan =="

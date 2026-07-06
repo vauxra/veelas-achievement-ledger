@@ -3,14 +3,11 @@ using FFXIVClientStructs.FFXIV.Client.Game.WKS;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace AchievementTracker.Services;
 
-// Component: Cosmic Class achievement progress mapping.
-// Risk level: medium.
-// Why: reads local WKS/Cosmic ClientStructs state.
-// Safety boundary: reads already-loaded local scores only; no server request, packet capture, or addon callback.
-public sealed class CosmicClassProgressProvider
+public sealed partial class CosmicClassProgressProvider
 {
     public const int ScoreCount = 11;
     private const int Carpenter = 0;
@@ -28,6 +25,20 @@ public sealed class CosmicClassProgressProvider
     private static readonly int[] DiscipleOfHand = [Carpenter, Blacksmith, Armorer, Goldsmith, Leatherworker, Weaver, Alchemist, Culinarian];
     private static readonly int[] DiscipleOfLand = [Miner, Botanist, Fisher];
     private static readonly int[] AllClasses = [Carpenter, Blacksmith, Armorer, Goldsmith, Leatherworker, Weaver, Alchemist, Culinarian, Miner, Botanist, Fisher];
+    private static readonly Dictionary<string, int> JobNameToIndex = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Carpenter"] = Carpenter,
+        ["Blacksmith"] = Blacksmith,
+        ["Armorer"] = Armorer,
+        ["Goldsmith"] = Goldsmith,
+        ["Leatherworker"] = Leatherworker,
+        ["Weaver"] = Weaver,
+        ["Alchemist"] = Alchemist,
+        ["Culinarian"] = Culinarian,
+        ["Miner"] = Miner,
+        ["Botanist"] = Botanist,
+        ["Fisher"] = Fisher,
+    };
 
     private readonly CosmicClassScoreCache cache;
     private readonly Action saveCache;
@@ -39,27 +50,50 @@ public sealed class CosmicClassProgressProvider
         NormalizeCache(this.cache);
     }
 
-    // Section: public entry points.
-    // Component: UI progress service calls. Risk: low; these mostly compute from cached/local data.
     public bool Handles(uint achievementId) => GetRule(achievementId) is not null;
+
+    public bool Handles(Lumina.Excel.Sheets.Achievement achievement)
+        => TryCreateRuleFromAchievementDetails(achievement, out _) || this.Handles(achievement.RowId);
 
     public void RefreshCacheFromLiveScores() => _ = this.TryReadLiveScores();
 
     public AchievementProgress GetProgress(uint achievementId)
     {
         var rule = GetRule(achievementId);
-        if (rule is null)
+        return rule is null ? AchievementProgress.DataNotAvailable() : this.GetProgress(rule);
+    }
+
+    public AchievementProgress GetProgress(Lumina.Excel.Sheets.Achievement achievement)
+    {
+        var rule = TryCreateRuleFromAchievementDetails(achievement, out var detailRule)
+            ? detailRule
+            : GetRule(achievement.RowId);
+        return rule is null ? AchievementProgress.DataNotAvailable() : this.GetProgress(rule);
+    }
+
+    public static bool TryCreateProgressOverride(string categoryName, string description, IReadOnlyList<int> scores, out AchievementProgress progress)
+    {
+        progress = AchievementProgress.DataNotAvailable();
+        if (!TryCreateRuleFromDetails(categoryName, description, out var rule) || scores.Count < ScoreCount)
         {
-            return AchievementProgress.DataNotAvailable();
+            return false;
         }
 
+        progress = BuildProgress(rule, scores);
+        return true;
+    }
+
+    private AchievementProgress GetProgress(CosmicAchievementRule rule)
+    {
         var scores = this.TryReadLiveScores() ?? this.TryReadCachedScores();
-        if (scores is null)
-        {
-            return AchievementProgress.DataNotAvailable();
-        }
+        return scores is null ? AchievementProgress.DataNotAvailable() : BuildProgress(rule, scores);
+    }
 
-        var current = CalculateCurrentScore(scores, rule);
+    private static AchievementProgress BuildProgress(CosmicAchievementRule rule, IReadOnlyList<int> scores)
+    {
+        var current = rule.Aggregation == CosmicScoreAggregation.Minimum
+            ? rule.ScoreIndexes.Min(index => scores[index])
+            : rule.ScoreIndexes.Max(index => scores[index]);
         return AchievementProgress.Numeric(Math.Max(0, current), rule.TargetScore);
     }
 
@@ -77,10 +111,75 @@ public sealed class CosmicClassProgressProvider
         return $"source={source}; {liveState}; {cachedState}; {scoreText}";
     }
 
+
+    private static bool TryCreateRuleFromAchievementDetails(Lumina.Excel.Sheets.Achievement achievement, out CosmicAchievementRule rule)
+    {
+        var categoryName = achievement.AchievementCategory.IsValid
+            ? achievement.AchievementCategory.Value.Name.ToString()
+            : string.Empty;
+        return TryCreateRuleFromDetails(categoryName, achievement.Description.ToString(), out rule);
+    }
+
+    private static bool TryCreateRuleFromDetails(string categoryName, string description, out CosmicAchievementRule rule)
+    {
+        rule = default!;
+        if (string.IsNullOrWhiteSpace(description) || !IsCosmicScoreDescription(description))
+        {
+            return false;
+        }
+
+        var targetMatch = CosmicTargetRegex().Match(description);
+        if (!targetMatch.Success || !int.TryParse(targetMatch.Groups[1].Value.Replace(",", string.Empty), out var target))
+        {
+            return false;
+        }
+
+        var indexes = GetScoreIndexesForCategory(categoryName);
+        if (indexes.Length == 0)
+        {
+            indexes = GetScoreIndexesForDescription(description);
+        }
+
+        if (indexes.Length == 0)
+        {
+            return false;
+        }
+
+        var aggregation = description.IndexOf("all ", StringComparison.OrdinalIgnoreCase) >= 0
+            || description.IndexOf("each ", StringComparison.OrdinalIgnoreCase) >= 0
+                ? CosmicScoreAggregation.Minimum
+                : CosmicScoreAggregation.Maximum;
+        rule = new CosmicAchievementRule(indexes, target, aggregation);
+        return true;
+    }
+
+    private static int[] GetScoreIndexesForDescription(string description)
+        => JobNameToIndex.FirstOrDefault(pair => description.Contains(pair.Key, StringComparison.OrdinalIgnoreCase)).Value is var index && index >= 0
+            ? [index]
+            : description.Contains("Disciple of the Hand", StringComparison.OrdinalIgnoreCase) || description.Contains("hand", StringComparison.OrdinalIgnoreCase)
+                ? DiscipleOfHand
+                : description.Contains("Disciple of the Land", StringComparison.OrdinalIgnoreCase) || description.Contains("land", StringComparison.OrdinalIgnoreCase)
+                    ? DiscipleOfLand
+                    : [];
+
+    private static bool IsCosmicScoreDescription(string description)
+        => description.Contains("cosmic class score", StringComparison.OrdinalIgnoreCase)
+            || description.Contains("tool mastery points", StringComparison.OrdinalIgnoreCase);
+
+    private static int[] GetScoreIndexesForCategory(string categoryName)
+        => JobNameToIndex.TryGetValue(categoryName, out var index)
+            ? [index]
+            : categoryName.Contains("Hand", StringComparison.OrdinalIgnoreCase)
+                ? DiscipleOfHand
+                : categoryName.Contains("Land", StringComparison.OrdinalIgnoreCase)
+                    ? DiscipleOfLand
+                    : [];
+
+    [GeneratedRegex(@"([0-9][0-9,]*).*points", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex CosmicTargetRegex();
+
     public static bool IsCosmicClassAchievement(uint achievementId) => GetRule(achievementId) is not null;
 
-    // Section: achievement ID to score-target rules.
-    // Component: static mapping table. Risk: low; wrong values would show wrong planning progress but do not affect game state.
     private static CosmicAchievementRule? GetRule(uint achievementId)
     {
         return achievementId switch
@@ -133,15 +232,6 @@ public sealed class CosmicClassProgressProvider
 
     private static CosmicAchievementRule Every(int[] indexes, int target) => new(indexes, target, CosmicScoreAggregation.Minimum);
 
-    private static int CalculateCurrentScore(IReadOnlyList<int> scores, CosmicAchievementRule rule)
-    {
-        return rule.Aggregation == CosmicScoreAggregation.Minimum
-            ? rule.ScoreIndexes.Min(index => scores[index])
-            : rule.ScoreIndexes.Max(index => scores[index]);
-    }
-
-    // Section: cache normalization and reads.
-    // Component: plugin-local config cache. Risk: low.
     private static void NormalizeCache(CosmicClassScoreCache scoreCache)
     {
         scoreCache.Scores ??= [];
@@ -163,9 +253,6 @@ public sealed class CosmicClassProgressProvider
         return this.cache.Scores.ToArray();
     }
 
-    // Section: live local ClientStructs score read.
-    // Component: WKS/Cosmic local state. Risk: medium.
-    // This is the method that actually reads scores: WKSManager.Instance()->State.Scores.
     private unsafe int[]? TryReadLiveScores(bool saveWhenAvailable = true)
     {
         var manager = WKSManager.Instance();
@@ -183,17 +270,12 @@ public sealed class CosmicClassProgressProvider
         liveScores = liveScores.Take(ScoreCount).Select(score => Math.Max(0, score)).ToArray();
         if (saveWhenAvailable && !this.ScoresEqualCache(liveScores))
         {
-            this.SaveScoresToCache(liveScores);
+            this.cache.Scores = liveScores.ToList();
+            this.cache.UpdatedAtUtc = DateTimeOffset.UtcNow;
+            this.saveCache();
         }
 
         return liveScores;
-    }
-
-    private void SaveScoresToCache(int[] liveScores)
-    {
-        this.cache.Scores = liveScores.ToList();
-        this.cache.UpdatedAtUtc = DateTimeOffset.UtcNow;
-        this.saveCache();
     }
 
     private unsafe string GetLiveStateSummary()

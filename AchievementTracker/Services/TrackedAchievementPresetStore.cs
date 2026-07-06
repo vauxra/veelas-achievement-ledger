@@ -118,6 +118,32 @@ public static class TrackedAchievementPresetStore
         return preset is not null && presets.Remove(preset);
     }
 
+    public static string BuildCopyName(List<TrackedAchievementPreset> presets, string sourceName)
+    {
+        var baseName = SanitizeName(sourceName);
+        if (baseName.Length == 0)
+        {
+            baseName = "Template";
+        }
+
+        var copyPrefix = SanitizeName($"Copy_{baseName}");
+        if (FindPreset(presets, copyPrefix) is null)
+        {
+            return copyPrefix;
+        }
+
+        for (var index = 2; index < 100; index++)
+        {
+            var candidate = SanitizeName($"Copy_{index}_{baseName}");
+            if (FindPreset(presets, candidate) is null)
+            {
+                return candidate;
+            }
+        }
+
+        return SanitizeName($"Copy_{DateTimeOffset.UtcNow:HHmmss}_{baseName}");
+    }
+
     public static TrackedAchievementPreset? FindPreset(List<TrackedAchievementPreset> presets, string name)
         => presets.FirstOrDefault(preset => string.Equals(preset.Name, name, StringComparison.OrdinalIgnoreCase));
 

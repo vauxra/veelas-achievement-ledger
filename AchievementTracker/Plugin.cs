@@ -35,6 +35,8 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IClientState ClientState { get; private set; } = null!;
     // IFramework runs the gated Cosmic local-cache check. It does not issue direct progress requests.
     [PluginService] internal static IFramework Framework { get; private set; } = null!;
+    // IGameGui docs: https://dalamud.dev/api/Dalamud.Plugin.Services/Interfaces/IGameGui
+    [PluginService] internal static IGameGui GameGui { get; private set; } = null!;
 
     // Component: public app state/services used by windows.
     // Risk: mixed. Native/unsafe work is behind named service classes so UI code can stay readable.
@@ -46,7 +48,7 @@ public sealed class Plugin : IDalamudPlugin
     public ClientAchievementProgressSource ClientAchievementProgressSource { get; }
     public CosmicClassProgressProvider CosmicClassProgressProvider { get; }
     public NativeAchievementNavigator NativeAchievementNavigator { get; }
-    public WindowSystem WindowSystem { get; } = new("AchieveExPlus");
+    public WindowSystem WindowSystem { get; } = new("AchieveEx");
 
     // Component: private app objects and timers.
     // Risk: low. These only control UI windows and local throttling.
@@ -66,7 +68,7 @@ public sealed class Plugin : IDalamudPlugin
         this.ClientAchievementProgressSource = new ClientAchievementProgressSource();
         this.AchievementProgressSource = this.ClientAchievementProgressSource;
         this.CosmicClassProgressProvider = new CosmicClassProgressProvider(this.Configuration.CosmicClassScoreCache, this.SaveConfiguration);
-        this.NativeAchievementNavigator = new NativeAchievementNavigator();
+        this.NativeAchievementNavigator = new NativeAchievementNavigator(GameGui);
         this.AchievementProgressService = new AchievementProgressService(UnlockState, this.AchievementProgressSource, this.CosmicClassProgressProvider);
         this.TrackerWindow = new TrackerWindow(this);
         this.ConfigWindow = new ConfigWindow(this);
@@ -221,6 +223,27 @@ public sealed class Plugin : IDalamudPlugin
 
     public void ToggleConfigUi() => this.ConfigWindow.Toggle();
 
+    public bool IsConfigUiOpen => this.ConfigWindow.IsOpen;
+
+    public bool OpenNativeAchievementForInspection(uint achievementId)
+    {
+        if (!this.AchievementCatalog.CanOpenInNativeAchievementUi(achievementId, out _)
+            || !this.NativeAchievementNavigator.OpenAchievement(achievementId))
+        {
+            return false;
+        }
+
+        this.ClientAchievementProgressSource.BeginObservation(achievementId, AchievementObservationWindow);
+        return true;
+    }
+
+    public bool IsAchievementCompleteForSearch(uint achievementId)
+        => this.AchievementCatalog.TryGetRow(achievementId, out var row)
+            && this.AchievementProgressService.IsComplete(row);
+
+    public bool RestoreNativeAchievementWindowDefaultScale()
+        => this.NativeAchievementNavigator.RestoreDefaultScale();
+
     public void OpenConfigUi(bool help = false)
     {
         if (help)
@@ -258,7 +281,7 @@ public sealed class Plugin : IDalamudPlugin
     {
         CommandManager.AddHandler(CommandName, new CommandInfo(this.OnCommand)
         {
-            HelpMessage = "Open Achieve Ex+.",
+            HelpMessage = "Open Achieve Ex.",
         });
     }
 
