@@ -20,6 +20,8 @@ public sealed class Configuration : IPluginConfiguration
 
     public bool HideCompletedInSearch { get; set; } = true;
 
+    public bool HideZeroCountIncompleteSearchCategories { get; set; } = true;
+
     public string SearchCompletionFilter { get; set; } = "All";
 
     public bool ExperimentalAutoUpdateEnabled { get; set; }

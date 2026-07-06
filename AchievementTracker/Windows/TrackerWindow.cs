@@ -297,7 +297,12 @@ public sealed class TrackerWindow : Window
 
     private void DrawAchievementCategoryColumn()
     {
-        var categoryGroups = this.GetSearchCategoryGroups();
+        var hideZeroCountEntries = AchievementSearchIndex.ShouldHideZeroCountCategories(
+            this.plugin.Configuration.SearchCompletionFilter,
+            this.plugin.Configuration.HideZeroCountIncompleteSearchCategories);
+        var categoryGroups = this.GetSearchCategoryGroups()
+            .Where(group => group.ShouldShow(hideZeroCountEntries))
+            .ToList();
         var completionFilteredCategoryCount = categoryGroups.Sum(group => group.DisplayCount);
         ImGui.TextUnformatted($"Achievement categories ({completionFilteredCategoryCount})");
         this.DrawDisabledWrapped("Ctrl-click to select multiple categories or subcategories.");
@@ -330,6 +335,7 @@ public sealed class TrackerWindow : Window
             var subcategories = categoryGroup.Entries
                 .Where(entry => !string.IsNullOrWhiteSpace(entry.Subcategory))
                 .GroupBy(entry => entry.Subcategory)
+                .Where(group => categoryGroup.ShouldShowSubcategory(group.Key, hideZeroCountEntries))
                 .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
                 .ToList();
             if (collapsed || subcategories.Count == 0)

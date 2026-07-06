@@ -18,11 +18,11 @@
         "IsTestingExclusive": true,
         "DownloadLinkInstall": "",
         "DownloadLinkUpdate": "",
-        "LastUpdate": "1782352066",
-        "TestingAssemblyVersion": "0.3.3.2",
+        "LastUpdate": "1783353085",
+        "TestingAssemblyVersion": "0.3.3.3",
         "TestingDalamudApiLevel": 15,
-        "TestingChangelog": "Moves search/category indexing into a tested service, refreshes agent code maps, and keeps the experimental /achex UI behavior intact.",
-        "DownloadLinkTesting": "https://github.com/vauxra/achieve-ex/releases/download/v0.3.3.2/AchieveExPlus_0_3_3_2.zip",
+        "TestingChangelog": "Adds a configurable UI option to hide zero-count categories and subcategories when the main achievement search is filtered to Incomplete.",
+        "DownloadLinkTesting": "https://github.com/vauxra/achieve-ex/releases/download/v0.3.3.3/AchieveExPlus_0_3_3_3.zip",
         "IconUrl": "https://raw.githubusercontent.com/vauxra/achieve-ex/achieve-ex-experimental/AchievementTracker/images/icon.png",
         "ImageUrls": []
     }

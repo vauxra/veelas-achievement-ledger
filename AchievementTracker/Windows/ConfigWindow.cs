@@ -695,6 +695,16 @@ public sealed class ConfigWindow : Window
 
     private void DrawUiPage()
     {
+        ImGui.TextUnformatted("Search category display");
+        var hideZeroCountIncompleteCategories = this.plugin.Configuration.HideZeroCountIncompleteSearchCategories;
+        if (ImGui.Checkbox("Hide zero-count categories when Incomplete is selected", ref hideZeroCountIncompleteCategories))
+        {
+            this.plugin.Configuration.HideZeroCountIncompleteSearchCategories = hideZeroCountIncompleteCategories;
+            this.plugin.SaveConfiguration();
+        }
+        this.AddTooltip("When the main search completion filter is Incomplete, hide categories and subcategories whose filtered count is 0.");
+
+        ImGui.Separator();
         ImGui.TextUnformatted("Main panel column order");
         ImGui.TextDisabled("Top to bottom here means left to right in the main panel.");
         this.DrawOrderEditor(this.plugin.Configuration.MainColumnOrder, ["Lists", "Search Categories", "Search Results", "Tracked Achievements"], "columns");

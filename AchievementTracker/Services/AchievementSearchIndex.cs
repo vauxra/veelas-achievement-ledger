@@ -50,6 +50,12 @@ public sealed record AchievementSearchCategoryGroup(string Category, IReadOnlyLi
         => this.Entries.Count(entry =>
             entry.MatchesCompletionCountFilter
             && string.Equals(entry.Subcategory, subcategory, StringComparison.OrdinalIgnoreCase));
+
+    public bool ShouldShow(bool hideZeroCountEntries)
+        => !hideZeroCountEntries || this.DisplayCount > 0;
+
+    public bool ShouldShowSubcategory(string subcategory, bool hideZeroCountEntries)
+        => !hideZeroCountEntries || this.CountEntriesForSubcategory(subcategory) > 0;
 }
 
 public static class AchievementSearchIndex
@@ -121,6 +127,10 @@ public static class AchievementSearchIndex
             completionFilter,
             completionStateLoaded,
             isComplete(info.Id));
+
+    public static bool ShouldHideZeroCountCategories(string completionFilter, bool hideZeroCountIncompleteCategories)
+        => hideZeroCountIncompleteCategories
+            && string.Equals(completionFilter, SearchCompletionFilterPolicy.Incomplete, StringComparison.Ordinal);
 
     public static bool MatchesSelectedCategory(AchievementInfo info, AchievementSearchQueryState state)
         => MatchesSelectedCategory(

@@ -41,6 +41,7 @@ var tests = new List<(string Name, Action Body)>
     ("Lumina search all does not wait for loaded achievement state", LuminaSearchAllDoesNotWaitForLoadedAchievementState),
     ("Achievement search index filters category query and completion", AchievementSearchIndexFiltersCategoryQueryAndCompletion),
     ("Achievement search index counts categories with unloaded completion fallback", AchievementSearchIndexCountsCategoriesWithUnloadedCompletionFallback),
+    ("Achievement search index hides zero-count incomplete categories only when configured", AchievementSearchIndexHidesZeroCountIncompleteCategoriesOnlyWhenConfigured),
     ("Achievement search index keeps game order stable", AchievementSearchIndexKeepsGameOrderStable),
     ("Native update batches do not park achievement windows", NativeUpdateBatchesDoNotParkAchievementWindows),
     ("Active refresh polls progress slot fallback", ActiveRefreshPollsProgressSlotFallback),
@@ -556,6 +557,37 @@ static void AchievementSearchIndexCountsCategoriesWithUnloadedCompletionFallback
     AssertEqualInt(1, craftingLoaded.DisplayCount);
     AssertEqualInt(0, craftingLoaded.CountEntriesForSubcategory("Miner"));
     AssertEqualInt(1, craftingLoaded.CountEntriesForSubcategory("Botanist"));
+}
+
+static void AchievementSearchIndexHidesZeroCountIncompleteCategoriesOnlyWhenConfigured()
+{
+    var achievements = AchievementSearchIndex.GetSearchableAchievements(
+    [
+        SearchInfo(1, "Mine 10 items", "Crafting & Gathering > Miner"),
+        SearchInfo(2, "Harvest 20 items", "Crafting & Gathering > Botanist"),
+        SearchInfo(3, "Win battles", "Battle > Field Operations"),
+    ]);
+    var sortKeys = SearchSortKeys(
+        (1u, new AchievementSearchSortKey(0, 1, 1, 1)),
+        (2u, new AchievementSearchSortKey(0, 1, 2, 2)),
+        (3u, new AchievementSearchSortKey(1, 1, 1, 3)));
+    var groups = AchievementSearchIndex.BuildCategoryGroups(
+        achievements,
+        SearchCompletionFilterPolicy.Incomplete,
+        completionStateLoaded: true,
+        isComplete: id => id is 1 or 2,
+        getSortKey: info => sortKeys[info.Id]);
+    var hideZeroCountEntries = AchievementSearchIndex.ShouldHideZeroCountCategories(
+        SearchCompletionFilterPolicy.Incomplete,
+        hideZeroCountIncompleteCategories: true);
+
+    AssertTrue(hideZeroCountEntries, "incomplete filter plus enabled config should hide zero-count entries");
+    AssertSequence(groups.Where(group => group.ShouldShow(hideZeroCountEntries)).Select(group => group.Entries[0].Info.Id).ToList(), [3]);
+
+    var craftingGroup = groups.Single(group => group.Category == "Crafting & Gathering");
+    AssertFalse(craftingGroup.ShouldShowSubcategory("Miner", hideZeroCountEntries), "zero-count subcategories should hide when configured");
+    AssertFalse(AchievementSearchIndex.ShouldHideZeroCountCategories(SearchCompletionFilterPolicy.Completed, hideZeroCountIncompleteCategories: true), "completed filter should not use the incomplete zero-count hiding toggle");
+    AssertFalse(AchievementSearchIndex.ShouldHideZeroCountCategories(SearchCompletionFilterPolicy.Incomplete, hideZeroCountIncompleteCategories: false), "disabled config should leave zero-count categories visible");
 }
 
 static void AchievementSearchIndexKeepsGameOrderStable()
