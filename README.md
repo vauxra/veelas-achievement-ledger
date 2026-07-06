@@ -17,7 +17,7 @@ A lightweight assistive achievement organizer and tracker for FFXIV.
 
 For a tree-style map of the addon architecture and current `origin/main` runtime flow, see [`docs/main-branch-addon-flow.md`](docs/main-branch-addon-flow.md). It traces filenames and method/function calls down to the state, services, native UI surfaces, and return values each flow touches.
 
-This mainline branch is **Achieve Ex**: the non-automated, public-safe flow where every update action is directly user-clicked. The **Achieve Ex+** name is reserved for the experimental automation branch, [`achieve-ex-experimental`](https://github.com/vauxra/achieve-ex/tree/achex-experimental), which offers private/testing features such as timed/event-triggered update queues and native Achievement-window parking/rescaling. That branch is intentionally not the safer public/mainline flow described here.
+This mainline branch is **Achieve Ex**: the non-automated, public-safe flow where every update action is directly user-clicked. A more automated **Achieve Ex+** build lives on the experimental branch, [`achieve-ex-experimental`](https://github.com/vauxra/achieve-ex/tree/achieve-ex-experimental), with private/testing features such as timed/event-triggered update queues and native Achievement-window parking/rescaling. That branch is intentionally not the safer public/mainline flow described here.
 
 ## Status
 
