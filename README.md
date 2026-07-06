@@ -6,7 +6,7 @@
 >
 > This build can briefly open, shrink, move, restore, and close the native FFXIV Achievement window while running update tasks. If flashing, sudden UI motion, or rapid window changes bother you, disable timed/event-triggered updates and use manual native Achievement opens instead.
 >
-> This is an experimental Ex branch build for private/testing use, not a normal Dalamud repository submission build. Use it only if you understand and accept the risk, including possible account consequences.
+> This is an experimental Ex+ branch build for private/testing use, not a normal Dalamud repository submission build. It is very automated compared with mainline Achieve Ex, may be against FFXIV/third-party-tool terms or expectations, has **not** been reviewed or approved by the Dalamud team, and should be used entirely at your own risk, including possible account consequences.
 >
 > Current progress refreshes use native Achievement UI opens plus passive reads of the already-populated local progress slot. The plugin source does **not** call `RequestAchievementProgress`, create remote-service calls, capture packets, synthesize addon submissions, execute actions, automate movement, or perform gameplay botting.
 >
